@@ -1,24 +1,24 @@
 {
   "basics": {
-    "name": "Albert Einstein",
-    "label": "Scientist",
+    "name": "0xnefertt",
+    "label": "Software Engineer",
     "image": "",
-    "email": "albert@einstein.de",
-    "phone": "(912) 123-4567",
-    "url": "https://alshedivat.github.io/al-folio/",
-    "summary": "A German-born theoretical physicist, widely ranked among the greatest and most influential scientists of all time",
+    "email": "adrwss2@gmail.com",
+    "phone": "",
+    "url": "https://0xnefertt.github.io",
+    "summary": "",
     "location": {
-      "address": "2712 Broadway St",
-      "postalCode": "CA 94115",
-      "city": "San Francisco",
-      "countryCode": "US",
-      "region": "California"
+      "address": "Hazel St",
+      "postalCode": "",
+      "city": "Burnaby",
+      "countryCode": "CA",
+      "region": "British Columbia"
     },
     "profiles": [
       {
         "network": "Twitter",
-        "username": "AlbertEinstein",
-        "url": "https://twitter.com/AlbertEinstein"
+        "username": "0xnefertt",
+        "url": "https://twitter.com/0xnefertt"
       }
     ]
   },

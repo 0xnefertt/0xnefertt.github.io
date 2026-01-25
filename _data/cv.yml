@@ -2,11 +2,11 @@
   type: map
   contents:
     - name: Full Name
-      value: Albert Einstein
+      value: SUNGJUN WON
     - name: Date of Birth
-      value: 14th March 1879
+      value: 10th July 1995
     - name: Languages
-      value: English, German
+      value: Korean, English, French
 
 - title: Education
   type: time_table

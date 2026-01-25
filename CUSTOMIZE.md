@@ -48,8 +48,7 @@ The project is structured as follows, focusing on the main components that you w
 ├── 📂 assets/: contains the assets that are displayed in the website
 │   └── 📂 json/
     │   └── 📄 resume.json: CV in JSON format (https://jsonresume.org/)
-├── 📂 _bibliography/
-│   └── 📄 papers.bib: bibliography in BibTeX format
+<!-- _bibliography and papers.bib removed -->
 ├── 📂 _books/: contains the bookshelf pages
 ├── 📄 _config.yml: the configuration file of the template
 ├── 📂 _data/: contains some of the data used in the template
@@ -208,7 +207,7 @@ exclude:
   - _pages/blog.md
   - _posts/
   - _projects/?_project.md
-  - assets/jupyter/blog.ipynb
+  - # assets/jupyter/blog.ipynb (removed)
 ```
 
 Here is a list of the main components that you may want to delete, and how to do it. Don't forget if you delete a page to update the `nav_order` of the remaining pages.
