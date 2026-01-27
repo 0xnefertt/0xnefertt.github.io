@@ -1,3 +1,9 @@
+---
+description: ''
+name: ''
+---
+# Favorites List
+
 ## Big Tech blog
 - Airbnb: https://airbnb.tech/blog/
 - Amazon: https://aws.amazon.com/blogs/
@@ -115,6 +121,8 @@
 
 ### Youtube
 
+### Research Papers
+- https://arxiv.org/
 
 
 
