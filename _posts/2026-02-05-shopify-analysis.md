@@ -4,7 +4,7 @@ title: Shopify 기업 분석
 date: 2026-02-05 10:00:00
 description: Shopify의 사업 구조, 경쟁 환경, 성장 동력과 리스크를 간단히 정리한 분석 글
 tags: ecommerce platform saas shopify canada analysis
-categories: Writed by AI
+categories: Writed-by-AI
 ---
 
 아래 글은 캐나다 기업 Shopify(티커: SHOP, NYSE/TSX)를 분석한 간단한 개요입니다.
