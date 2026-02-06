@@ -44,7 +44,29 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-a-post-with-plotly-js",
+        },{id: "post-enbridge-기업-분석",
+        
+          title: "Enbridge 기업 분석",
+        
+        description: "Enbridge의 사업 구조, 수익 모델, 성장 동력과 리스크를 간단히 정리한 분석 글",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/enbridge-analysis/";
+          
+        },
+      },{id: "post-shopify-기업-분석",
+        
+          title: "Shopify 기업 분석",
+        
+        description: "Shopify의 사업 구조, 경쟁 환경, 성장 동력과 리스크를 간단히 정리한 분석 글",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/shopify-analysis/";
+          
+        },
+      },{id: "post-a-post-with-plotly-js",
         
           title: "a post with plotly.js",
         
