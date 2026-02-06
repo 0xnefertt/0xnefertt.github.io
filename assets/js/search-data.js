@@ -44,7 +44,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-enbridge-기업-분석",
+        },{id: "post-brookfield-corporation-기업-분석",
+        
+          title: "Brookfield Corporation 기업 분석",
+        
+        description: "Brookfield Corporation의 사업 구조, 수익 모델, 성장 동력과 리스크를 간단히 정리한 분석 글",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/brookfield-corporation-analysis/";
+          
+        },
+      },{id: "post-enbridge-기업-분석",
         
           title: "Enbridge 기업 분석",
         
