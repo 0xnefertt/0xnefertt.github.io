@@ -44,7 +44,29 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-agnico-eagle-mines-limited-기업-분석",
+        },{id: "post-barrick-mining-corporation-기업-분석",
+        
+          title: "Barrick Mining Corporation 기업 분석",
+        
+        description: "Barrick Mining Corporation의 사업 구조, 수익 모델, 성장 동력과 리스크를 간단히 정리한 분석 글",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/barrick-mining-corporation-analysis/";
+          
+        },
+      },{id: "post-canadian-natural-resources-limited-기업-분석",
+        
+          title: "Canadian Natural Resources Limited 기업 분석",
+        
+        description: "Canadian Natural Resources Limited의 사업 구조, 수익 모델, 성장 동력과 리스크를 간단히 정리한 분석 글",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/canadian-natural-resources-analysis/";
+          
+        },
+      },{id: "post-agnico-eagle-mines-limited-기업-분석",
         
           title: "Agnico Eagle Mines Limited 기업 분석",
         
