@@ -1,7 +1,7 @@
 ---
 layout: post
 title: TC Energy 기업 분석
-date: 2026-03-12 11:00:00
+date: 2026-03-12 07:00:00
 description: TC Energy의 사업 구조, 수익 모델, 성장 동력과 리스크를 간단히 정리한 분석 글
 tags: energy pipeline infrastructure canada analysis trp
 categories: Writed-by-AI

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Canadian National Railway 기업 분석
-date: 2026-03-12 10:00:00
+date: 2026-03-12 06:00:00
 description: Canadian National Railway의 사업 구조, 수익 모델, 성장 동력과 리스크를 간단히 정리한 분석 글
 tags: railway transportation logistics canada analysis cni
 categories: Writed-by-AI
