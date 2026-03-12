@@ -44,7 +44,29 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-barrick-mining-corporation-기업-분석",
+        },{id: "post-tc-energy-기업-분석",
+        
+          title: "TC Energy 기업 분석",
+        
+        description: "TC Energy의 사업 구조, 수익 모델, 성장 동력과 리스크를 간단히 정리한 분석 글",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/tc-energy-analysis/";
+          
+        },
+      },{id: "post-canadian-national-railway-기업-분석",
+        
+          title: "Canadian National Railway 기업 분석",
+        
+        description: "Canadian National Railway의 사업 구조, 수익 모델, 성장 동력과 리스크를 간단히 정리한 분석 글",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/canadian-national-railway-analysis/";
+          
+        },
+      },{id: "post-barrick-mining-corporation-기업-분석",
         
           title: "Barrick Mining Corporation 기업 분석",
         
