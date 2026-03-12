@@ -134,3 +134,7 @@ name: ""
 ### Research Papers
 
 - https://arxiv.org/
+
+- google research
+
+- google patents
