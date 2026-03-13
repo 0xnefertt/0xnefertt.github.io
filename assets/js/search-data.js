@@ -44,7 +44,29 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-tc-energy-기업-분석",
+        },{id: "post-brookfield-asset-management-기업-분석",
+        
+          title: "Brookfield Asset Management 기업 분석",
+        
+        description: "Brookfield Asset Management의 사업 구조, 수익 모델, 성장 동력과 리스크를 간단히 정리한 분석 글",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/brookfield-asset-management-analysis/";
+          
+        },
+      },{id: "post-canadian-pacific-kansas-city-기업-분석",
+        
+          title: "Canadian Pacific Kansas City 기업 분석",
+        
+        description: "Canadian Pacific Kansas City의 사업 구조, 수익 모델, 성장 동력과 리스크를 간단히 정리한 분석 글",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/canadian-pacific-kansas-city-analysis/";
+          
+        },
+      },{id: "post-tc-energy-기업-분석",
         
           title: "TC Energy 기업 분석",
         
