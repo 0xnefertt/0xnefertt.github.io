@@ -190,6 +190,8 @@ exclude:
   - purgecss.config.js
   - README.md
   - readme_preview/
+  - materials/
+  - wealthsimple-crypto-job.md
   - vendor
 keep_files:
   - CNAME
