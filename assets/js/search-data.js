@@ -44,7 +44,29 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-brookfield-asset-management-기업-분석",
+        },{id: "post-suncor-energy-기업-분석",
+        
+          title: "Suncor Energy 기업 분석",
+        
+        description: "Suncor Energy의 사업 구조, 수익 모델, 성장 동력과 리스크를 간단히 정리한 분석 글",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/suncor-energy-analysis/";
+          
+        },
+      },{id: "post-wheaton-precious-metals-기업-분석",
+        
+          title: "Wheaton Precious Metals 기업 분석",
+        
+        description: "Wheaton Precious Metals의 사업 구조, 수익 모델, 성장 동력과 리스크를 간단히 정리한 분석 글",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/wheaton-precious-metals-analysis/";
+          
+        },
+      },{id: "post-brookfield-asset-management-기업-분석",
         
           title: "Brookfield Asset Management 기업 분석",
         
