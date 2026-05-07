@@ -81,6 +81,7 @@ function run() {
   const args = parseArgs(process.argv.slice(2));
   const title = args.title?.trim();
   const primaryCategory = args.category?.trim();
+  const description = args.description?.trim();
   const date = ensureDate(args.date);
 
   if (!title) {
@@ -89,6 +90,10 @@ function run() {
 
   if (!primaryCategory) {
     throw new Error("Missing required --category");
+  }
+
+  if (!description) {
+    throw new Error("Missing required --description");
   }
 
   const slug = args.slug ? slugify(args.slug) : slugify(title);
@@ -102,6 +107,10 @@ function run() {
   }
 
   const tags = parseList(args.tags);
+  if (tags.length === 0) {
+    throw new Error("Missing required --tags (comma-separated)");
+  }
+
   const extraCategories = parseList(args.extraCategories);
   const categories = [primaryCategory, ...extraCategories];
 
@@ -122,12 +131,30 @@ function run() {
 layout: post
 title: ${quoteYaml(title)}
 date: ${date}
-description:
+description: ${quoteYaml(description)}
 tags:${tagsField}
 categories:${categoriesField}
 ---
 
-Write your post here.
+## Summary
+
+Short summary of the post.
+
+## Key points
+
+- Point 1
+- Point 2
+- Point 3
+
+## Details
+
+Write your detailed content here.
+
+![Optional cover image](/assets/img/posts/${slug}/cover.png)
+
+## Conclusion
+
+Final takeaway.
 `;
 
   fs.writeFileSync(filePath, content, "utf8");

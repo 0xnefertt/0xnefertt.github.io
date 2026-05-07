@@ -98,6 +98,25 @@ const searchIndexJson = JSON.stringify(searchIndex).replace(/</g, '\\u003c');
         posts = [];
       }
 
+      const trackSearch = (query, resultCount, source) => {
+        const normalizedQuery = String(query || '').trim();
+        if (!normalizedQuery) {
+          return;
+        }
+
+        const analytics = window.siteAnalytics;
+        if (!analytics || typeof analytics.track !== 'function') {
+          return;
+        }
+
+        analytics.track('search_used', {
+          search_query: normalizedQuery.slice(0, 120),
+          results_count: resultCount,
+          source,
+          page_path: window.location.pathname,
+        });
+      };
+
       const normalize = (value) =>
         String(value || '')
           .toLowerCase()
@@ -210,7 +229,7 @@ const searchIndexJson = JSON.stringify(searchIndex).replace(/</g, '\\u003c');
           const latest = [...posts].sort((a, b) => (b.dateValue || 0) - (a.dateValue || 0)).slice(0, 12);
           metaNode.textContent = `Showing latest ${latest.length} posts. Enter a keyword to search all ${posts.length} posts.`;
           render(latest);
-          return;
+          return latest.length;
         }
 
         const matches = posts
@@ -224,16 +243,21 @@ const searchIndexJson = JSON.stringify(searchIndex).replace(/</g, '\\u003c');
 
         metaNode.textContent = `${matches.length} result${matches.length === 1 ? '' : 's'} for "${rawQuery.trim()}".`;
         render(matches);
+        return matches.length;
       };
 
       const params = new URLSearchParams(window.location.search);
       const initialQuery = params.get('q') || '';
       input.value = initialQuery;
-      runSearch(initialQuery, false);
+      const initialCount = runSearch(initialQuery, false);
+      if (initialQuery.trim()) {
+        trackSearch(initialQuery, initialCount, 'page_load');
+      }
 
       form.addEventListener('submit', (event) => {
         event.preventDefault();
-        runSearch(input.value, true);
+        const resultCount = runSearch(input.value, true);
+        trackSearch(input.value, resultCount, 'submit');
       });
 
       input.addEventListener('input', () => {

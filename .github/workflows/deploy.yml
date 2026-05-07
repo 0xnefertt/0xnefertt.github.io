@@ -59,8 +59,11 @@ jobs:
           npm ci
           npm --prefix astro ci
 
-      - name: Build Astro site 🔧
-        run: npm run astro:build
+      - name: Validate and build site ✅
+        run: |
+          npm run format:check
+          npm run verify:content
+          npm run verify:build
 
       - name: Deploy 🚀
         if: github.event_name != 'pull_request'

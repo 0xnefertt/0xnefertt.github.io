@@ -27,8 +27,10 @@ jobs:
           npm ci
           npm --prefix astro ci
 
-      - name: Build Astro site 🔧
-        run: npm run astro:build
+      - name: Validate and build site ✅
+        run: |
+          npm run verify:content
+          npm run verify:build
 
       - name: Link Checker 🔗
         uses: lycheeverse/lychee-action@v2.0.2

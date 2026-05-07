@@ -6,6 +6,7 @@ Personal site and blog built with Astro.
 
 - Astro (static output)
 - Markdown content collections
+- GA4-compatible analytics events
 - Node.js + npm
 - GitHub Pages deployment via GitHub Actions
 
@@ -58,7 +59,7 @@ Posts are organized by category directory under `_posts`.
 Create a new post:
 
 ```bash
-npm run post:new -- --title "My New Post" --category "engineering" --tags "astro,notes"
+npm run post:new -- --title "My New Post" --description "One-line summary for preview cards" --category "engineering" --tags "astro,notes"
 ```
 
 Optional flags:
@@ -75,6 +76,33 @@ Notes:
 
 - The site merges `frontmatter categories` and folder path categories.
 - If a post has no `categories` frontmatter, folder-based category inference still works.
+- `--description` and `--tags` are required for scaffolding.
+- New post template includes `Summary / Key points / Details / Conclusion` sections.
+- Recommended image location: `/assets/img/posts/<post-slug>/...`
+
+## SEO and feeds
+
+Generated at build time:
+
+- `/sitemap.xml`
+- `/rss.xml`
+- `/feed.xml` (alias of RSS for compatibility)
+- `/robots.txt`
+
+The layout now emits canonical, Open Graph, and Twitter metadata by default.
+Blog post pages also emit `Article` JSON-LD.
+
+## Analytics and comments
+
+Optional environment variables:
+
+- `PUBLIC_GA_MEASUREMENT_ID` (enables `search_used`, `post_opened`, `outbound_click`, `adsense_click_placeholder`)
+- `PUBLIC_GISCUS_REPO`
+- `PUBLIC_GISCUS_REPO_ID`
+- `PUBLIC_GISCUS_CATEGORY`
+- `PUBLIC_GISCUS_CATEGORY_ID`
+
+You can start from `.env.example` at repository root.
 
 ## CV content guide
 
@@ -118,9 +146,23 @@ This command:
 ## Verification commands
 
 ```bash
-npm run astro:build
+npm run verify:content
+npm run verify:build
 npm run format:check
 ```
+
+What they validate:
+
+- `verify:content`: required post frontmatter + image link integrity
+- `verify:build`: Astro build + required output files (`sitemap.xml`, `rss.xml`, `robots.txt`)
+
+## Publishing checklist
+
+1. `npm run verify:content`
+2. `npm run verify:build`
+3. `npm run format:check`
+4. Confirm `/blog/search/`, `/rss.xml`, `/sitemap.xml` locally
+5. After deploy, confirm Search Console indexing and GA4 event inflow
 
 ## Available npm scripts
 
@@ -130,6 +172,9 @@ npm run format:check
 - `npm run build`: Astro build (default)
 - `npm run astro:dev`: direct Astro dev
 - `npm run astro:build`: direct Astro build
+- `npm run verify:content`: post quality checks
+- `npm run verify:site-output`: output artifact checks
+- `npm run verify:build`: build + output checks
 
 ## CI/CD
 

@@ -91,7 +91,7 @@ export async function getSocialLinks(): Promise<SocialLink[]> {
   if (rssEnabled) {
     links.push({
       label: 'rss',
-      href: '/feed.xml',
+      href: '/rss.xml',
     });
   }
 

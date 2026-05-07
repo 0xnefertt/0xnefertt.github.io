@@ -10,6 +10,7 @@ import {
   sortPostsDesc,
   toBlogSummary,
 } from '../../../lib/blog';
+import { siteConfig } from '../../../lib/site';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -69,10 +70,62 @@ const recommendedPosts = scoredCandidates.length > 0 ? scoredCandidates : fallba
 const currentIndex = allPosts.findIndex((candidate) => candidate.id === post.id);
 const previousPost = currentIndex >= 0 && currentIndex < allPosts.length - 1 ? toBlogSummary(allPosts[currentIndex + 1]) : undefined;
 const nextPost = currentIndex > 0 ? toBlogSummary(allPosts[currentIndex - 1]) : undefined;
+const postRoute = getPostRoute(post);
+const canonicalPostUrl = new URL(`/blog/${postRoute.year}/${postRoute.slug}/`, siteConfig.siteUrl).toString();
+
+function toAbsoluteUrl(input: string): string {
+  if (/^https?:\/\//.test(input)) {
+    return input;
+  }
+
+  const normalized = input.startsWith('/') ? input : `/${input}`;
+  return new URL(normalized, siteConfig.siteUrl).toString();
+}
+
+const articleImageUrl = toAbsoluteUrl(post.data.thumbnail ?? siteConfig.defaultOgImage);
+const publishedIso = post.data.date?.toISOString();
+const modifiedIso = (post.data.last_updated ?? post.data.date)?.toISOString();
+const keywordValues = [...tags, ...categories];
+const articleJsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: post.data.title,
+  description: post.data.description ?? post.data.title,
+  author: {
+    '@type': 'Person',
+    name: post.data.author ?? '0xnefertt',
+  },
+  publisher: {
+    '@type': 'Person',
+    name: '0xnefertt',
+  },
+  mainEntityOfPage: canonicalPostUrl,
+  image: [articleImageUrl],
+  datePublished: publishedIso,
+  dateModified: modifiedIso,
+  keywords: keywordValues.join(', '),
+}).replace(/</g, '\\u003c');
+
+const giscusConfig = siteConfig.giscus;
+const hasGiscus =
+  giscusConfig.repo.length > 0 &&
+  giscusConfig.repoId.length > 0 &&
+  giscusConfig.category.length > 0 &&
+  giscusConfig.categoryId.length > 0;
+const showComments = hasGiscus && (post.data.giscus_comments ?? true) && !redirectTarget;
 ---
 
-<Layout title={post.data.title} description={post.data.description ?? post.data.title} currentPath="/blog/">
+<Layout
+  title={post.data.title}
+  description={post.data.description ?? post.data.title}
+  currentPath="/blog/"
+  ogType="article"
+  ogImage={post.data.thumbnail ?? siteConfig.defaultOgImage}
+  articlePublishedTime={post.data.date}
+  articleModifiedTime={post.data.last_updated ?? post.data.date}
+>
   {redirectTarget && <meta slot="head" http-equiv="refresh" content={`0; url=${redirectTarget}`} />}
+  <script slot="head" type="application/ld+json" set:html={articleJsonLd}></script>
 
   <article class="post-header">
     <h1>{post.data.title}</h1>
@@ -157,4 +210,26 @@ const nextPost = currentIndex > 0 ? toBlogSummary(allPosts[currentIndex - 1]) : 
       </aside>
     )}
   </div>
+
+  {showComments && (
+    <section class="card post-comments">
+      <h2 class="section-title">comments</h2>
+      <script
+        src="https://giscus.app/client.js"
+        data-repo={giscusConfig.repo}
+        data-repo-id={giscusConfig.repoId}
+        data-category={giscusConfig.category}
+        data-category-id={giscusConfig.categoryId}
+        data-mapping={giscusConfig.mapping}
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="preferred_color_scheme"
+        data-lang="en"
+        crossorigin="anonymous"
+        async
+      ></script>
+    </section>
+  )}
 </Layout>
