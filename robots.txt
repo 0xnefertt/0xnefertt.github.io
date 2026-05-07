@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://0xnefertt.github.io/sitemap.xml
+Sitemap: https://0xnefertt.github.io/rss.xml

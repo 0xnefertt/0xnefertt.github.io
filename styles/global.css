@@ -567,6 +567,14 @@ main {
   font-weight: 600;
 }
 
+.post-comments {
+  margin-top: 1rem;
+}
+
+.post-comments .section-title {
+  margin-top: 0;
+}
+
 .post-body img {
   max-width: 100%;
   height: auto;
