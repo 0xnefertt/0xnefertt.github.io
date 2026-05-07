@@ -49,6 +49,15 @@ function getNavI18nKey(href: string): string | undefined {
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
+    {
+      siteConfig.adsensePublisherId && (
+        <script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${siteConfig.adsensePublisherId}`}
+          crossorigin="anonymous"
+        ></script>
+      )
+    }
     <slot name="head" />
     <link rel="stylesheet" href="/styles/global.css" />
   </head>

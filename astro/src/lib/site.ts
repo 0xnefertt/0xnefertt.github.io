@@ -9,6 +9,7 @@ export const siteConfig = {
   siteUrl: 'https://0xnefertt.github.io',
   blogName: "0xnefertt's Blog",
   blogDescription: 'Academic insights and research notes on technology, computer science, and innovation',
+  adsensePublisherId: 'ca-pub-8138616027618632',
 };
 
 export interface NavItem {
