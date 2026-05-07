@@ -36,6 +36,12 @@ KO
             post_more_to_read: 'More to read',
             post_previous: '< Previous',
             post_next: 'Next >',
+            pagination_prev: 'Previous',
+            pagination_next: 'Next',
+            search_button: 'Search',
+            search_placeholder: 'Search posts',
+            search_back: 'back to blog',
+            search_all_posts: 'Search across all posts',
             cv_intro: 'Resume content loaded from `assets/json/resume.json`.',
             cv_basics: 'Basics',
             cv_work: 'Work',
@@ -58,6 +64,12 @@ KO
             post_more_to_read: '함께 읽으면 좋은 글',
             post_previous: '< 이전 글',
             post_next: '다음 글 >',
+            pagination_prev: '이전',
+            pagination_next: '다음',
+            search_button: '검색',
+            search_placeholder: '글 검색',
+            search_back: '블로그로 돌아가기',
+            search_all_posts: '전체 글에서 검색',
             cv_intro: '`assets/json/resume.json`에서 이력서 데이터를 로드했습니다.',
             cv_basics: '기본 정보',
             cv_work: '경력',
@@ -100,6 +112,15 @@ KO
             }
 
             node.textContent = messages[key];
+          });
+
+          document.querySelectorAll('[data-i18n-placeholder]').forEach((node) => {
+            const key = node.getAttribute('data-i18n-placeholder');
+            if (!key || !(key in messages) || !(node instanceof HTMLInputElement)) {
+              return;
+            }
+
+            node.setAttribute('placeholder', messages[key]);
           });
 
           try {
