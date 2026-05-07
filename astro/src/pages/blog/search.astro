@@ -1,0 +1,244 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import { formatPostDate, sortPostsDesc, toBlogSummary } from '../../lib/blog';
+import { siteConfig } from '../../lib/site';
+
+const rawPosts = sortPostsDesc(await getCollection('blog'));
+
+function normalizeMarkdownForSearch(content: string): string {
+  return content
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/`[^`]*`/g, ' ')
+    .replace(/!\[[^\]]*]\([^)]+\)/g, ' ')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/[#>*_~\-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 14000);
+}
+
+const searchIndex = rawPosts.map((entry) => {
+  const post = toBlogSummary(entry);
+
+  return {
+    title: post.title,
+    description: post.description ?? '',
+    content: normalizeMarkdownForSearch(entry.body ?? ''),
+    href: post.href,
+    external: post.external,
+    externalSource: post.externalSource ?? '',
+    readMinutes: post.readMinutes,
+    dateLabel: formatPostDate(post.date),
+    dateValue: post.date?.getTime() ?? 0,
+    tags: post.tags,
+    categories: post.categories,
+  };
+});
+
+const searchIndexJson = JSON.stringify(searchIndex).replace(/</g, '\\u003c');
+---
+
+<Layout title="blog search" description={siteConfig.blogDescription} currentPath="/blog/">
+  <section class="blog-header">
+    <h1>{siteConfig.blogName}</h1>
+    <p data-i18n-key="search_all_posts">Search across all posts</p>
+
+    <form class="blog-search-form" id="blog-search-form" action="/blog/search/" method="get">
+      <input
+        class="blog-search-input"
+        id="blog-search-input"
+        type="search"
+        name="q"
+        placeholder="Search posts"
+        data-i18n-placeholder="search_placeholder"
+        autocomplete="off"
+      />
+      <button class="blog-search-button" type="submit" data-i18n-key="search_button">Search</button>
+    </form>
+
+    <div class="blog-category-filter">
+      <a href="/blog/" class="active" data-i18n-key="search_back">back to blog</a>
+    </div>
+  </section>
+
+  <p class="search-results-meta" id="blog-search-meta"></p>
+
+  <ul class="post-list" id="blog-search-results"></ul>
+
+  <section class="card" id="blog-search-empty" hidden>
+    <p>No matching posts found.</p>
+  </section>
+
+  <script id="blog-search-data" type="application/json" set:html={searchIndexJson}></script>
+
+  <script is:inline>
+    (() => {
+      const dataNode = document.getElementById('blog-search-data');
+      const form = document.getElementById('blog-search-form');
+      const input = document.getElementById('blog-search-input');
+      const resultsContainer = document.getElementById('blog-search-results');
+      const metaNode = document.getElementById('blog-search-meta');
+      const emptyNode = document.getElementById('blog-search-empty');
+
+      if (!(dataNode instanceof HTMLScriptElement) || !(form instanceof HTMLFormElement) || !(input instanceof HTMLInputElement)) {
+        return;
+      }
+
+      if (!(resultsContainer instanceof HTMLUListElement) || !(metaNode instanceof HTMLParagraphElement) || !(emptyNode instanceof HTMLElement)) {
+        return;
+      }
+
+      let posts = [];
+
+      try {
+        posts = JSON.parse(dataNode.textContent || '[]');
+      } catch {
+        posts = [];
+      }
+
+      const normalize = (value) =>
+        String(value || '')
+          .toLowerCase()
+          .replace(/[^a-z0-9\s가-힣-]/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+
+      const buildHaystack = (post) =>
+        normalize([post.title, post.description, post.content, ...(post.tags || []), ...(post.categories || [])].join(' '));
+
+      const scorePost = (post, query) => {
+        const title = normalize(post.title);
+        const description = normalize(post.description);
+        const content = normalize(post.content);
+        const tags = normalize((post.tags || []).join(' '));
+        const categories = normalize((post.categories || []).join(' '));
+        const haystack = buildHaystack(post);
+
+        let score = 0;
+        if (title.includes(query)) score += 8;
+        if (description.includes(query)) score += 4;
+        if (content.includes(query)) score += 3;
+        if (tags.includes(query)) score += 3;
+        if (categories.includes(query)) score += 3;
+        if (haystack.includes(query)) score += 1;
+
+        return score;
+      };
+
+      const createPostItem = (post) => {
+        const item = document.createElement('li');
+        item.className = 'post-item';
+
+        const heading = document.createElement('h2');
+        const link = document.createElement('a');
+        link.href = post.href;
+        link.textContent = post.title;
+        if (post.external) {
+          link.target = '_blank';
+          link.rel = 'noreferrer';
+        }
+
+        heading.appendChild(link);
+        item.appendChild(heading);
+
+        const meta = document.createElement('p');
+        meta.className = 'post-meta';
+        meta.textContent = `${post.dateLabel} · ${post.readMinutes} min read${post.externalSource ? ` · ${post.externalSource}` : ''}`;
+        item.appendChild(meta);
+
+        if (post.description) {
+          const description = document.createElement('p');
+          description.textContent = post.description;
+          item.appendChild(description);
+        }
+
+        const tags = Array.isArray(post.tags) ? post.tags : [];
+        const categories = Array.isArray(post.categories) ? post.categories : [];
+
+        if (tags.length > 0 || categories.length > 0) {
+          const tagContainer = document.createElement('div');
+          tagContainer.className = 'tags';
+
+          for (const tag of tags) {
+            const tagNode = document.createElement('span');
+            tagNode.textContent = `#${tag}`;
+            tagContainer.appendChild(tagNode);
+          }
+
+          for (const category of categories) {
+            const categoryNode = document.createElement('span');
+            categoryNode.textContent = category;
+            tagContainer.appendChild(categoryNode);
+          }
+
+          item.appendChild(tagContainer);
+        }
+
+        return item;
+      };
+
+      const render = (items) => {
+        resultsContainer.textContent = '';
+
+        for (const post of items) {
+          resultsContainer.appendChild(createPostItem(post));
+        }
+
+        emptyNode.hidden = items.length > 0;
+      };
+
+      const updateUrl = (query) => {
+        const nextUrl = new URL(window.location.href);
+        if (query) {
+          nextUrl.searchParams.set('q', query);
+        } else {
+          nextUrl.searchParams.delete('q');
+        }
+        window.history.replaceState(null, '', nextUrl);
+      };
+
+      const runSearch = (rawQuery, mutateUrl = false) => {
+        const query = normalize(rawQuery);
+
+        if (mutateUrl) {
+          updateUrl(rawQuery.trim());
+        }
+
+        if (!query) {
+          const latest = [...posts].sort((a, b) => (b.dateValue || 0) - (a.dateValue || 0)).slice(0, 12);
+          metaNode.textContent = `Showing latest ${latest.length} posts. Enter a keyword to search all ${posts.length} posts.`;
+          render(latest);
+          return;
+        }
+
+        const matches = posts
+          .map((post) => ({
+            post,
+            score: scorePost(post, query),
+          }))
+          .filter((item) => item.score > 0)
+          .sort((a, b) => b.score - a.score || (b.post.dateValue || 0) - (a.post.dateValue || 0))
+          .map((item) => item.post);
+
+        metaNode.textContent = `${matches.length} result${matches.length === 1 ? '' : 's'} for "${rawQuery.trim()}".`;
+        render(matches);
+      };
+
+      const params = new URLSearchParams(window.location.search);
+      const initialQuery = params.get('q') || '';
+      input.value = initialQuery;
+      runSearch(initialQuery, false);
+
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        runSearch(input.value, true);
+      });
+
+      input.addEventListener('input', () => {
+        runSearch(input.value, true);
+      });
+    })();
+  </script>
+</Layout>
