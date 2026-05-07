@@ -1,39 +1,50 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-This repository is a Jekyll site based on `al-folio`.
-- Content: `_pages/` (site pages), `_posts/` (blog posts), `_projects/`, `_news/`, `_books/`.
-- Presentation: `_layouts/` (page templates), `_includes/` (reusable Liquid partials), `_sass/` (SCSS partials), `assets/` (images, JS, CSS, fonts, media).
-- Data/config: `_data/*.yml` and `_config.yml`.
-- Automation: `bin/` scripts and `.github/workflows/` CI/CD pipelines.
-- Generated output: `_site/` (do not edit directly).
+
+This repository runs on Astro.
+
+- Primary app: `astro/` (source and output under `astro/dist/`).
+- Content sources: `_pages/`, `_posts/`, `_projects/`, `_news/`, `_books/`.
+- Shared assets/data: `assets/`, `_data/`.
+- Automation: `.github/workflows/`.
+- Generated output: `astro/dist/` (do not edit directly).
 
 ## Build, Test, and Development Commands
-Use these from the repository root:
-- `bundle install`: install Ruby/Jekyll dependencies.
-- `npm install`: install formatter dependencies.
-- `npm run serve`: run local dev server with livereload (`http://localhost:4000`).
-- `npm run build`: build the static site into `_site/`.
+
+Use these from repository root unless stated otherwise:
+
+- `npm install`: install root tooling dependencies.
+- `npm run serve`: run Astro dev server.
+- `npm run build`: build Astro static site.
+- `npm run astro:dev`: run Astro dev server from `astro/`.
+- `npm run astro:build`: build Astro site into `astro/dist/`.
 - `npm run format`: apply Prettier formatting.
-- `npm run format:check`: verify formatting (matches CI check).
-- `bundle exec jekyll build`: direct Jekyll build (same behavior as `npm run build`).
+- `npm run format:check`: verify formatting.
 
 ## Coding Style & Naming Conventions
-- Formatting is enforced with Prettier + `@shopify/prettier-plugin-liquid` (`.prettierrc`, print width 150).
-- Use 2-space indentation in Liquid/HTML/YAML/Markdown files, following existing templates.
-- Keep keys in YAML/Liquid data files alphabetically sorted when extending structured lists (e.g., socials).
+
+- Formatting is enforced with Prettier (`.prettierrc`, print width 150).
+- Use 2-space indentation in markup/YAML/Markdown.
+- Keep keys in structured YAML data files alphabetically sorted when extending lists.
 - Blog posts should follow `YYYY-MM-DD-title.md` in `_posts/` with valid front matter.
-- Keep reusable UI logic in `_includes/`; page-specific content belongs in `_pages/` or collection files.
+- Place reusable UI parts under `astro/src/components/` and routes under `astro/src/pages/`.
 
 ## Testing Guidelines
-There is no unit-test suite in this repo. Validate changes with:
+
+There is no unit-test suite in this repo. Minimum verification before PR:
+
 - `npm run format:check`
 - `npm run build`
-- Optional local smoke test via `npm run serve`
-CI additionally runs formatting, link checks, and deployment builds. Treat a clean local build/format check as the minimum bar before opening a PR.
+
+Optional smoke tests:
+
+- `npm run serve`
+- `cd astro && npm run build`
 
 ## Commit & Pull Request Guidelines
-- Match existing commit style: short, imperative, sentence-case summaries (e.g., `Fix Prettier formatting issues`, `Add analysis post for ...`).
+
+- Use short, imperative, sentence-case commit messages.
 - Keep commits focused by concern (content vs. config vs. tooling).
-- For new features/bug fixes, open or reference a GitHub issue before submitting PRs (per `CONTRIBUTING.md`).
+- For new features/bug fixes, open or reference a GitHub issue before submitting PRs.
 - In PRs, include: purpose, key files changed, verification steps run, and screenshots for UI-visible changes.

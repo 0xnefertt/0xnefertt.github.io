@@ -1,0 +1,13 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Page not found" description="404">
+  <meta slot="head" http-equiv="refresh" content="3; url=/" />
+
+  <section class="card">
+    <h1>Page not found</h1>
+    <p>The page you requested does not exist. You will be redirected to the homepage in 3 seconds.</p>
+    <p><a href="/">Return to homepage</a></p>
+  </section>
+</Layout>

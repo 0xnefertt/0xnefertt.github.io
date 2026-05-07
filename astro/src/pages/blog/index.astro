@@ -1,0 +1,50 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import { formatPostDate, listBlogCategories, slugifyTerm, sortPostsDesc, toBlogSummary } from '../../lib/blog';
+import { siteConfig } from '../../lib/site';
+
+const rawPosts = sortPostsDesc(await getCollection('blog'));
+const posts = rawPosts.map(toBlogSummary);
+const categories = listBlogCategories(rawPosts);
+---
+
+<Layout title="blog" description={siteConfig.blogDescription} currentPath="/blog/">
+  <section class="blog-header">
+    <h1>{siteConfig.blogName}</h1>
+    <p>{siteConfig.blogDescription}</p>
+    {categories.length > 0 && (
+      <div class="blog-category-filter">
+        <a href="/blog/" class="active">all</a>
+        {categories.map((category) => <a href={`/blog/category/${category.slug}/`}>{category.name}</a>)}
+      </div>
+    )}
+  </section>
+
+  <ul class="post-list" style="margin-top: 1rem;">
+    {
+      posts.map((post) => (
+        <li class="post-item">
+          <h2>
+            <a href={post.href} target={post.external ? '_blank' : undefined} rel={post.external ? 'noreferrer' : undefined}>
+              {post.title}
+            </a>
+          </h2>
+          <p class="post-meta">
+            {formatPostDate(post.date)} · {post.readMinutes} min read
+            {post.externalSource ? ` · ${post.externalSource}` : ''}
+          </p>
+          {post.description && <p>{post.description}</p>}
+
+          {(post.tags.length > 0 || post.categories.length > 0) && (
+            <div class="tags">
+              {post.tags.map((tag) => <span>#{tag}</span>)}
+              {post.categories.map((category) => <a href={`/blog/category/${slugifyTerm(category)}/`}>{category}</a>)}
+            </div>
+          )}
+
+        </li>
+      ))
+    }
+  </ul>
+</Layout>

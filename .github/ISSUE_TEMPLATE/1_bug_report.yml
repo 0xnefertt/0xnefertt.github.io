@@ -1,102 +1,79 @@
-name: 🐛 Report a bug
-description: Any errors.
+name: "🐛 Report a bug"
+description: Report a reproducible problem.
 labels: ["needs triage", "bug"]
 body:
   - type: markdown
     attributes:
       value: >
-        Before you go any further. Is this really a **🐛 bug**?
-
-        If it's a question about how al-folio works, have a look at our [documentation](https://github.com/alshedivat/al-folio/blob/main/README.md),
-        [frequently asked questions](https://github.com/alshedivat/al-folio/blob/main/FAQ.md),
-        [past questions](https://github.com/alshedivat/al-folio/discussions/categories/q-a),
-        or [ask a question](https://github.com/alshedivat/al-folio/discussions/new?category=q-a).
+        Please confirm this is a bug report. For usage questions, check this repository's README first.
 
   - type: checkboxes
     id: requirements
     attributes:
-      label: Have you checked that your issue isn't already filed?
-      description: >
-        Please check if somebody else has already filed the same issue.
-        If you find a similar issue, please add a 👍 reaction or comment on the original post.
+      label: Have you checked for duplicates?
       options:
-        - label: I read through [FAQ](https://github.com/alshedivat/al-folio/blob/main/FAQ.md) and searched through the [past issues](https://github.com/alshedivat/al-folio/issues), none of which addressed my issue.
-          required: true
-        - label: Yes, I have checked that this issue isn't already filed.
+        - label: I searched existing issues and did not find the same bug.
           required: true
 
   - type: input
     attributes:
-      label: Bug description
-      description: A description of the 🐛 bug.
-      placeholder: A clear and concise description of what the bug is.
+      label: Bug summary
+      placeholder: Briefly describe the issue.
     validations:
       required: true
 
   - type: textarea
     attributes:
-      label: How to reproduce the bug
-      description: Provide steps to reproduce the 🐛 bug.
+      label: Reproduction steps
       placeholder: |
-        Include steps to reproduce, the expected behaviour, and the actual behaviour.
-
-        1. Go to '...'
-        2. Click on '....'
-        3. Scroll down to '....'
-        4. See error
+        1. Go to ...
+        2. Click ...
+        3. Observe ...
     validations:
       required: true
 
   - type: textarea
     attributes:
-      label: Error messages and logs
-      description: >
-        Provide any error messages and/or logs
-      placeholder: "Copy the complete error messages and logs"
-      value: |
-        ```
-        The error message you got, with the full traceback if available. Please paste it between these triple backticks.
-        ```
+      label: Expected behavior
+      placeholder: Describe what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Actual behavior
+      placeholder: Describe what actually happened.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Logs or error messages
+      placeholder: Paste relevant logs/errors.
     validations:
       required: false
 
   - type: dropdown
     id: os
     attributes:
-      label: What operating system are you using?
-      description: select all OSs where you have experienced this issue
+      label: Operating system
       multiple: true
       options:
         - Linux
-        - Mac
+        - macOS
         - Windows
-        - Not applicable (e.g. you're using GitHub Pages or other hosting)
+        - Not applicable
     validations:
       required: true
 
   - type: dropdown
     id: environment
     attributes:
-      label: Where are you seeing the problem on?
-      description: select all environments where you have experienced this issue
+      label: Environment
       multiple: true
       options:
-        - "Running locally with Docker (docker compose)"
-        - "Running locally with Docker (devcontainer)"
-        - "Running locally without Docker"
-        - "Deployed site"
+        - Local development
+        - CI workflow
+        - Deployed site
     validations:
       required: true
-
-  - type: textarea
-    attributes:
-      label: More info
-      description: Add any other info about the issue here.
-      placeholder: |
-        Add any other context about the problem here, such as versions of the libraries if running without docker, screenshots, links to the deployed site, etc.
-    validations:
-      required: false
-
-  - type: markdown
-    attributes:
-      value: "**Happy coding!**"

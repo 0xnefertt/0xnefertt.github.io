@@ -1,0 +1,52 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import { formatPostDate, normalizeTaxonomy } from '../../lib/blog';
+import { getBookRoute, normalizeAssetPath } from '../../lib/content';
+
+const books = await getCollection('books');
+const ordered = [...books].sort((a, b) => {
+  const aDate = a.data.finished?.getTime() ?? 0;
+  const bDate = b.data.finished?.getTime() ?? 0;
+  return bDate - aDate;
+});
+---
+
+<Layout title="bookshelf" description="Books collection" currentPath="/books/">
+  <section class="page-header">
+    <h1>bookshelf</h1>
+    <p>Books that are being read, finished, or planned.</p>
+  </section>
+
+  <ul class="book-list">
+    {
+      ordered.map((book) => {
+        const route = getBookRoute(book);
+        const cover = normalizeAssetPath(book.data.cover);
+
+        return (
+          <li class="book-item">
+            <div class="book-row">
+              {cover ? <img class="book-cover" src={cover} alt={`${book.data.title} cover`} loading="lazy" /> : <div class="book-cover" />}
+              <div>
+                <h2>
+                  <a href={route.href}>{book.data.title}</a>
+                </h2>
+                <p class="book-meta">
+                  {book.data.author ? `${book.data.author}` : 'Unknown author'}
+                  {book.data.status ? ` · ${book.data.status}` : ''}
+                  {book.data.finished ? ` · Finished ${formatPostDate(book.data.finished)}` : ''}
+                </p>
+                {normalizeTaxonomy(book.data.categories).length > 0 && (
+                  <div class="tags">
+                    {normalizeTaxonomy(book.data.categories).map((category) => <span>{category}</span>)}
+                  </div>
+                )}
+              </div>
+            </div>
+          </li>
+        );
+      })
+    }
+  </ul>
+</Layout>

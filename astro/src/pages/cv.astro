@@ -1,0 +1,143 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCvMeta, getResumeData } from '../lib/data';
+
+interface ResumeBasics {
+  name?: string;
+  label?: string;
+  email?: string;
+  url?: string;
+  location?: {
+    city?: string;
+    region?: string;
+    countryCode?: string;
+  };
+}
+
+interface ResumeEntry {
+  name?: string;
+  institution?: string;
+  organization?: string;
+  position?: string;
+  area?: string;
+  studyType?: string;
+  startDate?: string;
+  endDate?: string;
+  summary?: string;
+  highlights?: string[];
+}
+
+interface ResumeShape {
+  basics?: ResumeBasics;
+  work?: ResumeEntry[];
+  education?: ResumeEntry[];
+  awards?: Array<{ title?: string; date?: string; awarder?: string; summary?: string }>;
+  skills?: Array<{ name?: string; level?: string; keywords?: string[] }>;
+}
+
+const [resumeData, cvMeta] = await Promise.all([getResumeData(), getCvMeta()]);
+const resume = resumeData as ResumeShape;
+---
+
+<Layout title="cv" description="Curriculum vitae" currentPath="/cv/">
+  <section class="page-header">
+    <h1>cv</h1>
+    <p data-i18n-key="cv_intro">Resume content loaded from `assets/json/resume.json`.</p>
+    {cvMeta.resumePdfAvailable && cvMeta.resumePdfHref && (
+      <p class="cv-actions">
+        <a
+          class="cv-download"
+          href={cvMeta.resumePdfHref}
+          target="_blank"
+          rel="noreferrer"
+          data-i18n-key={cvMeta.resumePdfLabel ? undefined : 'cv_download_pdf'}
+        >
+          {cvMeta.resumePdfLabel ?? 'Download CV (PDF)'}
+        </a>
+      </p>
+    )}
+  </section>
+
+  <div class="cv-sections">
+    {resume.basics && (
+      <section class="cv-section">
+        <h2 data-i18n-key="cv_basics">Basics</h2>
+        <ul>
+          {resume.basics.name && <li>{resume.basics.name}</li>}
+          {resume.basics.label && <li>{resume.basics.label}</li>}
+          {resume.basics.email && <li>{resume.basics.email}</li>}
+          {resume.basics.url && (
+            <li>
+              <a href={resume.basics.url} target="_blank" rel="noreferrer">{resume.basics.url}</a>
+            </li>
+          )}
+          {resume.basics.location && (
+            <li>
+              {[resume.basics.location.city, resume.basics.location.region, resume.basics.location.countryCode].filter(Boolean).join(', ')}
+            </li>
+          )}
+        </ul>
+      </section>
+    )}
+
+    {resume.work && resume.work.length > 0 && (
+      <section class="cv-section">
+        <h2 data-i18n-key="cv_work">Work</h2>
+        <ul>
+          {resume.work.map((entry) => (
+            <li>
+              <strong>{entry.position ?? entry.name}</strong>
+              {entry.organization ?? entry.institution ? ` — ${entry.organization ?? entry.institution}` : ''}
+              {entry.startDate || entry.endDate ? ` (${entry.startDate ?? ''} - ${entry.endDate ?? 'Present'})` : ''}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    {resume.education && resume.education.length > 0 && (
+      <section class="cv-section">
+        <h2 data-i18n-key="cv_education">Education</h2>
+        <ul>
+          {resume.education.map((entry) => (
+            <li>
+              <strong>{entry.studyType ?? entry.area ?? 'Education'}</strong>
+              {entry.institution ? ` — ${entry.institution}` : ''}
+              {entry.startDate || entry.endDate ? ` (${entry.startDate ?? ''} - ${entry.endDate ?? 'Present'})` : ''}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    {resume.awards && resume.awards.length > 0 && (
+      <section class="cv-section">
+        <h2 data-i18n-key="cv_awards">Awards</h2>
+        <ul>
+          {resume.awards.map((award) => (
+            <li>
+              <strong>{award.title ?? 'Award'}</strong>
+              {award.awarder ? ` — ${award.awarder}` : ''}
+              {award.date ? ` (${award.date})` : ''}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    {resume.skills && resume.skills.length > 0 && (
+      <section class="cv-section">
+        <h2 data-i18n-key="cv_skills">Skills</h2>
+        <ul>
+          {resume.skills.map((skill) => (
+            <li>
+              <strong>{skill.name ?? 'Skill'}</strong>
+              {skill.level ? ` — ${skill.level}` : ''}
+              {skill.keywords && skill.keywords.length > 0 ? ` (${skill.keywords.join(', ')})` : ''}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+  </div>
+</Layout>

@@ -1,0 +1,43 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import { getProjectRoute, normalizeAssetPath } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects', (entry) => !entry.data.redirect);
+
+  return projects.map((project) => {
+    const route = getProjectRoute(project);
+
+    return {
+      params: { slug: route.slug },
+      props: { project },
+    };
+  });
+}
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+const image = normalizeAssetPath(project.data.img);
+---
+
+<Layout title={project.data.title} description={project.data.description ?? project.data.title} currentPath="/projects/">
+  <article class="post-header">
+    <h1>{project.data.title}</h1>
+    {project.data.description && <p>{project.data.description}</p>}
+    <p class="project-meta">
+      {project.data.category ? `Category: ${project.data.category}` : 'Project page'}
+      {typeof project.data.importance === 'number' ? ` · Priority: ${project.data.importance}` : ''}
+    </p>
+  </article>
+
+  {image && <img class="profile-image" src={image} alt={`${project.data.title} cover`} loading="lazy" />}
+
+  <div class="post-body markdown-body">
+    <Content />
+  </div>
+</Layout>

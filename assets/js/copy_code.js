@@ -23,7 +23,7 @@ codeBlocks.forEach(function (codeBlock) {
     copyButton.addEventListener("click", function () {
       // check if code block has line numbers
       // i.e. `kramdown.syntax_highlighter_opts.block.line_numbers` set to true in _config.yml
-      // or using `jekyll highlight` liquid tag with `linenos` option
+      // or with line-number rendering enabled in the markdown pipeline
       if (codeBlock.querySelector("pre:not(.lineno)")) {
         // get code from code block ignoring line numbers
         var code = codeBlock.querySelector("pre:not(.lineno)").innerText.trim();

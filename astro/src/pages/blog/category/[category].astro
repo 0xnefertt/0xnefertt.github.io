@@ -1,0 +1,83 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../../layouts/Layout.astro';
+import { formatPostDate, listBlogCategories, slugifyTerm, sortPostsDesc, toBlogSummary } from '../../../lib/blog';
+import { siteConfig } from '../../../lib/site';
+
+export async function getStaticPaths() {
+  const posts = sortPostsDesc(await getCollection('blog'));
+  const categories = listBlogCategories(posts);
+
+  return categories.map((category) => ({
+    params: { category: category.slug },
+    props: { category },
+  }));
+}
+
+interface Props {
+  category: {
+    name: string;
+    slug: string;
+    count: number;
+  };
+}
+
+const { category } = Astro.props;
+const rawPosts = sortPostsDesc(await getCollection('blog'));
+const categories = listBlogCategories(rawPosts);
+const posts = rawPosts
+  .map(toBlogSummary)
+  .filter((post) => post.categories.some((item) => slugifyTerm(item) === category.slug));
+---
+
+<Layout title={`blog · ${category.name}`} description={`Posts in ${category.name}`} currentPath={`/blog/category/${category.slug}/`}>
+  <section class="blog-header">
+    <h1>{siteConfig.blogName}</h1>
+    <p>
+      Category: <strong>{category.name}</strong> ({posts.length})
+    </p>
+    <div class="blog-category-filter">
+      <a href="/blog/">all</a>
+      {
+        categories.map((item) => (
+          <a href={`/blog/category/${item.slug}/`} class={item.slug === category.slug ? 'active' : undefined}>
+            {item.name}
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  {posts.length === 0 ? (
+    <section class="card">
+      <p>No posts found for this category.</p>
+    </section>
+  ) : (
+    <ul class="post-list" style="margin-top: 1rem;">
+      {
+        posts.map((post) => (
+          <li class="post-item">
+            <h2>
+              <a href={post.href} target={post.external ? '_blank' : undefined} rel={post.external ? 'noreferrer' : undefined}>
+                {post.title}
+              </a>
+            </h2>
+            <p class="post-meta">
+              {formatPostDate(post.date)} · {post.readMinutes} min read
+              {post.externalSource ? ` · ${post.externalSource}` : ''}
+            </p>
+            {post.description && <p>{post.description}</p>}
+
+            {(post.tags.length > 0 || post.categories.length > 0) && (
+              <div class="tags">
+                {post.tags.map((tag) => <span>#{tag}</span>)}
+                {post.categories.map((item) => <a href={`/blog/category/${slugifyTerm(item)}/`}>{item}</a>)}
+              </div>
+            )}
+
+          </li>
+        ))
+      }
+    </ul>
+  )}
+</Layout>

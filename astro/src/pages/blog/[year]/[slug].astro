@@ -1,0 +1,160 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import Layout from '../../../layouts/Layout.astro';
+import {
+  formatPostDate,
+  getPostCategories,
+  getPostRoute,
+  normalizeTaxonomy,
+  slugifyTerm,
+  sortPostsDesc,
+  toBlogSummary,
+} from '../../../lib/blog';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+
+  return posts.map((post) => {
+    const route = getPostRoute(post);
+
+    return {
+      params: {
+        year: route.year,
+        slug: route.slug,
+      },
+      props: {
+        post,
+      },
+    };
+  });
+}
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const tags = normalizeTaxonomy(post.data.tags);
+const categories = getPostCategories(post);
+const redirectTarget = post.data.redirect;
+const allPosts = sortPostsDesc(await getCollection('blog'));
+
+const currentTagSlugs = new Set(tags.map((tag) => slugifyTerm(tag)));
+const currentCategorySlugs = new Set(categories.map((category) => slugifyTerm(category)));
+
+const scoredCandidates = allPosts
+  .filter((candidate) => candidate.id !== post.id)
+  .map((candidate) => {
+    const summary = toBlogSummary(candidate);
+    const sharedCategoryCount = summary.categories.filter((category) => currentCategorySlugs.has(slugifyTerm(category))).length;
+    const sharedTagCount = summary.tags.filter((tag) => currentTagSlugs.has(slugifyTerm(tag))).length;
+    const score = sharedCategoryCount * 4 + sharedTagCount * 2;
+    const publishedAt = summary.date?.getTime() ?? 0;
+
+    return {
+      summary,
+      score,
+      publishedAt,
+    };
+  })
+  .filter((candidate) => candidate.score > 0)
+  .sort((a, b) => b.score - a.score || b.publishedAt - a.publishedAt)
+  .slice(0, 4)
+  .map((candidate) => candidate.summary);
+
+const fallbackCandidates = allPosts.filter((candidate) => candidate.id !== post.id).map(toBlogSummary).slice(0, 4);
+const recommendedPosts = scoredCandidates.length > 0 ? scoredCandidates : fallbackCandidates;
+
+const currentIndex = allPosts.findIndex((candidate) => candidate.id === post.id);
+const previousPost = currentIndex >= 0 && currentIndex < allPosts.length - 1 ? toBlogSummary(allPosts[currentIndex + 1]) : undefined;
+const nextPost = currentIndex > 0 ? toBlogSummary(allPosts[currentIndex - 1]) : undefined;
+---
+
+<Layout title={post.data.title} description={post.data.description ?? post.data.title} currentPath="/blog/">
+  {redirectTarget && <meta slot="head" http-equiv="refresh" content={`0; url=${redirectTarget}`} />}
+
+  <article class="post-header">
+    <h1>{post.data.title}</h1>
+    <p>
+      {formatPostDate(post.data.date)}
+      {post.data.author ? ` · ${post.data.author}` : ''}
+      {post.data.external_source ? ` · ${post.data.external_source}` : ''}
+    </p>
+
+    {(tags.length > 0 || categories.length > 0) && (
+      <div class="tags">
+        {tags.map((tag) => <span>#{tag}</span>)}
+        {categories.map((category) => <a href={`/blog/category/${slugifyTerm(category)}/`}>{category}</a>)}
+      </div>
+    )}
+  </article>
+
+  <div class="post-detail-layout">
+    <div class="post-main">
+      {redirectTarget && (
+        <p class="notice">
+          This post redirects to <a href={redirectTarget}>{redirectTarget}</a>.
+        </p>
+      )}
+
+      <div class="post-body markdown-body">
+        <Content />
+      </div>
+
+      {(previousPost || nextPost) && (
+        <nav class="post-pager" aria-label="Post navigation">
+          {previousPost ? (
+            <a
+              class="post-pager-link post-pager-link--prev"
+              href={previousPost.href}
+              target={previousPost.external ? '_blank' : undefined}
+              rel={previousPost.external ? 'noreferrer' : undefined}
+            >
+              <span class="post-pager-label" data-i18n-key="post_previous">
+                &lt; Previous
+              </span>
+              <span class="post-pager-title">{previousPost.title}</span>
+            </a>
+          ) : (
+            <span aria-hidden="true"></span>
+          )}
+
+          {nextPost ? (
+            <a
+              class="post-pager-link post-pager-link--next"
+              href={nextPost.href}
+              target={nextPost.external ? '_blank' : undefined}
+              rel={nextPost.external ? 'noreferrer' : undefined}
+            >
+              <span class="post-pager-label" data-i18n-key="post_next">
+                Next &gt;
+              </span>
+              <span class="post-pager-title">{nextPost.title}</span>
+            </a>
+          ) : (
+            <span aria-hidden="true"></span>
+          )}
+        </nav>
+      )}
+    </div>
+
+    {recommendedPosts.length > 0 && (
+      <aside class="post-related card" aria-label="Recommended posts">
+        <h2 data-i18n-key="post_more_to_read">More to read</h2>
+        <ul class="post-related-list">
+          {recommendedPosts.map((item) => (
+            <li class="post-related-item">
+              <a href={item.href} target={item.external ? '_blank' : undefined} rel={item.external ? 'noreferrer' : undefined}>
+                {item.title}
+              </a>
+              <p class="post-related-meta">
+                {formatPostDate(item.date)} · {item.readMinutes} min read
+              </p>
+            </li>
+          ))}
+        </ul>
+      </aside>
+    )}
+  </div>
+</Layout>

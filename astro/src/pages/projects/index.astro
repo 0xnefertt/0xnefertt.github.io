@@ -1,0 +1,50 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import { getProjectRoute, normalizeAssetPath, sortProjects } from '../../lib/content';
+
+const pageDef = (await getCollection('pages')).find((entry) => entry.filePath?.endsWith('/projects.md'));
+const allProjects = sortProjects(await getCollection('projects'));
+const categories = pageDef?.data.display_categories;
+
+const groupedProjects =
+  categories && categories.length > 0
+    ? categories.map((category) => ({
+        category,
+        items: allProjects.filter((project) => project.data.category === category),
+      }))
+    : [{ category: undefined, items: allProjects }];
+---
+
+<Layout title="projects" description="Projects collection" currentPath="/projects/">
+  <section class="page-header">
+    <h1>projects</h1>
+    <p>{pageDef?.data.description ?? 'A growing collection of projects.'}</p>
+  </section>
+
+  {
+    groupedProjects.map((group) => (
+      <section>
+        {group.category && <h2 class="section-title">{group.category}</h2>}
+        <div class="project-grid">
+          {group.items.map((project) => {
+            const route = getProjectRoute(project);
+            const image = normalizeAssetPath(project.data.img);
+
+            return (
+              <article class="project-card">
+                <a href={route.href} target={route.external ? '_blank' : undefined} rel={route.external ? 'noreferrer' : undefined}>
+                  {image && <img class="project-image" src={image} alt={`${project.data.title} thumbnail`} loading="lazy" />}
+                  <div class="project-content">
+                    <h3>{project.data.title}</h3>
+                    {project.data.description && <p class="project-meta">{project.data.description}</p>}
+                  </div>
+                </a>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+    ))
+  }
+</Layout>

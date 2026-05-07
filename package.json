@@ -1,12 +1,20 @@
 {
   "scripts": {
+    "setup": "npm install && npm --prefix astro install",
+    "setup:ci": "npm ci && npm --prefix astro ci",
+    "post:new": "node scripts/new-post.mjs",
+    "cv:pdf": "node scripts/set-cv-pdf.mjs",
+    "astro:build": "npm --prefix astro run build",
+    "astro:dev": "npm --prefix astro run dev",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "serve": "bundle exec jekyll serve --livereload",
-    "build": "bundle exec jekyll build"
+    "serve": "npm run astro:dev",
+    "build": "npm run astro:build"
   },
   "devDependencies": {
-    "@shopify/prettier-plugin-liquid": "1.4.0",
     "prettier": "3.1.1"
-  }
+  },
+  "name": "0xnefertt.github.io",
+  "version": "1.0.0",
+  "private": true
 }

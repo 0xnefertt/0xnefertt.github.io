@@ -122,7 +122,7 @@ let setMermaidTheme = (theme) => {
     theme = "default";
   }
 
-  /* Re-render the SVG, based on https://github.com/cotes2020/jekyll-theme-chirpy/blob/master/_includes/mermaid.html */
+  /* Re-render the SVG after theme changes. */
   document.querySelectorAll(".mermaid").forEach((elem) => {
     // Get the code block content from previous element, since it is the mermaid code itself as defined in Markdown, but it is hidden
     let svgCode = elem.previousSibling.childNodes[0].innerHTML;

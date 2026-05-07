@@ -1,14 +1,10 @@
 github_users:
-  - torvalds
   - 0xnefertt
 
 repo_description_lines_max: 2
 
 github_repos:
-  - alshedivat/al-folio
-  - jekyll/jekyll
+  - 0xnefertt/0xnefertt.github.io
   - twbs/bootstrap
-  - jquery/jquery
   - FortAwesome/Font-Awesome
   - mathjax/MathJax
-  - jpswalsh/academicons

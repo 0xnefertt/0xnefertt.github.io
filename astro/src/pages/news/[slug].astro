@@ -1,0 +1,36 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import { formatPostDate } from '../../lib/blog';
+import { getNewsRoute } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('news', (entry) => !entry.data.inline);
+
+  return entries.map((entry) => {
+    const route = getNewsRoute(entry);
+    return {
+      params: { slug: route.slug },
+      props: { entry },
+    };
+  });
+}
+
+interface Props {
+  entry: CollectionEntry<'news'>;
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<Layout title={entry.data.title ?? 'news'} description={entry.data.title ?? 'News entry'} currentPath="/news/">
+  <article class="post-header">
+    <h1>{entry.data.title ?? 'Announcement'}</h1>
+    <p>{formatPostDate(entry.data.date)}</p>
+  </article>
+
+  <div class="post-body markdown-body">
+    <Content />
+  </div>
+</Layout>

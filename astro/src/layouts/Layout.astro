@@ -1,0 +1,232 @@
+---
+import { getNavItems, siteConfig } from '../lib/site';
+import { getSocialLinks } from '../lib/data';
+
+interface Props {
+  title?: string;
+  description?: string;
+  currentPath?: string;
+}
+
+const { title, description = siteConfig.description, currentPath = '/' } = Astro.props;
+const pageTitle = title ? `${title} | ${siteConfig.title}` : siteConfig.title;
+const canonicalUrl = new URL(Astro.url.pathname, siteConfig.siteUrl).toString();
+const currentYear = new Date().getFullYear();
+const navItems = await getNavItems();
+const socialLinks = await getSocialLinks();
+
+function isActive(href: string, path: string): boolean {
+  if (href === '/') {
+    return path === '/';
+  }
+
+  return path === href || path.startsWith(href);
+}
+
+function getNavI18nKey(href: string): string | undefined {
+  const map: Record<string, string> = {
+    '/': 'nav_about',
+    '/blog/': 'nav_blog',
+    '/books/': 'nav_bookshelf',
+    '/projects/': 'nav_projects',
+    '/repositories/': 'nav_repositories',
+    '/cv/': 'nav_cv',
+    '/people/': 'nav_people',
+    '/publications/': 'nav_publications',
+    '/teaching/': 'nav_teaching',
+    '/news/': 'nav_news',
+  };
+
+  return map[href];
+}
+---
+
+<!doctype html>
+<html lang={siteConfig.lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <slot name="head" />
+    <link rel="stylesheet" href="/styles/global.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="site-title" href="/">{siteConfig.title}</a>
+        <div class="header-controls">
+          <nav aria-label="Primary">
+            <ul class="nav-list">
+              {
+                navItems.map((item) => (
+                  <li class={item.children && item.children.length > 0 ? 'nav-item nav-item--dropdown' : 'nav-item'}>
+                    <a class={isActive(item.href, currentPath) ? 'active' : undefined} href={item.href} data-i18n-key={getNavI18nKey(item.href)}>
+                      {item.label}
+                    </a>
+                    {item.children && item.children.length > 0 && (
+                      <ul class="nav-dropdown">
+                        {item.children.map((child) => (
+                          <li>
+                            <a class={isActive(child.href, currentPath) ? 'active' : undefined} href={child.href}>
+                              {child.label}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </li>
+                ))
+              }
+            </ul>
+          </nav>
+
+          <div class="language-switch" role="group" aria-label="Language selector">
+            <button type="button" class="language-option is-active" data-lang-option="en">
+              EN
+            </button>
+            <button type="button" class="language-option" data-lang-option="ko">
+              KO
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>
+          © {currentYear} 0xnefertt.
+        </p>
+        {
+          socialLinks.length > 0 && (
+            <ul class="social-links">
+              {socialLinks.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+            </ul>
+          )
+        }
+      </div>
+    </footer>
+
+    <script is:inline>
+      (() => {
+        const STORAGE_KEY = 'site-language';
+        const FALLBACK_LANG = 'en';
+        const SUPPORTED = ['en', 'ko'];
+        const DICTIONARY = {
+          en: {
+            nav_about: 'about',
+            nav_blog: 'blog',
+            nav_bookshelf: 'bookshelf',
+            nav_projects: 'projects',
+            nav_repositories: 'repositories',
+            nav_cv: 'cv',
+            nav_people: 'people',
+            nav_publications: 'publications',
+            nav_teaching: 'teaching',
+            nav_news: 'news',
+            post_more_to_read: 'More to read',
+            post_previous: '< Previous',
+            post_next: 'Next >',
+            cv_intro: 'Resume content loaded from `assets/json/resume.json`.',
+            cv_basics: 'Basics',
+            cv_work: 'Work',
+            cv_education: 'Education',
+            cv_awards: 'Awards',
+            cv_skills: 'Skills',
+            cv_download_pdf: 'Download CV (PDF)',
+          },
+          ko: {
+            nav_about: '소개',
+            nav_blog: '블로그',
+            nav_bookshelf: '책장',
+            nav_projects: '프로젝트',
+            nav_repositories: '저장소',
+            nav_cv: '이력',
+            nav_people: '사람들',
+            nav_publications: '출판물',
+            nav_teaching: '강의',
+            nav_news: '소식',
+            post_more_to_read: '함께 읽으면 좋은 글',
+            post_previous: '< 이전 글',
+            post_next: '다음 글 >',
+            cv_intro: '`assets/json/resume.json`에서 이력서 데이터를 로드했습니다.',
+            cv_basics: '기본 정보',
+            cv_work: '경력',
+            cv_education: '학력',
+            cv_awards: '수상',
+            cv_skills: '기술',
+            cv_download_pdf: 'CV 다운로드 (PDF)',
+          },
+        };
+
+        function normalizeLanguage(input) {
+          if (!input) {
+            return FALLBACK_LANG;
+          }
+
+          const short = String(input).toLowerCase().slice(0, 2);
+          return SUPPORTED.includes(short) ? short : FALLBACK_LANG;
+        }
+
+        function setActiveLanguageOption(language) {
+          document.querySelectorAll('[data-lang-option]').forEach((node) => {
+            const optionLanguage = node.getAttribute('data-lang-option');
+            const isActive = optionLanguage === language;
+            node.classList.toggle('is-active', isActive);
+            node.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+          });
+        }
+
+        function applyLanguage(language) {
+          const normalized = normalizeLanguage(language);
+          const messages = DICTIONARY[normalized] || DICTIONARY[FALLBACK_LANG];
+
+          document.documentElement.lang = normalized;
+          setActiveLanguageOption(normalized);
+
+          document.querySelectorAll('[data-i18n-key]').forEach((node) => {
+            const key = node.getAttribute('data-i18n-key');
+            if (!key || !(key in messages)) {
+              return;
+            }
+
+            node.textContent = messages[key];
+          });
+
+          try {
+            window.localStorage.setItem(STORAGE_KEY, normalized);
+          } catch {}
+        }
+
+        const stored = (() => {
+          try {
+            return window.localStorage.getItem(STORAGE_KEY);
+          } catch {
+            return null;
+          }
+        })();
+
+        const browserPreferred = normalizeLanguage(window.navigator.language);
+        const initialLanguage = normalizeLanguage(stored || browserPreferred || FALLBACK_LANG);
+        applyLanguage(initialLanguage);
+
+        document.querySelectorAll('[data-lang-option]').forEach((node) => {
+          node.addEventListener('click', () => {
+            const selected = node.getAttribute('data-lang-option');
+            if (!selected) {
+              return;
+            }
+
+            applyLanguage(selected);
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>

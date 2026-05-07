@@ -1,0 +1,47 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getRepositoryData } from '../lib/data';
+
+const repos = await getRepositoryData();
+---
+
+<Layout title="repositories" description="GitHub repositories and users" currentPath="/repositories/">
+  <section class="page-header">
+    <h1>repositories</h1>
+    <p>GitHub users and repositories.</p>
+  </section>
+
+  {repos.githubUsers.length > 0 && (
+    <section>
+      <h2 class="section-title">GitHub users</h2>
+      <ul class="repo-list">
+        {repos.githubUsers.map((user) => (
+          <li class="repo-item">
+            <h2>
+              <a href={`https://github.com/${user}`} target="_blank" rel="noreferrer">
+                {user}
+              </a>
+            </h2>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  {repos.githubRepos.length > 0 && (
+    <section>
+      <h2 class="section-title">GitHub repositories</h2>
+      <ul class="repo-list">
+        {repos.githubRepos.map((repo) => (
+          <li class="repo-item">
+            <h2>
+              <a href={`https://github.com/${repo}`} target="_blank" rel="noreferrer">
+                {repo}
+              </a>
+            </h2>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+</Layout>

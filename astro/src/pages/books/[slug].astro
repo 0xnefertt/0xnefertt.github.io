@@ -1,0 +1,61 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import { formatPostDate, normalizeTaxonomy } from '../../lib/blog';
+import { getBookRoute, normalizeAssetPath } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('books');
+
+  return entries.map((entry) => {
+    const route = getBookRoute(entry);
+    return {
+      params: { slug: route.slug },
+      props: { entry },
+    };
+  });
+}
+
+interface Props {
+  entry: CollectionEntry<'books'>;
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const cover = normalizeAssetPath(entry.data.cover);
+const categories = normalizeTaxonomy(entry.data.categories);
+const tags = normalizeTaxonomy(entry.data.tags);
+---
+
+<Layout title={entry.data.title} description={entry.data.title} currentPath="/books/">
+  <article class="post-header">
+    <h1>{entry.data.title}</h1>
+    <p>
+      {entry.data.author ? entry.data.author : 'Unknown author'}
+      {entry.data.released ? ` · ${entry.data.released}` : ''}
+      {entry.data.stars ? ` · ${entry.data.stars}/5` : ''}
+      {entry.data.status ? ` · ${entry.data.status}` : ''}
+    </p>
+
+    {(categories.length > 0 || tags.length > 0) && (
+      <div class="tags">
+        {categories.map((category) => <span>{category}</span>)}
+        {tags.map((tag) => <span>#{tag}</span>)}
+      </div>
+    )}
+
+    {entry.data.started && <p class="book-meta">Started: {formatPostDate(entry.data.started)}</p>}
+    {entry.data.finished && <p class="book-meta">Finished: {formatPostDate(entry.data.finished)}</p>}
+    {entry.data.buy_link && (
+      <p class="book-meta">
+        <a href={entry.data.buy_link} target="_blank" rel="noreferrer">Buy link</a>
+      </p>
+    )}
+  </article>
+
+  {cover && <img class="profile-image" src={cover} alt={`${entry.data.title} cover`} loading="lazy" />}
+
+  <div class="post-body markdown-body">
+    <Content />
+  </div>
+</Layout>

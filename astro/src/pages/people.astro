@@ -1,0 +1,30 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+import { normalizeAssetPath } from '../lib/content';
+
+const entry = (await getCollection('pages')).find((page) => page.filePath?.endsWith('/profiles.md'));
+const profiles = entry?.data.profiles ?? [];
+---
+
+<Layout title={entry?.data.title ?? 'people'} description={entry?.data.description ?? 'People'} currentPath="/people/">
+  <section class="page-header">
+    <h1>{entry?.data.title ?? 'people'}</h1>
+    {entry?.data.description && <p>{entry.data.description}</p>}
+  </section>
+
+  <section class="profile-grid">
+    {
+      profiles.map((profile) => {
+        const image = normalizeAssetPath(profile.image) ?? '/assets/img/prof_pic.jpg';
+
+        return (
+          <article class="profile-card">
+            <img src={image} alt="Profile image" loading="lazy" />
+            {profile.more_info && <div class="profile-meta" set:html={profile.more_info} />}
+          </article>
+        );
+      })
+    }
+  </section>
+</Layout>

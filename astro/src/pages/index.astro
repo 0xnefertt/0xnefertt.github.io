@@ -1,0 +1,79 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+import { formatPostDate, sortPostsDesc, toBlogSummary } from '../lib/blog';
+import { normalizeAssetPath, sortByDateDesc } from '../lib/content';
+
+const pages = await getCollection('pages');
+const aboutPage = pages.find((entry) => entry.filePath?.endsWith('/about.md') || entry.id === 'about');
+
+if (!aboutPage) {
+  throw new Error('Missing about page: expected _pages/about.md.');
+}
+
+const { Content } = await render(aboutPage);
+const allPosts = sortPostsDesc(await getCollection('blog'));
+const latestLimit = aboutPage.data.latest_posts?.limit ?? 5;
+const latestPosts = allPosts.slice(0, latestLimit).map(toBlogSummary);
+const allNews = sortByDateDesc(await getCollection('news'));
+const newsLimit = aboutPage.data.announcements?.limit ?? 5;
+const latestNews = allNews.slice(0, newsLimit);
+
+const profile = aboutPage.data.profile;
+const subtitle = aboutPage.data.subtitle;
+const profileImage = normalizeAssetPath(profile?.image);
+---
+
+<Layout title={aboutPage.data.title ?? 'about'} description={aboutPage.data.description ?? 'About page'} currentPath="/">
+  <section class="hero">
+    <article class="card markdown-body">
+      <h1>{aboutPage.data.title ?? 'about'}</h1>
+      {subtitle && <p set:html={subtitle} />}
+      <Content />
+    </article>
+
+    {
+      profile && (
+        <aside class="card">
+          {profileImage && <img class="profile-image" src={profileImage} alt={`${aboutPage.data.title ?? 'Profile'} image`} loading="lazy" />}
+          {profile.more_info && <div class="profile-meta" set:html={profile.more_info} />}
+        </aside>
+      )
+    }
+  </section>
+
+  <section>
+    <h2 class="section-title">Latest Posts</h2>
+    <ul class="post-list">
+      {
+        latestPosts.map((post) => (
+          <li class="post-item">
+            <h3>
+              <a href={post.href} target={post.external ? '_blank' : undefined} rel={post.external ? 'noreferrer' : undefined}>
+                {post.title}
+              </a>
+            </h3>
+            <p class="post-meta">
+              {formatPostDate(post.date)} · {post.readMinutes} min read
+              {post.externalSource ? ` · ${post.externalSource}` : ''}
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section>
+    <h2 class="section-title">Latest News</h2>
+    <ul class="news-list">
+      {
+        latestNews.map((item) => (
+          <li class="news-item">
+            <p class="news-meta">{formatPostDate(item.data.date)}</p>
+            <p>{item.data.title ?? item.body.split('\n').filter(Boolean)[0]}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Layout>

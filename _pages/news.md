@@ -4,4 +4,4 @@ title: news
 permalink: /news/
 ---
 
-{% include news.liquid %}
+News index metadata page.
