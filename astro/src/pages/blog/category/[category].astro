@@ -1,13 +1,13 @@
 ---
 import { getCollection } from 'astro:content';
 import Layout from '../../../layouts/Layout.astro';
-import { formatPostDate, listBlogCategories, slugifyTerm, sortPostsDesc, toBlogSummary } from '../../../lib/blog';
+import { formatPostDate, getPublishedBlogPosts, listBlogCategories, slugifyTerm, sortPostsDesc, toBlogSummary } from '../../../lib/blog';
 import { siteConfig } from '../../../lib/site';
 
 const POSTS_PER_PAGE = 8;
 
 export async function getStaticPaths() {
-  const posts = sortPostsDesc(await getCollection('blog'));
+  const posts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')));
   const categories = listBlogCategories(posts);
 
   return categories.map((category) => ({
@@ -25,7 +25,7 @@ interface Props {
 }
 
 const { category } = Astro.props;
-const rawPosts = sortPostsDesc(await getCollection('blog'));
+const rawPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')));
 const categories = listBlogCategories(rawPosts);
 const allPosts = rawPosts
   .map(toBlogSummary)

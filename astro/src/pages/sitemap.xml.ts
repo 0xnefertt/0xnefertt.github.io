@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
-import { listBlogCategories, slugifyTerm, sortPostsDesc, toBlogSummary } from '../lib/blog';
+import { getPublishedBlogPosts, listBlogCategories, slugifyTerm, sortPostsDesc, toBlogSummary } from '../lib/blog';
 import { siteConfig } from '../lib/site';
 
 const POSTS_PER_PAGE = 8;
@@ -25,7 +25,7 @@ function joinAbsolute(base: string, path: string): string {
 
 export const GET: APIRoute = async ({ site }) => {
   const base = (site?.toString() ?? siteConfig.siteUrl).replace(/\/$/, '');
-  const entries = sortPostsDesc(await getCollection('blog'));
+  const entries = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')));
   const categories = listBlogCategories(entries);
   const summaries = entries.map(toBlogSummary);
 

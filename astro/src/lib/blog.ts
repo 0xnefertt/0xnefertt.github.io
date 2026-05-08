@@ -186,6 +186,14 @@ export function listBlogCategories(posts: CollectionEntry<'blog'>[]): BlogCatego
   return [...categoryMap.values()].sort((a, b) => a.name.localeCompare(b.name));
 }
 
+export function isDraftPost(post: CollectionEntry<'blog'>): boolean {
+  return post.data.draft === true;
+}
+
+export function getPublishedBlogPosts(posts: CollectionEntry<'blog'>[]): CollectionEntry<'blog'>[] {
+  return posts.filter((post) => !isDraftPost(post));
+}
+
 function isExternalUrl(url: string): boolean {
   return /^https?:\/\//.test(url);
 }

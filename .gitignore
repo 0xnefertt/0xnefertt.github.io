@@ -10,4 +10,7 @@ node_modules/
 vendor
 .idea
 .venv
+reports/
+.env
+.env.local
 wealthsimple-crypto-job.md

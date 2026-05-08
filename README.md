@@ -62,11 +62,21 @@ Create a new post:
 npm run post:new -- --title "My New Post" --description "One-line summary for preview cards" --category "engineering" --tags "astro,notes"
 ```
 
+Interactive mode:
+
+```bash
+npm run post:new -- --interactive
+```
+
 Optional flags:
 
 - `--date YYYY-MM-DD`
 - `--slug custom-slug`
 - `--extraCategories "frontend,notes"`
+- `--series "Infra Notes"`
+- `--draft true`
+- `--cover "/assets/img/posts/<slug>/cover.png"`
+- `--canonical "https://external.example.com/original"`
 
 Generated path format:
 
@@ -79,6 +89,29 @@ Notes:
 - `--description` and `--tags` are required for scaffolding.
 - New post template includes `Summary / Key points / Details / Conclusion` sections.
 - Recommended image location: `/assets/img/posts/<post-slug>/...`
+- `post:new` prints two SEO title candidates and description length.
+
+## Draft and publish flow
+
+- `draft: true` posts are excluded from:
+  - blog lists
+  - category pages
+  - blog search index
+  - RSS feed
+  - sitemap
+- Publish a draft (strict check + draft flag removal):
+
+```bash
+npm run post:publish -- --file _posts/<category>/YYYY-MM-DD-slug.md
+```
+
+## Image helper
+
+Attach an image to a post asset folder and get markdown snippet:
+
+```bash
+npm run post:image -- --post _posts/<category>/YYYY-MM-DD-slug.md --src ~/Downloads/chart.png
+```
 
 ## SEO and feeds
 
@@ -147,13 +180,15 @@ This command:
 
 ```bash
 npm run verify:content
+npm run report:content
 npm run verify:build
 npm run format:check
 ```
 
 What they validate:
 
-- `verify:content`: required post frontmatter + image link integrity
+- `verify:content`: frontmatter/image checks + route-duplicate detection + section guidance
+- `report:content`: writes `reports/content-check.md`
 - `verify:build`: Astro build + required output files (`sitemap.xml`, `rss.xml`, `robots.txt`)
 
 ## Publishing checklist
@@ -172,7 +207,10 @@ What they validate:
 - `npm run build`: Astro build (default)
 - `npm run astro:dev`: direct Astro dev
 - `npm run astro:build`: direct Astro build
+- `npm run post:publish`: publish a draft post
+- `npm run post:image`: copy image into post asset directory + print markdown snippet
 - `npm run verify:content`: post quality checks
+- `npm run report:content`: generate content report artifact
 - `npm run verify:site-output`: output artifact checks
 - `npm run verify:build`: build + output checks
 
@@ -180,4 +218,5 @@ What they validate:
 
 - Deploy: `.github/workflows/deploy.yml` (deploys `astro/dist`)
 - Link check after deploy: `.github/workflows/broken-links-site.yml`
+- Weekly content health report: `.github/workflows/content-health.yml`
 - Accessibility check (manual): `.github/workflows/axe.yml`

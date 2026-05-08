@@ -1,10 +1,10 @@
 ---
 import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
-import { formatPostDate, sortPostsDesc, toBlogSummary } from '../../lib/blog';
+import { formatPostDate, getPublishedBlogPosts, sortPostsDesc, toBlogSummary } from '../../lib/blog';
 import { siteConfig } from '../../lib/site';
 
-const rawPosts = sortPostsDesc(await getCollection('blog'));
+const rawPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')));
 
 function normalizeMarkdownForSearch(content: string): string {
   return content

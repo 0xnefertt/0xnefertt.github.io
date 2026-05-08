@@ -5,6 +5,49 @@ import path from "node:path";
 
 const repoRoot = process.cwd();
 const postsRoot = path.join(repoRoot, "_posts");
+const fileNamePattern = /^(\d{4})-\d{2}-\d{2}-(.+)\.mdx?$/;
+const summaryHeadings = new Set(["summary", "요약"]);
+const conclusionHeadings = new Set(["conclusion", "결론"]);
+
+function parseArgs(argv) {
+  const args = {};
+
+  for (let i = 0; i < argv.length; i += 1) {
+    const token = argv[i];
+    if (!token.startsWith("--")) {
+      continue;
+    }
+
+    const key = token.slice(2);
+    const value = argv[i + 1];
+    if (!value || value.startsWith("--")) {
+      args[key] = "true";
+      continue;
+    }
+
+    args[key] = value;
+    i += 1;
+  }
+
+  return args;
+}
+
+function parseBoolean(input, fallback = false) {
+  if (input == null || input === "") {
+    return fallback;
+  }
+
+  const normalized = String(input).trim().toLowerCase();
+  if (["true", "1", "yes", "y"].includes(normalized)) {
+    return true;
+  }
+
+  if (["false", "0", "no", "n"].includes(normalized)) {
+    return false;
+  }
+
+  return fallback;
+}
 
 async function walkMarkdownFiles(dir) {
   const entries = await fs.readdir(dir, { withFileTypes: true });
@@ -132,25 +175,170 @@ function collectImageTargets(body) {
   return matches;
 }
 
+function normalizeSectionTitle(input) {
+  return input.trim().toLowerCase();
+}
+
+function hasRequiredSections(body) {
+  const headings = new Set();
+  const regex = /^##\s+(.+)$/gm;
+
+  let match;
+  while ((match = regex.exec(body)) !== null) {
+    headings.add(normalizeSectionTitle(match[1]));
+  }
+
+  const hasSummary = [...summaryHeadings].some((item) => headings.has(item));
+  const hasConclusion = [...conclusionHeadings].some((item) => headings.has(item));
+
+  return {
+    hasSummary,
+    hasConclusion,
+  };
+}
+
+function extractRouteKey(filePath) {
+  const fileName = path.basename(filePath);
+  const match = fileName.match(fileNamePattern);
+  if (!match) {
+    return null;
+  }
+
+  const year = match[1];
+  const slug = match[2];
+  return `${year}/${slug}`;
+}
+
+function markdownReport({ checkedFiles, strictMode, errors, warnings }) {
+  const status = errors.length > 0 ? "FAILED" : "PASSED";
+  const checkedAt = new Date().toISOString();
+
+  const lines = [
+    "# Content Check Report",
+    "",
+    `- Status: **${status}**`,
+    `- Checked at: ${checkedAt}`,
+    `- Files checked: ${checkedFiles}`,
+    `- Mode: ${strictMode ? "publish-strict" : "default"}`,
+    `- Errors: ${errors.length}`,
+    `- Warnings: ${warnings.length}`,
+    "",
+  ];
+
+  lines.push("## Errors");
+  if (errors.length === 0) {
+    lines.push("", "- None", "");
+  } else {
+    lines.push("", ...errors.map((entry) => `- ${entry}`), "");
+  }
+
+  lines.push("## Warnings");
+  if (warnings.length === 0) {
+    lines.push("", "- None", "");
+  } else {
+    lines.push("", ...warnings.map((entry) => `- ${entry}`), "");
+  }
+
+  return lines.join("\n");
+}
+
+async function writeReport(reportPath, content) {
+  const outputPath = path.isAbsolute(reportPath) ? reportPath : path.join(repoRoot, reportPath);
+  await fs.mkdir(path.dirname(outputPath), { recursive: true });
+  await fs.writeFile(outputPath, content, "utf8");
+}
+
+function toRelativeFromRepo(targetPath) {
+  return path.relative(repoRoot, targetPath).replace(/\\/g, "/");
+}
+
 async function run() {
+  const args = parseArgs(process.argv.slice(2));
+  const strictMode = parseBoolean(args["publish-mode"], false);
+  const reportPath = args.report?.trim() || "reports/content-check.md";
+  const targetFile = args.file ? path.resolve(repoRoot, args.file) : undefined;
+
   const files = await walkMarkdownFiles(postsRoot);
+  const metadata = [];
+
+  for (const filePath of files) {
+    const content = await fs.readFile(filePath, "utf8");
+    const relativePath = toRelativeFromRepo(filePath);
+
+    metadata.push({
+      filePath,
+      relativePath,
+      content,
+      frontmatter: getFrontmatter(content),
+      body: getBody(content),
+      routeKey: extractRouteKey(filePath),
+    });
+  }
+
+  if (targetFile) {
+    const targetExists = metadata.some((item) => path.resolve(item.filePath) === targetFile);
+    if (!targetExists) {
+      throw new Error(`Target post was not found: ${toRelativeFromRepo(targetFile)}`);
+    }
+  }
+
   const errors = [];
   const warnings = [];
 
-  for (const filePath of files) {
-    const relativePath = path.relative(repoRoot, filePath);
-    const content = await fs.readFile(filePath, "utf8");
-    const frontmatter = getFrontmatter(content);
-    const body = getBody(content);
+  const routeMap = new Map();
+  for (const item of metadata) {
+    if (!item.routeKey) {
+      continue;
+    }
+
+    if (!routeMap.has(item.routeKey)) {
+      routeMap.set(item.routeKey, []);
+    }
+
+    routeMap.get(item.routeKey).push(item.relativePath);
+  }
+
+  for (const [routeKey, filesWithRoute] of routeMap.entries()) {
+    if (filesWithRoute.length < 2) {
+      continue;
+    }
+
+    const includesTarget = !targetFile || filesWithRoute.includes(toRelativeFromRepo(targetFile));
+    if (!includesTarget) {
+      continue;
+    }
+
+    errors.push(`duplicate route '${routeKey}' -> ${filesWithRoute.join(", ")}`);
+  }
+
+  const filesToCheck = targetFile ? metadata.filter((item) => path.resolve(item.filePath) === targetFile) : metadata;
+
+  for (const item of filesToCheck) {
+    const { relativePath, frontmatter, body } = item;
 
     if (!frontmatter) {
       errors.push(`${relativePath}: missing frontmatter block`);
       continue;
     }
 
-    for (const requiredKey of ["title", "date", "description", "tags", "categories"]) {
+    const isDraft = !strictMode && parseBoolean(getScalar(frontmatter, "draft"), false);
+
+    const requiredForPublished = ["title", "date", "description", "tags", "categories"];
+    const requiredForDraft = ["title", "date", "categories"];
+
+    const requiredFields = isDraft ? requiredForDraft : requiredForPublished;
+
+    for (const requiredKey of requiredFields) {
       if (!hasMeaningfulField(frontmatter, requiredKey)) {
         errors.push(`${relativePath}: missing required frontmatter '${requiredKey}'`);
+      }
+    }
+
+    if (isDraft) {
+      for (const relaxedKey of ["description", "tags"]) {
+        if (!hasMeaningfulField(frontmatter, relaxedKey)) {
+          warnings.push(`${relativePath}: draft post is missing '${relaxedKey}'`);
+        }
       }
     }
 
@@ -165,9 +353,18 @@ async function run() {
       warnings.push(`${relativePath}: description length ${descriptionValue.length} > 170`);
     }
 
+    const sections = hasRequiredSections(body);
+    if (!sections.hasSummary) {
+      warnings.push(`${relativePath}: missing section heading '## Summary' (or '## 요약')`);
+    }
+
+    if (!sections.hasConclusion) {
+      warnings.push(`${relativePath}: missing section heading '## Conclusion' (or '## 결론')`);
+    }
+
     const images = collectImageTargets(body);
     for (const imageTarget of images) {
-      const resolvedPath = resolveImagePath(imageTarget, filePath);
+      const resolvedPath = resolveImagePath(imageTarget, item.filePath);
       if (!resolvedPath) {
         continue;
       }
@@ -184,6 +381,15 @@ async function run() {
     }
   }
 
+  const report = markdownReport({
+    checkedFiles: filesToCheck.length,
+    strictMode,
+    errors,
+    warnings,
+  });
+
+  await writeReport(reportPath, report);
+
   if (warnings.length > 0) {
     console.log("\n[post-check] warnings");
     for (const warning of warnings) {
@@ -196,10 +402,13 @@ async function run() {
     for (const error of errors) {
       console.error(`- ${error}`);
     }
+
+    console.error(`\n[post-check] report written to ${reportPath}`);
     process.exit(1);
   }
 
-  console.log(`\n[post-check] OK (${files.length} posts validated)`);
+  console.log(`\n[post-check] OK (${filesToCheck.length} posts validated)`);
+  console.log(`[post-check] report written to ${reportPath}`);
 }
 
 run().catch((error) => {

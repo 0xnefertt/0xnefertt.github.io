@@ -1,5 +1,5 @@
 import { getCollection } from 'astro:content';
-import { listBlogCategories } from './blog';
+import { getPublishedBlogPosts, listBlogCategories } from './blog';
 
 const gaMeasurementId = (import.meta.env.PUBLIC_GA_MEASUREMENT_ID ?? '').trim();
 
@@ -32,7 +32,7 @@ export interface NavItem {
 
 export async function getNavItems(): Promise<NavItem[]> {
   const [pages, posts] = await Promise.all([getCollection('pages'), getCollection('blog')]);
-  const blogCategories = listBlogCategories(posts);
+  const blogCategories = listBlogCategories(getPublishedBlogPosts(posts));
 
   const aboutPage = pages.find((entry) => entry.data.permalink === '/');
   const aboutTitle = aboutPage?.data.title ?? 'about';

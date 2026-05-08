@@ -1,7 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
-import { formatPostDate, sortPostsDesc, toBlogSummary } from '../lib/blog';
+import { formatPostDate, getPublishedBlogPosts, sortPostsDesc, toBlogSummary } from '../lib/blog';
 import { normalizeAssetPath, sortByDateDesc } from '../lib/content';
 
 const pages = await getCollection('pages');
@@ -12,7 +12,7 @@ if (!aboutPage) {
 }
 
 const { Content } = await render(aboutPage);
-const allPosts = sortPostsDesc(await getCollection('blog'));
+const allPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')));
 const latestLimit = aboutPage.data.latest_posts?.limit ?? 5;
 const latestPosts = allPosts.slice(0, latestLimit).map(toBlogSummary);
 const allNews = sortByDateDesc(await getCollection('news'));

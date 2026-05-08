@@ -6,6 +6,7 @@ interface Props {
   title?: string;
   description?: string;
   currentPath?: string;
+  canonicalHref?: string;
   ogType?: 'website' | 'article';
   ogImage?: string;
   articlePublishedTime?: Date | string;
@@ -13,10 +14,20 @@ interface Props {
   noindex?: boolean;
 }
 
+function toAbsoluteCanonicalUrl(input: string): string {
+  if (/^https?:\/\//.test(input)) {
+    return input;
+  }
+
+  const normalized = input.startsWith('/') ? input : `/${input}`;
+  return new URL(normalized, siteConfig.siteUrl).toString();
+}
+
 const {
   title,
   description = siteConfig.description,
   currentPath = '/',
+  canonicalHref,
   ogType = 'website',
   ogImage = siteConfig.defaultOgImage,
   articlePublishedTime,
@@ -24,7 +35,7 @@ const {
   noindex = false,
 } = Astro.props;
 const pageTitle = title ? `${title} | ${siteConfig.title}` : siteConfig.title;
-const canonicalUrl = new URL(Astro.url.pathname, siteConfig.siteUrl).toString();
+const canonicalUrl = canonicalHref ? toAbsoluteCanonicalUrl(canonicalHref) : new URL(Astro.url.pathname, siteConfig.siteUrl).toString();
 const currentYear = new Date().getFullYear();
 const navItems = await getNavItems();
 const socialLinks = await getSocialLinks();

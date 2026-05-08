@@ -2,12 +2,14 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import process from "node:process";
+import { createInterface } from "node:readline/promises";
 
 const repoRoot = process.cwd();
 const postsRoot = path.join(repoRoot, "_posts");
 
 function slugify(input) {
-  return input
+  return String(input || "")
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, "")
     .trim()
@@ -49,6 +51,23 @@ function parseList(input) {
     .filter(Boolean);
 }
 
+function parseBoolean(input) {
+  if (input == null || input === "") {
+    return undefined;
+  }
+
+  const normalized = String(input).trim().toLowerCase();
+  if (["true", "1", "y", "yes"].includes(normalized)) {
+    return true;
+  }
+
+  if (["false", "0", "n", "no"].includes(normalized)) {
+    return false;
+  }
+
+  throw new Error(`Invalid boolean value: ${input}`);
+}
+
 function ensureDate(input) {
   if (!input) {
     const now = new Date();
@@ -65,54 +84,103 @@ function ensureDate(input) {
   return input;
 }
 
+function quoteYaml(input) {
+  return `"${String(input).replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+}
+
 function toYamlList(values) {
   if (values.length === 0) {
-    return "[]";
+    return " []";
   }
 
   return `\n${values.map((item) => `  - ${quoteYaml(item)}`).join("\n")}`;
 }
 
-function quoteYaml(input) {
-  return `"${input.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+async function ask(rl, label, defaultValue = "") {
+  const suffix = defaultValue ? ` [${defaultValue}]` : "";
+  const answer = await rl.question(`${label}${suffix}: `);
+  const normalized = answer.trim();
+  return normalized || defaultValue;
 }
 
-function run() {
+function validateRequired(input, name) {
+  if (!input || !String(input).trim()) {
+    throw new Error(`Missing required --${name}`);
+  }
+}
+
+function seoTitleCandidates(title) {
+  const base = title.trim();
+  return [base, `${base} | 0xnefertt`];
+}
+
+async function run() {
   const args = parseArgs(process.argv.slice(2));
-  const title = args.title?.trim();
-  const primaryCategory = args.category?.trim();
-  const description = args.description?.trim();
-  const date = ensureDate(args.date);
+  const interactiveRequested = parseBoolean(args.interactive) === true;
 
-  if (!title) {
-    throw new Error("Missing required --title");
+  let title = args.title?.trim() ?? "";
+  let description = args.description?.trim() ?? "";
+  let category = args.category?.trim() ?? "";
+  let tagsInput = args.tags?.trim() ?? "";
+  let date = ensureDate(args.date);
+  let slugInput = args.slug?.trim() ?? "";
+  let extraCategoriesInput = args.extraCategories?.trim() ?? "";
+  let series = args.series?.trim() ?? "";
+  let draft = parseBoolean(args.draft) ?? false;
+  let cover = args.cover?.trim() ?? "";
+  let canonical = args.canonical?.trim() ?? "";
+
+  const missingRequired = !title || !description || !category || !tagsInput;
+
+  if ((interactiveRequested || missingRequired) && process.stdin.isTTY) {
+    const rl = createInterface({ input: process.stdin, output: process.stdout });
+    try {
+      title = await ask(rl, "Title", title);
+      description = await ask(rl, "Description", description);
+      category = await ask(rl, "Primary category", category);
+      tagsInput = await ask(rl, "Tags (comma-separated)", tagsInput);
+      date = ensureDate(await ask(rl, "Date (YYYY-MM-DD)", date));
+      const suggestedSlug = slugInput || slugify(title);
+      slugInput = await ask(rl, "Slug", suggestedSlug);
+      extraCategoriesInput = await ask(rl, "Extra categories (comma-separated)", extraCategoriesInput);
+      series = await ask(rl, "Series (optional)", series);
+
+      const draftAnswer = await ask(rl, "Draft? (y/n)", draft ? "y" : "n");
+      draft = parseBoolean(draftAnswer) ?? false;
+
+      const defaultCover = cover || `/assets/img/posts/${slugify(slugInput || title)}/cover.png`;
+      cover = await ask(rl, "Cover image path (optional)", defaultCover);
+      canonical = await ask(rl, "Canonical URL (optional)", canonical);
+    } finally {
+      rl.close();
+    }
   }
 
-  if (!primaryCategory) {
-    throw new Error("Missing required --category");
-  }
+  validateRequired(title, "title");
+  validateRequired(description, "description");
+  validateRequired(category, "category");
+  validateRequired(tagsInput, "tags");
 
-  if (!description) {
-    throw new Error("Missing required --description");
-  }
-
-  const slug = args.slug ? slugify(args.slug) : slugify(title);
+  const slug = slugInput ? slugify(slugInput) : slugify(title);
   if (!slug) {
     throw new Error("Could not generate slug. Provide --slug explicitly.");
   }
 
-  const categorySlug = slugify(primaryCategory);
+  const categorySlug = slugify(category);
   if (!categorySlug) {
     throw new Error("Invalid --category value");
   }
 
-  const tags = parseList(args.tags);
+  const tags = parseList(tagsInput);
   if (tags.length === 0) {
     throw new Error("Missing required --tags (comma-separated)");
   }
 
-  const extraCategories = parseList(args.extraCategories);
-  const categories = [primaryCategory, ...extraCategories];
+  const extraCategories = parseList(extraCategoriesInput);
+  const categories = [category, ...extraCategories];
+
+  const normalizedCover = cover.trim();
+  const normalizedCanonical = canonical.trim();
 
   const categoryDir = path.join(postsRoot, categorySlug);
   const filename = `${date}-${slug}.md`;
@@ -124,8 +192,24 @@ function run() {
     throw new Error(`Post already exists: ${path.relative(repoRoot, filePath)}`);
   }
 
-  const tagsField = tags.length > 0 ? toYamlList(tags) : " []";
-  const categoriesField = categories.length > 0 ? toYamlList(categories) : " []";
+  const tagsField = toYamlList(tags);
+  const categoriesField = toYamlList(categories);
+
+  const optionalFrontmatter = [];
+  if (draft) {
+    optionalFrontmatter.push("draft: true");
+  }
+  if (series) {
+    optionalFrontmatter.push(`series: ${quoteYaml(series)}`);
+  }
+  if (normalizedCover) {
+    optionalFrontmatter.push(`thumbnail: ${quoteYaml(normalizedCover)}`);
+  }
+  if (normalizedCanonical) {
+    optionalFrontmatter.push(`canonical: ${quoteYaml(normalizedCanonical)}`);
+  }
+
+  const frontmatterOptionalBlock = optionalFrontmatter.length > 0 ? `${optionalFrontmatter.join("\n")}\n` : "";
 
   const content = `---
 layout: post
@@ -134,7 +218,7 @@ date: ${date}
 description: ${quoteYaml(description)}
 tags:${tagsField}
 categories:${categoriesField}
----
+${frontmatterOptionalBlock}---
 
 ## Summary
 
@@ -158,12 +242,15 @@ Final takeaway.
 `;
 
   fs.writeFileSync(filePath, content, "utf8");
+
+  const [seoPrimary, seoSecondary] = seoTitleCandidates(title);
   console.log(`Created ${path.relative(repoRoot, filePath)}`);
+  console.log(`SEO title candidate 1: ${seoPrimary}`);
+  console.log(`SEO title candidate 2: ${seoSecondary}`);
+  console.log(`Description length: ${description.length}`);
 }
 
-try {
-  run();
-} catch (error) {
+run().catch((error) => {
   console.error(error instanceof Error ? error.message : String(error));
   process.exit(1);
-}
+});

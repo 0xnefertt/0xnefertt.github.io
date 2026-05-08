@@ -3,6 +3,7 @@ import { getCollection, render, type CollectionEntry } from 'astro:content';
 import Layout from '../../../layouts/Layout.astro';
 import {
   formatPostDate,
+  getPublishedBlogPosts,
   getPostCategories,
   getPostRoute,
   normalizeTaxonomy,
@@ -13,7 +14,7 @@ import {
 import { siteConfig } from '../../../lib/site';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('blog');
+  const posts = getPublishedBlogPosts(await getCollection('blog'));
 
   return posts.map((post) => {
     const route = getPostRoute(post);
@@ -39,7 +40,7 @@ const { Content } = await render(post);
 const tags = normalizeTaxonomy(post.data.tags);
 const categories = getPostCategories(post);
 const redirectTarget = post.data.redirect;
-const allPosts = sortPostsDesc(await getCollection('blog'));
+const allPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')));
 
 const currentTagSlugs = new Set(tags.map((tag) => slugifyTerm(tag)));
 const currentCategorySlugs = new Set(categories.map((category) => slugifyTerm(category)));
@@ -119,6 +120,7 @@ const showComments = hasGiscus && (post.data.giscus_comments ?? true) && !redire
   title={post.data.title}
   description={post.data.description ?? post.data.title}
   currentPath="/blog/"
+  canonicalHref={post.data.canonical ?? post.data.canonical_url}
   ogType="article"
   ogImage={post.data.thumbnail ?? siteConfig.defaultOgImage}
   articlePublishedTime={post.data.date}

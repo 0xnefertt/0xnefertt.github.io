@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
-import { getPostCategories, getPostRoute, sortPostsDesc, toBlogSummary } from '../lib/blog';
+import { getPostCategories, getPostRoute, getPublishedBlogPosts, sortPostsDesc, toBlogSummary } from '../lib/blog';
 import { siteConfig } from '../lib/site';
 
 function escapeXml(input: string): string {
@@ -34,7 +34,7 @@ function excerpt(input: string, maxLength: number): string {
 
 export const GET: APIRoute = async ({ site }) => {
   const base = (site?.toString() ?? siteConfig.siteUrl).replace(/\/$/, '');
-  const posts = sortPostsDesc(await getCollection('blog'))
+  const posts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')))
     .filter((entry) => !entry.data.redirect)
     .slice(0, 60);
 
