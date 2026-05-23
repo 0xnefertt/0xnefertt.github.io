@@ -5,6 +5,7 @@ import {
   formatPostDate,
   getPublishedBlogPosts,
   getPostCategories,
+  getPostCategoryPaths,
   getPostRoute,
   normalizeTaxonomy,
   slugifyTerm,
@@ -39,6 +40,7 @@ const { post } = Astro.props;
 const { Content } = await render(post);
 const tags = normalizeTaxonomy(post.data.tags);
 const categories = getPostCategories(post);
+const categoryPaths = getPostCategoryPaths(post);
 const redirectTarget = post.data.redirect;
 const allPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')));
 
@@ -137,10 +139,10 @@ const showComments = hasGiscus && (post.data.giscus_comments ?? true) && !redire
       {post.data.external_source ? ` · ${post.data.external_source}` : ''}
     </p>
 
-    {(tags.length > 0 || categories.length > 0) && (
+    {(tags.length > 0 || categoryPaths.length > 0) && (
       <div class="tags">
         {tags.map((tag) => <span>#{tag}</span>)}
-        {categories.map((category) => <a href={`/blog/category/${slugifyTerm(category)}/`}>{category}</a>)}
+        {categoryPaths.map((categoryPath) => <a href={categoryPath.href}>{categoryPath.label}</a>)}
       </div>
     )}
   </article>

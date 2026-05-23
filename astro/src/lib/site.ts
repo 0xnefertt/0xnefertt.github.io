@@ -1,5 +1,5 @@
 import { getCollection } from 'astro:content';
-import { getPublishedBlogPosts, listBlogCategories } from './blog';
+import { getPublishedBlogPosts, listBlogCategoryTree } from './blog';
 
 const gaMeasurementId = (import.meta.env.PUBLIC_GA_MEASUREMENT_ID ?? '').trim();
 
@@ -32,7 +32,7 @@ export interface NavItem {
 
 export async function getNavItems(): Promise<NavItem[]> {
   const [pages, posts] = await Promise.all([getCollection('pages'), getCollection('blog')]);
-  const blogCategories = listBlogCategories(getPublishedBlogPosts(posts));
+  const blogCategoryTree = listBlogCategoryTree(getPublishedBlogPosts(posts));
 
   const aboutPage = pages.find((entry) => entry.data.permalink === '/');
   const aboutTitle = aboutPage?.data.title ?? 'about';
@@ -55,9 +55,13 @@ export async function getNavItems(): Promise<NavItem[]> {
         label: entry.data.title ?? entry.id,
         href,
         children: isBlogNav
-          ? blogCategories.map((category) => ({
-              label: category.name,
-              href: `/blog/category/${category.slug}/`,
+          ? blogCategoryTree.map((parent) => ({
+              label: parent.name,
+              href: parent.href,
+              children: parent.children.map((child) => ({
+                label: child.name,
+                href: child.href,
+              })),
             }))
           : undefined,
       };

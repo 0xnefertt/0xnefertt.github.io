@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
-import { getPublishedBlogPosts, listBlogCategories, slugifyTerm, sortPostsDesc, toBlogSummary } from '../lib/blog';
+import { getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from '../lib/blog';
 import { siteConfig } from '../lib/site';
 
 const POSTS_PER_PAGE = 8;
@@ -26,7 +26,7 @@ function joinAbsolute(base: string, path: string): string {
 export const GET: APIRoute = async ({ site }) => {
   const base = (site?.toString() ?? siteConfig.siteUrl).replace(/\/$/, '');
   const entries = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')));
-  const categories = listBlogCategories(entries);
+  const categoryTree = listBlogCategoryTree(entries);
   const summaries = entries.map(toBlogSummary);
 
   const urls = new Map<string, string | undefined>();
@@ -46,13 +46,25 @@ export const GET: APIRoute = async ({ site }) => {
     urls.set(`/blog/page-${page}/`, undefined);
   }
 
-  for (const category of categories) {
-    const categoryPosts = internalPosts.filter((post) => post.categories.some((item) => slugifyTerm(item) === category.slug));
-    urls.set(`/blog/category/${category.slug}/`, categoryPosts[0]?.date?.toISOString());
+  for (const parentCategory of categoryTree) {
+    const parentPosts = internalPosts.filter((post) => post.categoryPaths.some((item) => item.parentSlug === parentCategory.slug));
+    urls.set(`/blog/category/${parentCategory.slug}/`, parentPosts[0]?.date?.toISOString());
 
-    const totalCategoryPages = Math.max(1, Math.ceil(categoryPosts.length / POSTS_PER_PAGE));
-    for (let page = 2; page <= totalCategoryPages; page += 1) {
-      urls.set(`/blog/category/${category.slug}/page-${page}/`, undefined);
+    const totalParentPages = Math.max(1, Math.ceil(parentPosts.length / POSTS_PER_PAGE));
+    for (let page = 2; page <= totalParentPages; page += 1) {
+      urls.set(`/blog/category/${parentCategory.slug}/page-${page}/`, undefined);
+    }
+
+    for (const childCategory of parentCategory.children) {
+      const childPosts = internalPosts.filter((post) =>
+        post.categoryPaths.some((item) => item.parentSlug === parentCategory.slug && item.childSlug === childCategory.slug)
+      );
+      urls.set(`/blog/category/${parentCategory.slug}/${childCategory.slug}/`, childPosts[0]?.date?.toISOString());
+
+      const totalChildPages = Math.max(1, Math.ceil(childPosts.length / POSTS_PER_PAGE));
+      for (let page = 2; page <= totalChildPages; page += 1) {
+        urls.set(`/blog/category/${parentCategory.slug}/${childCategory.slug}/page-${page}/`, undefined);
+      }
     }
   }
 

@@ -175,10 +175,21 @@ function getNavI18nKey(href: string): string | undefined {
                     {item.children && item.children.length > 0 && (
                       <ul class="nav-dropdown">
                         {item.children.map((child) => (
-                          <li>
+                          <li class={child.children && child.children.length > 0 ? 'nav-dropdown-item nav-dropdown-item--nested' : 'nav-dropdown-item'}>
                             <a class={isActive(child.href, currentPath) ? 'active' : undefined} href={child.href}>
                               {child.label}
                             </a>
+                            {child.children && child.children.length > 0 && (
+                              <ul class="nav-subdropdown">
+                                {child.children.map((grandchild) => (
+                                  <li>
+                                    <a class={isActive(grandchild.href, currentPath) ? 'active' : undefined} href={grandchild.href}>
+                                      {grandchild.label}
+                                    </a>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
                           </li>
                         ))}
                       </ul>

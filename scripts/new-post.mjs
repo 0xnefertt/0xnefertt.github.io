@@ -17,6 +17,32 @@ function slugify(input) {
     .replace(/-+/g, "-");
 }
 
+function parseCategoryPath(input) {
+  const segments = String(input || "")
+    .split("/")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  if (segments.length === 0) {
+    throw new Error("Invalid --category value");
+  }
+
+  if (segments.length > 2) {
+    throw new Error("--category supports up to 2 levels (e.g. engineering or engineering/frontend)");
+  }
+
+  const slugs = segments.map((item) => slugify(item));
+  if (slugs.some((item) => !item)) {
+    throw new Error("Invalid --category value");
+  }
+
+  return {
+    names: segments,
+    slugs,
+    label: segments.join("/"),
+  };
+}
+
 function parseArgs(argv) {
   const args = {};
 
@@ -137,7 +163,7 @@ async function run() {
     try {
       title = await ask(rl, "Title", title);
       description = await ask(rl, "Description", description);
-      category = await ask(rl, "Primary category", category);
+      category = await ask(rl, "Primary category (supports parent/child)", category);
       tagsInput = await ask(rl, "Tags (comma-separated)", tagsInput);
       date = ensureDate(await ask(rl, "Date (YYYY-MM-DD)", date));
       const suggestedSlug = slugInput || slugify(title);
@@ -166,10 +192,7 @@ async function run() {
     throw new Error("Could not generate slug. Provide --slug explicitly.");
   }
 
-  const categorySlug = slugify(category);
-  if (!categorySlug) {
-    throw new Error("Invalid --category value");
-  }
+  const primaryCategory = parseCategoryPath(category);
 
   const tags = parseList(tagsInput);
   if (tags.length === 0) {
@@ -177,12 +200,12 @@ async function run() {
   }
 
   const extraCategories = parseList(extraCategoriesInput);
-  const categories = [category, ...extraCategories];
+  const categories = [primaryCategory.label, ...extraCategories];
 
   const normalizedCover = cover.trim();
   const normalizedCanonical = canonical.trim();
 
-  const categoryDir = path.join(postsRoot, categorySlug);
+  const categoryDir = path.join(postsRoot, ...primaryCategory.slugs);
   const filename = `${date}-${slug}.md`;
   const filePath = path.join(categoryDir, filename);
 

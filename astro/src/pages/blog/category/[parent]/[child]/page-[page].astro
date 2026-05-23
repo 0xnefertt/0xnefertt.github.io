@@ -1,62 +1,87 @@
 ---
 import { getCollection } from 'astro:content';
-import Layout from '../../../../layouts/Layout.astro';
-import { formatPostDate, getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from '../../../../lib/blog';
-import { siteConfig } from '../../../../lib/site';
+import Layout from '../../../../../layouts/Layout.astro';
+import { formatPostDate, getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from '../../../../../lib/blog';
+import { siteConfig } from '../../../../../lib/site';
 
 export async function getStaticPaths() {
   const postsPerPage = 8;
   const rawPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')));
   const categoryTree = listBlogCategoryTree(rawPosts);
+  const summaries = rawPosts.map(toBlogSummary);
 
-  return categoryTree.flatMap((category) => {
-    const categoryPostCount = rawPosts
-      .map(toBlogSummary)
-      .filter((post) => post.categoryPaths.some((item) => item.parentSlug === category.slug)).length;
+  return categoryTree.flatMap((parentCategory) =>
+    parentCategory.children.flatMap((childCategory) => {
+      const categoryPostCount = summaries.filter(
+        (post) => post.categoryPaths.some((item) => item.parentSlug === parentCategory.slug && item.childSlug === childCategory.slug)
+      ).length;
 
-    const totalPages = Math.max(1, Math.ceil(categoryPostCount / postsPerPage));
+      const totalPages = Math.max(1, Math.ceil(categoryPostCount / postsPerPage));
 
-    return Array.from({ length: totalPages }, (_, index) => index + 1)
-      .filter((page) => page > 1)
-      .map((page) => ({
-        params: { category: category.slug, page: String(page) },
-        props: {
-          category,
-          currentPage: page,
-        },
-      }));
-  });
+      return Array.from({ length: totalPages }, (_, index) => index + 1)
+        .filter((page) => page > 1)
+        .map((page) => ({
+          params: {
+            parent: parentCategory.slug,
+            child: childCategory.slug,
+            page: String(page),
+          },
+          props: {
+            parentCategory: {
+              name: parentCategory.name,
+              slug: parentCategory.slug,
+            },
+            childCategory: {
+              name: childCategory.name,
+              slug: childCategory.slug,
+            },
+            currentPage: page,
+          },
+        }));
+    })
+  );
 }
 
 interface Props {
-  category: {
+  parentCategory: {
     name: string;
     slug: string;
-    count: number;
+  };
+  childCategory: {
+    name: string;
+    slug: string;
   };
   currentPage: number;
 }
 
-const { category, currentPage } = Astro.props;
+const { parentCategory, childCategory, currentPage } = Astro.props;
 const postsPerPage = 8;
 const rawPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')));
 const categoryTree = listBlogCategoryTree(rawPosts);
-const allPosts = rawPosts.map(toBlogSummary).filter((post) => post.categoryPaths.some((item) => item.parentSlug === category.slug));
+const allPosts = rawPosts
+  .map(toBlogSummary)
+  .filter((post) => post.categoryPaths.some((item) => item.parentSlug === parentCategory.slug && item.childSlug === childCategory.slug));
 const totalPages = Math.max(1, Math.ceil(allPosts.length / postsPerPage));
 const pageIndex = Math.max(1, Math.min(currentPage, totalPages));
 const pageStart = (pageIndex - 1) * postsPerPage;
 const posts = allPosts.slice(pageStart, pageStart + postsPerPage);
 
 function getPageHref(page: number): string {
-  return page <= 1 ? `/blog/category/${category.slug}/` : `/blog/category/${category.slug}/page-${page}/`;
+  return page <= 1
+    ? `/blog/category/${parentCategory.slug}/${childCategory.slug}/`
+    : `/blog/category/${parentCategory.slug}/${childCategory.slug}/page-${page}/`;
 }
 ---
 
-<Layout title={`blog · ${category.name} · page ${pageIndex}`} description={`Posts in ${category.name}`} currentPath={`/blog/category/${category.slug}/`}>
+<Layout
+  title={`blog · ${parentCategory.name} / ${childCategory.name} · page ${pageIndex}`}
+  description={`Posts in ${parentCategory.name} / ${childCategory.name}`}
+  currentPath={`/blog/category/${parentCategory.slug}/${childCategory.slug}/`}
+>
   <section class="blog-header">
     <h1>{siteConfig.blogName}</h1>
     <p>
-      Category: <strong>{category.name}</strong> ({allPosts.length}) · Page {pageIndex} of {totalPages}
+      Category: <strong>{parentCategory.name} / {childCategory.name}</strong> ({allPosts.length}) · Page {pageIndex} of {totalPages}
     </p>
     <form class="blog-search-form" action="/blog/search/" method="get">
       <input class="blog-search-input" type="search" name="q" placeholder="Search posts" data-i18n-placeholder="search_placeholder" />
@@ -68,12 +93,20 @@ function getPageHref(page: number): string {
         {
           categoryTree.map((parent) => (
             <li class="blog-category-parent-item">
-              <a href={parent.href} class={parent.slug === category.slug ? 'active' : undefined}>
+              <a href={parent.href} class={parent.slug === parentCategory.slug ? 'active' : undefined}>
                 {parent.name}
               </a>
               {parent.children.length > 0 && (
                 <ul class="blog-category-child-list">
-                  {parent.children.map((child) => <li><a href={child.href}>{child.name}</a></li>)}
+                  {
+                    parent.children.map((child) => (
+                      <li>
+                        <a href={child.href} class={parent.slug === parentCategory.slug && child.slug === childCategory.slug ? 'active' : undefined}>
+                          {child.name}
+                        </a>
+                      </li>
+                    ))
+                  }
                 </ul>
               )}
             </li>

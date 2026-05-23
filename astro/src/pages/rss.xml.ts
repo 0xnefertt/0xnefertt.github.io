@@ -44,7 +44,7 @@ export const GET: APIRoute = async ({ site }) => {
       const route = getPostRoute(entry);
       const url = `${base}/blog/${route.year}/${route.slug}/`;
       const published = entry.data.date?.toUTCString() ?? new Date(0).toUTCString();
-      const description = excerpt(summary.description ?? normalizeMarkdown(entry.body), 320);
+      const description = excerpt(summary.description ?? normalizeMarkdown(entry.body ?? ''), 320);
       const categories = getPostCategories(entry)
         .map((category) => `<category>${escapeXml(category)}</category>`)
         .join('');

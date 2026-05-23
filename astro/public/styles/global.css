@@ -145,9 +145,11 @@ a:hover {
   top: 100%;
   left: 0;
   margin: 0;
-  padding: 0.35rem;
+  padding: 0.45rem;
   list-style: none;
-  min-width: 180px;
+  min-width: 320px;
+  display: grid;
+  gap: 0.2rem;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -163,8 +165,43 @@ a:hover {
   z-index: 30;
 }
 
-.nav-dropdown li {
+.nav-dropdown-item {
   margin: 0;
+}
+
+.nav-dropdown-item--nested {
+  display: grid;
+  grid-template-columns: minmax(130px, 160px) minmax(170px, 1fr);
+  column-gap: 0.6rem;
+  align-items: start;
+  padding: 0.2rem;
+}
+
+.nav-dropdown-item--nested + .nav-dropdown-item--nested {
+  border-top: 1px solid color-mix(in srgb, var(--line), white 25%);
+  padding-top: 0.4rem;
+}
+
+.nav-dropdown-item--nested > a {
+  font-weight: 600;
+  background: var(--surface-muted);
+  color: var(--text);
+  white-space: normal;
+}
+
+.nav-subdropdown {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.25rem;
+}
+
+.nav-subdropdown a {
+  font-size: 0.82rem;
+  padding: 0.32rem 0.55rem;
+  white-space: normal;
 }
 
 .nav-dropdown a {
@@ -174,7 +211,7 @@ a:hover {
   color: var(--text-muted);
   font-size: 0.85rem;
   border: 1px solid transparent;
-  white-space: nowrap;
+  line-height: 1.35;
 }
 
 .nav-dropdown a:hover,
@@ -351,9 +388,33 @@ main {
 
 .blog-category-filter {
   margin-top: 1rem;
+}
+
+.blog-category-parent-list,
+.blog-category-child-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.blog-category-parent-list {
   display: flex;
-  gap: 0.45rem;
   flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.blog-category-parent-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.blog-category-child-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  padding-left: 0.5rem;
 }
 
 .blog-category-filter a {
@@ -365,6 +426,7 @@ main {
   background: var(--surface);
   color: var(--text-muted);
   font-size: 0.82rem;
+  white-space: nowrap;
 }
 
 .blog-category-filter a:hover {
@@ -792,6 +854,21 @@ main {
     box-shadow: none;
     min-width: 0;
     width: 100%;
+  }
+
+  .nav-dropdown-item--nested {
+    display: block;
+  }
+
+  .nav-dropdown-item--nested + .nav-dropdown-item--nested {
+    border-top: 0;
+    padding-top: 0.2rem;
+  }
+
+  .nav-subdropdown {
+    padding-left: 0.45rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .post-detail-layout {

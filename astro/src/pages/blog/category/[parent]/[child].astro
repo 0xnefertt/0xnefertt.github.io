@@ -4,59 +4,69 @@ import Layout from '../../../../layouts/Layout.astro';
 import { formatPostDate, getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from '../../../../lib/blog';
 import { siteConfig } from '../../../../lib/site';
 
+const POSTS_PER_PAGE = 8;
+
 export async function getStaticPaths() {
-  const postsPerPage = 8;
   const rawPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')));
   const categoryTree = listBlogCategoryTree(rawPosts);
 
-  return categoryTree.flatMap((category) => {
-    const categoryPostCount = rawPosts
-      .map(toBlogSummary)
-      .filter((post) => post.categoryPaths.some((item) => item.parentSlug === category.slug)).length;
-
-    const totalPages = Math.max(1, Math.ceil(categoryPostCount / postsPerPage));
-
-    return Array.from({ length: totalPages }, (_, index) => index + 1)
-      .filter((page) => page > 1)
-      .map((page) => ({
-        params: { category: category.slug, page: String(page) },
-        props: {
-          category,
-          currentPage: page,
+  return categoryTree.flatMap((parentCategory) =>
+    parentCategory.children.map((childCategory) => ({
+      params: {
+        parent: parentCategory.slug,
+        child: childCategory.slug,
+      },
+      props: {
+        parentCategory: {
+          name: parentCategory.name,
+          slug: parentCategory.slug,
         },
-      }));
-  });
+        childCategory: {
+          name: childCategory.name,
+          slug: childCategory.slug,
+        },
+      },
+    }))
+  );
 }
 
 interface Props {
-  category: {
+  parentCategory: {
     name: string;
     slug: string;
-    count: number;
   };
-  currentPage: number;
+  childCategory: {
+    name: string;
+    slug: string;
+  };
 }
 
-const { category, currentPage } = Astro.props;
-const postsPerPage = 8;
+const { parentCategory, childCategory } = Astro.props;
 const rawPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')));
 const categoryTree = listBlogCategoryTree(rawPosts);
-const allPosts = rawPosts.map(toBlogSummary).filter((post) => post.categoryPaths.some((item) => item.parentSlug === category.slug));
-const totalPages = Math.max(1, Math.ceil(allPosts.length / postsPerPage));
-const pageIndex = Math.max(1, Math.min(currentPage, totalPages));
-const pageStart = (pageIndex - 1) * postsPerPage;
-const posts = allPosts.slice(pageStart, pageStart + postsPerPage);
+const allPosts = rawPosts
+  .map(toBlogSummary)
+  .filter((post) => post.categoryPaths.some((item) => item.parentSlug === parentCategory.slug && item.childSlug === childCategory.slug));
+const totalPages = Math.max(1, Math.ceil(allPosts.length / POSTS_PER_PAGE));
+const currentPage = 1;
+const posts = allPosts.slice(0, POSTS_PER_PAGE);
 
 function getPageHref(page: number): string {
-  return page <= 1 ? `/blog/category/${category.slug}/` : `/blog/category/${category.slug}/page-${page}/`;
+  return page <= 1
+    ? `/blog/category/${parentCategory.slug}/${childCategory.slug}/`
+    : `/blog/category/${parentCategory.slug}/${childCategory.slug}/page-${page}/`;
 }
 ---
 
-<Layout title={`blog · ${category.name} · page ${pageIndex}`} description={`Posts in ${category.name}`} currentPath={`/blog/category/${category.slug}/`}>
+<Layout
+  title={`blog · ${parentCategory.name} / ${childCategory.name}`}
+  description={`Posts in ${parentCategory.name} / ${childCategory.name}`}
+  currentPath={`/blog/category/${parentCategory.slug}/${childCategory.slug}/`}
+>
   <section class="blog-header">
     <h1>{siteConfig.blogName}</h1>
     <p>
-      Category: <strong>{category.name}</strong> ({allPosts.length}) · Page {pageIndex} of {totalPages}
+      Category: <strong>{parentCategory.name} / {childCategory.name}</strong> ({allPosts.length})
     </p>
     <form class="blog-search-form" action="/blog/search/" method="get">
       <input class="blog-search-input" type="search" name="q" placeholder="Search posts" data-i18n-placeholder="search_placeholder" />
@@ -68,12 +78,20 @@ function getPageHref(page: number): string {
         {
           categoryTree.map((parent) => (
             <li class="blog-category-parent-item">
-              <a href={parent.href} class={parent.slug === category.slug ? 'active' : undefined}>
+              <a href={parent.href} class={parent.slug === parentCategory.slug ? 'active' : undefined}>
                 {parent.name}
               </a>
               {parent.children.length > 0 && (
                 <ul class="blog-category-child-list">
-                  {parent.children.map((child) => <li><a href={child.href}>{child.name}</a></li>)}
+                  {
+                    parent.children.map((child) => (
+                      <li>
+                        <a href={child.href} class={parent.slug === parentCategory.slug && child.slug === childCategory.slug ? 'active' : undefined}>
+                          {child.name}
+                        </a>
+                      </li>
+                    ))
+                  }
                 </ul>
               )}
             </li>
@@ -120,9 +138,9 @@ function getPageHref(page: number): string {
     totalPages > 1 && (
       <nav class="pagination" aria-label="Category pagination">
         <ul class="pagination-list">
-          {pageIndex > 1 ? (
+          {currentPage > 1 ? (
             <li>
-              <a class="pagination-link" href={getPageHref(pageIndex - 1)} data-i18n-key="pagination_prev">
+              <a class="pagination-link" href={getPageHref(currentPage - 1)} data-i18n-key="pagination_prev">
                 Previous
               </a>
             </li>
@@ -136,15 +154,15 @@ function getPageHref(page: number): string {
 
           {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
             <li>
-              <a class={page === pageIndex ? 'pagination-link active' : 'pagination-link'} href={getPageHref(page)}>
+              <a class={page === currentPage ? 'pagination-link active' : 'pagination-link'} href={getPageHref(page)}>
                 {page}
               </a>
             </li>
           ))}
 
-          {pageIndex < totalPages ? (
+          {currentPage < totalPages ? (
             <li>
-              <a class="pagination-link" href={getPageHref(pageIndex + 1)} data-i18n-key="pagination_next">
+              <a class="pagination-link" href={getPageHref(currentPage + 1)} data-i18n-key="pagination_next">
                 Next
               </a>
             </li>

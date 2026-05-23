@@ -1,14 +1,14 @@
 ---
 import { getCollection } from 'astro:content';
 import Layout from '../../../layouts/Layout.astro';
-import { formatPostDate, getPublishedBlogPosts, listBlogCategories, slugifyTerm, sortPostsDesc, toBlogSummary } from '../../../lib/blog';
+import { formatPostDate, getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from '../../../lib/blog';
 import { siteConfig } from '../../../lib/site';
 
 const POSTS_PER_PAGE = 8;
 
 export async function getStaticPaths() {
   const posts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')));
-  const categories = listBlogCategories(posts);
+  const categories = listBlogCategoryTree(posts);
 
   return categories.map((category) => ({
     params: { category: category.slug },
@@ -26,10 +26,8 @@ interface Props {
 
 const { category } = Astro.props;
 const rawPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')));
-const categories = listBlogCategories(rawPosts);
-const allPosts = rawPosts
-  .map(toBlogSummary)
-  .filter((post) => post.categories.some((item) => slugifyTerm(item) === category.slug));
+const categoryTree = listBlogCategoryTree(rawPosts);
+const allPosts = rawPosts.map(toBlogSummary).filter((post) => post.categoryPaths.some((item) => item.parentSlug === category.slug));
 const totalPages = Math.max(1, Math.ceil(allPosts.length / POSTS_PER_PAGE));
 const currentPage = 1;
 const posts = allPosts.slice(0, POSTS_PER_PAGE);
@@ -49,16 +47,25 @@ function getPageHref(page: number): string {
       <input class="blog-search-input" type="search" name="q" placeholder="Search posts" data-i18n-placeholder="search_placeholder" />
       <button class="blog-search-button" type="submit" data-i18n-key="search_button">Search</button>
     </form>
-    <div class="blog-category-filter">
-      <a href="/blog/">all</a>
-      {
-        categories.map((item) => (
-          <a href={`/blog/category/${item.slug}/`} class={item.slug === category.slug ? 'active' : undefined}>
-            {item.name}
-          </a>
-        ))
-      }
-    </div>
+    <nav class="blog-category-filter" aria-label="Blog categories">
+      <ul class="blog-category-parent-list">
+        <li><a href="/blog/">all</a></li>
+        {
+          categoryTree.map((parent) => (
+            <li class="blog-category-parent-item">
+              <a href={parent.href} class={parent.slug === category.slug ? 'active' : undefined}>
+                {parent.name}
+              </a>
+              {parent.children.length > 0 && (
+                <ul class="blog-category-child-list">
+                  {parent.children.map((child) => <li><a href={child.href}>{child.name}</a></li>)}
+                </ul>
+              )}
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
   </section>
 
   {posts.length === 0 ? (
@@ -81,10 +88,10 @@ function getPageHref(page: number): string {
             </p>
             {post.description && <p>{post.description}</p>}
 
-            {(post.tags.length > 0 || post.categories.length > 0) && (
+            {(post.tags.length > 0 || post.categoryPaths.length > 0) && (
               <div class="tags">
                 {post.tags.map((tag) => <span>#{tag}</span>)}
-                {post.categories.map((item) => <a href={`/blog/category/${slugifyTerm(item)}/`}>{item}</a>)}
+                {post.categoryPaths.map((categoryPath) => <a href={categoryPath.href}>{categoryPath.label}</a>)}
               </div>
             )}
 

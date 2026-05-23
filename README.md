@@ -17,7 +17,7 @@ Personal site and blog built with Astro.
   - `astro/src/content.config.ts`: content collections
 - Content sources consumed by Astro:
   - `_pages/`
-  - `_posts/` (category-based folders)
+  - `_posts/` (1~2 level category folders)
   - `_projects/`
   - `_news/`
   - `_books/`
@@ -54,12 +54,12 @@ Build output: `astro/dist/`
 
 ## Blog post scaffolding
 
-Posts are organized by category directory under `_posts`.
+Posts are organized by category directory under `_posts` (supports 1~2 levels).
 
 Create a new post:
 
 ```bash
-npm run post:new -- --title "My New Post" --description "One-line summary for preview cards" --category "engineering" --tags "astro,notes"
+npm run post:new -- --title "My New Post" --description "One-line summary for preview cards" --category "engineering/frontend" --tags "astro,notes"
 ```
 
 Interactive mode:
@@ -81,10 +81,12 @@ Optional flags:
 Generated path format:
 
 - `_posts/<category-slug>/YYYY-MM-DD-<slug>.md`
+- `_posts/<parent-slug>/<child-slug>/YYYY-MM-DD-<slug>.md`
 
 Notes:
 
 - The site merges `frontmatter categories` and folder path categories.
+- `--category` accepts `parent` or `parent/child` format (up to 2 levels).
 - If a post has no `categories` frontmatter, folder-based category inference still works.
 - `--description` and `--tags` are required for scaffolding.
 - New post template includes `Summary / Key points / Details / Conclusion` sections.
@@ -102,7 +104,7 @@ Notes:
 - Publish a draft (strict check + draft flag removal):
 
 ```bash
-npm run post:publish -- --file _posts/<category>/YYYY-MM-DD-slug.md
+npm run post:publish -- --file _posts/<category-path>/YYYY-MM-DD-slug.md
 ```
 
 ## Image helper
@@ -110,7 +112,7 @@ npm run post:publish -- --file _posts/<category>/YYYY-MM-DD-slug.md
 Attach an image to a post asset folder and get markdown snippet:
 
 ```bash
-npm run post:image -- --post _posts/<category>/YYYY-MM-DD-slug.md --src ~/Downloads/chart.png
+npm run post:image -- --post _posts/<category-path>/YYYY-MM-DD-slug.md --src ~/Downloads/chart.png
 ```
 
 ## SEO and feeds
