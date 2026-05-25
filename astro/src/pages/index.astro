@@ -22,25 +22,420 @@ const latestNews = allNews.slice(0, newsLimit);
 const profile = aboutPage.data.profile;
 const subtitle = aboutPage.data.subtitle;
 const profileImage = normalizeAssetPath(profile?.image);
+
+interface FavoriteLink {
+  title: string;
+  href: string;
+  note?: string;
+}
+
+interface FavoriteCategory {
+  name: string;
+  items: FavoriteLink[];
+}
+
+interface UsefulInfoConfig {
+  enabled: boolean;
+  locationLabel: string;
+  latitude: number;
+  longitude: number;
+  baseCurrency: string;
+  targetCurrencies: string[];
+}
+
+const DEFAULT_USEFUL_INFO: UsefulInfoConfig = {
+  enabled: true,
+  locationLabel: 'Vancouver, BC',
+  latitude: 49.2827,
+  longitude: -123.1207,
+  baseCurrency: 'USD',
+  targetCurrencies: ['KRW', 'CAD'],
+};
+
+const FAVORITE_PRIMARY_CATEGORIES = ['AI', 'Blockchain', 'Developer', 'News'];
+
+function toFavoriteLinks(input: unknown): FavoriteLink[] {
+  if (!Array.isArray(input)) {
+    return [];
+  }
+
+  return input
+    .map((item) => {
+      if (!item || typeof item !== 'object') {
+        return null;
+      }
+
+      const record = item as Record<string, unknown>;
+      const title = typeof record.title === 'string' ? record.title.trim() : '';
+      const href = typeof record.href === 'string' ? record.href.trim() : '';
+      const note = typeof record.note === 'string' ? record.note.trim() : undefined;
+
+      if (!title || !href) {
+        return null;
+      }
+
+      return {
+        title,
+        href,
+        note,
+      };
+    })
+    .filter((item): item is FavoriteLink => item !== null);
+}
+
+function toFavoriteCategories(input: unknown): FavoriteCategory[] {
+  const byName = new Map<string, FavoriteLink[]>();
+  FAVORITE_PRIMARY_CATEGORIES.forEach((name) => {
+    byName.set(name, []);
+  });
+
+  if (Array.isArray(input)) {
+    input.forEach((entry) => {
+      if (!entry || typeof entry !== 'object') {
+        return;
+      }
+
+      const record = entry as Record<string, unknown>;
+      const rawName = typeof record.name === 'string' ? record.name.trim() : typeof record.title === 'string' ? record.title.trim() : '';
+      const items = toFavoriteLinks(record.items);
+
+      if (rawName) {
+        if (!byName.has(rawName)) {
+          byName.set(rawName, items);
+        } else if (items.length > 0) {
+          byName.set(rawName, items);
+        }
+        return;
+      }
+
+      const flatTitle = typeof record.title === 'string' ? record.title.trim() : '';
+      const flatHref = typeof record.href === 'string' ? record.href.trim() : '';
+      const flatNote = typeof record.note === 'string' ? record.note.trim() : undefined;
+
+      if (!flatTitle || !flatHref) {
+        return;
+      }
+
+      const developerLinks = byName.get('Developer') ?? [];
+      developerLinks.push({ title: flatTitle, href: flatHref, note: flatNote });
+      byName.set('Developer', developerLinks);
+    });
+  }
+
+  const ordered = FAVORITE_PRIMARY_CATEGORIES.map((name) => ({
+    name,
+    items: byName.get(name) ?? [],
+  }));
+
+  for (const [name, items] of byName.entries()) {
+    if (FAVORITE_PRIMARY_CATEGORIES.includes(name)) {
+      continue;
+    }
+    ordered.push({ name, items });
+  }
+
+  return ordered;
+}
+
+function isExternalLink(href: string): boolean {
+  return /^https?:\/\//.test(href);
+}
+
+function toUsefulInfoConfig(input: unknown): UsefulInfoConfig {
+  if (!input || typeof input !== 'object') {
+    return DEFAULT_USEFUL_INFO;
+  }
+
+  const config = input as Record<string, unknown>;
+  const locationLabel = typeof config.location === 'string' && config.location.trim() ? config.location.trim() : DEFAULT_USEFUL_INFO.locationLabel;
+  const latitude = typeof config.latitude === 'number' ? config.latitude : Number(config.latitude);
+  const longitude = typeof config.longitude === 'number' ? config.longitude : Number(config.longitude);
+  const baseCurrencyRaw = typeof config.base_currency === 'string' ? config.base_currency.trim().toUpperCase() : DEFAULT_USEFUL_INFO.baseCurrency;
+  const baseCurrency = /^[A-Z]{3}$/.test(baseCurrencyRaw) ? baseCurrencyRaw : DEFAULT_USEFUL_INFO.baseCurrency;
+  const targetCurrenciesRaw = Array.isArray(config.target_currencies)
+    ? config.target_currencies
+    : typeof config.target_currencies === 'string'
+      ? config.target_currencies.split(',')
+      : [];
+  const targetCurrencies = targetCurrenciesRaw
+    .map((item) => String(item).trim().toUpperCase())
+    .filter((item) => /^[A-Z]{3}$/.test(item));
+  const enabled =
+    typeof config.enabled === 'boolean'
+      ? config.enabled
+      : config.enabled == null
+        ? DEFAULT_USEFUL_INFO.enabled
+        : String(config.enabled).toLowerCase() !== 'false';
+
+  return {
+    enabled,
+    locationLabel,
+    latitude: Number.isFinite(latitude) ? latitude : DEFAULT_USEFUL_INFO.latitude,
+    longitude: Number.isFinite(longitude) ? longitude : DEFAULT_USEFUL_INFO.longitude,
+    baseCurrency,
+    targetCurrencies: targetCurrencies.length > 0 ? targetCurrencies : DEFAULT_USEFUL_INFO.targetCurrencies,
+  };
+}
+
+const aboutData = aboutPage.data as Record<string, unknown>;
+const favoriteCategories = toFavoriteCategories(aboutData.favorites);
+const usefulInfo = toUsefulInfoConfig(aboutData.useful_info);
+const hasRightSidebar = Boolean(profile) || usefulInfo.enabled;
+const heroClassName = ['hero', hasRightSidebar ? 'hero--with-sidebar' : 'hero--without-sidebar'].join(' ');
+const introClassName = [
+  'home-intro',
+  favoriteCategories.length > 0 ? 'home-intro--with-favorites' : 'home-intro--without-favorites',
+  usefulInfo.enabled ? 'home-intro--with-useful-info' : 'home-intro--without-useful-info',
+].join(' ');
 ---
 
 <Layout title={aboutPage.data.title ?? 'about'} description={aboutPage.data.description ?? 'About page'} currentPath="/">
-  <section class="hero">
-    <article class="card markdown-body">
-      <h1>{aboutPage.data.title ?? 'about'}</h1>
-      {subtitle && <p set:html={subtitle} />}
-      <Content />
-    </article>
-
+  <div class={introClassName}>
     {
-      profile && (
-        <aside class="card">
-          {profileImage && <img class="profile-image" src={profileImage} alt={`${aboutPage.data.title ?? 'Profile'} image`} loading="lazy" />}
-          {profile.more_info && <div class="profile-meta" set:html={profile.more_info} />}
-        </aside>
+      favoriteCategories.length > 0 && (
+        <details class="card favorite-card favorite-disclosure favorite-rail" data-favorite-disclosure open>
+          <summary class="favorite-summary">
+            <span class="favorite-title">Favorite</span>
+          </summary>
+          <ul class="favorite-list">
+            {
+              favoriteCategories.map((category) => (
+                <li class="favorite-group">
+                  <details class="favorite-group-disclosure">
+                    <summary class="favorite-group-summary">
+                      <span class="favorite-group-title">{category.name}</span>
+                      <span class="favorite-group-count">({category.items.length})</span>
+                    </summary>
+                    {category.items.length > 0 ? (
+                      <ul class="favorite-child-list">
+                        {category.items.map((item) => (
+                          <li class="favorite-item">
+                            <a href={item.href} target={isExternalLink(item.href) ? '_blank' : undefined} rel={isExternalLink(item.href) ? 'noreferrer' : undefined}>
+                              {item.title}
+                            </a>
+                            {item.note && <p class="favorite-note">{item.note}</p>}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p class="favorite-empty">No items yet</p>
+                    )}
+                  </details>
+                </li>
+              ))
+            }
+          </ul>
+        </details>
       )
     }
-  </section>
+
+    <section class={heroClassName}>
+      <article class="card markdown-body">
+        <h1>{aboutPage.data.title ?? 'about'}</h1>
+        {subtitle && <p set:html={subtitle} />}
+        <Content />
+      </article>
+
+      {
+        hasRightSidebar && (
+          <aside class="hero-side">
+            {profile && (
+              <section class="card">
+                {profileImage && <img class="profile-image" src={profileImage} alt={`${aboutPage.data.title ?? 'Profile'} image`} loading="lazy" />}
+                {profile.more_info && <div class="profile-meta" set:html={profile.more_info} />}
+              </section>
+            )}
+
+            {usefulInfo.enabled && (
+              <section
+                class="card useful-info-card useful-info-rail"
+                data-useful-info
+                data-location={usefulInfo.locationLabel}
+                data-lat={String(usefulInfo.latitude)}
+                data-lon={String(usefulInfo.longitude)}
+                data-base-currency={usefulInfo.baseCurrency}
+                data-target-currencies={usefulInfo.targetCurrencies.join(',')}
+              >
+                <h2 class="useful-info-title">Useful Info</h2>
+                <p class="useful-info-location">{usefulInfo.locationLabel}</p>
+                <div class="useful-info-block">
+                  <p class="useful-info-label">Weather</p>
+                  <p class="useful-info-value" data-weather-temp>--</p>
+                  <p class="useful-info-meta" data-weather-desc>Loading weather...</p>
+                </div>
+                <div class="useful-info-block">
+                  <p class="useful-info-label">Exchange</p>
+                  <ul class="useful-info-rate-list" data-exchange-list>
+                    <li class="useful-info-meta">Loading exchange rates...</li>
+                  </ul>
+                </div>
+              </section>
+            )}
+          </aside>
+        )
+      }
+    </section>
+  </div>
+
+  {
+    favoriteCategories.length > 0 && (
+      <script is:inline>
+        (() => {
+          const disclosure = document.querySelector('[data-favorite-disclosure]');
+          if (!(disclosure instanceof HTMLDetailsElement)) {
+            return;
+          }
+
+          const mobileMedia = window.matchMedia('(max-width: 840px)');
+
+          function syncFavoriteState() {
+            if (mobileMedia.matches) {
+              disclosure.removeAttribute('open');
+              return;
+            }
+            disclosure.setAttribute('open', '');
+          }
+
+          syncFavoriteState();
+          mobileMedia.addEventListener('change', syncFavoriteState);
+        })();
+      </script>
+    )
+  }
+
+  {
+    usefulInfo.enabled && (
+      <script is:inline>
+        (() => {
+          const panel = document.querySelector('[data-useful-info]');
+          if (!(panel instanceof HTMLElement)) {
+            return;
+          }
+
+          const latitude = Number(panel.dataset.lat);
+          const longitude = Number(panel.dataset.lon);
+          const baseCurrency = (panel.dataset.baseCurrency || 'USD').toUpperCase();
+          const targetCurrencies = (panel.dataset.targetCurrencies || '')
+            .split(',')
+            .map((item) => item.trim().toUpperCase())
+            .filter((item) => /^[A-Z]{3}$/.test(item));
+
+          const weatherTempNode = panel.querySelector('[data-weather-temp]');
+          const weatherDescNode = panel.querySelector('[data-weather-desc]');
+          const exchangeListNode = panel.querySelector('[data-exchange-list]');
+
+          const weatherCodeMap = {
+            0: 'Clear',
+            1: 'Mainly clear',
+            2: 'Partly cloudy',
+            3: 'Overcast',
+            45: 'Fog',
+            48: 'Rime fog',
+            51: 'Light drizzle',
+            53: 'Drizzle',
+            55: 'Heavy drizzle',
+            61: 'Light rain',
+            63: 'Rain',
+            65: 'Heavy rain',
+            71: 'Light snow',
+            73: 'Snow',
+            75: 'Heavy snow',
+            80: 'Rain showers',
+            81: 'Heavy showers',
+            82: 'Violent showers',
+            95: 'Thunderstorm',
+          };
+
+          function setWeatherFallback() {
+            if (weatherTempNode) {
+              weatherTempNode.textContent = '--';
+            }
+            if (weatherDescNode) {
+              weatherDescNode.textContent = 'Weather unavailable';
+            }
+          }
+
+          function setExchangeFallback() {
+            if (!exchangeListNode) {
+              return;
+            }
+            exchangeListNode.innerHTML = '';
+            const fallbackItem = document.createElement('li');
+            fallbackItem.className = 'useful-info-meta';
+            fallbackItem.textContent = 'Exchange rates unavailable';
+            exchangeListNode.appendChild(fallbackItem);
+          }
+
+          async function loadWeather() {
+            if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+              setWeatherFallback();
+              return;
+            }
+
+            const weatherUrl = new URL('https://api.open-meteo.com/v1/forecast');
+            weatherUrl.searchParams.set('latitude', String(latitude));
+            weatherUrl.searchParams.set('longitude', String(longitude));
+            weatherUrl.searchParams.set('current', 'temperature_2m,weather_code');
+            weatherUrl.searchParams.set('timezone', 'auto');
+
+            try {
+              const response = await fetch(weatherUrl.toString());
+              if (!response.ok) {
+                throw new Error('weather-fetch-failed');
+              }
+
+              const data = await response.json();
+              const temperature = data?.current?.temperature_2m;
+              const weatherCode = Number(data?.current?.weather_code);
+
+              if (weatherTempNode) {
+                weatherTempNode.textContent = typeof temperature === 'number' ? `${temperature.toFixed(1)}°C` : '--';
+              }
+              if (weatherDescNode) {
+                weatherDescNode.textContent = weatherCodeMap[weatherCode] ?? 'Current conditions';
+              }
+            } catch {
+              setWeatherFallback();
+            }
+          }
+
+          async function loadExchangeRates() {
+            if (!exchangeListNode || targetCurrencies.length === 0) {
+              return;
+            }
+
+            const exchangeUrl = new URL('https://api.frankfurter.app/latest');
+            exchangeUrl.searchParams.set('from', baseCurrency);
+            exchangeUrl.searchParams.set('to', targetCurrencies.join(','));
+
+            try {
+              const response = await fetch(exchangeUrl.toString());
+              if (!response.ok) {
+                throw new Error('exchange-fetch-failed');
+              }
+
+              const data = await response.json();
+              const rates = data?.rates ?? {};
+
+              exchangeListNode.innerHTML = '';
+              targetCurrencies.forEach((currency) => {
+                const rate = Number(rates[currency]);
+                const listItem = document.createElement('li');
+                listItem.className = 'useful-info-rate-item';
+                listItem.textContent = Number.isFinite(rate) ? `1 ${baseCurrency} = ${rate.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${currency}` : `1 ${baseCurrency} = -- ${currency}`;
+                exchangeListNode.appendChild(listItem);
+              });
+            } catch {
+              setExchangeFallback();
+            }
+          }
+
+          void loadWeather();
+          void loadExchangeRates();
+        })();
+      </script>
+    )
+  }
 
   <section>
     <h2 class="section-title">Latest Posts</h2>

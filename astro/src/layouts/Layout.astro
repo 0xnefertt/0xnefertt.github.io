@@ -163,8 +163,19 @@ function getNavI18nKey(href: string): string | undefined {
     <header class="site-header">
       <div class="container header-inner">
         <a class="site-title" href="/">{siteConfig.title}</a>
-        <div class="header-controls">
-          <nav aria-label="Primary">
+        <button
+          type="button"
+          class="menu-toggle"
+          data-menu-toggle
+          aria-controls="site-menu-panel"
+          aria-expanded="false"
+          aria-label="Open navigation menu"
+        >
+          <span class="menu-toggle-icon" aria-hidden="true"></span>
+          <span data-i18n-key="nav_menu">Menu</span>
+        </button>
+        <div class="header-controls" id="site-menu-panel">
+          <nav aria-label="Primary" id="primary-nav">
             <ul class="nav-list">
               {
                 navItems.map((item) => (
@@ -327,12 +338,76 @@ function getNavI18nKey(href: string): string | undefined {
 
     <script is:inline>
       (() => {
+        const header = document.querySelector('.site-header');
+        const menuToggle = document.querySelector('[data-menu-toggle]');
+        const menuPanel = document.getElementById('site-menu-panel');
+
+        if (!(header instanceof HTMLElement) || !(menuToggle instanceof HTMLButtonElement) || !(menuPanel instanceof HTMLElement)) {
+          return;
+        }
+
+        const mobileMedia = window.matchMedia('(max-width: 840px)');
+
+        function setMenuOpen(nextOpen) {
+          header.classList.toggle('menu-open', nextOpen);
+          menuToggle.setAttribute('aria-expanded', nextOpen ? 'true' : 'false');
+          menuToggle.setAttribute('aria-label', nextOpen ? 'Close navigation menu' : 'Open navigation menu');
+        }
+
+        function closeMenu() {
+          setMenuOpen(false);
+        }
+
+        menuToggle.addEventListener('click', () => {
+          const willOpen = !header.classList.contains('menu-open');
+          setMenuOpen(willOpen);
+        });
+
+        menuPanel.addEventListener('click', (event) => {
+          const target = event.target;
+          if (!(target instanceof Element)) {
+            return;
+          }
+
+          if (target.closest('a[href]') && mobileMedia.matches) {
+            closeMenu();
+          }
+        });
+
+        document.addEventListener('click', (event) => {
+          if (!mobileMedia.matches) {
+            return;
+          }
+
+          const target = event.target;
+          if (!(target instanceof Node)) {
+            return;
+          }
+
+          if (header.contains(target)) {
+            return;
+          }
+
+          closeMenu();
+        });
+
+        mobileMedia.addEventListener('change', () => {
+          if (!mobileMedia.matches) {
+            closeMenu();
+          }
+        });
+      })();
+    </script>
+
+    <script is:inline>
+      (() => {
         const STORAGE_KEY = 'site-language';
         const FALLBACK_LANG = 'en';
         const SUPPORTED = ['en', 'ko'];
         const DICTIONARY = {
           en: {
             nav_about: 'about',
+            nav_menu: 'Menu',
             nav_blog: 'blog',
             nav_bookshelf: 'bookshelf',
             nav_projects: 'projects',
@@ -361,6 +436,7 @@ function getNavI18nKey(href: string): string | undefined {
           },
           ko: {
             nav_about: '소개',
+            nav_menu: '메뉴',
             nav_blog: '블로그',
             nav_bookshelf: '책장',
             nav_projects: '프로젝트',
