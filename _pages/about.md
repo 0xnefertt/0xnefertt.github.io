@@ -27,7 +27,7 @@ latest_posts:
 
 favorites:
   - name: AI
-    items: 
+    items:
       - title: Programbench
         href: https://programbench.com/
   - name: Blockchain
