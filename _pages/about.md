@@ -70,6 +70,10 @@ favorites:
         href: https://www.thetimes.com/us
       - title: Substack
         href: https://substack.com/
+      - title: Reddit
+        href: https://www.reddit.com/
+      - title: GeekNews
+        href: https://news.hada.io/
   - name: Space
     items:
       - title: SpaceX
