@@ -34,8 +34,8 @@ favorites:
     items:
       - title: Polymarket
         href: https://polymarket.com/
-      - title: DL News Research
-        href: https://www.dlnews.com/research/
+      - title: Defillama
+        href: https://defillama.com/
       - title: 4pillars Research
         href: https://research.4pillars.io/en/
       - title: Jump Crypto Insights
