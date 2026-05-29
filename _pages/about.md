@@ -82,7 +82,7 @@ favorites:
         href: https://www.blueorigin.com/
       - title: Space Mobile
         href: https://ast-science.com/
-      
+
   - name: Health / Bio
     items:
       - title: Calio
