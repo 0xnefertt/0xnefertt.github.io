@@ -30,6 +30,8 @@ favorites:
     items:
       - title: Programbench
         href: https://programbench.com/
+      - title: Robostrategy
+        href: https://robostrategy.co/
   - name: Blockchain
     items:
       - title: Polymarket
@@ -68,6 +70,26 @@ favorites:
         href: https://www.thetimes.com/us
       - title: Substack
         href: https://substack.com/
+  - name: Space
+    items:
+      - title: SpaceX
+        href: https://www.spacex.com/
+      - title: Blue Origin
+        href: https://www.blueorigin.com/
+      - title: Space Mobile
+        href: https://ast-science.com/
+      
+  - name: Health / Bio
+    items:
+      - title: Calio
+        href: https://www.calicolabs.com/
+      - title: Altos Labs
+        href: https://www.altoslabs.com/
+      - title: CRISPR Therapeutics
+        href: https://crisprtx.com/
+      - title: Intellia Therapeutics
+        href: https://www.intelliatx.com/
+  - name: Quantum
 
 useful_info:
   enabled: true
