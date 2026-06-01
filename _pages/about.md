@@ -38,6 +38,8 @@ favorites:
         href: https://polymarket.com/
       - title: Defillama
         href: https://defillama.com/
+      - title: Coindesk
+        href: https://www.coindesk.com/
       - title: 4pillars Research
         href: https://research.4pillars.io/en/
       - title: Jump Crypto Insights
