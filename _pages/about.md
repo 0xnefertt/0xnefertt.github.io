@@ -78,6 +78,68 @@ favorites:
         href: https://www.reddit.com/
       - title: GeekNews
         href: https://news.hada.io/
+  - name: Security
+    items:
+      - title: Trail of Bits
+        href: https://trailofbits.com/
+      - title: NCC Group
+        href: https://www.nccgroup.com/
+      - title: Cure53
+        href: https://cure53.de/
+      - title: Bishop Fox
+        href: https://bishopfox.com/
+      - title: OpenZeppelin
+        href: https://www.openzeppelin.com/security-audits
+      - title: Spearbit
+        href: https://spearbit.com/
+      - title: Cantina
+        href: https://cantina.xyz/
+      - title: Zellic
+        href: https://www.zellic.io/
+      - title: Sigma Prime
+        href: https://sigmaprime.io/
+      - title: Consensys Diligence
+        href: https://consensys.io/diligence
+      - title: ChainSecurity
+        href: https://chainsecurity.com/
+      - title: Certora
+        href: https://www.certora.com/
+      - title: Runtime Verification
+        href: https://runtimeverification.com/
+      - title: Galois
+        href: https://galois.com/
+      - title: Halborn
+        href: https://www.halborn.com/
+      - title: Quantstamp
+        href: https://quantstamp.com/
+      - title: CertiK
+        href: https://www.certik.com/
+      - title: Hacken
+        href: https://hacken.io/
+      - title: Sherlock
+        href: https://sherlock.xyz/
+      - title: Latacora
+        href: https://www.latacora.com/
+      - title: Include Security
+        href: https://includesecurity.com/
+      - title: Praetorian
+        href: https://www.praetorian.com/
+      - title: IOActive
+        href: https://www.ioactive.com/
+      - title: Quarkslab
+        href: https://www.quarkslab.com/
+      - title: Synacktiv
+        href: https://www.synacktiv.com/
+      - title: RET2 Systems
+        href: https://ret2.io/
+      - title: GRIMM
+        href: https://www.grimm-co.com/
+      - title: Mandiant
+        href: https://www.mandiant.com/
+      - title: NetSPI
+        href: https://www.netspi.com/
+      - title: Cobalt
+        href: https://www.cobalt.io/
   - name: Space
     items:
       - title: SpaceX
@@ -86,7 +148,6 @@ favorites:
         href: https://www.blueorigin.com/
       - title: Space Mobile
         href: https://ast-science.com/
-
   - name: Health / Bio
     items:
       - title: Calio
