@@ -72,6 +72,8 @@ favorites:
         href: https://www.thetimes.com/us
       - title: Substack
         href: https://substack.com/
+      - title: Linda Hall Library
+        href: https://www.lindahall.org/
       - title: Reddit
         href: https://www.reddit.com/
       - title: GeekNews
