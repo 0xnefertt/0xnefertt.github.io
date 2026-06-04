@@ -1,7 +1,7 @@
 import { getCollection } from 'astro:content';
 import { getPublishedBlogPosts, listBlogCategoryTree } from './blog';
 
-const gaMeasurementId = (import.meta.env.PUBLIC_GA_MEASUREMENT_ID ?? '').trim();
+const gaMeasurementId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID?.trim() || 'G-XKLJ41F6PS';
 
 export const siteConfig = {
   title: "0xnefertt's thoughts",
