@@ -60,6 +60,8 @@ jobs:
           npm --prefix astro ci
 
       - name: Validate and build site ✅
+        env:
+          PUBLIC_GA_MEASUREMENT_ID: ${{ vars.PUBLIC_GA_MEASUREMENT_ID }}
         run: |
           npm run format:check
           npm run verify:content

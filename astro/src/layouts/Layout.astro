@@ -39,7 +39,7 @@ const canonicalUrl = canonicalHref ? toAbsoluteCanonicalUrl(canonicalHref) : new
 const currentYear = new Date().getFullYear();
 const navItems = await getNavItems();
 const socialLinks = await getSocialLinks();
-const gaMeasurementId = siteConfig.gaMeasurementId.trim();
+const gaMeasurementId = siteConfig.gaMeasurementId?.trim() ?? '';
 const hasGaMeasurementId = gaMeasurementId.length > 0;
 
 function toAbsoluteUrl(input: string): string {
