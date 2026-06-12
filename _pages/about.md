@@ -64,8 +64,6 @@ favorites:
         href: https://cryptorank.io/
       - title: Pantera Capital
         href: https://panteracapital.com/insights/
-  - name: Developer
-    items: []
   - name: Reading
     items:
       - title: The Times
@@ -78,6 +76,12 @@ favorites:
         href: https://www.reddit.com/
       - title: GeekNews
         href: https://news.hada.io/
+      - title: rekt
+        href: https://rekt.news/
+      - title: Trading economics
+        href: https://tradingeconomics.com/
+      - title: Marketcap
+        href: https://companiesmarketcap.com/
   - name: Security
     items:
       - title: Trail of Bits
