@@ -478,28 +478,372 @@ print(path.parent)  # 부모 폴더
 
 ## JSON
 
+Python의 dict / list 데이터를 파일로 저장하거나, JSON 파일을 다시 Python 데이터로 읽어보는 방법
+
+```python
+import json
+
+json.loads() # JSON 문자열/파일 -> Python 객체
+json.dumps() # Python 객체 -> JSON 문자열/파일
+
+```
+
+## CSV
+
+표 형태 데이터를 다룰 때 사용
+
+```python
+import csv
+
+writer = csv.DictWriter(file, fieldnames=["id", "name", "city"])
+writer.writeheader()
+writer.writerows(users)
+
+reader = writer.DictReader(file)
+```
+
+## package / pip / virtual environments / uv
+
+json, pathlib, math 와 같이 기본적으로 제공하는 라이브러리를 제외한 외부 라이브러리를 package 라고 부른다.
+
+package = 남들이 만들어둔 Python 기능 묶음(=라이브러리)
+
+- requests = HTTP 요청
+- fastapi = 백엔드 API 서버
+- pandas = 데이터 분석
+- numpy = 수치 계산
+- python-dotenv = .env 환경변수 읽기
+- pytest = 테스트
+
+pip는 Python 패키지를 설치하는 도구(Node.js로 치면 npm install)
+
+```python
+# pip install requests
+python -m pip install requests
+
+import requests
+
+response = requests.get("https://example.com")
+print(response.status_code)
+```
+
+패키지 버전을 디렉토리 또는 서버마다 독립되게 설정하기 위해서 등장한 것이 virtual environment.
+venv = 프로젝트 전용 Python 공간
+
+```python
+mkdir python-practice
+cd python-practice
+python3 -m venv .venv
+
+# python-practice/
+# └── .venv/
+
+# 가상환경 ON
+source .venv/bin/activate
+# (.venv) python-practice % python3 -m pip install requests
+
+# 가상환경 OFF
+deactivate
+```
+
+다른 사람이 내 프로젝트를 받으면 어떤 패키지를 설치해야 할지 모른다.
+그래서 설치 목록을 파일로 적어둔 것이 requirements.txt 이다.
+
+```python
+python3 -m pip install -r requirements.txt
+```
+
+requirements.txt 는 패키지 목록만 관리를 하고 있다.
+
+프로젝트에는 패키지 목록 말고도 관리할 것이 많다. — 프로젝트 이름, 버전, Python 버전, 의존성 패키지, 테스트 설정, 린터 설정, 포맷터 설정, 빌드 설정 등
+
+이런 걸 한 파일에 적는 pyproject.toml 이 현대적인 방식으로 자주 사용된다.
+
+pyproject.toml (=package.json)
+
+```toml
+[project]
+name = "python-practice"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "requests"
+    "python-dotenv"
+]
+```
+
+uv는 요즘 많이 쓰는 도구이다.
+
+uv = venv + pip + pyproject.toml + lock 파일 관리를 쉽게 해주는 도구이다.
+
+```shell
+uv init python-practice
+cd python-practice
+
+uv add requests
+uv run python main.py
+```
+
+## pandas
+
+pandas는 CSV뿐만 아니라 Excel, SQL, JSON, Parquet같은 여러데이터 소스를 읽을 수 있다.
+
+pandas의 핵심은 DataFrame, 파이썬 안에서 쓰는 엑셀 표 같은 객체이다.
+
+```python
+import pandas as pd
+
+df = pd.read_csv("data/users.csv")
+print(df)
+print(df.head()) # 처음 몇 줄 보기 - 기본 5줄
+print(df["name", "city", "salary"]) # 컬럼 보기
+
+korean_users = df[df["country"] == "Korea"] # 조건으로 필터링
+older_users = df[df["age"] >= 30]
+
+sorted_df = df.sort_values("name") # 이름 기준으로 정렬 - 기본 오름차순
+sorted_df = df.sort_values("name", ascending=False) # 내림차순
+
+df["color"] = "Red" # 새 컬럼 만들기
+df["age_next_year"] = df["age"] + 1 # 기존 컬럼을 이용해서 새 컬럼 만들기
+
+df.to_csv("data/users_output.csv", index=False) # CSV로 저장하기
+```
+
+## requests
+
+파이썬에서 웹 API에 요청을 보내고 데이터를 받아오는 라이브러리
+
+```python
+import requests
+
+response = requests.get("https://api.example.com/users", timeout=10)
+# API 요청에는 보통 timeout을 넣는 게 좋다.
+# 실무에서 많이 사용하는 방식 - 400번대나 500번대 에러가 오면 예외를 발생 시킨다.
+# response.raise_for_status()
+# 보통 응답은 JSON 으로 온다.
+data = response.json()
+
+
+# print(response.status_code)
+# print(response.text)
+print(data["name"])
+print(data["city"])
+```
+
+## sqlite3
+
+파이썬에 기본으로 들어있는 로컬 파일 기반 데이터베이스이다. 외부 라이브러리를 설치할 필요가 없다.
+
+별도 서버를 띄울 필요 없이, 하나의 .db 파일에 데이터를 저장한다.
+
+```python
+# 보통 이 구조
+# python-data-practice/
+# ├── main.py
+# └── data/
+#    └── app.db
+
+import sqlite3
+from pathlib import Path
+
+data_dir = Path("data")
+data_dir.mkdir(exist_ok=True)
+
+db_path = data_dir / "app.db"
+
+connection = sqlite3.connect(db_path)
+# DB에 SQL 명령을 보내려면 cursor를 사용한다.
+cursor = connection.cursor()
+
+# SQL 실행
+connection.commit()
+connection.close()
+
+# 테이블 만들기
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    city TEXT NOT NULL,
+    age INTEGER
+)
+""")
+
+# 데이터 넣기
+cursor.execute(
+    "INSERT INTO users (name, city, age) VALUES (?, ?, ?)",
+    ("nefer", "vancouver", 20)
+)
+
+# 데이터 조회하기
+cursor.execute("SELECT * FROM users WHERE city = ?", ("vancouver"),)
+rows = cursor.fetchall()
+print(rows)
+
+# 데이터 수정 및 삭제
+cursor.execute("""
+UPDATE users
+SET age = ?
+WHERE name = ?
+""", (30, "secret"))
+
+connection.commit()
+
+cursor.execute("""
+DELETE FROM users
+WHERE name = ?
+""", ("secret",))
+connection.commit()
+```
+
+## class
+
+클래스는 관련있는 데이터와 함수를 하나로 묶는 설계도다.
+
+```python
+class User:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+    def introduce(self):
+        return f"My name is {self.name} and I am {self.age} years old."
+
+user = User("Yona", 30)
+
+print(user.name)
+print(user.age)
+print(user.introduce())
+```
+
+- class = 설계도
+- instance/object = 설계도로 만든 실제 물건
+- attribute = 객체가 가지고 있는 값
+
+```python
+# 이렇게 하면 User 설계도로 객체 2개를 만든 것이며, user1과 user2는 서로 다른 객체이다.
+user1 = User()
+user2 = User()
+```
+
+`__init__` 은 초기 설정 함수이다.
+
+self 는 이 객체 자신이다.
+
+클래스의 장점은 같은 구조의 객체를 여러 개 만들 수 있다는 것이다.
+
+클래스에서 꼭 알아야 하는 특수 메서드 (double underscore method, dunder method)
+
+- `__repr__`: 개발자용 객체 표현. print(obj) 또는 repr(obj)에서 보기 좋은 문자열을 만들 때 사용한다. 반드시 문자열을 반환해야 한다.
+- `__str__`: 사용자용 문자열 표현. str(obj), print(obj)에서 우선 사용된다. 없으면 `__repr__`이 대신 사용된다.
+- `__eq__`: obj1 == obj2 비교 기준을 정한다. 값이 같으면 같은 객체로 볼지 직접 정의할 수 있다.
+- `__hash__`: 객체를 set에 넣거나 dict의 key로 쓸 때 필요한 해시값을 정한다. `__eq__`를 직접 정의하면 hash 처리는 조심해야 한다.
+- `__len__`: len(obj)를 가능하게 한다.
+- `__getitem__`: obj[index]를 가능하게 한다.
+- `__contains__`: value in obj를 가능하게 한다.
+- `__lt__`: obj1 < obj2 비교 기준을 정한다. 정렬과 관련 있다.
+
+```python
+class Product:
+    def __init__(self, name, price, quantity):
+        self.name = name
+        self.price = price
+        self.quantity = quantity
+
+    def total_price(self):
+        return self.price * self.quantity
+
+    def __repr__(self):
+        return (
+            f"Product("
+            f"name={self.name!r}, "
+            f"price={self.price!r}, "
+            f"quantity={self.quantity!r}"
+            f")"
+        )
+
+    def __eq__(self, other):
+        if not isinstance(other, Product):
+            return NotImplemented
+
+        return (
+            self.name == other.name
+            and self.price == other.price
+            and self.quantity == other.quantity
+        )
+
+product1 = Product("Apple", 2, 5)
+product2 = Product("Apple", 2, 5)
+product3 = Product("Banana", 1, 10)
+
+print(product1)
+print(product1.total_price())
+
+print(product1 == product2)
+print(product1 == product3)
+print(product1 is product2)
+```
+
+## type hints / dataclass / project structure
+
+dataclass는 데이터를 담는 클래스를 쉽게 만드는 문법이다. `__init__`, `__repr__`, `__eq__` 등을 자동 생성한다.
+
+```python
+from dataclasses import dataclass
+
+@dataclass
+class Product:
+    name: str
+    price: int
+    quantity: int
+
+    def total_price(self):
+        return self.price * self.quantity
+```
+
+```python
+# 이런 것들은 type hints 다.
+name: str
+age: int
+```
+
+프로젝트 구조
+
+```python
+python-data-practice/
+├── pyproject.toml              # 프로젝트 설정, 의존성, 도구 설정
+├── README.md                   # 프로젝트 설명
+├── .gitignore                  # Git에 올리지 않을 파일 설정
+├── data/                       # JSON, CSV 같은 샘플/로컬 데이터
+│   └── users.json
+├── src/                        # 실제 소스코드
+│   └── data_practice/          # 내 Python 패키지
+│       ├── __init__.py
+│       ├── main.py             # 실행 시작점
+│       ├── models.py           # dataclass 같은 데이터 구조
+│       ├── paths.py            # 파일 경로 관리
+│       ├── services/           # 실제 비즈니스 로직
+│       │   ├── __init__.py
+│       │   └── user_service.py
+│       └── utils/              # 재사용 가능한 작은 도구 함수
+│           ├── __init__.py
+│           └── json_utils.py
+└── tests/                      # 테스트 코드
+    └── test_json_utils.py
+```
+
 ---
 
-| 순서 | 키워드                     | 왜 중요한지                                   |
-| ---- | -------------------------- | --------------------------------------------- |
-| 3    | `pathlib`                  | 파일 경로 다루기                              |
-| 4    | `json`                     | 설정 파일, API 데이터 다루기                  |
-| 5    | `csv`                      | 엑셀 비슷한 데이터 다루기                     |
-| 6    | list comprehension         | 리스트를 짧고 깔끔하게 처리                   |
-| 7    | function 심화              | 기본값, keyword argument, `*args`, `**kwargs` |
-| 8    | class                      | 객체지향 기본                                 |
-| 9    | virtual environment / `uv` | 프로젝트 환경 관리                            |
-| 10   | pip / package              | 외부 라이브러리 설치                          |
-| 11   | requests                   | 웹페이지/API 요청                             |
-| 12   | BeautifulSoup              | HTML 파싱, 크롤링                             |
-| 13   | argparse / typer           | CLI 명령어 만들기                             |
-| 14   | logging                    | 실행 기록 남기기                              |
-| 15   | datetime                   | 날짜/시간 다루기                              |
-| 16   | SQLite                     | 작은 로컬 DB 저장                             |
-| 17   | pytest                     | 테스트 코드                                   |
-| 18   | type hints                 | 타입 표시, 실무 코드 품질                     |
-| 19   | dataclass                  | 깔끔한 데이터 구조                            |
-| 20   | project structure          | 실제 프로젝트 폴더 구조                       |
+| 순서 | 키워드             | 왜 중요한지                                   |
+| ---- | ------------------ | --------------------------------------------- |
+| 6    | list comprehension | 리스트를 짧고 깔끔하게 처리                   |
+| 7    | function 심화      | 기본값, keyword argument, `*args`, `**kwargs` |
+| 12   | BeautifulSoup      | HTML 파싱, 크롤링                             |
+| 13   | argparse / typer   | CLI 명령어 만들기                             |
+| 14   | logging            | 실행 기록 남기기                              |
+| 15   | datetime           | 날짜/시간 다루기                              |
+| 17   | pytest             | 테스트 코드                                   |
 
 ```
 
