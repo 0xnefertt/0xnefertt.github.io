@@ -295,6 +295,7 @@ except ValuError:
 | FileNotFoundError | 파일이 없음 |
 
 else도 있다.
+
 ```python
 try:
     num = int("123") #시도
@@ -305,6 +306,7 @@ else:
 ```
 
 finally도 있다. 성공하든 실패하든 무조건 실행된다.
+
 ```python
 try:
     num = int("123")
@@ -315,6 +317,7 @@ finally:
 ```
 
 raise는 내가 직접 에러를 발생시키는 것
+
 ```python
 age = -1
 
@@ -326,9 +329,11 @@ if (age < 0):
 ```
 
 ## 다른 기능 가져오기 (import / module)
+
 파이썬에서 .py 파일 하나는 하나의 module이고, 그 안에 있는 함수, 변수, 클래스 등을 다른 파일에서 가져와 사용할 때 import를 사용한다.
 
 예를 들면,
+
 ```python
 project/
 ├── main.py
@@ -343,6 +348,7 @@ def add (a,b):
 def sub (a,b):
     return a-b
 ```
+
 이때 calculator.py 가 하나의 module 이다.
 
 ```python
@@ -352,14 +358,17 @@ import calculator
 print(calculator.add(1,2))
 print(calculator.sub(1,2))
 ```
-여기서 import calculator는 calculator.py 파일의 모듈을 가져오는 것이다. 
+
+여기서 import calculator는 calculator.py 파일의 모듈을 가져오는 것이다.
 
 함수가 아니더라도 변수도 모듈이다. 파일 안에 작성한 함수, 변수, 클래스가 기본적으로 모듈의 속성(attribute)이 된다.
 
 파이썬에는 JS/TS와 달리 export 키워드가 없다.
 
 **자주 쓰는 Python Standard Library 모듈**
+
 1. math (수학 계산용 모듈)
+
 ```python
 import math
 
@@ -371,7 +380,9 @@ print(math.gcd(12, 18))   # 최대공약수
 print(math.lcm(12, 18))   # 최소공배수
 print(math.pi)            # 원주율
 ```
+
 2. random (랜덤 값을 만들 때 사용)
+
 ```python
 import random
 
@@ -385,7 +396,8 @@ print(nums)
 
 print(random.sample(nums, 2))   # 2개 랜덤 선택 출력
 ```
-주의할 점은 random은 보안용 랜덤이 아니라는 것이다. 
+
+주의할 점은 random은 보안용 랜덤이 아니라는 것이다.
 
 비밀번호, 토큰, 인증번호 같은 보안 관련 값은 secrets를 쓰는 게 더 맞다.
 
@@ -397,6 +409,7 @@ print(token)
 ```
 
 3. datetime (날짜와 시간을 다룰 때 사용)
+
 ```python
 import datetime
 
@@ -407,6 +420,7 @@ d = datetime.date(2026,6, 8)    # 날짜 만들기
 datetime.datetime.striptime(d, "%Y-%m-%d")  # 문자열을 날짜로 바꾸기
 fiormatted = now.strftime("%Y-%m-%d")       # 날짜를 문자열로 바꾸기
 ```
+
 4. os
 5. sys
 6. pathlib
@@ -419,6 +433,7 @@ fiormatted = now.strftime("%Y-%m-%d")       # 날짜를 문자열로 바꾸기
 13. ...
 
 ## 파일 경로 다루기 (pathlib)
+
 파일 경로를 문자열이 아니라 Path 객체로 다루는 라이브러리
 
 파일을 읽거나 저장하는 프로그램을 만들 때, "정확히 어디에 있는 파일을 다루는지"를 안정적으로 지정하기 위해 사용된다.
@@ -457,6 +472,7 @@ print(path.parent)  # 부모 폴더
 ```
 
 상대 경로와 절대 경로
+
 - 상대 경로: 현재 실행 위치 기준으로부터의 경로
 - 절대 경로: 컴퓨터 루트부터 시작하는 전체 경로
 
