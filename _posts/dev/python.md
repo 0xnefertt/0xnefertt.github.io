@@ -286,10 +286,10 @@ except ValuError:
 
 **자주 보는 예외 종류**
 | 예외 | 의미 |
-| ---| ----| 
+| ---| ----|
 | ValueError | 값이 잘못됨 |
-| TypeError | 타입이 잘못됨 | 
-| IndexError | 리스트 인덱스 범위 초과 | 
+| TypeError | 타입이 잘못됨 |
+| IndexError | 리스트 인덱스 범위 초과 |
 | KeyError | 딕셔너리에 없는 키 접근 |
 | ZeroDivisionError | 0으로 나눔 |
 | FileNotFoundError | 파일이 없음 |
@@ -306,7 +306,7 @@ else:
 
 finally도 있다. 성공하든 실패하든 무조건 실행된다.
 ```python
-try: 
+try:
     num = int("123")
 except ValueError:
     print("변환 실패")
@@ -372,15 +372,15 @@ print(math.lcm(12, 18))   # 최소공배수
 print(math.pi)            # 원주율
 ```
 2. random (랜덤 값을 만들 때 사용)
-``` python
+```python
 import random
 
 print(random.randint(1,10))     # 1-10 사이 정수
 print(random.random())          # 0 이상 1 미만 실수
-print(random.choice(["a", "b", "c"])) 
+print(random.choice(["a", "b", "c"]))
 
 nums = [1,2,3,4,5]
-random.shuffle(nums)            # 랜덤 셔플 
+random.shuffle(nums)            # 랜덤 셔플
 print(nums)
 
 print(random.sample(nums, 2))   # 2개 랜덤 선택 출력
@@ -418,15 +418,14 @@ fiormatted = now.strftime("%Y-%m-%d")       # 날짜를 문자열로 바꾸기
 12. re
 13. ...
 
-
 ## 파일 경로 다루기 (pathlib)
 파일 경로를 문자열이 아니라 Path 객체로 다루는 라이브러리
 
-파일을 읽거나 저장하는 프로그램을 만들 때, "정확히 어디에 있는 파일을 다루는지"를 안정적으로 지정하기 위해 사용된다. 
+파일을 읽거나 저장하는 프로그램을 만들 때, "정확히 어디에 있는 파일을 다루는지"를 안정적으로 지정하기 위해 사용된다.
 
 e.g. CSV 파일 읽기, JSON 설정 파일 읽기, 이미지 파일 저장하기, 로그 파일 만들기, 크롤링한 데이터 저장하기, 업로드된 파일 정리하기, AI/RAG용 문서 파일 불러오기, 백업 파일 만들기 등
 
-```python 
+```python
 from pathlib import Path
 
 path = Path("data/user.txt")
@@ -485,4 +484,7 @@ print(path.parent)  # 부모 폴더
 | 18   | type hints                 | 타입 표시, 실무 코드 품질                     |
 | 19   | dataclass                  | 깔끔한 데이터 구조                            |
 | 20   | project structure          | 실제 프로젝트 폴더 구조                       |
+
+```
+
 ```
