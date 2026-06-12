@@ -373,6 +373,7 @@ main {
   padding: 0;
   display: grid;
   gap: 0.5rem;
+  min-height: 0;
 }
 
 .favorite-group {
@@ -416,9 +417,13 @@ main {
 .favorite-child-list {
   list-style: none;
   margin: 0.4rem 0 0;
-  padding: 0;
+  padding: 0 0.25rem 0 0;
   display: grid;
   gap: 0.35rem;
+  max-height: min(22rem, 42vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 
 .favorite-item a {
@@ -526,7 +531,17 @@ main {
     top: 5.2rem;
     left: calc((100vw - var(--max-width)) / 2 - var(--favorite-rail-width) - 1rem);
     width: var(--favorite-rail-width);
+    max-height: calc(100vh - 6.4rem);
     margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .home-intro--with-favorites .favorite-rail > .favorite-list {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 0.25rem;
+    scrollbar-gutter: stable;
   }
 
   .home-intro--with-useful-info .useful-info-rail {
