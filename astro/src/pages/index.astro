@@ -3,6 +3,7 @@ import { getCollection, render } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
 import { formatPostDate, getPublishedBlogPosts, sortPostsDesc, toBlogSummary } from '../lib/blog';
 import { normalizeAssetPath, sortByDateDesc } from '../lib/content';
+import { siteConfig } from '../lib/site';
 
 const pages = await getCollection('pages');
 const aboutPage = pages.find((entry) => entry.filePath?.endsWith('/about.md') || entry.id === 'about');
@@ -172,12 +173,14 @@ function toUsefulInfoConfig(input: unknown): UsefulInfoConfig {
 const aboutData = aboutPage.data as Record<string, unknown>;
 const favoriteCategories = toFavoriteCategories(aboutData.favorites);
 const usefulInfo = toUsefulInfoConfig(aboutData.useful_info);
+const homeVerticalAdSlot = '3436251506';
+const showHomeVerticalAd = siteConfig.adsensePublisherId.length > 0;
 const hasRightSidebar = Boolean(profile);
 const heroClassName = ['hero', hasRightSidebar ? 'hero--with-sidebar' : 'hero--without-sidebar'].join(' ');
 const introClassName = [
   'home-intro',
   favoriteCategories.length > 0 ? 'home-intro--with-favorites' : 'home-intro--without-favorites',
-  usefulInfo.enabled ? 'home-intro--with-useful-info' : 'home-intro--without-useful-info',
+  usefulInfo.enabled || showHomeVerticalAd ? 'home-intro--with-useful-info' : 'home-intro--without-useful-info',
 ].join(' ');
 ---
 
@@ -221,30 +224,48 @@ const introClassName = [
       )
     }
 
-    {usefulInfo.enabled && (
-      <section
-        class="card useful-info-card useful-info-rail"
-        data-useful-info
-        data-location={usefulInfo.locationLabel}
-        data-lat={String(usefulInfo.latitude)}
-        data-lon={String(usefulInfo.longitude)}
-        data-base-currency={usefulInfo.baseCurrency}
-        data-target-currencies={usefulInfo.targetCurrencies.join(',')}
-      >
-        <h2 class="useful-info-title">Useful Info</h2>
-        <p class="useful-info-location">{usefulInfo.locationLabel}</p>
-        <div class="useful-info-block">
-          <p class="useful-info-label">Weather</p>
-          <p class="useful-info-value" data-weather-temp>--</p>
-          <p class="useful-info-meta" data-weather-desc>Loading weather...</p>
-        </div>
-        <div class="useful-info-block">
-          <p class="useful-info-label">Exchange</p>
-          <ul class="useful-info-rate-list" data-exchange-list>
-            <li class="useful-info-meta">Loading exchange rates...</li>
-          </ul>
-        </div>
-      </section>
+    {(usefulInfo.enabled || showHomeVerticalAd) && (
+      <aside class="home-right-rail">
+        {usefulInfo.enabled && (
+          <section
+            class="card useful-info-card useful-info-rail"
+            data-useful-info
+            data-location={usefulInfo.locationLabel}
+            data-lat={String(usefulInfo.latitude)}
+            data-lon={String(usefulInfo.longitude)}
+            data-base-currency={usefulInfo.baseCurrency}
+            data-target-currencies={usefulInfo.targetCurrencies.join(',')}
+          >
+            <h2 class="useful-info-title">Useful Info</h2>
+            <p class="useful-info-location">{usefulInfo.locationLabel}</p>
+            <div class="useful-info-block">
+              <p class="useful-info-label">Weather</p>
+              <p class="useful-info-value" data-weather-temp>--</p>
+              <p class="useful-info-meta" data-weather-desc>Loading weather...</p>
+            </div>
+            <div class="useful-info-block">
+              <p class="useful-info-label">Exchange</p>
+              <ul class="useful-info-rate-list" data-exchange-list>
+                <li class="useful-info-meta">Loading exchange rates...</li>
+              </ul>
+            </div>
+          </section>
+        )}
+
+        {showHomeVerticalAd && (
+          <section class="home-ad-card" aria-label="Advertisement">
+            <ins
+              class="adsbygoogle"
+              style="display:block"
+              data-ad-client={siteConfig.adsensePublisherId}
+              data-ad-slot={homeVerticalAdSlot}
+              data-ad-format="auto"
+              data-full-width-responsive="true"
+              data-adsense-slot
+            ></ins>
+          </section>
+        )}
+      </aside>
     )}
 
     <section class={heroClassName}>
@@ -268,6 +289,28 @@ const introClassName = [
       }
     </section>
   </div>
+
+  {
+    showHomeVerticalAd && (
+      <script is:inline>
+        (() => {
+          const slots = document.querySelectorAll('[data-adsense-slot]:not([data-adsense-initialized])');
+          slots.forEach((slot) => {
+            if (!(slot instanceof HTMLElement)) {
+              return;
+            }
+
+            slot.dataset.adsenseInitialized = 'true';
+            try {
+              (window.adsbygoogle = window.adsbygoogle || []).push({});
+            } catch {
+              slot.dataset.adsenseInitialized = 'false';
+            }
+          });
+        })();
+      </script>
+    )
+  }
 
   {
     favoriteCategories.length > 0 && (
