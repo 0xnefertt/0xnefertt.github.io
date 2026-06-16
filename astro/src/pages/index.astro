@@ -126,7 +126,7 @@ function toFavoriteCategories(input: unknown): FavoriteCategory[] {
     ordered.push({ name, items });
   }
 
-  return ordered;
+  return ordered.filter((category) => category.items.length > 0);
 }
 
 function isExternalLink(href: string): boolean {
@@ -172,7 +172,7 @@ function toUsefulInfoConfig(input: unknown): UsefulInfoConfig {
 const aboutData = aboutPage.data as Record<string, unknown>;
 const favoriteCategories = toFavoriteCategories(aboutData.favorites);
 const usefulInfo = toUsefulInfoConfig(aboutData.useful_info);
-const hasRightSidebar = Boolean(profile) || usefulInfo.enabled;
+const hasRightSidebar = Boolean(profile);
 const heroClassName = ['hero', hasRightSidebar ? 'hero--with-sidebar' : 'hero--without-sidebar'].join(' ');
 const introClassName = [
   'home-intro',
@@ -221,6 +221,32 @@ const introClassName = [
       )
     }
 
+    {usefulInfo.enabled && (
+      <section
+        class="card useful-info-card useful-info-rail"
+        data-useful-info
+        data-location={usefulInfo.locationLabel}
+        data-lat={String(usefulInfo.latitude)}
+        data-lon={String(usefulInfo.longitude)}
+        data-base-currency={usefulInfo.baseCurrency}
+        data-target-currencies={usefulInfo.targetCurrencies.join(',')}
+      >
+        <h2 class="useful-info-title">Useful Info</h2>
+        <p class="useful-info-location">{usefulInfo.locationLabel}</p>
+        <div class="useful-info-block">
+          <p class="useful-info-label">Weather</p>
+          <p class="useful-info-value" data-weather-temp>--</p>
+          <p class="useful-info-meta" data-weather-desc>Loading weather...</p>
+        </div>
+        <div class="useful-info-block">
+          <p class="useful-info-label">Exchange</p>
+          <ul class="useful-info-rate-list" data-exchange-list>
+            <li class="useful-info-meta">Loading exchange rates...</li>
+          </ul>
+        </div>
+      </section>
+    )}
+
     <section class={heroClassName}>
       <article class="card markdown-body">
         <h1>{aboutPage.data.title ?? 'about'}</h1>
@@ -235,32 +261,6 @@ const introClassName = [
               <section class="card">
                 {profileImage && <img class="profile-image" src={profileImage} alt={`${aboutPage.data.title ?? 'Profile'} image`} loading="lazy" />}
                 {profile.more_info && <div class="profile-meta" set:html={profile.more_info} />}
-              </section>
-            )}
-
-            {usefulInfo.enabled && (
-              <section
-                class="card useful-info-card useful-info-rail"
-                data-useful-info
-                data-location={usefulInfo.locationLabel}
-                data-lat={String(usefulInfo.latitude)}
-                data-lon={String(usefulInfo.longitude)}
-                data-base-currency={usefulInfo.baseCurrency}
-                data-target-currencies={usefulInfo.targetCurrencies.join(',')}
-              >
-                <h2 class="useful-info-title">Useful Info</h2>
-                <p class="useful-info-location">{usefulInfo.locationLabel}</p>
-                <div class="useful-info-block">
-                  <p class="useful-info-label">Weather</p>
-                  <p class="useful-info-value" data-weather-temp>--</p>
-                  <p class="useful-info-meta" data-weather-desc>Loading weather...</p>
-                </div>
-                <div class="useful-info-block">
-                  <p class="useful-info-label">Exchange</p>
-                  <ul class="useful-info-rate-list" data-exchange-list>
-                    <li class="useful-info-meta">Loading exchange rates...</li>
-                  </ul>
-                </div>
               </section>
             )}
           </aside>
@@ -278,10 +278,10 @@ const introClassName = [
             return;
           }
 
-          const mobileMedia = window.matchMedia('(max-width: 840px)');
+          const compactMedia = window.matchMedia('(max-width: 1359px)');
 
           function syncFavoriteState() {
-            if (mobileMedia.matches) {
+            if (compactMedia.matches) {
               disclosure.removeAttribute('open');
               return;
             }
@@ -289,7 +289,7 @@ const introClassName = [
           }
 
           syncFavoriteState();
-          mobileMedia.addEventListener('change', syncFavoriteState);
+          compactMedia.addEventListener('change', syncFavoriteState);
         })();
       </script>
     )

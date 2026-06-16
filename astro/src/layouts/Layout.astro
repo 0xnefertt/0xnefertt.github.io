@@ -1,6 +1,7 @@
 ---
 import { getNavItems, siteConfig } from '../lib/site';
 import { getSocialLinks } from '../lib/data';
+import { getCategoryI18nKey } from '../lib/blog';
 
 interface Props {
   title?: string;
@@ -157,6 +158,15 @@ function getNavI18nKey(href: string): string | undefined {
       )
     }
     <slot name="head" />
+    <script is:inline>
+      (() => {
+        const STORAGE_KEY = 'site-theme';
+        const storedTheme = localStorage.getItem(STORAGE_KEY);
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = storedTheme === 'light' || storedTheme === 'dark' ? storedTheme : prefersDark ? 'dark' : 'light';
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
     <link rel="stylesheet" href="/styles/global.css" />
   </head>
   <body>
@@ -187,14 +197,18 @@ function getNavI18nKey(href: string): string | undefined {
                       <ul class="nav-dropdown">
                         {item.children.map((child) => (
                           <li class={child.children && child.children.length > 0 ? 'nav-dropdown-item nav-dropdown-item--nested' : 'nav-dropdown-item'}>
-                            <a class={isActive(child.href, currentPath) ? 'active' : undefined} href={child.href}>
+                            <a class={isActive(child.href, currentPath) ? 'active' : undefined} href={child.href} data-i18n-key={getCategoryI18nKey(child.href)}>
                               {child.label}
                             </a>
                             {child.children && child.children.length > 0 && (
                               <ul class="nav-subdropdown">
                                 {child.children.map((grandchild) => (
                                   <li>
-                                    <a class={isActive(grandchild.href, currentPath) ? 'active' : undefined} href={grandchild.href}>
+                                    <a
+                                      class={isActive(grandchild.href, currentPath) ? 'active' : undefined}
+                                      href={grandchild.href}
+                                      data-i18n-key={getCategoryI18nKey(grandchild.href)}
+                                    >
                                       {grandchild.label}
                                     </a>
                                   </li>
@@ -211,12 +225,18 @@ function getNavI18nKey(href: string): string | undefined {
             </ul>
           </nav>
 
-          <div class="language-switch" role="group" aria-label="Language selector">
-            <button type="button" class="language-option is-active" data-lang-option="en">
-              EN
-            </button>
-            <button type="button" class="language-option" data-lang-option="ko">
-              KO
+          <div class="preference-controls">
+            <div class="language-switch" role="group" aria-label="Language selector">
+              <button type="button" class="language-option is-active" data-lang-option="en">
+                EN
+              </button>
+              <button type="button" class="language-option" data-lang-option="ko">
+                KO
+              </button>
+            </div>
+
+            <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch to dark mode" aria-pressed="false">
+              <span class="theme-toggle-icon" aria-hidden="true"></span>
             </button>
           </div>
         </div>
@@ -338,6 +358,35 @@ function getNavI18nKey(href: string): string | undefined {
 
     <script is:inline>
       (() => {
+        const STORAGE_KEY = 'site-theme';
+        const themeToggle = document.querySelector('[data-theme-toggle]');
+
+        if (!(themeToggle instanceof HTMLButtonElement)) {
+          return;
+        }
+
+        function getCurrentTheme() {
+          return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+        }
+
+        function applyTheme(nextTheme) {
+          document.documentElement.dataset.theme = nextTheme;
+          localStorage.setItem(STORAGE_KEY, nextTheme);
+          const isDark = nextTheme === 'dark';
+          themeToggle.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+          themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+        }
+
+        applyTheme(getCurrentTheme());
+
+        themeToggle.addEventListener('click', () => {
+          applyTheme(getCurrentTheme() === 'dark' ? 'light' : 'dark');
+        });
+      })();
+    </script>
+
+    <script is:inline>
+      (() => {
         const header = document.querySelector('.site-header');
         const menuToggle = document.querySelector('[data-menu-toggle]');
         const menuPanel = document.getElementById('site-menu-panel');
@@ -417,6 +466,19 @@ function getNavI18nKey(href: string): string | undefined {
             nav_publications: 'publications',
             nav_teaching: 'teaching',
             nav_news: 'news',
+            category_study_log: 'study log',
+            category_dev: 'dev',
+            category_english: 'english',
+            category_money_talk: 'money talk',
+            category_finance: 'finance',
+            category_stock: 'stock',
+            category_property: 'property',
+            category_tax: 'tax',
+            category_life_thoughts: 'life thoughts',
+            category_opinions_is_my_own: 'opinions is my own',
+            category_useful_tips: 'useful tips',
+            category_general: 'general',
+            category_in_canada: 'in canada',
             post_more_to_read: 'More to read',
             post_previous: '< Previous',
             post_next: 'Next >',
@@ -446,6 +508,19 @@ function getNavI18nKey(href: string): string | undefined {
             nav_publications: '출판물',
             nav_teaching: '강의',
             nav_news: '소식',
+            category_study_log: '공부 기록',
+            category_dev: 'dev',
+            category_english: 'english',
+            category_money_talk: '돈 이야기',
+            category_finance: 'finance',
+            category_stock: 'stock',
+            category_property: 'property',
+            category_tax: 'tax',
+            category_life_thoughts: '일상·생각',
+            category_opinions_is_my_own: 'opinions is my own',
+            category_useful_tips: '정보 공유',
+            category_general: 'general',
+            category_in_canada: 'in canada',
             post_more_to_read: '함께 읽으면 좋은 글',
             post_previous: '< 이전 글',
             post_next: '다음 글 >',

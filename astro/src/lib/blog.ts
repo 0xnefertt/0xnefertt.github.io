@@ -53,6 +53,22 @@ export interface BlogCategoryTreeParent {
   children: BlogCategoryTreeChild[];
 }
 
+const CATEGORY_I18N_KEYS: Record<string, string> = {
+  '/blog/category/study-log/': 'category_study_log',
+  '/blog/category/study-log/dev/': 'category_dev',
+  '/blog/category/study-log/english/': 'category_english',
+  '/blog/category/money-talk/': 'category_money_talk',
+  '/blog/category/money-talk/finance/': 'category_finance',
+  '/blog/category/money-talk/stock/': 'category_stock',
+  '/blog/category/money-talk/property/': 'category_property',
+  '/blog/category/money-talk/tax/': 'category_tax',
+  '/blog/category/life-thoughts/': 'category_life_thoughts',
+  '/blog/category/life-thoughts/opinions-is-my-own/': 'category_opinions_is_my_own',
+  '/blog/category/useful-tips/': 'category_useful_tips',
+  '/blog/category/useful-tips/general/': 'category_general',
+  '/blog/category/useful-tips/in-canada/': 'category_in_canada',
+};
+
 const WORDS_PER_MINUTE = 180;
 const FILE_NAME_PATTERN = /^(\d{4})-\d{2}-\d{2}-(.+)$/;
 
@@ -60,38 +76,44 @@ interface ParentCategoryPreset {
   slug: string;
   label: string;
   aliases: string[];
+  children: { slug: string; label: string }[];
 }
 
 const PARENT_CATEGORY_PRESETS: ParentCategoryPreset[] = [
   {
-    slug: 'money-talk',
-    label: '돈 이야기',
-    aliases: ['money-talk', 'finance', 'energy', 'mining', 'writed-by-ai', 'transportation'],
-  },
-  {
-    slug: 'useful-tips',
-    label: '정보 공유',
-    aliases: ['useful-tips', 'technology', 'tips'],
-  },
-  {
     slug: 'study-log',
-    label: '공부 기록',
-    aliases: ['study-log', 'study', 'dev', 'research'],
+    label: 'study log',
+    aliases: ['study-log', 'study', 'dev', 'english'],
+    children: [
+      { slug: 'dev', label: 'dev' },
+      { slug: 'english', label: 'english' },
+    ],
   },
   {
-    slug: 'reading-log',
-    label: '독서 기록',
-    aliases: ['reading-log', 'reading', 'books'],
+    slug: 'money-talk',
+    label: 'money talk',
+    aliases: ['money-talk', 'money', 'finance', 'stock', 'property', 'tax'],
+    children: [
+      { slug: 'finance', label: 'finance' },
+      { slug: 'stock', label: 'stock' },
+      { slug: 'property', label: 'property' },
+      { slug: 'tax', label: 'tax' },
+    ],
   },
   {
     slug: 'life-thoughts',
-    label: '일상·생각',
-    aliases: ['life-thoughts', 'thoughts', 'uncategory', 'life'],
+    label: 'life thoughts',
+    aliases: ['life-thoughts', 'thoughts', 'uncategory', 'life', 'opinions-is-my-own'],
+    children: [{ slug: 'opinions-is-my-own', label: 'opinions is my own' }],
   },
   {
-    slug: 'life-in-canada',
-    label: '캐나다 생활',
-    aliases: ['life-in-canada', 'canada'],
+    slug: 'useful-tips',
+    label: 'useful tips',
+    aliases: ['useful-tips', 'tips', 'general', 'in-canada', 'canada'],
+    children: [
+      { slug: 'general', label: 'general' },
+      { slug: 'in-canada', label: 'in canada' },
+    ],
   },
 ];
 
@@ -99,12 +121,49 @@ const PARENT_ALIAS_LOOKUP = new Map<string, ParentCategoryPreset>(
   PARENT_CATEGORY_PRESETS.flatMap((preset) => preset.aliases.map((alias) => [alias, preset] as const))
 );
 
+const PARENT_CATEGORY_ORDER = new Map(PARENT_CATEGORY_PRESETS.map((preset, index) => [preset.slug, index]));
+const CHILD_CATEGORY_ORDER = new Map(
+  PARENT_CATEGORY_PRESETS.flatMap((preset) => preset.children.map((child, index) => [`${preset.slug}/${child.slug}`, index] as const))
+);
+
+const CATEGORY_LABELS = new Map<string, string>([
+  ['dev', 'dev'],
+  ['english', 'english'],
+  ['finance', 'finance'],
+  ['general', 'general'],
+  ['in-canada', 'in canada'],
+  ['money', '자산'],
+  ['opinions-is-my-own', 'opinions is my own'],
+  ['portfolio', '포트폴리오'],
+  ['property', 'property'],
+  ['school', '학교'],
+  ['shool', '학교'],
+  ['stock', 'stock'],
+  ['tax', 'tax'],
+  ['technology', '기술'],
+  ['thoughts', '생각'],
+  ['uncategory', '기타'],
+]);
+
+const HIDDEN_NAV_CHILD_CATEGORY_SLUGS = new Set(['writed-by-ai']);
+const LANGUAGE_CATEGORY_SLUGS = new Set(['en', 'english', 'ko', 'korean']);
+const PARENT_ONLY_ALIAS_SLUGS = new Set(['life', 'life-thoughts', 'thoughts', 'uncategory']);
+
+export function getCategoryI18nKey(href: string): string | undefined {
+  const normalized = href.endsWith('/') ? href : `${href}/`;
+  return CATEGORY_I18N_KEYS[normalized];
+}
+
 function toTitleCaseWords(input: string): string {
   return input
     .split(/\s+/)
     .filter(Boolean)
     .map((word) => word[0].toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
+}
+
+function getCategoryLabel(name: string, slug: string): string {
+  return CATEGORY_LABELS.get(slug) ?? toTitleCaseWords(name.replace(/[-_]+/g, ' '));
 }
 
 function remapCategoryPath(names: string[], slugs: string[]): { names: string[]; slugs: string[] } {
@@ -115,24 +174,27 @@ function remapCategoryPath(names: string[], slugs: string[]): { names: string[];
 
   const preset = PARENT_ALIAS_LOOKUP.get(parentSlug);
   if (!preset) {
-    return { names, slugs };
+    return {
+      names: names.map((name, index) => getCategoryLabel(name, slugs[index])),
+      slugs,
+    };
   }
 
   if (childName && childSlug) {
     return {
-      names: [preset.label, childName],
+      names: [preset.label, getCategoryLabel(childName, childSlug)],
       slugs: [preset.slug, childSlug],
     };
   }
 
-  if (preset.slug === parentSlug) {
+  if (preset.slug === parentSlug || PARENT_ONLY_ALIAS_SLUGS.has(parentSlug)) {
     return {
       names: [preset.label],
       slugs: [preset.slug],
     };
   }
 
-  const childLabel = toTitleCaseWords(parentName.replace(/[-_]+/g, ' '));
+  const childLabel = getCategoryLabel(parentName, parentSlug);
   return {
     names: [preset.label, childLabel],
     slugs: [preset.slug, parentSlug],
@@ -241,17 +303,18 @@ function toCategoryPath(segments: string[]): BlogCategoryPath | undefined {
 export function getPostCategoryPaths(post: CollectionEntry<'blog'>): BlogCategoryPath[] {
   const explicitCategories = normalizeTaxonomy(post.data.categories).map((item) => item.trim()).filter(Boolean);
   const inferredCategoryPath = inferCategoryPathFromFilePath(post.filePath);
+  const inferredParentSlug = inferredCategoryPath.length === 1 ? slugifyTerm(inferredCategoryPath[0]) : undefined;
+  const shouldUseInferredPath = inferredCategoryPath.length > 0 && !(explicitCategories.length > 0 && inferredParentSlug && LANGUAGE_CATEGORY_SLUGS.has(inferredParentSlug));
 
   const explicitEntries = explicitCategories.map(parseCategoryTerm).filter((segments) => segments.length > 0);
   const entries: string[][] = [...explicitEntries];
 
-  if (inferredCategoryPath.length > 0) {
+  if (shouldUseInferredPath) {
     entries.push(inferredCategoryPath);
   }
 
-  if (inferredCategoryPath.length === 1) {
+  if (shouldUseInferredPath && inferredCategoryPath.length === 1) {
     const inferredParent = inferredCategoryPath[0];
-    const inferredParentSlug = slugifyTerm(inferredParent);
 
     for (const explicitEntry of explicitEntries) {
       if (explicitEntry.length !== 1) {
@@ -273,6 +336,10 @@ export function getPostCategoryPaths(post: CollectionEntry<'blog'>): BlogCategor
   for (const entry of entries) {
     const categoryPath = toCategoryPath(entry);
     if (!categoryPath) {
+      continue;
+    }
+
+    if (categoryPath.childSlug && HIDDEN_NAV_CHILD_CATEGORY_SLUGS.has(categoryPath.childSlug)) {
       continue;
     }
 
@@ -323,6 +390,14 @@ function getFileStem(filePath?: string): string | undefined {
 }
 
 export function getPostRoute(post: CollectionEntry<'blog'>): PostRoute {
+  const explicitSlug = post.data.slug?.trim();
+  if (explicitSlug) {
+    return {
+      year: String(safeDate(post.data.date).getUTCFullYear()),
+      slug: fallbackSlug(explicitSlug),
+    };
+  }
+
   const stem = getFileStem(post.filePath);
 
   if (stem) {
@@ -372,6 +447,25 @@ export function normalizeTaxonomy(items?: string | string[]): string[] {
 export function listBlogCategoryTree(posts: CollectionEntry<'blog'>[]): BlogCategoryTreeParent[] {
   const categoryMap = new Map<string, { name: string; slug: string; count: number; children: Map<string, BlogCategoryTreeChild> }>();
 
+  for (const preset of PARENT_CATEGORY_PRESETS) {
+    categoryMap.set(preset.slug, {
+      name: preset.label,
+      slug: preset.slug,
+      count: 0,
+      children: new Map(
+        preset.children.map((child) => [
+          child.slug,
+          {
+            name: child.label,
+            slug: child.slug,
+            count: 0,
+            href: `/blog/category/${preset.slug}/${child.slug}/`,
+          },
+        ])
+      ),
+    });
+  }
+
   for (const post of posts) {
     const categoryPaths = getPostCategoryPaths(post);
     const parentSeen = new Set<string>();
@@ -399,7 +493,7 @@ export function listBlogCategoryTree(posts: CollectionEntry<'blog'>[]): BlogCate
         parentSeen.add(parentSlug);
       }
 
-      if (!categoryPath.childSlug || !categoryPath.childName) {
+      if (!categoryPath.childSlug || !categoryPath.childName || HIDDEN_NAV_CHILD_CATEGORY_SLUGS.has(categoryPath.childSlug)) {
         continue;
       }
 
@@ -430,9 +524,17 @@ export function listBlogCategoryTree(posts: CollectionEntry<'blog'>[]): BlogCate
       slug: parent.slug,
       count: parent.count,
       href: `/blog/category/${parent.slug}/`,
-      children: [...parent.children.values()].sort((a, b) => a.name.localeCompare(b.name)),
+      children: [...parent.children.values()].sort((a, b) => {
+        const aOrder = CHILD_CATEGORY_ORDER.get(`${parent.slug}/${a.slug}`) ?? Number.MAX_SAFE_INTEGER;
+        const bOrder = CHILD_CATEGORY_ORDER.get(`${parent.slug}/${b.slug}`) ?? Number.MAX_SAFE_INTEGER;
+        return aOrder === bOrder ? a.name.localeCompare(b.name) : aOrder - bOrder;
+      }),
     }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort((a, b) => {
+      const aOrder = PARENT_CATEGORY_ORDER.get(a.slug) ?? Number.MAX_SAFE_INTEGER;
+      const bOrder = PARENT_CATEGORY_ORDER.get(b.slug) ?? Number.MAX_SAFE_INTEGER;
+      return aOrder === bOrder ? a.name.localeCompare(b.name) : aOrder - bOrder;
+    });
 }
 
 export function listBlogCategories(posts: CollectionEntry<'blog'>[]): BlogCategory[] {

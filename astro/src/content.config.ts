@@ -16,6 +16,7 @@ const blog = defineCollection({
       tags: taxonomyField,
       categories: taxonomyField,
       redirect: z.string().optional(),
+      slug: z.string().optional(),
       canonical: z.string().optional(),
       canonical_url: z.string().optional(),
       external_source: z.string().optional(),

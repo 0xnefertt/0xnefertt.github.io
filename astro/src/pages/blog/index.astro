@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
-import { formatPostDate, getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from '../../lib/blog';
+import { getCategoryI18nKey, formatPostDate, getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from '../../lib/blog';
 import { siteConfig } from '../../lib/site';
 
 const POSTS_PER_PAGE = 8;
@@ -32,10 +32,10 @@ function getPageHref(page: number): string {
           {
             categoryTree.map((parent) => (
               <li class="blog-category-parent-item">
-                <a href={parent.href}>{parent.name}</a>
+                <a href={parent.href} data-i18n-key={getCategoryI18nKey(parent.href)}>{parent.name}</a>
                 {parent.children.length > 0 && (
                   <ul class="blog-category-child-list">
-                    {parent.children.map((child) => <li><a href={child.href}>{child.name}</a></li>)}
+                    {parent.children.map((child) => <li><a href={child.href} data-i18n-key={getCategoryI18nKey(child.href)}>{child.name}</a></li>)}
                   </ul>
                 )}
               </li>

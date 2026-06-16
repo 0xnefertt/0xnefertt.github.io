@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Layout from '../../../../layouts/Layout.astro';
-import { formatPostDate, getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from '../../../../lib/blog';
+import { getCategoryI18nKey, formatPostDate, getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from '../../../../lib/blog';
 import { siteConfig } from '../../../../lib/site';
 
 const POSTS_PER_PAGE = 8;
@@ -78,7 +78,7 @@ function getPageHref(page: number): string {
         {
           categoryTree.map((parent) => (
             <li class="blog-category-parent-item">
-              <a href={parent.href} class={parent.slug === parentCategory.slug ? 'active' : undefined}>
+              <a href={parent.href} class={parent.slug === parentCategory.slug ? 'active' : undefined} data-i18n-key={getCategoryI18nKey(parent.href)}>
                 {parent.name}
               </a>
               {parent.children.length > 0 && (
@@ -86,7 +86,7 @@ function getPageHref(page: number): string {
                   {
                     parent.children.map((child) => (
                       <li>
-                        <a href={child.href} class={parent.slug === parentCategory.slug && child.slug === childCategory.slug ? 'active' : undefined}>
+                        <a href={child.href} class={parent.slug === parentCategory.slug && child.slug === childCategory.slug ? 'active' : undefined} data-i18n-key={getCategoryI18nKey(child.href)}>
                           {child.name}
                         </a>
                       </li>

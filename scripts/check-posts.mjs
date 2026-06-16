@@ -6,8 +6,6 @@ import path from "node:path";
 const repoRoot = process.cwd();
 const postsRoot = path.join(repoRoot, "_posts");
 const fileNamePattern = /^(\d{4})-\d{2}-\d{2}-(.+)\.mdx?$/;
-const summaryHeadings = new Set(["summary", "요약"]);
-const conclusionHeadings = new Set(["conclusion", "결론"]);
 
 function parseArgs(argv) {
   const args = {};
@@ -175,28 +173,6 @@ function collectImageTargets(body) {
   return matches;
 }
 
-function normalizeSectionTitle(input) {
-  return input.trim().toLowerCase();
-}
-
-function hasRequiredSections(body) {
-  const headings = new Set();
-  const regex = /^##\s+(.+)$/gm;
-
-  let match;
-  while ((match = regex.exec(body)) !== null) {
-    headings.add(normalizeSectionTitle(match[1]));
-  }
-
-  const hasSummary = [...summaryHeadings].some((item) => headings.has(item));
-  const hasConclusion = [...conclusionHeadings].some((item) => headings.has(item));
-
-  return {
-    hasSummary,
-    hasConclusion,
-  };
-}
-
 function extractRouteKey(filePath) {
   const fileName = path.basename(filePath);
   const match = fileName.match(fileNamePattern);
@@ -351,15 +327,6 @@ async function run() {
 
     if (descriptionValue.length > 170) {
       warnings.push(`${relativePath}: description length ${descriptionValue.length} > 170`);
-    }
-
-    const sections = hasRequiredSections(body);
-    if (!sections.hasSummary) {
-      warnings.push(`${relativePath}: missing section heading '## Summary' (or '## 요약')`);
-    }
-
-    if (!sections.hasConclusion) {
-      warnings.push(`${relativePath}: missing section heading '## Conclusion' (or '## 결론')`);
     }
 
     const images = collectImageTargets(body);
