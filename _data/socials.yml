@@ -12,10 +12,10 @@
 # cv_pdf: /assets/pdf/example_pdf.pdf # path to your CV PDF file
 # dblp_url: # your DBLP profile url
 # discord_id: # your discord id (18-digit unique numerical identifier)
-email: adrwss2@gmail.com # your email address
+email: adrwss2@gmail.com
 # facebook_id: # your facebook id
 # flickr_id: # your flickr id
-github_username: 0xnefertt # your GitHub user name
+github_username: 0xnefertt
 # gitlab_username: # your GitLab user name
 # hal_id: # your HAL id (https://hal.science/)
 # ieee_id: # your ieeexplore.ieee.org/author/id
@@ -49,7 +49,7 @@ rss_icon: true # comment this line to hide the RSS icon
 # wikidata_id: # your wikidata id
 # wikipedia_id: # your wikipedia id (Case sensitive)
 # work_url: # work page URL
-x_username: 0xnefertt # your X handle
+x_username: 0xnefertt
 # youtube_id: # your youtube channel id (youtube.com/@<youtube_id>)
 # zotero_username: # your zotero username
 # custom_social: # can be any name here other than the ones already defined above

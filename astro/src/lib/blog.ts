@@ -61,7 +61,6 @@ const CATEGORY_I18N_KEYS: Record<string, string> = {
   '/blog/category/money-talk/finance/': 'category_finance',
   '/blog/category/money-talk/stock/': 'category_stock',
   '/blog/category/money-talk/property/': 'category_property',
-  '/blog/category/money-talk/tax/': 'category_tax',
   '/blog/category/life-thoughts/': 'category_life_thoughts',
   '/blog/category/life-thoughts/opinions-is-my-own/': 'category_opinions_is_my_own',
   '/blog/category/useful-tips/': 'category_useful_tips',
@@ -92,12 +91,11 @@ const PARENT_CATEGORY_PRESETS: ParentCategoryPreset[] = [
   {
     slug: 'money-talk',
     label: 'money talk',
-    aliases: ['money-talk', 'money', 'finance', 'stock', 'property', 'tax'],
+    aliases: ['money-talk', 'money', 'finance', 'stock', 'property'],
     children: [
       { slug: 'finance', label: 'finance' },
       { slug: 'stock', label: 'stock' },
       { slug: 'property', label: 'property' },
-      { slug: 'tax', label: 'tax' },
     ],
   },
   {
@@ -139,7 +137,6 @@ const CATEGORY_LABELS = new Map<string, string>([
   ['school', '학교'],
   ['shool', '학교'],
   ['stock', 'stock'],
-  ['tax', 'tax'],
   ['technology', '기술'],
   ['thoughts', '생각'],
   ['uncategory', '기타'],
@@ -566,6 +563,15 @@ export function getBlogHref(post: CollectionEntry<'blog'>): { href: string; exte
   }
 
   const { year, slug } = getPostRoute(post);
+  const primaryCategoryPath = getPostCategoryPaths(post).find((categoryPath) => categoryPath.childSlug);
+
+  if (primaryCategoryPath?.childSlug) {
+    return {
+      href: `/blog/category/${primaryCategoryPath.parentSlug}/${primaryCategoryPath.childSlug}/${slug}/`,
+      external: false,
+    };
+  }
+
   return {
     href: `/blog/${year}/${slug}/`,
     external: false,

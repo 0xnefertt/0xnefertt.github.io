@@ -2,6 +2,7 @@
 layout: post
 title: "Tax saving strategies in Canada"
 date: 2026-05-31
+slug: tax-saving-strategies-in-canada
 description: "캐나다 절세 계좌와 신고 방식 차이를 정리한 초안"
 tags:
   - money
@@ -10,8 +11,8 @@ tags:
   - FHSA
   - RRSP
 categories:
-  - tax
-draft: true
+  - in-canada
+draft: false
 ---
 
 캐나다에서 절세하는 방법에 대해서 알아보자.

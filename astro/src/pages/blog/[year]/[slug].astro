@@ -1,35 +1,26 @@
 ---
-import { getCollection, render, type CollectionEntry } from 'astro:content';
-import Layout from '../../../layouts/Layout.astro';
-import {
-  formatPostDate,
-  getPublishedBlogPosts,
-  getPostCategories,
-  getPostCategoryPaths,
-  getPostRoute,
-  normalizeTaxonomy,
-  slugifyTerm,
-  sortPostsDesc,
-  toBlogSummary,
-} from '../../../lib/blog';
-import { siteConfig } from '../../../lib/site';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import PostDetail from '../../../components/PostDetail.astro';
+import { getPostCategoryPaths, getPostRoute, getPublishedBlogPosts } from '../../../lib/blog';
 
 export async function getStaticPaths() {
   const posts = getPublishedBlogPosts(await getCollection('blog'));
 
-  return posts.map((post) => {
-    const route = getPostRoute(post);
+  return posts
+    .filter((post) => !getPostCategoryPaths(post).some((categoryPath) => categoryPath.childSlug))
+    .map((post) => {
+      const route = getPostRoute(post);
 
-    return {
-      params: {
-        year: route.year,
-        slug: route.slug,
-      },
-      props: {
-        post,
-      },
-    };
-  });
+      return {
+        params: {
+          year: route.year,
+          slug: route.slug,
+        },
+        props: {
+          post,
+        },
+      };
+    });
 }
 
 interface Props {
@@ -37,203 +28,6 @@ interface Props {
 }
 
 const { post } = Astro.props;
-const { Content } = await render(post);
-const tags = normalizeTaxonomy(post.data.tags);
-const categories = getPostCategories(post);
-const categoryPaths = getPostCategoryPaths(post);
-const redirectTarget = post.data.redirect;
-const allPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')));
-
-const currentTagSlugs = new Set(tags.map((tag) => slugifyTerm(tag)));
-const currentCategorySlugs = new Set(categories.map((category) => slugifyTerm(category)));
-
-const scoredCandidates = allPosts
-  .filter((candidate) => candidate.id !== post.id)
-  .map((candidate) => {
-    const summary = toBlogSummary(candidate);
-    const sharedCategoryCount = summary.categories.filter((category) => currentCategorySlugs.has(slugifyTerm(category))).length;
-    const sharedTagCount = summary.tags.filter((tag) => currentTagSlugs.has(slugifyTerm(tag))).length;
-    const score = sharedCategoryCount * 4 + sharedTagCount * 2;
-    const publishedAt = summary.date?.getTime() ?? 0;
-
-    return {
-      summary,
-      score,
-      publishedAt,
-    };
-  })
-  .filter((candidate) => candidate.score > 0)
-  .sort((a, b) => b.score - a.score || b.publishedAt - a.publishedAt)
-  .slice(0, 4)
-  .map((candidate) => candidate.summary);
-
-const fallbackCandidates = allPosts.filter((candidate) => candidate.id !== post.id).map(toBlogSummary).slice(0, 4);
-const recommendedPosts = scoredCandidates.length > 0 ? scoredCandidates : fallbackCandidates;
-
-const currentIndex = allPosts.findIndex((candidate) => candidate.id === post.id);
-const previousPost = currentIndex >= 0 && currentIndex < allPosts.length - 1 ? toBlogSummary(allPosts[currentIndex + 1]) : undefined;
-const nextPost = currentIndex > 0 ? toBlogSummary(allPosts[currentIndex - 1]) : undefined;
-const postRoute = getPostRoute(post);
-const canonicalPostUrl = new URL(`/blog/${postRoute.year}/${postRoute.slug}/`, siteConfig.siteUrl).toString();
-
-function toAbsoluteUrl(input: string): string {
-  if (/^https?:\/\//.test(input)) {
-    return input;
-  }
-
-  const normalized = input.startsWith('/') ? input : `/${input}`;
-  return new URL(normalized, siteConfig.siteUrl).toString();
-}
-
-const articleImageUrl = toAbsoluteUrl(post.data.thumbnail ?? siteConfig.defaultOgImage);
-const publishedIso = post.data.date?.toISOString();
-const modifiedIso = (post.data.last_updated ?? post.data.date)?.toISOString();
-const keywordValues = [...tags, ...categories];
-const articleJsonLd = JSON.stringify({
-  '@context': 'https://schema.org',
-  '@type': 'Article',
-  headline: post.data.title,
-  description: post.data.description ?? post.data.title,
-  author: {
-    '@type': 'Person',
-    name: post.data.author ?? '0xnefertt',
-  },
-  publisher: {
-    '@type': 'Person',
-    name: '0xnefertt',
-  },
-  mainEntityOfPage: canonicalPostUrl,
-  image: [articleImageUrl],
-  datePublished: publishedIso,
-  dateModified: modifiedIso,
-  keywords: keywordValues.join(', '),
-}).replace(/</g, '\\u003c');
-
-const giscusConfig = siteConfig.giscus;
-const hasGiscus =
-  giscusConfig.repo.length > 0 &&
-  giscusConfig.repoId.length > 0 &&
-  giscusConfig.category.length > 0 &&
-  giscusConfig.categoryId.length > 0;
-const showComments = hasGiscus && (post.data.giscus_comments ?? true) && !redirectTarget;
 ---
 
-<Layout
-  title={post.data.title}
-  description={post.data.description ?? post.data.title}
-  currentPath="/blog/"
-  canonicalHref={post.data.canonical ?? post.data.canonical_url}
-  ogType="article"
-  ogImage={post.data.thumbnail ?? siteConfig.defaultOgImage}
-  articlePublishedTime={post.data.date}
-  articleModifiedTime={post.data.last_updated ?? post.data.date}
->
-  {redirectTarget && <meta slot="head" http-equiv="refresh" content={`0; url=${redirectTarget}`} />}
-  <script slot="head" type="application/ld+json" set:html={articleJsonLd}></script>
-
-  <article class="post-header">
-    <h1>{post.data.title}</h1>
-    <p>
-      {formatPostDate(post.data.date)}
-      {post.data.author ? ` · ${post.data.author}` : ''}
-      {post.data.external_source ? ` · ${post.data.external_source}` : ''}
-    </p>
-
-    {(tags.length > 0 || categoryPaths.length > 0) && (
-      <div class="tags">
-        {tags.map((tag) => <span>#{tag}</span>)}
-        {categoryPaths.map((categoryPath) => <a href={categoryPath.href}>{categoryPath.label}</a>)}
-      </div>
-    )}
-  </article>
-
-  <div class="post-detail-layout">
-    <div class="post-main">
-      {redirectTarget && (
-        <p class="notice">
-          This post redirects to <a href={redirectTarget}>{redirectTarget}</a>.
-        </p>
-      )}
-
-      <div class="post-body markdown-body">
-        <Content />
-      </div>
-
-      {(previousPost || nextPost) && (
-        <nav class="post-pager" aria-label="Post navigation">
-          {previousPost ? (
-            <a
-              class="post-pager-link post-pager-link--prev"
-              href={previousPost.href}
-              target={previousPost.external ? '_blank' : undefined}
-              rel={previousPost.external ? 'noreferrer' : undefined}
-            >
-              <span class="post-pager-label" data-i18n-key="post_previous">
-                &lt; Previous
-              </span>
-              <span class="post-pager-title">{previousPost.title}</span>
-            </a>
-          ) : (
-            <span aria-hidden="true"></span>
-          )}
-
-          {nextPost ? (
-            <a
-              class="post-pager-link post-pager-link--next"
-              href={nextPost.href}
-              target={nextPost.external ? '_blank' : undefined}
-              rel={nextPost.external ? 'noreferrer' : undefined}
-            >
-              <span class="post-pager-label" data-i18n-key="post_next">
-                Next &gt;
-              </span>
-              <span class="post-pager-title">{nextPost.title}</span>
-            </a>
-          ) : (
-            <span aria-hidden="true"></span>
-          )}
-        </nav>
-      )}
-    </div>
-
-    {recommendedPosts.length > 0 && (
-      <aside class="post-related card" aria-label="Recommended posts">
-        <h2 data-i18n-key="post_more_to_read">More to read</h2>
-        <ul class="post-related-list">
-          {recommendedPosts.map((item) => (
-            <li class="post-related-item">
-              <a href={item.href} target={item.external ? '_blank' : undefined} rel={item.external ? 'noreferrer' : undefined}>
-                {item.title}
-              </a>
-              <p class="post-related-meta">
-                {formatPostDate(item.date)} · {item.readMinutes} min read
-              </p>
-            </li>
-          ))}
-        </ul>
-      </aside>
-    )}
-  </div>
-
-  {showComments && (
-    <section class="card post-comments">
-      <h2 class="section-title">comments</h2>
-      <script
-        src="https://giscus.app/client.js"
-        data-repo={giscusConfig.repo}
-        data-repo-id={giscusConfig.repoId}
-        data-category={giscusConfig.category}
-        data-category-id={giscusConfig.categoryId}
-        data-mapping={giscusConfig.mapping}
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="bottom"
-        data-theme="preferred_color_scheme"
-        data-lang="en"
-        crossorigin="anonymous"
-        async
-      ></script>
-    </section>
-  )}
-</Layout>
+<PostDetail post={post} />
