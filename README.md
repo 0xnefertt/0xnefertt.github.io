@@ -131,13 +131,26 @@ Blog post pages also emit `Article` JSON-LD.
 
 Optional environment variables:
 
-- `PUBLIC_GA_MEASUREMENT_ID` (enables `search_used`, `post_opened`, `outbound_click`, `adsense_click_placeholder`)
+- `PUBLIC_GA_MEASUREMENT_ID` (enables `search_used`, `post_opened`, `outbound_click`, `adsense_script_present_engagement`)
+- `PUBLIC_ADSENSE_PUBLISHER_ID` (enables the global AdSense Auto ads script, for example `ca-pub-XXXXXXXXXXXXXXXX`)
 - `PUBLIC_GISCUS_REPO`
 - `PUBLIC_GISCUS_REPO_ID`
 - `PUBLIC_GISCUS_CATEGORY`
 - `PUBLIC_GISCUS_CATEGORY_ID`
 
 You can start from `.env.example` at repository root.
+
+## AdSense Auto ads checklist
+
+This site only loads the global AdSense Auto ads script. It does not define manual `<ins class="adsbygoogle">` ad slots.
+
+Before expecting ads to appear:
+
+1. Set `PUBLIC_ADSENSE_PUBLISHER_ID` locally and as a GitHub Actions repository variable.
+2. Confirm `/ads.txt` returns the expected publisher record after deploy.
+3. Confirm AdSense shows the site as approved and Auto ads are enabled for `0xnefertt.github.io`.
+4. Test without an ad blocker or browser tracking protection.
+5. Allow time for AdSense to start serving ads after approval or setting changes.
 
 ## CV content guide
 

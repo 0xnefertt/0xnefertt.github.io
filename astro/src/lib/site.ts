@@ -2,6 +2,7 @@ import { getCollection } from 'astro:content';
 import { getPublishedBlogPosts, listBlogCategoryTree } from './blog';
 
 const gaMeasurementId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID?.trim() || 'G-XKLJ41F6PS';
+const adsensePublisherId = import.meta.env.PUBLIC_ADSENSE_PUBLISHER_ID?.trim() || '';
 
 export const siteConfig = {
   title: "0xnefertt's thoughts",
@@ -13,7 +14,7 @@ export const siteConfig = {
   blogDescription: 'Academic insights and research notes on technology, computer science, and innovation',
   defaultOgImage: '/assets/img/prof_pic_color.png',
   xHandle: '@0xnefertt',
-  adsensePublisherId: 'ca-pub-8138616027618632',
+  adsensePublisherId,
   gaMeasurementId,
   giscus: {
     repo: (import.meta.env.PUBLIC_GISCUS_REPO ?? '').trim(),
