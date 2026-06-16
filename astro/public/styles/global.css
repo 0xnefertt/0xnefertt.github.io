@@ -1125,6 +1125,16 @@ main {
   font-size: 0.8rem;
 }
 
+.post-ad-card {
+  margin-top: 1rem;
+  min-height: 220px;
+  overflow: hidden;
+}
+
+.post-ad-card .adsbygoogle {
+  min-height: 220px;
+}
+
 .post-pager {
   margin-top: 1rem;
   display: grid;

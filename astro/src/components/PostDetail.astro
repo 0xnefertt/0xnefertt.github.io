@@ -98,6 +98,8 @@ const hasGiscus =
   giscusConfig.category.length > 0 &&
   giscusConfig.categoryId.length > 0;
 const showComments = hasGiscus && (post.data.giscus_comments ?? true) && !redirectTarget;
+const multiplexAdSlot = '8089812386';
+const showMultiplexAd = siteConfig.adsensePublisherId.length > 0 && !redirectTarget;
 ---
 
 <Layout
@@ -196,6 +198,41 @@ const showComments = hasGiscus && (post.data.giscus_comments ?? true) && !redire
       </aside>
     )}
   </div>
+
+  {showMultiplexAd && (
+    <section class="post-ad-card post-ad-card--multiplex" aria-label="Advertisement">
+      <ins
+        class="adsbygoogle"
+        style="display:block"
+        data-ad-format="autorelaxed"
+        data-ad-client={siteConfig.adsensePublisherId}
+        data-ad-slot={multiplexAdSlot}
+        data-adsense-slot
+      ></ins>
+    </section>
+  )}
+
+  {
+    showMultiplexAd && (
+      <script is:inline>
+        (() => {
+          const slots = document.querySelectorAll('[data-adsense-slot]:not([data-adsense-initialized])');
+          slots.forEach((slot) => {
+            if (!(slot instanceof HTMLElement)) {
+              return;
+            }
+
+            slot.dataset.adsenseInitialized = 'true';
+            try {
+              (window.adsbygoogle = window.adsbygoogle || []).push({});
+            } catch {
+              slot.dataset.adsenseInitialized = 'false';
+            }
+          });
+        })();
+      </script>
+    )
+  }
 
   {showComments && (
     <section class="card post-comments">
