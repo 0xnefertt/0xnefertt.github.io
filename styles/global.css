@@ -522,8 +522,22 @@ main {
   gap: 0.9rem;
 }
 
+.home-right-rail {
+  display: grid;
+  gap: 0.9rem;
+}
+
 .useful-info-card {
   padding: 0.85rem 0.95rem;
+}
+
+.home-ad-card {
+  min-height: 320px;
+  overflow: hidden;
+}
+
+.home-ad-card .adsbygoogle {
+  min-height: 320px;
 }
 
 .useful-info-title {
@@ -614,12 +628,16 @@ main {
     scrollbar-gutter: stable;
   }
 
-  .home-intro--with-useful-info .useful-info-rail {
+  .home-intro--with-useful-info .home-right-rail {
     --useful-rail-width: min(220px, calc((100vw - var(--max-width)) / 2 - 1.2rem));
     position: fixed;
     top: 5.2rem;
     right: calc((100vw - var(--max-width)) / 2 - var(--useful-rail-width) - 1rem);
     width: var(--useful-rail-width);
+    max-height: calc(100vh - 6.4rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
   }
 }
 
@@ -685,6 +703,10 @@ main {
     margin-top: -2.2rem;
   }
 
+  .home-right-rail {
+    display: contents;
+  }
+
   .useful-info-card {
     margin-bottom: 0;
   }
@@ -740,6 +762,10 @@ main {
   .useful-info-rate-item {
     font-size: 0.78rem;
     line-height: 1.35;
+  }
+
+  .home-ad-card {
+    display: none;
   }
 }
 
