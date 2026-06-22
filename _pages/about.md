@@ -82,6 +82,12 @@ favorites:
         href: https://tradingeconomics.com/
       - title: Marketcap
         href: https://companiesmarketcap.com/
+      - title: BIS
+        href: https://www.bis.org/
+      - title: IMF
+        href: https://www.imf.org/en/home
+      - title: FSB
+        href: https://www.fsb.org/
   - name: Security
     items:
       - title: Trail of Bits
