@@ -1070,7 +1070,6 @@ main {
 }
 
 .post-body {
-  margin-top: 1.6rem;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -1355,6 +1354,13 @@ main {
   margin-left: 0;
   padding-left: 1rem;
   color: var(--text-muted);
+}
+
+.markdown-body hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 1.5rem 0;
+  opacity: 0.35;
 }
 
 @media (max-width: 840px) {

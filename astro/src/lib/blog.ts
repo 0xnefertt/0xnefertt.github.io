@@ -100,9 +100,12 @@ const PARENT_CATEGORY_PRESETS: ParentCategoryPreset[] = [
   },
   {
     slug: 'life-thoughts',
-    label: 'life thoughts',
-    aliases: ['life-thoughts', 'thoughts', 'uncategory', 'life', 'opinions-is-my-own'],
-    children: [{ slug: 'opinions-is-my-own', label: 'opinions is my own' }],
+    label: 'life · thoughts',
+    aliases: ['life-thoughts', 'thoughts', 'uncategory', 'life', 'opinions-is-my-own', 'retrospect'],
+    children: [
+      { slug: 'opinions-is-my-own', label: 'opinions is my own' },
+      { slug: 'retrospect', label: 'retrospect' },
+    ],
   },
   {
     slug: 'useful-tips',
