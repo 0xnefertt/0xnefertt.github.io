@@ -1356,6 +1356,33 @@ main {
   color: var(--text-muted);
 }
 
+.markdown-body table {
+  width: 100%;
+  margin: 1rem 0;
+  border-collapse: collapse;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 0.95rem;
+}
+
+.markdown-body th,
+.markdown-body td {
+  border: 1px solid var(--line);
+  padding: 0.55rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.markdown-body th {
+  background: var(--surface-muted);
+  color: var(--text);
+  font-weight: 700;
+}
+
+.markdown-body tr:nth-child(even) td {
+  background: color-mix(in srgb, var(--surface-muted), transparent 58%);
+}
+
 .markdown-body hr {
   border: 0;
   border-top: 1px solid var(--line);

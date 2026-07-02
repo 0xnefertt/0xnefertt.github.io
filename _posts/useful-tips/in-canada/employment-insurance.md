@@ -71,14 +71,14 @@ BC주에서는 vacation pay가 기본적으로 중요하다.
 
 정리
 
-| dd                                     | dd                                |
+| 문제                                   | 1차 문의처                        | 추가 문의처            |
 | -------------------------------------- | --------------------------------- | ---------------------- |
-| 임금 체불, vacation pay, overtime 문제 | BC Employment Standards Branch    |
-| EI 신청/거절/ROE 문제                  | Service Canada                    |
-| 일하다 다침                            | WorkSafeBC                        |
-| 차별/인권침해                          | BC Human Rights Tribunal / Clinic |
+| 임금 체불, vacation pay, overtime 문제 | BC Employment Standards Branch    |                        |
+| EI 신청/거절/ROE 문제                  | Service Canada                    |                        |
+| 일하다 다침                            | WorkSafeBC                        |                        |
+| 차별/인권침해                          | BC Human Rights Tribunal / Clinic |                        |
 | 노조 있는 직장 문제                    | Union rep                         | Labour Relations Board |
-| 해고 보상, 계약서, severance           | Employment lawyer                 |
-| 세금 관련                              | CRA                               |
+| 해고 보상, 계약서, severance           | Employment lawyer                 |                        |
+| 세금 관련                              | CRA                               |                        |
 
 아무쪼록 문제가 생기면 제출할 증거 문서가 중요하다.
