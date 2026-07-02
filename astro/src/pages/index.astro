@@ -271,7 +271,7 @@ const introClassName = [
     <section class={heroClassName}>
       <article class="card markdown-body">
         <h1>{aboutPage.data.title ?? 'about'}</h1>
-        {subtitle && <p set:html={subtitle} />}
+        {subtitle && <p class="home-subtitle" set:html={subtitle} />}
         <Content />
       </article>
 
@@ -549,7 +549,7 @@ const introClassName = [
     )
   }
 
-  <section>
+  <section class="home-latest-section">
     <h2 class="section-title">Latest Posts</h2>
     <ul class="post-list">
       {

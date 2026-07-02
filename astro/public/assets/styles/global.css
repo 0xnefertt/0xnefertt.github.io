@@ -596,6 +596,11 @@ main {
 }
 
 @media (min-width: 1360px) {
+  .home-intro {
+    --home-rail-top: calc(68px + 2.2rem);
+    --home-rail-bottom-gap: 1.2rem;
+  }
+
   .favorite-summary {
     cursor: default;
     pointer-events: none;
@@ -612,10 +617,10 @@ main {
   .home-intro--with-favorites .favorite-rail {
     --favorite-rail-width: min(220px, calc((100vw - var(--max-width)) / 2 - 1.2rem));
     position: fixed;
-    top: 5.2rem;
+    top: var(--home-rail-top);
     left: calc((100vw - var(--max-width)) / 2 - var(--favorite-rail-width) - 1rem);
     width: var(--favorite-rail-width);
-    max-height: calc(100vh - 6.4rem);
+    max-height: calc(100vh - var(--home-rail-top) - var(--home-rail-bottom-gap));
     margin-bottom: 0;
     display: flex;
     flex-direction: column;
@@ -631,10 +636,10 @@ main {
   .home-intro--with-useful-info .home-right-rail {
     --useful-rail-width: min(220px, calc((100vw - var(--max-width)) / 2 - 1.2rem));
     position: fixed;
-    top: 5.2rem;
+    top: var(--home-rail-top);
     right: calc((100vw - var(--max-width)) / 2 - var(--useful-rail-width) - 1rem);
     width: var(--useful-rail-width);
-    max-height: calc(100vh - 6.4rem);
+    max-height: calc(100vh - var(--home-rail-top) - var(--home-rail-bottom-gap));
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-gutter: stable;
@@ -642,6 +647,20 @@ main {
 }
 
 @media (max-width: 1359px) {
+  .site-footer {
+    padding-bottom: 5.5rem;
+  }
+
+  .footer-inner {
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .social-links {
+    margin-left: auto;
+    justify-content: flex-end;
+  }
+
   .favorite-rail {
     position: fixed;
     left: 1rem;
@@ -708,7 +727,7 @@ main {
   }
 
   .useful-info-card {
-    margin-bottom: 0;
+    margin-bottom: 1rem;
   }
 
   .useful-info-card {
@@ -803,6 +822,15 @@ main {
   margin-top: 0.75rem;
   color: var(--text-muted);
   font-size: 0.94rem;
+  line-height: 1.45;
+}
+
+.profile-meta p {
+  margin: 0.28rem 0 0;
+}
+
+.profile-meta p:first-child {
+  margin-top: 0;
 }
 
 .section-title {
@@ -812,6 +840,10 @@ main {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-muted);
+}
+
+.home-latest-section .section-title {
+  margin-top: 1rem;
 }
 
 .post-list,
@@ -1341,6 +1373,14 @@ main {
   margin-bottom: 0.5em;
 }
 
+.hero > .markdown-body > :first-child {
+  margin-top: 0;
+}
+
+.home-subtitle {
+  font-style: italic;
+}
+
 .markdown-body p,
 .markdown-body ul,
 .markdown-body ol,
@@ -1455,12 +1495,12 @@ main {
   }
 
   .footer-inner {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
   }
 
   .social-links {
-    justify-content: flex-start;
+    justify-content: flex-end;
   }
 
   .language-switch {
