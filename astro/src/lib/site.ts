@@ -12,7 +12,7 @@ export const siteConfig = {
   siteUrl: 'https://0xnefertt.github.io',
   blogName: "0xnefertt's Blog",
   blogDescription: 'Academic insights and research notes on technology, computer science, and innovation',
-  defaultOgImage: '/assets/img/prof_pic_color.png',
+  defaultOgImage: '/assets/img/prof_pic.jpg',
   xHandle: '@0xnefertt',
   adsensePublisherId,
   gaMeasurementId,
