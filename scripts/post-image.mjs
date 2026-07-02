@@ -101,7 +101,7 @@ async function run() {
   const targetFileName = targetBaseName.endsWith(ext.toLowerCase()) ? targetBaseName : `${targetBaseName}${ext.toLowerCase()}`;
 
   const relativeAssetDir = path.join("assets", "img", "posts", slug);
-  const targetDir = path.join(repoRoot, relativeAssetDir);
+  const targetDir = path.join(repoRoot, "astro", "public", relativeAssetDir);
   const targetPath = path.join(targetDir, targetFileName);
 
   await fs.mkdir(targetDir, { recursive: true });

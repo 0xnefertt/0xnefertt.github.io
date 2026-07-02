@@ -146,6 +146,10 @@ function resolveImagePath(rawTarget, sourceFile) {
   }
 
   if (target.startsWith("/")) {
+    if (target.startsWith("/assets/")) {
+      return path.join(repoRoot, "astro", "public", target.replace(/^\/+/, ""));
+    }
+
     return path.join(repoRoot, target.replace(/^\/+/, ""));
   }
 

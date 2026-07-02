@@ -4,7 +4,7 @@ import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const repoRoot = process.cwd();
-const assetsPdfDir = path.join(repoRoot, "assets", "pdf");
+const assetsPdfDir = path.join(repoRoot, "astro", "public", "assets", "pdf");
 const cvMetaPath = path.join(repoRoot, "_data", "cv-meta.yml");
 
 function parseArgs(argv) {

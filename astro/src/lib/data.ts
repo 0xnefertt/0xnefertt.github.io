@@ -3,7 +3,7 @@ import path from 'node:path';
 
 const repoRoot = path.resolve(process.cwd(), '..');
 const dataRoot = path.join(repoRoot, '_data');
-const assetsRoot = path.join(repoRoot, 'assets');
+const assetsRoot = path.join(repoRoot, 'astro', 'public', 'assets');
 
 function extractFirstValue(content: string, key: string): string | undefined {
   const pattern = new RegExp(`^${key}:\\s*(.+)$`, 'm');
@@ -132,7 +132,7 @@ export async function getCvMeta(): Promise<CvMeta> {
   }
 
   const resumePdfHref = normalizePublicPath(rawPdfHref);
-  const fileSystemPath = path.join(repoRoot, resumePdfHref.replace(/^\/+/, ''));
+  const fileSystemPath = path.join(repoRoot, 'astro', 'public', resumePdfHref.replace(/^\/+/, ''));
   const resumePdfAvailable = await hasFile(fileSystemPath);
 
   return {

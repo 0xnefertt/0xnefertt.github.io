@@ -22,7 +22,7 @@ Personal site and blog built with Astro.
   - `_news/`
   - `_books/`
 - Shared assets/data:
-  - `assets/`
+  - `astro/public/assets/` (served at `/assets/...`)
   - `_data/`
 
 ## Prerequisites
@@ -90,7 +90,8 @@ Notes:
 - If a post has no `categories` frontmatter, folder-based category inference still works.
 - `--description` and `--tags` are required for scaffolding.
 - New post template includes `Summary / Key points / Details / Conclusion` sections.
-- Recommended image location: `/assets/img/posts/<post-slug>/...`
+- Recommended image file location: `astro/public/assets/img/posts/<post-slug>/...`
+- Public image URL: `/assets/img/posts/<post-slug>/...`
 - `post:new` prints two SEO title candidates and description length.
 
 ## Draft and publish flow
@@ -156,7 +157,7 @@ Before expecting ads to appear:
 
 The `/cv/` page reads structured data from:
 
-- `assets/json/resume.json`
+- `astro/public/assets/json/resume.json`
 
 Recommended minimum sections:
 
@@ -187,7 +188,7 @@ npm run cv:pdf -- --file ~/Downloads/cv.pdf --name sungjun-won-cv.pdf
 
 This command:
 
-- copies the file to `assets/pdf/...`
+- copies the file to `astro/public/assets/pdf/...`
 - updates `_data/cv-meta.yml` (`resume_pdf` path)
 - enables the button on `/cv/` automatically
 

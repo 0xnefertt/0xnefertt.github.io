@@ -7,7 +7,7 @@ on:
       - main
     paths:
       - "astro/**"
-      - "assets/**"
+      - "astro/public/assets/**"
       - "_pages/**"
       - "_posts/**"
       - "_projects/**"
@@ -23,7 +23,7 @@ on:
       - main
     paths:
       - "astro/**"
-      - "assets/**"
+      - "astro/public/assets/**"
       - "_pages/**"
       - "_posts/**"
       - "_projects/**"
