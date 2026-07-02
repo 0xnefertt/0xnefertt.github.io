@@ -1,7 +1,8 @@
 ---
 import { getCollection } from 'astro:content';
+import BlogCategoryFilter from '../../../../components/BlogCategoryFilter.astro';
 import Layout from '../../../../layouts/Layout.astro';
-import { getCategoryI18nKey, formatPostDate, getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from '../../../../lib/blog';
+import { formatPostDate, getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from '../../../../lib/blog';
 import { siteConfig } from '../../../../lib/site';
 
 export async function getStaticPaths() {
@@ -62,25 +63,7 @@ function getPageHref(page: number): string {
       <input class="blog-search-input" type="search" name="q" placeholder="Search posts" data-i18n-placeholder="search_placeholder" />
       <button class="blog-search-button" type="submit" data-i18n-key="search_button">Search</button>
     </form>
-    <nav class="blog-category-filter" aria-label="Blog categories">
-      <ul class="blog-category-parent-list">
-        <li><a href="/blog/">all</a></li>
-        {
-          categoryTree.map((parent) => (
-            <li class="blog-category-parent-item">
-              <a href={parent.href} class={parent.slug === category.slug ? 'active' : undefined} data-i18n-key={getCategoryI18nKey(parent.href)}>
-                {parent.name}
-              </a>
-              {parent.children.length > 0 && (
-                <ul class="blog-category-child-list">
-                  {parent.children.map((child) => <li><a href={child.href} data-i18n-key={getCategoryI18nKey(child.href)}>{child.name}</a></li>)}
-                </ul>
-              )}
-            </li>
-          ))
-        }
-      </ul>
-    </nav>
+    <BlogCategoryFilter categoryTree={categoryTree} totalCount={rawPosts.length} activeParentSlug={category.slug} />
   </section>
 
   {posts.length === 0 ? (

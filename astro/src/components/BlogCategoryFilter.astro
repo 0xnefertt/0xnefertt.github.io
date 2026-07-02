@@ -1,0 +1,47 @@
+---
+import { getCategoryI18nKey, type BlogCategoryTreeParent } from '../lib/blog';
+
+interface Props {
+  activeChildSlug?: string;
+  activeParentSlug?: string;
+  categoryTree: BlogCategoryTreeParent[];
+  isAllActive?: boolean;
+  totalCount: number;
+}
+
+const { activeChildSlug, activeParentSlug, categoryTree, isAllActive = false, totalCount } = Astro.props;
+---
+
+{
+  categoryTree.length > 0 && (
+    <nav class="blog-category-filter" aria-label="Blog categories">
+      <ul class="blog-category-parent-list">
+        <li>
+          <a href="/blog/" class={isAllActive ? 'active' : undefined}>
+            all <span class="category-count">({totalCount})</span>
+          </a>
+        </li>
+        {categoryTree.map((parent) => (
+          <li class="blog-category-parent-item">
+            <a href={parent.href} class={parent.slug === activeParentSlug && !activeChildSlug ? 'active' : undefined}>
+              <span data-i18n-key={getCategoryI18nKey(parent.href)}>{parent.name}</span>{' '}
+              <span class="category-count">({parent.count})</span>
+            </a>
+            {parent.children.length > 0 && (
+              <ul class="blog-category-child-list">
+                {parent.children.map((child) => (
+                  <li>
+                    <a href={child.href} class={parent.slug === activeParentSlug && child.slug === activeChildSlug ? 'active' : undefined}>
+                      <span data-i18n-key={getCategoryI18nKey(child.href)}>{child.name}</span>{' '}
+                      <span class="category-count">({child.count})</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}
