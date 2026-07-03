@@ -83,7 +83,53 @@
 
   function createPostItem(post) {
     const item = document.createElement('li');
-    item.className = 'post-item';
+    const previewImages = Array.isArray(post.gallery) ? post.gallery.slice(0, 6) : post.thumbnail ? [post.thumbnail] : [];
+    item.className = previewImages.length > 0 ? 'post-item post-item--with-media' : 'post-item';
+
+    if (previewImages.length > 0) {
+      const visibleImages = previewImages.slice(0, 2);
+      const hoverImages = previewImages.slice(2, 5);
+      const mediaLink = document.createElement('a');
+      mediaLink.className = 'post-card-media';
+      mediaLink.href = post.href;
+      mediaLink.setAttribute('aria-label', post.title);
+      if (post.external) {
+        mediaLink.target = '_blank';
+        mediaLink.rel = 'noreferrer';
+      }
+
+      const preview = document.createElement('span');
+      preview.className = `post-card-preview post-card-preview--${visibleImages.length}`;
+      preview.setAttribute('aria-hidden', 'true');
+
+      for (const image of visibleImages) {
+        const previewImage = document.createElement('img');
+        previewImage.src = image;
+        previewImage.alt = '';
+        previewImage.loading = 'lazy';
+        preview.appendChild(previewImage);
+      }
+
+      mediaLink.appendChild(preview);
+
+      if (hoverImages.length > 0) {
+        const gallery = document.createElement('span');
+        gallery.className = 'post-card-gallery';
+        gallery.setAttribute('aria-hidden', 'true');
+
+        for (const image of hoverImages) {
+          const galleryImage = document.createElement('img');
+          galleryImage.src = image;
+          galleryImage.alt = '';
+          galleryImage.loading = 'lazy';
+          gallery.appendChild(galleryImage);
+        }
+
+        mediaLink.appendChild(gallery);
+      }
+
+      item.appendChild(mediaLink);
+    }
 
     const heading = document.createElement('h2');
     const link = document.createElement('a');
@@ -94,18 +140,21 @@
       link.rel = 'noreferrer';
     }
 
+    const content = document.createElement('div');
+    content.className = 'post-card-content';
+
     heading.appendChild(link);
-    item.appendChild(heading);
+    content.appendChild(heading);
 
     const meta = document.createElement('p');
     meta.className = 'post-meta';
     meta.textContent = `${post.dateLabel} · ${post.readMinutes} min read${post.externalSource ? ` · ${post.externalSource}` : ''}`;
-    item.appendChild(meta);
+    content.appendChild(meta);
 
     if (post.description) {
       const description = document.createElement('p');
       description.textContent = post.description;
-      item.appendChild(description);
+      content.appendChild(description);
     }
 
     const tags = Array.isArray(post.tags) ? post.tags : [];
@@ -137,8 +186,10 @@
         }
       }
 
-      item.appendChild(tagContainer);
+      content.appendChild(tagContainer);
     }
+
+    item.appendChild(content);
 
     return item;
   }
