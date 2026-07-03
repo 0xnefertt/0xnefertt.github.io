@@ -23,21 +23,92 @@ interface Props {
 const { project } = Astro.props;
 const { Content } = await render(project);
 const image = normalizeAssetPath(project.data.img);
+const stack = project.data.stack ?? [];
+const highlights = project.data.highlights ?? [];
+const lessons = project.data.lessons ?? [];
+const links = project.data.links ?? [];
 ---
 
 <Layout title={project.data.title} description={project.data.description ?? project.data.title} currentPath="/projects/">
-  <article class="post-header">
-    <h1>{project.data.title}</h1>
-    {project.data.description && <p>{project.data.description}</p>}
-    <p class="project-meta">
-      {project.data.category ? `Category: ${project.data.category}` : 'Project page'}
-      {typeof project.data.importance === 'number' ? ` · Priority: ${project.data.importance}` : ''}
-    </p>
+  <a class="back-link" href="/projects/">Back to projects</a>
+
+  <article class="project-detail-header">
+    <div>
+      <p class="eyebrow">{project.data.category ?? 'Project'}</p>
+      <h1>{project.data.title}</h1>
+      {project.data.description && <p>{project.data.description}</p>}
+    </div>
+    <div class="project-detail-actions">
+      {links.map((link) => (
+        <a href={link.url} target="_blank" rel="noreferrer">
+          {link.label}
+        </a>
+      ))}
+    </div>
   </article>
 
-  {image && <img class="profile-image" src={image} alt={`${project.data.title} cover`} loading="lazy" />}
+  <div class="project-detail-layout">
+    <div class="project-detail-main">
+      {image && <img class="project-detail-image" src={image} alt={`${project.data.title} cover`} loading="lazy" />}
 
-  <div class="post-body markdown-body">
-    <Content />
+      {highlights.length > 0 && (
+        <section class="project-detail-section">
+          <h2>What I worked on</h2>
+          <ul class="project-detail-list">
+            {highlights.map((highlight) => (
+              <li>{highlight}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {lessons.length > 0 && (
+        <section class="project-detail-section">
+          <h2>Lessons learned</h2>
+          <ul class="project-detail-list">
+            {lessons.map((lesson) => (
+              <li>{lesson}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section class="post-body markdown-body">
+        <Content />
+      </section>
+    </div>
+
+    <aside class="project-summary-panel" aria-label="Project summary">
+      <dl>
+        {project.data.status && (
+          <>
+            <dt>Status</dt>
+            <dd>{project.data.status}</dd>
+          </>
+        )}
+        {project.data.period && (
+          <>
+            <dt>Period</dt>
+            <dd>{project.data.period}</dd>
+          </>
+        )}
+        {project.data.role && (
+          <>
+            <dt>Role</dt>
+            <dd>{project.data.role}</dd>
+          </>
+        )}
+      </dl>
+      {stack.length > 0 && (
+        <div class="project-summary-stack">
+          <h2>Stack</h2>
+          <div class="project-stack">
+            {stack.map((item) => (
+              <span>{item}</span>
+            ))}
+          </div>
+        </div>
+      )}
+    </aside>
   </div>
 </Layout>

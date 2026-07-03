@@ -14,17 +14,19 @@ const groupedProjects =
         items: allProjects.filter((project) => project.data.category === category),
       }))
     : [{ category: undefined, items: allProjects }];
+const visibleGroups = groupedProjects.filter((group) => group.items.length > 0);
 ---
 
-<Layout title="projects" description="Projects collection" currentPath="/projects/">
-  <section class="page-header">
-    <h1>projects</h1>
-    <p>{pageDef?.data.description ?? 'A growing collection of projects.'}</p>
+<Layout title="projects" description={pageDef?.data.description ?? 'Selected project case studies'} currentPath="/projects/">
+  <section class="page-header project-portfolio-header">
+    <p class="eyebrow">Portfolio</p>
+    <h1>Projects</h1>
+    <p>{pageDef?.data.description ?? 'A curated collection of things I built, improved, and learned from.'}</p>
   </section>
 
   {
-    groupedProjects.map((group) => (
-      <section>
+    visibleGroups.map((group) => (
+      <section class="project-section">
         {group.category && <h2 class="section-title">{group.category}</h2>}
         <div class="project-grid">
           {group.items.map((project) => {
@@ -33,11 +35,10 @@ const groupedProjects =
 
             return (
               <article class="project-card">
-                <a href={route.href} target={route.external ? '_blank' : undefined} rel={route.external ? 'noreferrer' : undefined}>
+                <a class="project-card-link" href={route.href} target={route.external ? '_blank' : undefined} rel={route.external ? 'noreferrer' : undefined}>
                   {image && <img class="project-image" src={image} alt={`${project.data.title} thumbnail`} loading="lazy" />}
                   <div class="project-content">
-                    <h3>{project.data.title}</h3>
-                    {project.data.description && <p class="project-meta">{project.data.description}</p>}
+                    <h2>{project.data.title}</h2>
                   </div>
                 </a>
               </article>

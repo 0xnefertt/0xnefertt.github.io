@@ -105,6 +105,20 @@ const projects = defineCollection({
       img: z.any().optional(),
       importance: z.coerce.number().optional(),
       category: z.string().optional(),
+      status: z.string().optional(),
+      period: z.coerce.string().optional(),
+      role: z.string().optional(),
+      stack: z.array(z.string()).optional(),
+      highlights: z.array(z.string()).optional(),
+      lessons: z.array(z.string()).optional(),
+      links: z
+        .array(
+          z.object({
+            label: z.string(),
+            url: z.string(),
+          })
+        )
+        .optional(),
       redirect: z.string().optional(),
       giscus_comments: z.coerce.boolean().optional(),
       related_publications: z.coerce.boolean().optional(),
