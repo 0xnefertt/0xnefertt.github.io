@@ -4,6 +4,7 @@ title: "국제학교"
 date: 2026-06-16
 slug: international-school-information
 description: "국제학교에 대해서 정리한 글"
+thumbnail: /assets/img/posts/International-school-information.png
 tags:
   - education
 categories:

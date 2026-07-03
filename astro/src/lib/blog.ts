@@ -1,4 +1,5 @@
 import type { CollectionEntry } from 'astro:content';
+import { normalizeAssetPath } from './content';
 
 export interface PostRoute {
   year: string;
@@ -25,6 +26,8 @@ export interface BlogSummary {
   tags: string[];
   categories: string[];
   categoryPaths: BlogCategoryPath[];
+  thumbnail?: string;
+  gallery: string[];
   href: string;
   external: boolean;
   externalSource?: string;
@@ -444,6 +447,38 @@ export function normalizeTaxonomy(items?: string | string[]): string[] {
     .filter(Boolean);
 }
 
+function normalizeGallery(items?: string | string[]): string[] {
+  return normalizeTaxonomy(items)
+    .map((item) => normalizeAssetPath(item, 'assets/img/posts'))
+    .filter((item): item is string => Boolean(item));
+}
+
+function extractPostImageUrls(markdown?: string): string[] {
+  if (!markdown) {
+    return [];
+  }
+
+  const imageUrls = new Set<string>();
+  const markdownImagePattern = /!\[[^\]]*]\((\S+)(?:\s+["'][^"']*["'])?\)/g;
+  const htmlImagePattern = /<img\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/g;
+
+  for (const match of markdown.matchAll(markdownImagePattern)) {
+    const imagePath = normalizeAssetPath(match[1].replace(/^<|>$/g, ''), 'assets/img/posts');
+    if (imagePath) {
+      imageUrls.add(imagePath);
+    }
+  }
+
+  for (const match of markdown.matchAll(htmlImagePattern)) {
+    const imagePath = normalizeAssetPath(match[1], 'assets/img/posts');
+    if (imagePath) {
+      imageUrls.add(imagePath);
+    }
+  }
+
+  return [...imageUrls];
+}
+
 export function listBlogCategoryTree(posts: CollectionEntry<'blog'>[]): BlogCategoryTreeParent[] {
   const categoryMap = new Map<string, { name: string; slug: string; count: number; children: Map<string, BlogCategoryTreeChild> }>();
 
@@ -588,6 +623,10 @@ export function sortPostsDesc(posts: CollectionEntry<'blog'>[]): CollectionEntry
 export function toBlogSummary(post: CollectionEntry<'blog'>): BlogSummary {
   const { year, slug } = getPostRoute(post);
   const { href, external } = getBlogHref(post);
+  const thumbnail = normalizeAssetPath(post.data.thumbnail ?? post.data.cover, 'assets/img/posts');
+  const gallery = normalizeGallery(post.data.gallery);
+  const bodyImages = extractPostImageUrls(post.body);
+  const previewImages = [...new Set([...(thumbnail ? [thumbnail] : []), ...gallery, ...bodyImages])];
 
   return {
     title: post.data.title,
@@ -597,6 +636,8 @@ export function toBlogSummary(post: CollectionEntry<'blog'>): BlogSummary {
     tags: normalizeTaxonomy(post.data.tags),
     categories: getPostCategories(post),
     categoryPaths: getPostCategoryPaths(post),
+    thumbnail,
+    gallery: previewImages.slice(0, 8),
     href,
     external,
     externalSource: post.data.external_source,

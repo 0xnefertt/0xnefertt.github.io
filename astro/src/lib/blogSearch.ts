@@ -13,6 +13,8 @@ export interface BlogSearchItem {
   dateValue: number;
   tags: string[];
   categories: string[];
+  thumbnail?: string;
+  gallery: string[];
   categoryPaths: {
     href: string;
     label: string;
@@ -48,6 +50,8 @@ export function buildBlogSearchIndex(posts: CollectionEntry<'blog'>[]): BlogSear
       dateValue: post.date?.getTime() ?? 0,
       tags: post.tags,
       categories: post.categories,
+      thumbnail: post.thumbnail,
+      gallery: post.gallery,
       categoryPaths: post.categoryPaths.map((categoryPath) => ({
         href: categoryPath.href,
         label: categoryPath.label,

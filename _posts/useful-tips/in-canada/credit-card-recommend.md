@@ -4,6 +4,11 @@ title: "캐나다 신용카드 추천"
 date: 2026-01-19
 slug: credit-card-recommend
 description: "캐나다에서 신용카드를 고를 때 참고할 만한 아멕스 코발트 카드 혜택과 포인트 적립 메모"
+thumbnail: /assets/img/posts/credit-card-recommend-1.png
+gallery:
+  - /assets/img/posts/credit-card-recommend-1.png
+  - /assets/img/posts/credit-card-recommend-2.png
+  - /assets/img/posts/credit-card-recommend-3.png
 tags:
   - canada
   - credit-card

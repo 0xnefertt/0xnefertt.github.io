@@ -1,8 +1,9 @@
 ---
 import { getCollection } from 'astro:content';
 import BlogCategoryFilter from '../../../components/BlogCategoryFilter.astro';
+import PostCard from '../../../components/PostCard.astro';
 import Layout from '../../../layouts/Layout.astro';
-import { formatPostDate, getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from '../../../lib/blog';
+import { getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from '../../../lib/blog';
 import { siteConfig } from '../../../lib/site';
 
 const POSTS_PER_PAGE = 8;
@@ -58,28 +59,7 @@ function getPageHref(page: number): string {
   ) : (
     <ul class="post-list" style="margin-top: 1rem;">
       {
-        posts.map((post) => (
-          <li class="post-item">
-            <h2>
-              <a href={post.href} target={post.external ? '_blank' : undefined} rel={post.external ? 'noreferrer' : undefined}>
-                {post.title}
-              </a>
-            </h2>
-            <p class="post-meta">
-              {formatPostDate(post.date)} · {post.readMinutes} min read
-              {post.externalSource ? ` · ${post.externalSource}` : ''}
-            </p>
-            {post.description && <p>{post.description}</p>}
-
-            {(post.tags.length > 0 || post.categoryPaths.length > 0) && (
-              <div class="tags">
-                {post.tags.map((tag) => <span>#{tag}</span>)}
-                {post.categoryPaths.map((categoryPath) => <a href={categoryPath.href}>{categoryPath.label}</a>)}
-              </div>
-            )}
-
-          </li>
-        ))
+        posts.map((post) => <PostCard post={post} />)
       }
     </ul>
   )}

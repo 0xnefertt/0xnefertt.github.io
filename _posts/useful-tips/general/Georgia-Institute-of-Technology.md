@@ -4,6 +4,10 @@ title: "Georgia Institute of Technology"
 date: 2026-06-29
 slug: georgia-institute-of-technology
 description: "Georgia Institute of Technology"
+thumbnail: /assets/img/posts/2026-06-29.png
+gallery:
+  - /assets/img/posts/2026-06-29.png
+  - /assets/img/posts/2026-06-29(2).png
 tags:
   - education
 categories:

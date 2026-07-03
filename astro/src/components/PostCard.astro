@@ -1,0 +1,56 @@
+---
+import { formatPostDate, type BlogSummary } from '../lib/blog';
+
+interface Props {
+  post: BlogSummary;
+  headingLevel?: 2 | 3;
+  showDescription?: boolean;
+}
+
+const { post, headingLevel = 2, showDescription = true } = Astro.props;
+const HeadingTag = `h${headingLevel}` as 'h2' | 'h3';
+const previewImages = post.gallery.slice(0, 6);
+const visibleImages = previewImages.slice(0, 2);
+const hoverImages = previewImages.slice(2, 5);
+---
+
+<li class={previewImages.length > 0 ? 'post-item post-item--with-media' : 'post-item'}>
+  {
+    previewImages.length > 0 && (
+      <a class="post-card-media" href={post.href} target={post.external ? '_blank' : undefined} rel={post.external ? 'noreferrer' : undefined} aria-label={post.title}>
+        <span class={`post-card-preview post-card-preview--${visibleImages.length}`} aria-hidden="true">
+          {visibleImages.map((image) => (
+            <img src={image} alt="" loading="lazy" />
+          ))}
+        </span>
+        {hoverImages.length > 0 && (
+          <span class="post-card-gallery" aria-hidden="true">
+            {hoverImages.map((image) => (
+              <img src={image} alt="" loading="lazy" />
+            ))}
+          </span>
+        )}
+      </a>
+    )
+  }
+
+  <div class="post-card-content">
+    <HeadingTag>
+      <a href={post.href} target={post.external ? '_blank' : undefined} rel={post.external ? 'noreferrer' : undefined}>
+        {post.title}
+      </a>
+    </HeadingTag>
+    <p class="post-meta">
+      {formatPostDate(post.date)} · {post.readMinutes} min read
+      {post.externalSource ? ` · ${post.externalSource}` : ''}
+    </p>
+    {showDescription && post.description && <p>{post.description}</p>}
+
+    {(post.tags.length > 0 || post.categoryPaths.length > 0) && (
+      <div class="tags">
+        {post.tags.map((tag) => <span>#{tag}</span>)}
+        {post.categoryPaths.map((categoryPath) => <a href={categoryPath.href}>{categoryPath.label}</a>)}
+      </div>
+    )}
+  </div>
+</li>

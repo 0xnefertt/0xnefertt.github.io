@@ -14,3 +14,4 @@ reports/
 .env
 .env.local
 wealthsimple-crypto-job.md
+.gstack/

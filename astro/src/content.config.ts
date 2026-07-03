@@ -25,6 +25,7 @@ const blog = defineCollection({
       featured: z.coerce.boolean().optional(),
       cover: z.string().optional(),
       thumbnail: z.string().optional(),
+      gallery: z.union([z.array(z.string()), z.string()]).optional(),
       author: z.string().optional(),
       last_updated: z.coerce.date().optional(),
       giscus_comments: z.coerce.boolean().optional(),
