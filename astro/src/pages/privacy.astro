@@ -1,0 +1,183 @@
+---
+import PolicyPage from '../components/PolicyPage.astro';
+
+const updatedAt = '2026년 7월 22일';
+---
+
+<PolicyPage
+  title="Privacy & Cookie Policy"
+  eyebrow="Privacy"
+  summary="0xnefertt's thoughts가 어떤 정보를 수집하고, 왜 사용하며, 방문자가 어떤 선택을 할 수 있는지 설명합니다."
+  updatedAt={updatedAt}
+  currentPath="/privacy/"
+>
+  <ul slot="toc">
+    <li><a href="#scope">적용 범위</a></li>
+    <li><a href="#information">수집하는 정보</a></li>
+    <li><a href="#cookies">쿠키와 로컬 저장소</a></li>
+    <li><a href="#services">외부 서비스</a></li>
+    <li><a href="#choices">방문자의 선택</a></li>
+    <li><a href="#retention">보관·보호·이전</a></li>
+    <li><a href="#rights">권리와 문의</a></li>
+    <li><a href="#changes">정책 변경</a></li>
+  </ul>
+
+  <section id="scope">
+    <h2>1. 적용 범위와 운영자</h2>
+    <p>
+      이 정책은 <strong>0xnefertt's thoughts</strong>(이하 “사이트”)에 적용됩니다. 사이트는 캐나다 브리티시컬럼비아에서
+      0xnefertt가 운영하는 개인 블로그이며, 기술·커리어·캐나다 생활·금융 관련 정보와 의견을 제공합니다.
+    </p>
+    <p>
+      개인정보 또는 이 정책에 관한 문의는 <a href="mailto:adrwss2@gmail.com">adrwss2@gmail.com</a>으로 보내주세요.
+    </p>
+  </section>
+
+  <section id="information">
+    <h2>2. 수집하거나 처리될 수 있는 정보</h2>
+    <h3>직접 제공하는 정보</h3>
+    <p>
+      이메일로 문의할 경우 이메일 주소, 이름 또는 닉네임, 메시지 내용과 첨부 정보가 전달될 수 있습니다. 사이트는 회원가입,
+      결제 또는 자체 문의 폼을 운영하지 않습니다.
+    </p>
+
+    <h3>자동으로 처리되는 정보</h3>
+    <p>사이트 방문 시 다음과 같은 기술·이용 정보가 외부 서비스 제공자에 의해 처리될 수 있습니다.</p>
+    <ul>
+      <li>방문 페이지, 방문·체류 시간, 유입 경로와 사이트 내 검색·스크롤 같은 이용 이벤트</li>
+      <li>브라우저, 운영체제, 기기 유형, 화면 크기와 언어 설정</li>
+      <li>IP 주소에서 추정한 대략적인 지역과 네트워크 요청 정보</li>
+      <li>광고 노출·클릭·빈도, 쿠키 또는 유사 식별자와 연결된 광고 측정 정보</li>
+    </ul>
+    <p>이 정보는 사이트 운영, 방문 통계, 오류 진단, 콘텐츠 개선과 광고 제공·측정을 위해 사용됩니다.</p>
+  </section>
+
+  <section id="cookies">
+    <h2>3. 쿠키와 로컬 저장소</h2>
+    <p>
+      쿠키는 브라우저에 저장되는 작은 데이터입니다. 로컬 저장소는 테마처럼 기기별 설정을 기억하는 브라우저 기능입니다.
+      사용되는 항목은 서비스 설정과 브라우저에 따라 달라질 수 있습니다.
+    </p>
+
+    <div class="policy-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">항목</th>
+            <th scope="col">제공자</th>
+            <th scope="col">목적</th>
+            <th scope="col">일반적인 보관 기간</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>site-theme</code>, <code>site-language</code></td>
+            <td>이 사이트</td>
+            <td>선택한 화면 테마와 언어 설정 저장</td>
+            <td>브라우저에서 삭제할 때까지</td>
+          </tr>
+          <tr>
+            <td><code>_ga</code>, <code>_ga_*</code></td>
+            <td>Google Analytics</td>
+            <td>방문자와 세션을 구분하고 이용 통계 측정</td>
+            <td>Google 기본 설정상 최대 2년</td>
+          </tr>
+          <tr>
+            <td>광고 쿠키와 유사 식별자</td>
+            <td>Google 및 광고 파트너</td>
+            <td>광고 제공, 개인화, 빈도 관리, 부정 사용 방지와 성과 측정</td>
+            <td>쿠키 종류, 지역, 동의 및 Google 설정에 따라 다름</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="services">
+    <h2>4. 외부 서비스와 정보 공유</h2>
+    <p>사이트 운영을 위해 다음 서비스가 정보를 독립적으로 처리할 수 있습니다.</p>
+    <ul>
+      <li>
+        <strong>Google Analytics:</strong> 방문 통계와 콘텐츠 이용 분석. 자세한 내용은
+        <a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer">Google 개인정보처리방침</a>을 참고하세요.
+      </li>
+      <li>
+        <strong>Google AdSense:</strong> Google과 제3자 광고 사업자가 이전 방문 기록 등을 바탕으로 광고를 제공할 수 있습니다.
+        Google의 광고 쿠키는 맞춤 광고 제공과 측정에 사용될 수 있습니다.
+      </li>
+      <li>
+        <strong>GitHub Pages:</strong> 사이트 호스팅과 보안·운영 로그 처리. 자세한 내용은
+        <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noreferrer">
+          GitHub 개인정보처리방침
+        </a>을 참고하세요.
+      </li>
+      <li>
+        <strong>Giscus/GitHub Discussions:</strong> 댓글 기능이 활성화된 페이지에서 GitHub 계정으로 댓글을 남길 때 GitHub와 Giscus의
+        정책이 적용됩니다. 사이트는 GitHub 비밀번호를 수집하지 않습니다.
+      </li>
+      <li>
+        <strong>Open-Meteo 및 Frankfurter:</strong> 홈 화면의 날씨와 환율 정보를 제공하기 위해 방문자의 브라우저가 해당 API에 직접
+        요청할 수 있습니다.
+      </li>
+    </ul>
+    <p>
+      운영자는 이메일로 직접 받은 개인정보를 판매하지 않습니다. 다만 광고·분석·호스팅 제공자는 각자의 정책과 방문자의 설정에 따라
+      정보를 처리할 수 있습니다.
+    </p>
+  </section>
+
+  <section id="choices">
+    <h2>5. 방문자의 선택과 거부 방법</h2>
+    <ul>
+      <li>브라우저 설정에서 쿠키를 차단하거나 삭제할 수 있습니다. 일부 설정 저장과 광고 기능이 제한될 수 있습니다.</li>
+      <li>
+        <a href="https://adssettings.google.com/" target="_blank" rel="noreferrer">Google 광고 설정</a>에서 맞춤 광고를 관리하거나
+        해제할 수 있습니다.
+      </li>
+      <li>
+        <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noreferrer">Google Analytics 차단 브라우저 부가기능</a>을
+        사용할 수 있습니다.
+      </li>
+      <li>
+        일부 제3자 광고 사업자의 맞춤 광고는 <a href="https://optout.aboutads.info/" target="_blank" rel="noreferrer">AboutAds 선택 도구</a>에서
+        관리할 수 있습니다.
+      </li>
+    </ul>
+    <p>지역별 법률과 동의 신호에 따라 개인 맞춤 광고 또는 분석 기능이 제한될 수 있습니다.</p>
+  </section>
+
+  <section id="retention">
+    <h2>6. 보관, 보호와 국외 처리</h2>
+    <p>
+      이메일 문의는 답변, 후속 문의와 분쟁 대응에 필요한 기간 동안 보관한 뒤 삭제할 수 있습니다. 분석·광고 데이터의 보관 기간은
+      사이트의 서비스 설정과 각 제공자의 정책에 따릅니다.
+    </p>
+    <p>
+      합리적인 보안 조치를 사용하지만 인터넷 전송이나 전자 저장 방식의 절대적인 안전을 보장할 수는 없습니다. Google, GitHub 등
+      외부 제공자는 캐나다 외 국가에서 정보를 처리할 수 있으며, 해당 지역 법률의 적용을 받을 수 있습니다.
+    </p>
+  </section>
+
+  <section id="rights">
+    <h2>7. 개인정보 권리와 문의</h2>
+    <p>
+      적용되는 법률에 따라 본인의 개인정보에 대한 열람, 정정 또는 삭제를 요청하거나 처리 방식에 이의를 제기할 수 있습니다. 요청 시
+      본인 확인에 필요한 최소한의 정보를 요청할 수 있습니다.
+    </p>
+    <p>
+      요청 또는 불만은 <a href="mailto:adrwss2@gmail.com">adrwss2@gmail.com</a>으로 보내주세요. 합리적인 기간 안에 확인하고 답변하겠습니다.
+    </p>
+  </section>
+
+  <section id="changes">
+    <h2>8. 아동, 외부 링크와 정책 변경</h2>
+    <p>
+      사이트는 아동을 대상으로 설계되지 않았으며 아동의 개인정보를 의도적으로 수집하지 않습니다. 외부 링크를 방문하면 해당 웹사이트의
+      정책이 적용됩니다.
+    </p>
+    <p>
+      서비스, 법률 또는 데이터 처리 방식이 바뀌면 이 정책을 업데이트하고 상단의 최종 업데이트 날짜를 변경합니다. 중요한 변경은 가능한
+      경우 사이트에 별도로 알립니다.
+    </p>
+  </section>
+</PolicyPage>

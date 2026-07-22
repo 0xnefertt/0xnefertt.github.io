@@ -78,17 +78,6 @@ const pages = defineCollection({
           more_info: z.string().optional(),
         })
         .optional(),
-      profiles: z
-        .array(
-          z.object({
-            align: z.string().optional(),
-            image: z.string().optional(),
-            image_circular: z.coerce.boolean().optional(),
-            more_info: z.string().optional(),
-            content: z.string().optional(),
-          })
-        )
-        .optional(),
     })
     .passthrough(),
 });
@@ -126,21 +115,6 @@ const projects = defineCollection({
     .passthrough(),
 });
 
-const news = defineCollection({
-  loader: glob({
-    base: '../_news',
-    pattern: '**/*.md',
-  }),
-  schema: z
-    .object({
-      title: z.string().optional(),
-      date: z.coerce.date().optional(),
-      inline: z.coerce.boolean().optional(),
-      related_posts: z.coerce.boolean().optional(),
-    })
-    .passthrough(),
-});
-
 const books = defineCollection({
   loader: glob({
     base: '../_books',
@@ -166,4 +140,4 @@ const books = defineCollection({
     .passthrough(),
 });
 
-export const collections = { blog, books, news, pages, projects };
+export const collections = { blog, books, pages, projects };

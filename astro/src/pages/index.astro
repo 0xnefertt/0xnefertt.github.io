@@ -2,8 +2,8 @@
 import { getCollection, render } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
 import PostCard from '../components/PostCard.astro';
-import { formatPostDate, getPublishedBlogPosts, sortPostsDesc, toBlogSummary } from '../lib/blog';
-import { normalizeAssetPath, sortByDateDesc } from '../lib/content';
+import { getPublishedBlogPosts, sortPostsDesc, toBlogSummary } from '../lib/blog';
+import { normalizeAssetPath } from '../lib/content';
 import { siteConfig } from '../lib/site';
 
 const pages = await getCollection('pages');
@@ -17,10 +17,6 @@ const { Content } = await render(aboutPage);
 const allPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')));
 const latestLimit = aboutPage.data.latest_posts?.limit ?? 5;
 const latestPosts = allPosts.slice(0, latestLimit).map(toBlogSummary);
-const allNews = sortByDateDesc(await getCollection('news'));
-const newsLimit = aboutPage.data.announcements?.limit ?? 5;
-const latestNews = allNews.slice(0, newsLimit);
-
 const profile = aboutPage.data.profile;
 const subtitle = aboutPage.data.subtitle;
 const profileImage = normalizeAssetPath(profile?.image);
@@ -559,17 +555,4 @@ const introClassName = [
     </ul>
   </section>
 
-  <section>
-    <h2 class="section-title">Latest News</h2>
-    <ul class="news-list">
-      {
-        latestNews.map((item) => (
-          <li class="news-item">
-            <p class="news-meta">{formatPostDate(item.data.date)}</p>
-            <p>{item.data.title ?? item.body.split('\n').filter(Boolean)[0]}</p>
-          </li>
-        ))
-      }
-    </ul>
-  </section>
 </Layout>

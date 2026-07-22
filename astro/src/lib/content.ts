@@ -82,23 +82,6 @@ export function getBookRoute(book: CollectionEntry<'books'>): RouteInfo {
   };
 }
 
-export function getNewsRoute(news: CollectionEntry<'news'>): RouteInfo {
-  const slug = getFileStem(news.filePath) ?? fallbackSlug(news.id);
-  return {
-    slug,
-    href: `/news/${slug}/`,
-    external: false,
-  };
-}
-
-function safeDate(date?: Date): number {
-  return date?.getTime() ?? 0;
-}
-
-export function sortByDateDesc<T extends { data: { date?: Date } }>(entries: T[]): T[] {
-  return [...entries].sort((a, b) => safeDate(b.data.date) - safeDate(a.data.date));
-}
-
 export function sortProjects(projects: CollectionEntry<'projects'>[]): CollectionEntry<'projects'>[] {
   return [...projects].sort((a, b) => {
     const aImportance = a.data.importance ?? Number.MAX_SAFE_INTEGER;

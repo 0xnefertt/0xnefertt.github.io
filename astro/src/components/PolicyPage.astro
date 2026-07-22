@@ -1,0 +1,35 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+interface Props {
+  title: string;
+  eyebrow: string;
+  summary: string;
+  updatedAt: string;
+  currentPath: string;
+}
+
+const { title, eyebrow, summary, updatedAt, currentPath } = Astro.props;
+---
+
+<Layout title={title} description={summary} currentPath={currentPath} disableAds>
+  <article class="policy-page" lang="ko">
+    <header class="policy-header">
+      <p class="eyebrow">{eyebrow}</p>
+      <h1>{title}</h1>
+      <p class="policy-summary">{summary}</p>
+      <p class="policy-updated">최종 업데이트: {updatedAt}</p>
+    </header>
+
+    <div class="policy-layout">
+      <aside class="policy-toc" aria-label="페이지 목차">
+        <h2>이 페이지에서</h2>
+        <slot name="toc" />
+      </aside>
+
+      <div class="policy-content markdown-body">
+        <slot />
+      </div>
+    </div>
+  </article>
+</Layout>

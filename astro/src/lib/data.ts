@@ -1,9 +1,8 @@
-import { access, readFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const repoRoot = path.resolve(process.cwd(), '..');
 const dataRoot = path.join(repoRoot, '_data');
-const assetsRoot = path.join(repoRoot, 'astro', 'public', 'assets');
 
 function extractFirstValue(content: string, key: string): string | undefined {
   const pattern = new RegExp(`^${key}:\\s*(.+)$`, 'm');
@@ -40,12 +39,6 @@ export interface RepositoryData {
 export interface SocialLink {
   label: string;
   href: string;
-}
-
-export interface CvMeta {
-  resumePdfHref?: string;
-  resumePdfLabel?: string;
-  resumePdfAvailable: boolean;
 }
 
 export async function getRepositoryData(): Promise<RepositoryData> {
@@ -96,48 +89,4 @@ export async function getSocialLinks(): Promise<SocialLink[]> {
   }
 
   return links;
-}
-
-export async function getResumeData(): Promise<unknown> {
-  const resumePath = path.join(assetsRoot, 'json', 'resume.json');
-  const content = await readFile(resumePath, 'utf-8');
-  return JSON.parse(content);
-}
-
-function normalizePublicPath(input: string): string {
-  return input.startsWith('/') ? input : `/${input}`;
-}
-
-async function hasFile(filePath: string): Promise<boolean> {
-  try {
-    await access(filePath);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-export async function getCvMeta(): Promise<CvMeta> {
-  const cvMetaPath = path.join(dataRoot, 'cv-meta.yml');
-  const content = await readFile(cvMetaPath, 'utf-8').catch(() => '');
-
-  const rawPdfHref = extractFirstValue(content, 'resume_pdf');
-  const resumePdfLabel = extractFirstValue(content, 'resume_pdf_label') ?? 'Download CV (PDF)';
-
-  if (!rawPdfHref) {
-    return {
-      resumePdfLabel,
-      resumePdfAvailable: false,
-    };
-  }
-
-  const resumePdfHref = normalizePublicPath(rawPdfHref);
-  const fileSystemPath = path.join(repoRoot, 'astro', 'public', resumePdfHref.replace(/^\/+/, ''));
-  const resumePdfAvailable = await hasFile(fileSystemPath);
-
-  return {
-    resumePdfHref,
-    resumePdfLabel,
-    resumePdfAvailable,
-  };
 }

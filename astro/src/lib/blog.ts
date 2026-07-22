@@ -554,16 +554,19 @@ export function listBlogCategoryTree(posts: CollectionEntry<'blog'>[]): BlogCate
   }
 
   return [...categoryMap.values()]
+    .filter((parent) => parent.count > 0)
     .map((parent) => ({
       name: parent.name,
       slug: parent.slug,
       count: parent.count,
       href: `/blog/category/${parent.slug}/`,
-      children: [...parent.children.values()].sort((a, b) => {
-        const aOrder = CHILD_CATEGORY_ORDER.get(`${parent.slug}/${a.slug}`) ?? Number.MAX_SAFE_INTEGER;
-        const bOrder = CHILD_CATEGORY_ORDER.get(`${parent.slug}/${b.slug}`) ?? Number.MAX_SAFE_INTEGER;
-        return aOrder === bOrder ? a.name.localeCompare(b.name) : aOrder - bOrder;
-      }),
+      children: [...parent.children.values()]
+        .filter((child) => child.count > 0)
+        .sort((a, b) => {
+          const aOrder = CHILD_CATEGORY_ORDER.get(`${parent.slug}/${a.slug}`) ?? Number.MAX_SAFE_INTEGER;
+          const bOrder = CHILD_CATEGORY_ORDER.get(`${parent.slug}/${b.slug}`) ?? Number.MAX_SAFE_INTEGER;
+          return aOrder === bOrder ? a.name.localeCompare(b.name) : aOrder - bOrder;
+        }),
     }))
     .sort((a, b) => {
       const aOrder = PARENT_CATEGORY_ORDER.get(a.slug) ?? Number.MAX_SAFE_INTEGER;

@@ -13,6 +13,7 @@ interface Props {
   articlePublishedTime?: Date | string;
   articleModifiedTime?: Date | string;
   noindex?: boolean;
+  disableAds?: boolean;
 }
 
 function toAbsoluteCanonicalUrl(input: string): string {
@@ -34,14 +35,18 @@ const {
   articlePublishedTime,
   articleModifiedTime,
   noindex = false,
+  disableAds = false,
 } = Astro.props;
 const pageTitle = title ? `${title} | ${siteConfig.title}` : siteConfig.title;
 const canonicalUrl = canonicalHref ? toAbsoluteCanonicalUrl(canonicalHref) : new URL(Astro.url.pathname, siteConfig.siteUrl).toString();
+const isBlogPaginationPage = /^\/blog\/(?:page-\d+|category\/[^/]+(?:\/[^/]+)?\/page-\d+)\/?$/.test(Astro.url.pathname);
+const shouldNoindex = noindex || Astro.url.pathname === '/blog/search/' || isBlogPaginationPage;
 const currentYear = new Date().getFullYear();
 const navItems = await getNavItems();
 const socialLinks = await getSocialLinks();
 const gaMeasurementId = siteConfig.gaMeasurementId?.trim() ?? '';
 const hasGaMeasurementId = gaMeasurementId.length > 0;
+const shouldLoadAds = siteConfig.adsensePublisherId.length > 0 && !disableAds;
 
 function toAbsoluteUrl(input: string): string {
   if (/^https?:\/\//.test(input)) {
@@ -80,11 +85,6 @@ function getNavI18nKey(href: string): string | undefined {
     '/books/': 'nav_bookshelf',
     '/projects/': 'nav_projects',
     '/repositories/': 'nav_repositories',
-    '/cv/': 'nav_cv',
-    '/people/': 'nav_people',
-    '/publications/': 'nav_publications',
-    '/teaching/': 'nav_teaching',
-    '/news/': 'nav_news',
   };
 
   return map[href];
@@ -98,7 +98,7 @@ function getNavI18nKey(href: string): string | undefined {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
-    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {shouldNoindex && <meta name="robots" content="noindex, follow" />}
     <link rel="canonical" href={canonicalUrl} />
     <link rel="alternate" type="application/rss+xml" title={`${siteConfig.title} RSS Feed`} href="/rss.xml" />
     <meta property="og:site_name" content={siteConfig.title} />
@@ -149,7 +149,7 @@ function getNavI18nKey(href: string): string | undefined {
       })();
     </script>
     {
-      siteConfig.adsensePublisherId && (
+      shouldLoadAds && (
         <script
           async
           src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${siteConfig.adsensePublisherId}`}
@@ -252,13 +252,24 @@ function getNavI18nKey(href: string): string | undefined {
         <p>
           © {currentYear} 0xnefertt.
         </p>
-        {
-          socialLinks.length > 0 && (
-            <ul class="social-links">
-              {socialLinks.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+        <div class="footer-links">
+          <nav aria-label="Policies and site information">
+            <ul class="footer-policy-links">
+              <li><a href="/privacy/">Privacy</a></li>
+              <li><a href="/contact/">Contact</a></li>
+              <li><a href="/author/">Author</a></li>
+              <li><a href="/financial-disclaimer/">Financial Disclaimer</a></li>
+              <li><a href="/editorial-policy/">Editorial Policy</a></li>
             </ul>
-          )
-        }
+          </nav>
+          {
+            socialLinks.length > 0 && (
+              <ul class="social-links">
+                {socialLinks.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+              </ul>
+            )
+          }
+        </div>
       </div>
     </footer>
 
@@ -461,11 +472,6 @@ function getNavI18nKey(href: string): string | undefined {
             nav_bookshelf: 'bookshelf',
             nav_projects: 'projects',
             nav_repositories: 'repositories',
-            nav_cv: 'cv',
-            nav_people: 'people',
-            nav_publications: 'publications',
-            nav_teaching: 'teaching',
-            nav_news: 'news',
             category_study_log: 'study log',
             category_dev: 'dev',
             category_english: 'english',
@@ -487,13 +493,6 @@ function getNavI18nKey(href: string): string | undefined {
             search_placeholder: 'Search posts',
             search_back: 'back to blog',
             search_all_posts: 'Search across all posts',
-            cv_intro: 'Resume content loaded from `astro/public/assets/json/resume.json`.',
-            cv_basics: 'Basics',
-            cv_work: 'Work',
-            cv_education: 'Education',
-            cv_awards: 'Awards',
-            cv_skills: 'Skills',
-            cv_download_pdf: 'Download CV (PDF)',
           },
           ko: {
             nav_about: '소개',
@@ -502,11 +501,6 @@ function getNavI18nKey(href: string): string | undefined {
             nav_bookshelf: '책장',
             nav_projects: '프로젝트',
             nav_repositories: '저장소',
-            nav_cv: '이력',
-            nav_people: '사람들',
-            nav_publications: '출판물',
-            nav_teaching: '강의',
-            nav_news: '소식',
             category_study_log: '공부 기록',
             category_dev: 'dev',
             category_english: 'english',
@@ -528,13 +522,6 @@ function getNavI18nKey(href: string): string | undefined {
             search_placeholder: '글 검색',
             search_back: '블로그로 돌아가기',
             search_all_posts: '전체 글에서 검색',
-            cv_intro: '`astro/public/assets/json/resume.json`에서 이력서 데이터를 로드했습니다.',
-            cv_basics: '기본 정보',
-            cv_work: '경력',
-            cv_education: '학력',
-            cv_awards: '수상',
-            cv_skills: '기술',
-            cv_download_pdf: 'CV 다운로드 (PDF)',
           },
         };
 

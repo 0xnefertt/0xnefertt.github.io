@@ -1,0 +1,56 @@
+---
+import PolicyPage from '../components/PolicyPage.astro';
+
+const updatedAt = '2026년 7월 22일';
+---
+
+<PolicyPage
+  title="Contact"
+  eyebrow="Get in touch"
+  summary="글의 오류 제보, 출처 문의, 개인정보 요청과 협업 제안을 받을 수 있는 공식 연락처입니다."
+  updatedAt={updatedAt}
+  currentPath="/contact/"
+>
+  <ul slot="toc">
+    <li><a href="#email">이메일</a></li>
+    <li><a href="#topics">문의할 수 있는 내용</a></li>
+    <li><a href="#privacy">개인정보 안내</a></li>
+    <li><a href="#expectations">답변 기준</a></li>
+  </ul>
+
+  <section id="email">
+    <h2>이메일</h2>
+    <p class="contact-callout">
+      <a href="mailto:adrwss2@gmail.com">adrwss2@gmail.com</a>
+    </p>
+    <p>제목에 문의 목적을 간단히 적어주시면 확인하기 쉽습니다.</p>
+  </section>
+
+  <section id="topics">
+    <h2>문의할 수 있는 내용</h2>
+    <ul>
+      <li>게시물의 사실 오류, 깨진 링크 또는 오래된 정보 제보</li>
+      <li>인용, 이미지, 저작권과 출처 관련 문의</li>
+      <li>개인정보 열람·정정·삭제 요청</li>
+      <li>인터뷰, 글 기고, 기술·콘텐츠 협업 제안</li>
+      <li>광고 또는 후원 제안. 콘텐츠 독립성을 해치는 조건은 받지 않습니다.</li>
+    </ul>
+  </section>
+
+  <section id="privacy">
+    <h2>개인정보 안내</h2>
+    <p>
+      사이트는 별도의 문의 폼이나 회원 데이터베이스를 운영하지 않습니다. 이메일로 보내는 주소, 이름, 메시지와 첨부 파일은 문의 처리에
+      필요한 범위에서만 사용합니다. 민감한 개인정보, 계정 비밀번호, 금융 계좌 정보는 보내지 마세요.
+    </p>
+    <p>자세한 내용은 <a href="/privacy/">Privacy & Cookie Policy</a>를 확인해주세요.</p>
+  </section>
+
+  <section id="expectations">
+    <h2>답변 기준</h2>
+    <p>
+      모든 메시지에 답변을 보장하지는 않지만 사실 오류, 저작권, 개인정보와 보안 관련 문의는 우선 확인합니다. 투자 종목 추천이나 개인별
+      법률·세무·재무 상담은 제공하지 않습니다.
+    </p>
+  </section>
+</PolicyPage>
