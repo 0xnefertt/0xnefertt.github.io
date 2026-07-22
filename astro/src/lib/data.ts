@@ -15,39 +15,9 @@ function extractFirstValue(content: string, key: string): string | undefined {
   return match[1].trim().replace(/^['"]|['"]$/g, '');
 }
 
-function extractYamlList(content: string, key: string): string[] {
-  const blockPattern = new RegExp(`^${key}:\\s*$([\\s\\S]*?)(?=^\\S|$)`, 'm');
-  const blockMatch = content.match(blockPattern);
-
-  if (!blockMatch) {
-    return [];
-  }
-
-  return blockMatch[1]
-    .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => line.startsWith('- '))
-    .map((line) => line.slice(2).trim())
-    .filter(Boolean);
-}
-
-export interface RepositoryData {
-  githubUsers: string[];
-  githubRepos: string[];
-}
-
 export interface SocialLink {
   label: string;
   href: string;
-}
-
-export async function getRepositoryData(): Promise<RepositoryData> {
-  const content = await readFile(path.join(dataRoot, 'repositories.yml'), 'utf-8');
-
-  return {
-    githubUsers: extractYamlList(content, 'github_users'),
-    githubRepos: extractYamlList(content, 'github_repos'),
-  };
 }
 
 export async function getSocialLinks(): Promise<SocialLink[]> {

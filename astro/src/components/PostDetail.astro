@@ -68,6 +68,8 @@ function toAbsoluteUrl(input: string): string {
 }
 
 const articleImageUrl = toAbsoluteUrl(post.data.thumbnail ?? siteConfig.defaultOgImage);
+const authorName = post.data.author ?? '0xnefertt';
+const authorUrl = new URL('/author/', siteConfig.siteUrl).toString();
 const publishedIso = post.data.date?.toISOString();
 const modifiedIso = (post.data.last_updated ?? post.data.date)?.toISOString();
 const keywordValues = [...tags, ...categories];
@@ -78,11 +80,14 @@ const articleJsonLd = JSON.stringify({
   description: post.data.description ?? post.data.title,
   author: {
     '@type': 'Person',
-    name: post.data.author ?? '0xnefertt',
+    name: authorName,
+    url: authorUrl,
+    sameAs: ['https://github.com/0xnefertt', 'https://x.com/0xnefertt'],
   },
   publisher: {
     '@type': 'Person',
     name: '0xnefertt',
+    url: authorUrl,
   },
   mainEntityOfPage: canonicalPostUrl,
   image: [articleImageUrl],
@@ -111,6 +116,7 @@ const showMultiplexAd = siteConfig.adsensePublisherId.length > 0 && !redirectTar
   ogImage={post.data.thumbnail ?? siteConfig.defaultOgImage}
   articlePublishedTime={post.data.date}
   articleModifiedTime={post.data.last_updated ?? post.data.date}
+  lang={post.data.lang ?? 'ko'}
 >
   {redirectTarget && <meta slot="head" http-equiv="refresh" content={`0; url=${redirectTarget}`} />}
   <script slot="head" type="application/ld+json" set:html={articleJsonLd}></script>
@@ -119,7 +125,7 @@ const showMultiplexAd = siteConfig.adsensePublisherId.length > 0 && !redirectTar
     <h1>{post.data.title}</h1>
     <p>
       {formatPostDate(post.data.date)}
-      {post.data.author ? ` · ${post.data.author}` : ''}
+      {' · '}<a href="/author/" rel="author">{authorName}</a>
       {post.data.external_source ? ` · ${post.data.external_source}` : ''}
     </p>
 

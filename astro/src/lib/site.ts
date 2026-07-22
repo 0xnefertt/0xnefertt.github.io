@@ -1,17 +1,16 @@
 import { getCollection } from 'astro:content';
 import { getPublishedBlogPosts, listBlogCategoryTree } from './blog';
 
-const gaMeasurementId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID?.trim() || 'G-XKLJ41F6PS';
-const adsensePublisherId = import.meta.env.PUBLIC_ADSENSE_PUBLISHER_ID?.trim() || 'ca-pub-8138616027618632';
+const gaMeasurementId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID?.trim() ?? '';
+const adsensePublisherId = import.meta.env.PUBLIC_ADSENSE_PUBLISHER_ID?.trim() ?? '';
 
 export const siteConfig = {
   title: "0xnefertt's thoughts",
-  description:
-    'Academic portfolio and research blog by 0xnefertt. Sharing insights on technology, research, and academic work in computer science and related fields.',
-  lang: 'en',
+  description: '소프트웨어 개발, 캐나다 생활, 커리어와 금융 리서치를 직접 경험과 공식 자료를 바탕으로 기록하는 0xnefertt의 블로그입니다.',
+  lang: 'ko',
   siteUrl: 'https://0xnefertt.github.io',
   blogName: "0xnefertt's Blog",
-  blogDescription: 'Academic insights and research notes on technology, computer science, and innovation',
+  blogDescription: '소프트웨어 개발, 캐나다 생활, 커리어와 금융에 관한 학습 기록과 실용적인 리서치',
   defaultOgImage: '/assets/img/prof_pic.jpg',
   xHandle: '@0xnefertt',
   adsensePublisherId,

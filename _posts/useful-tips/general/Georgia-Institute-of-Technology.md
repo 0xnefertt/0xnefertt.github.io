@@ -12,7 +12,7 @@ tags:
   - education
 categories:
   - general
-draft: false
+draft: true
 ---
 
 [2026-06-29.png]

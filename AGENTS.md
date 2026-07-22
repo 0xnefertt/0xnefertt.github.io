@@ -5,7 +5,7 @@
 This repository runs on Astro.
 
 - Primary app: `astro/` (source and output under `astro/dist/`).
-- Content sources: `_pages/`, `_posts/`, `_projects/`, `_news/`, `_books/`.
+- Content sources: `_pages/`, `_posts/`, `_projects/`, `_books/`.
 - Shared assets/data: `astro/public/assets/`, `_data/`.
 - Automation: `.github/workflows/`.
 - Generated output: `astro/dist/` (do not edit directly).

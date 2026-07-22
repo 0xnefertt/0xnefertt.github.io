@@ -14,6 +14,7 @@ interface Props {
   articleModifiedTime?: Date | string;
   noindex?: boolean;
   disableAds?: boolean;
+  lang?: 'ko' | 'en';
 }
 
 function toAbsoluteCanonicalUrl(input: string): string {
@@ -36,6 +37,7 @@ const {
   articleModifiedTime,
   noindex = false,
   disableAds = false,
+  lang = siteConfig.lang,
 } = Astro.props;
 const pageTitle = title ? `${title} | ${siteConfig.title}` : siteConfig.title;
 const canonicalUrl = canonicalHref ? toAbsoluteCanonicalUrl(canonicalHref) : new URL(Astro.url.pathname, siteConfig.siteUrl).toString();
@@ -84,7 +86,6 @@ function getNavI18nKey(href: string): string | undefined {
     '/blog/': 'nav_blog',
     '/books/': 'nav_bookshelf',
     '/projects/': 'nav_projects',
-    '/repositories/': 'nav_repositories',
   };
 
   return map[href];
@@ -92,7 +93,7 @@ function getNavI18nKey(href: string): string | undefined {
 ---
 
 <!doctype html>
-<html lang={siteConfig.lang}>
+<html lang={lang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -115,6 +116,25 @@ function getNavI18nKey(href: string): string | undefined {
     <meta name="twitter:image" content={socialImage} />
     <meta name="twitter:site" content={siteConfig.xHandle} />
     <meta name="twitter:creator" content={siteConfig.xHandle} />
+    <script is:inline>
+      (() => {
+        window.dataLayer = window.dataLayer || [];
+        window.gtag =
+          window.gtag ||
+          function gtag() {
+            window.dataLayer.push(arguments);
+          };
+
+        window.gtag('consent', 'default', {
+          ad_storage: 'denied',
+          ad_user_data: 'denied',
+          ad_personalization: 'denied',
+          analytics_storage: 'denied',
+          wait_for_update: 2000,
+        });
+        window.gtag('set', 'ads_data_redaction', true);
+      })();
+    </script>
     {
       hasGaMeasurementId && (
         <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}></script>
@@ -123,13 +143,8 @@ function getNavI18nKey(href: string): string | undefined {
     {
       hasGaMeasurementId && (
         <script is:inline define:vars={{ gaMeasurementId }}>
-          window.dataLayer = window.dataLayer || [];
-          function gtag() {
-            window.dataLayer.push(arguments);
-          }
-          window.gtag = window.gtag || gtag;
-          gtag('js', new Date());
-          gtag('config', gaMeasurementId);
+          window.gtag('js', new Date());
+          window.gtag('config', gaMeasurementId);
         </script>
       )
     }
@@ -471,7 +486,6 @@ function getNavI18nKey(href: string): string | undefined {
             nav_blog: 'blog',
             nav_bookshelf: 'bookshelf',
             nav_projects: 'projects',
-            nav_repositories: 'repositories',
             category_study_log: 'study log',
             category_dev: 'dev',
             category_english: 'english',
@@ -500,7 +514,6 @@ function getNavI18nKey(href: string): string | undefined {
             nav_blog: '블로그',
             nav_bookshelf: '책장',
             nav_projects: '프로젝트',
-            nav_repositories: '저장소',
             category_study_log: '공부 기록',
             category_dev: 'dev',
             category_english: 'english',

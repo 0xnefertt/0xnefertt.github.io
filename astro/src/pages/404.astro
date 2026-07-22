@@ -2,12 +2,10 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="Page not found" description="404">
-  <meta slot="head" http-equiv="refresh" content="3; url=/" />
-
+<Layout title="Page not found" description="요청한 페이지를 찾을 수 없습니다." noindex disableAds>
   <section class="card">
     <h1>Page not found</h1>
-    <p>The page you requested does not exist. You will be redirected to the homepage in 3 seconds.</p>
+    <p>The page you requested does not exist.</p>
     <p><a href="/">Return to homepage</a></p>
   </section>
 </Layout>

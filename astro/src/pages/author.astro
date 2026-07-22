@@ -2,6 +2,18 @@
 import PolicyPage from '../components/PolicyPage.astro';
 
 const updatedAt = '2026년 7월 22일';
+const profileJsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'ProfilePage',
+  mainEntity: {
+    '@type': 'Person',
+    name: '0xnefertt',
+    url: 'https://0xnefertt.github.io/author/',
+    image: 'https://0xnefertt.github.io/assets/img/prof_pic.jpg',
+    jobTitle: 'Software Developer',
+    sameAs: ['https://github.com/0xnefertt', 'https://x.com/0xnefertt'],
+  },
+}).replace(/</g, '\\u003c');
 ---
 
 <PolicyPage
@@ -11,6 +23,7 @@ const updatedAt = '2026년 7월 22일';
   updatedAt={updatedAt}
   currentPath="/author/"
 >
+  <script type="application/ld+json" set:html={profileJsonLd}></script>
   <ul slot="toc">
     <li><a href="#profile">프로필</a></li>
     <li><a href="#topics">주요 주제</a></li>

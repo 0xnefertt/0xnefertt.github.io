@@ -9,6 +9,7 @@ tags:
   - dev
 categories:
   - dev
+draft: true
 ---
 
 파이썬 타입 시스템에서 알아보자.

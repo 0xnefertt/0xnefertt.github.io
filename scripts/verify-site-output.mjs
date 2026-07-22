@@ -5,7 +5,16 @@ import path from "node:path";
 
 const repoRoot = process.cwd();
 const distRoot = path.join(repoRoot, "astro", "dist");
-const requiredFiles = [".nojekyll", "sitemap.xml", "rss.xml", "robots.txt", "blog/search/index.html", "blog/search-index.json"];
+const requiredFiles = [
+  ".nojekyll",
+  "404.html",
+  "ads.txt",
+  "sitemap.xml",
+  "rss.xml",
+  "robots.txt",
+  "blog/search/index.html",
+  "blog/search-index.json",
+];
 
 async function exists(filePath) {
   try {
@@ -38,6 +47,10 @@ async function listHtmlFiles(directory) {
 
 function hasNoindexFollow(html) {
   return /<meta\s+name="robots"\s+content="noindex, follow"\s*\/?\s*>/.test(html);
+}
+
+function loadsAdsense(html) {
+  return html.includes("pagead2.googlesyndication.com/pagead/js/adsbygoogle.js");
 }
 
 async function run() {
@@ -73,6 +86,22 @@ async function run() {
     process.exit(1);
   }
 
+  if (loadsAdsense(searchHtml)) {
+    console.error("[verify-site-output] blog search page must not load AdSense");
+    process.exit(1);
+  }
+
+  const notFoundHtml = await fs.readFile(path.join(distRoot, "404.html"), "utf8");
+  if (!hasNoindexFollow(notFoundHtml) || loadsAdsense(notFoundHtml) || /http-equiv="refresh"/i.test(notFoundHtml)) {
+    console.error("[verify-site-output] 404 page must be noindex, ad-free, and free of automatic redirects");
+    process.exit(1);
+  }
+
+  if (await exists(path.join(distRoot, "repositories", "index.html"))) {
+    console.error("[verify-site-output] removed repositories template page was generated");
+    process.exit(1);
+  }
+
   const paginationFiles = (await listHtmlFiles(path.join(distRoot, "blog"))).filter((filePath) => /\/page-\d+\/index\.html$/.test(filePath));
   for (const filePath of paginationFiles) {
     const html = await fs.readFile(filePath, "utf8");
@@ -92,12 +121,16 @@ async function run() {
   }
 
   const sitemap = await fs.readFile(path.join(distRoot, "sitemap.xml"), "utf8");
-  if (sitemap.includes("/blog/search/") || /\/page-\d+\//.test(sitemap)) {
+  if (sitemap.includes("/blog/search/") || sitemap.includes("/repositories/") || /\/page-\d+\//.test(sitemap)) {
     console.error("[verify-site-output] noindex search or pagination URL found in sitemap.xml");
     process.exit(1);
   }
 
-  console.log(`[verify-site-output] OK (${requiredFiles.join(", ")}; search asset; noindex pages; no empty categories)`);
+  console.log(
+    `[verify-site-output] OK (${requiredFiles.join(
+      ", "
+    )}; search asset; ad-free utility pages; noindex pages; no empty categories; no removed templates)`
+  );
 }
 
 run().catch((error) => {

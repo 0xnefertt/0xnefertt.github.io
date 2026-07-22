@@ -16,9 +16,12 @@ tags:
 categories:
   - in-canada
 draft: false
+last_updated: 2026-07-22
 ---
 
 ## 들어가며
+
+> **제휴 고지:** 이 글에는 작성자의 American Express 추천 링크가 포함되어 있습니다. 해당 링크로 카드가 승인되면 작성자가 포인트 보상을 받을 수 있습니다. 독자가 부담하는 카드 비용은 링크 사용 여부와 무관하며, 보상 가능성이 글의 평가 기준을 바꾸지 않습니다. 혜택과 수수료는 수시로 변경될 수 있으므로 신청 전 공식 약관을 확인하세요.
 
 보통 캐나다에 처음 오는 경우라면, 은행 계좌 개설과 동시에 신용카드도 발급을 받는다. 캐나다 빅 5 은행사에서 만들어준 신용카드를 사용하고 유지하는 경우가 많다. 연회비가 없다는 것 빼고?? 혜택이 그리 좋지는(?) 않다.
 
@@ -76,15 +79,15 @@ draft: false
 
 - 기본 1% 적립
 
-[American Express Cobalt Card referral](https://americanexpress.com/en-ca/referral/cobalt?ref=sUNGJWw0jp&CPID=999999538)
+<a href="https://americanexpress.com/en-ca/referral/cobalt?ref=sUNGJWw0jp&CPID=999999538" rel="sponsored nofollow">American Express Cobalt Card 추천 링크</a>
 
 마지막으로 포인트를 쌓을 수 있는 또 다른 방법은 바로 레퍼럴이다.
 
-누군가 내 레퍼럴을 이용해서 카드를 발급한다면, 내가 5,000포인트를 받을 수 있다. 누군가 이 글을 보고 해줄지 모르겠지만 가입해준다면 너무 감사할 것 같다.
+추천 보상 규모와 신청자 프로모션은 시점과 계정에 따라 달라질 수 있다. 링크를 열었을 때 표시되는 조건을 기준으로 판단해야 한다.
 
 한 가지 중요한 팁을 드리자면,
 
-아멕스 공식 사이트에서 제공하는 레퍼럴을 통해서 카드를 발급 받는 것보다 [greatcanadianrebates.ca](https://www.greatcanadianrebates.ca/) (← 본인 레퍼럴 포함되어있음) 라는 사이트를 통해서 카드를 개설하면 $100을 캐시백으로 받을 수 있다. 그래서 이 방법으로 카드를 만드는 것을 추천한다.
+리베이트 사이트를 경유하는 선택지도 있지만 캐시백 금액과 지급 조건은 수시로 바뀐다. <a href="https://www.greatcanadianrebates.ca/" rel="sponsored nofollow">Great Canadian Rebates</a>를 이용한다면 신청 전에 최신 조건과 개인정보 처리 방식을 직접 확인해야 한다.
 
 ## 참고해야 할 점
 
@@ -103,3 +106,8 @@ draft: false
 그 외는 기본 적립
 
 현명한 소비 습관으로 다들 고물가 시기를 잘 버텨나가기를..
+
+## 공식 자료
+
+- [American Express Cobalt Card 혜택과 적립 조건](https://www.americanexpress.com/ca/en/benefits/cobalt-card/index.html)
+- [American Express 카드 수수료 및 조건](https://www.americanexpress.com/en-ca/benefits/upgrade/cobalt-to-gold-card/)

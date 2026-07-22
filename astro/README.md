@@ -53,5 +53,4 @@ Astro collections read content from repository root:
 - `_pages/`
 - `_posts/`
 - `_projects/`
-- `_news/`
 - `_books/`

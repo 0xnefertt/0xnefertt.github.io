@@ -2,6 +2,7 @@
 layout: about
 title: about
 permalink: /
+description: "캐나다에서 일하는 소프트웨어 개발자 0xnefertt가 기술, 커리어, 캐나다 생활과 금융 리서치를 기록하는 블로그입니다."
 subtitle: "Go hang out with your loved ones or something."
 
 profile:

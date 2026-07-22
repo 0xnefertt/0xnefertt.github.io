@@ -5,7 +5,6 @@
     "post:new": "node scripts/new-post.mjs",
     "post:publish": "node scripts/post-publish.mjs",
     "post:image": "node scripts/post-image.mjs",
-    "cv:pdf": "node scripts/set-cv-pdf.mjs",
     "astro:build": "npm --prefix astro run build",
     "astro:dev": "npm --prefix astro run dev",
     "verify:content": "node scripts/check-posts.mjs",

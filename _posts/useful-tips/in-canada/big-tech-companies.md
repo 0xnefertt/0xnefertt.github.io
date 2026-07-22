@@ -10,7 +10,7 @@ tags:
   - tech
 categories:
   - in-canada
-draft: false
+draft: true
 ---
 
 밴쿠버에 있는 테크 회사들을 알아보자
