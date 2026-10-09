@@ -182,7 +182,7 @@ async function route(request: Request, env: Env): Promise<Response> {
         ),
       ]);
       const destination = flow.editor ? `${env.SITE_URL}/admin/#session=${id}&state=${flow.clientState}` : "/";
-      return redirect(destination, [cleared, cookie(request, COOKIE, id, seconds)]);
+      return redirect(destination, flow.editor ? [cleared] : [cleared, cookie(request, COOKIE, id, seconds)]);
     } catch (error) {
       return redirect(error instanceof HttpError && error.status === 403 ? "/?login=owner-only" : "/?login=failed", [cleared]);
     }

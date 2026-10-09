@@ -278,6 +278,7 @@ test("site login returns to the fixed admin address with its client nonce", asyn
     headers: { Cookie: start.headers.get("Set-Cookie").split(";")[0] },
   });
   const target = new URL(callback.headers.get("Location"));
+  assert.ok(!callback.headers.getSetCookie().some((value) => value.startsWith("writer_session=")));
   assert.equal(target.origin, "https://0xnefertt.github.io");
   assert.equal(target.pathname, "/admin/");
   const fragment = new URLSearchParams(target.hash.slice(1));
