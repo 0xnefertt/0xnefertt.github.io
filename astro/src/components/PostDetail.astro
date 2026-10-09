@@ -69,7 +69,7 @@ function toAbsoluteUrl(input: string): string {
 
 const articleImageUrl = toAbsoluteUrl(post.data.thumbnail ?? siteConfig.defaultOgImage);
 const authorName = post.data.author ?? '0xnefertt';
-const authorUrl = new URL('/author/', siteConfig.siteUrl).toString();
+const authorUrl = new URL('/', siteConfig.siteUrl).toString();
 const publishedIso = post.data.date?.toISOString();
 const modifiedIso = (post.data.last_updated ?? post.data.date)?.toISOString();
 const keywordValues = [...tags, ...categories];
@@ -125,7 +125,7 @@ const showMultiplexAd = siteConfig.adsensePublisherId.length > 0 && !redirectTar
     <h1>{post.data.title}</h1>
     <p>
       {formatPostDate(post.data.date)}
-      {' · '}<a href="/author/" rel="author">{authorName}</a>
+      {' · '}<a href="/" rel="author">{authorName}</a>
       {post.data.external_source ? ` · ${post.data.external_source}` : ''}
     </p>
 

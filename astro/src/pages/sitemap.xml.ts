@@ -3,17 +3,7 @@ import { getCollection } from 'astro:content';
 import { getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from '../lib/blog';
 import { siteConfig } from '../lib/site';
 
-const STATIC_PATHS = [
-  '/',
-  '/blog/',
-  '/books/',
-  '/projects/',
-  '/privacy/',
-  '/contact/',
-  '/author/',
-  '/financial-disclaimer/',
-  '/editorial-policy/',
-];
+const STATIC_PATHS = ['/', '/blog/', '/books/', '/projects/', '/privacy/'];
 
 function escapeXml(input: string): string {
   return input
