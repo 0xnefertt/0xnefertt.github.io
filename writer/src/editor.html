@@ -1,12 +1,12 @@
 <header class="writer-header">
-  <a class="brand" href="https://0xnefertt.github.io">0xnefertt<span> / 글쓰기</span></a>
+  <a class="brand" href="https://0xnefertt.github.io">0xnefertt<span> / admin</span></a>
   <div class="header-actions"><span id="save-status" role="status">연결 중</span><button id="logout" hidden>로그아웃</button></div>
 </header>
 <main>
   <section id="login-screen" class="welcome" hidden>
-    <span class="eyebrow">YOUR WRITING SPACE</span>
-    <h1>생각을 남기는 공간.</h1>
-    <p>어디서든 이어 쓰고, 준비가 되었을 때 발행하세요.<br />작성 중인 초안은 본인만 볼 수 있습니다.</p>
+    <span class="eyebrow">ADMIN</span>
+    <h1>글 관리</h1>
+    <p>GitHub로 로그인해 글을 작성하고 수정하세요.<br />초안은 비공개로 저장됩니다.</p>
     <a class="primary" id="login-link" href="#login-screen">GitHub로 로그인</a>
     <p id="login-message" class="muted" role="status"></p>
   </section>
@@ -23,9 +23,9 @@
     </aside>
     <section class="writing-area" aria-label="글 편집">
       <div id="empty" class="empty">
-        <span class="eyebrow">A LITTLE EVERY DAY</span>
-        <h2>오늘은 어떤 이야기를 남길까요?</h2>
-        <p>새 글을 쓰거나, 목록에서 이어 쓸 글을 선택하세요.</p>
+        <span class="eyebrow">POSTS</span>
+        <h2>글을 선택하세요</h2>
+        <p>새 글을 작성하거나 목록에서 수정할 글을 선택하세요.</p>
       </div>
       <div id="editor" hidden>
         <div class="editor-actions">
@@ -75,10 +75,7 @@
         </div>
         <div id="write-panel">
           <label class="sr-only" for="body">글 본문</label
-          ><textarea
-            id="body"
-            placeholder="이곳에 이야기를 써 주세요. Markdown을 사용할 수 있고, 이미지를 붙여넣거나 끌어 넣을 수 있습니다."
-          ></textarea>
+          ><textarea id="body" placeholder="본문을 입력하세요. Markdown을 사용할 수 있고, 이미지를 붙여넣거나 끌어 넣을 수 있습니다."></textarea>
         </div>
         <article id="preview-panel" class="post-preview" hidden>
           <header class="post-header">
@@ -94,7 +91,7 @@
 </main>
 <dialog id="publish-dialog">
   <form method="dialog">
-    <span class="eyebrow">READY TO SHARE?</span>
+    <span class="eyebrow">PUBLISH</span>
     <h2>이 글을 발행할까요?</h2>
     <p>글과 사용한 이미지가 블로그 저장소에 공개됩니다.<br />사이트에 반영되기까지 잠시 걸릴 수 있습니다.</p>
     <div class="dialog-actions"><button value="cancel">계속 작성</button><button class="primary" value="publish">발행하기</button></div>
