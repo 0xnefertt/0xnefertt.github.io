@@ -79,6 +79,12 @@ Never put the GitHub Client Secret or the session secret in a `PUBLIC_` variable
 
 Secrets, local database state, generated UI bundles, and test bundles are ignored by Git.
 
+## Post editor
+
+The visual editor supports headings, fonts, sizes, line spacing, bold, italic, underline, strikethrough, colors, highlighting, alignment, lists, quotes, code, links, images, and tables. Images can also be pasted or dropped into the body. Table controls add or remove rows and columns, toggle header rows, and merge or split cells. Undo history is isolated to the open post.
+
+Source editing and sanitized preview remain available. Opening a post or saving metadata preserves its original Markdown; editing the visual body produces Markdown with HTML for formatting that Markdown cannot express. Posts containing custom embeds, templates, or unsupported syntax open in source mode to preserve their content. Private image URLs remain private until publication, including images inside HTML tables.
+
 ## Site management
 
 `/admin/` includes Posts, Categories, and Favorites. Category names and ordering are independent of their stable URL slugs. Add parents or children, rename display names, reorder entries, or remove an unused category. Categories referenced by published posts or private drafts cannot be removed until those posts are reassigned.

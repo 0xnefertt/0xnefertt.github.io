@@ -97,10 +97,13 @@ export async function publishPost(env: Env, token: string, doc: PostDocument, me
   const content = await format(renderPost(doc, mediaPaths), { parser: "markdown", plugins: [markdown, yaml], printWidth: 150, trailingComma: "es5" });
   // Validate local references before writing anything to the public repository.
   const publicMedia = new Set(mediaPaths.values());
-  for (const match of content.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)) {
-    const image = match[1].trim().replace(/^<|>$/g, "").split(/\s/)[0];
+  const images = [
+    ...Array.from(content.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g), (match) => match[1].trim().replace(/^<|>$/g, "").split(/\s/)[0]),
+    ...Array.from(content.matchAll(/<img\b[^>]*\bsrc=["']([^"']+)["']/gi), (match) => match[1]),
+  ];
+  for (const image of images) {
     if (/^https?:\/\//i.test(image)) continue;
-    if (/^(data:|\/api\/)/i.test(image)) throw new HttpError(422, "이미지는 첨부 버튼으로 추가해 주세요.");
+    if (/^(data:|blob:|\/api\/)/i.test(image)) throw new HttpError(422, "이미지는 첨부 버튼으로 추가해 주세요.");
     const imagePath = image.startsWith("/assets/")
       ? `astro/public${image}`
       : image.startsWith("/")
