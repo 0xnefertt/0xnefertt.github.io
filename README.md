@@ -145,7 +145,7 @@ You can start from `.env.example` at repository root.
 
 ## AdSense Auto ads checklist
 
-This site loads the global AdSense script and content-page ad slots. Search, policy, contact, and 404 pages are intentionally ad-free.
+This site loads the global AdSense script and content-page ad slots. Search, privacy, the writing space, and 404 pages are intentionally ad-free.
 
 Before expecting ads to appear:
 
