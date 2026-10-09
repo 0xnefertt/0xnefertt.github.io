@@ -30,6 +30,7 @@ jobs:
         run: |
           npm ci
           npm --prefix astro ci
+          npm --prefix writer ci
 
       - name: Build Astro site 🔧
         run: npm run astro:build

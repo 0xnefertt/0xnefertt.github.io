@@ -25,6 +25,7 @@ jobs:
         run: |
           npm ci
           npm --prefix astro ci
+          npm --prefix writer ci
 
       - name: Run content health report 🧪
         id: content_check
