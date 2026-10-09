@@ -26,6 +26,7 @@ jobs:
         run: |
           npm ci
           npm --prefix astro ci
+          npm --prefix writer ci
 
       - name: Validate and build site ✅
         run: |

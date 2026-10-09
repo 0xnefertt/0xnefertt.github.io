@@ -495,7 +495,7 @@ element("logout").addEventListener(
 );
 
 async function start() {
-  if (apiBase) element<HTMLAnchorElement>("login-link").href = `${apiBase}/auth/login?editor=site`;
+  element<HTMLAnchorElement>("login-link").href = apiBase ? `${apiBase}/auth/login?editor=site` : "/auth/login";
   try {
     const session = await api<{ csrf: string }>("/api/session");
     csrf = session.csrf;
