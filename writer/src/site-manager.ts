@@ -27,8 +27,8 @@ export function siteManager(api: Api, leave: () => Promise<boolean>) {
     for (const path of Object.keys(usage))
       if (!options.some((item) => item.value === path)) options.push({ value: path, label: path.replaceAll("/", " / ") });
     select.replaceChildren(...options.map((item) => new Option(item.label, item.value)));
-    if (value && !options.some((item) => item.value === value)) select.add(new Option(value, value));
-    if (value) select.value = value;
+    if (value && options.some((item) => item.value === value)) select.value = value;
+    el<HTMLButtonElement>("new-post").disabled = !select.value;
   }
   function apply(snapshot: SettingsSnapshot) {
     settings = structuredClone(snapshot.settings);

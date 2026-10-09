@@ -381,6 +381,10 @@ element("new-post").addEventListener(
   () =>
     void (async () => {
       if (switching) return;
+      if (!category.value) {
+        status("카테고리를 추가한 뒤 새 글을 작성해 주세요.");
+        return;
+      }
       switching = true;
       try {
         if (!(await leave())) return;
@@ -391,7 +395,7 @@ element("new-post").addEventListener(
           description: "",
           date,
           slug: "",
-          category: category.value || "study-log/dev",
+          category: category.value,
           tags: [],
           body: "",
           metadata: {},
