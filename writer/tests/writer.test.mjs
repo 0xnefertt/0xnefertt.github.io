@@ -14,9 +14,12 @@ let mf;
 let ownerId = 170924802;
 let failBranch = false;
 let calls = [];
+const settingsSha = "1".repeat(40);
+let configuredSettings;
 let auth;
 
 before(async () => {
+  configuredSettings = JSON.parse(await readFile("../_data/site-settings.json", "utf8"));
   await mkdir(".test-build", { recursive: true });
   await build({
     entryPoints: ["src/worker.ts"],
@@ -55,7 +58,27 @@ before(async () => {
         if (url.pathname.endsWith("/git/ref/heads/main")) return json({ object: { sha: "b".repeat(40) } });
         if (url.pathname.endsWith(`/git/commits/${"b".repeat(40)}`)) return json({ tree: { sha: "c".repeat(40) } });
         if (url.pathname.endsWith(`/git/trees/${"c".repeat(40)}`))
-          return json({ truncated: false, tree: [{ path: sourcePath, sha: originalSha, type: "blob" }] });
+          return json({
+            truncated: false,
+            tree: [
+              { path: sourcePath, sha: originalSha, type: "blob" },
+              { path: "_data/site-settings.json", sha: settingsSha, type: "blob" },
+            ],
+          });
+        if (url.pathname.endsWith(`/git/blobs/${settingsSha}`)) {
+          const content = JSON.stringify(configuredSettings);
+          return json({ content: Buffer.from(content).toString("base64"), size: content.length });
+        }
+        if (url.pathname === "/graphql")
+          return json({
+            data: {
+              repository: Object.fromEntries(
+                Object.keys(data.variables)
+                  .filter((key) => /^p\d+$/.test(key))
+                  .map((key) => [key, { text: existing }])
+              ),
+            },
+          });
         if (url.pathname.includes("/contents/"))
           return json({ content: Buffer.from(existing).toString("base64"), sha: originalSha, size: existing.length });
         if (url.pathname.endsWith("/git/blobs")) return json({ sha: "d".repeat(40) });
@@ -133,7 +156,7 @@ async function create(doc = document()) {
 
 test("private drafts and media cannot be read without a session", async () => {
   const value = await create();
-  for (const path of ["/api/session", "/api/drafts", `/api/drafts/${value.id}`, `/api/media/${crypto.randomUUID()}`]) {
+  for (const path of ["/api/session", "/api/site-settings", "/api/drafts", `/api/drafts/${value.id}`, `/api/media/${crypto.randomUUID()}`]) {
     const response = await mf.dispatchFetch(`${origin}${path}`);
     assert.equal(response.status, 401);
     assert.equal(response.headers.get("Cache-Control"), "no-store");
@@ -303,6 +326,77 @@ test("category edits retain the original file and record old category routes", a
   assert.deepEqual(result.draft.document.metadata.categories, ["life-thoughts/retrospect"]);
   assert.ok(result.draft.document.metadata.legacy_categories.includes("study-log/dev"));
 });
+
+test("settings load existing favorites and category usage only for the owner", async () => {
+  const response = await request("/api/site-settings");
+  assert.equal(response.status, 200);
+  const value = await response.json();
+  assert.equal(value.sha, settingsSha);
+  assert.deepEqual(value.settings.favorites, configuredSettings.favorites);
+  assert.ok(value.usage["study-log/dev"] >= 1);
+});
+test("settings save writes only configuration atomically and refuses stale revisions", async () => {
+  const settings = structuredClone(configuredSettings);
+  settings.categories[0].name = "Development notes";
+  settings.favorites.reverse();
+  settings.favorites.push({ name: "New group", items: [{ title: "Example", href: "https://example.com", note: "A note" }] });
+  calls = [];
+  const result = await request("/api/site-settings", { method: "PUT", data: { settings, sha: settingsSha } });
+  assert.equal(result.status, 200, await result.clone().text());
+  const tree = calls.find((call) => call.path.endsWith("/git/trees") && call.method === "POST");
+  assert.deepEqual(
+    tree.data.tree.map((entry) => entry.path),
+    ["_data/site-settings.json"]
+  );
+  const content = calls.find((call) => call.path.endsWith("/git/blobs") && call.method === "POST").data.content;
+  assert.equal(await prettier.check(content, { parser: "json", printWidth: 150, trailingComma: "es5" }), true);
+  const parsed = JSON.parse(content);
+  assert.equal(parsed.categories[0].name, "Development notes");
+  assert.equal(parsed.favorites.at(-1).items[0].href, "https://example.com");
+  assert.equal(calls.find((call) => call.method === "PATCH").data.force, false);
+  calls = [];
+  assert.equal((await request("/api/site-settings", { method: "PUT", data: { settings, sha: "0".repeat(40) } })).status, 409);
+  assert.ok(!calls.some((call) => call.path.endsWith("/git/blobs") && call.method === "POST"));
+});
+test("settings reject unsafe links, duplicate slugs, deleted used categories, and CSRF", async () => {
+  const invalidLink = structuredClone(configuredSettings);
+  invalidLink.favorites[0].items[0].href = "javascript:alert(1)";
+  const duplicate = structuredClone(configuredSettings);
+  duplicate.categories.push(duplicate.categories[0]);
+  const removed = structuredClone(configuredSettings);
+  removed.categories[0].children = removed.categories[0].children.filter((child) => child.slug !== "dev");
+  for (const settings of [invalidLink, duplicate, removed]) {
+    calls = [];
+    const response = await request("/api/site-settings", { method: "PUT", data: { settings, sha: settingsSha } });
+    assert.equal(response.status, 422, await response.clone().text());
+    assert.ok(!calls.some((call) => call.path.endsWith("/git/blobs") && call.method === "POST"));
+  }
+  assert.equal(
+    (
+      await request("/api/site-settings", {
+        method: "PUT",
+        data: { settings: configuredSettings, sha: settingsSha },
+        headers: { "X-CSRF-Token": "" },
+      })
+    ).status,
+    403
+  );
+});
+test("settings protect categories used by new drafts and handle concurrent branch writes", async () => {
+  await create(document({ category: "money-talk/property" }));
+  const removed = structuredClone(configuredSettings);
+  removed.categories.find((group) => group.slug === "money-talk").children = removed.categories
+    .find((group) => group.slug === "money-talk")
+    .children.filter((child) => child.slug !== "property");
+  assert.equal((await request("/api/site-settings", { method: "PUT", data: { settings: removed, sha: settingsSha } })).status, 422);
+  failBranch = true;
+  try {
+    assert.equal((await request("/api/site-settings", { method: "PUT", data: { settings: configuredSettings, sha: settingsSha } })).status, 409);
+  } finally {
+    failBranch = false;
+  }
+});
+
 test("logout invalidates the server session", async () => {
   const response = await request("/api/logout", { method: "POST" });
   assert.equal(response.status, 200);

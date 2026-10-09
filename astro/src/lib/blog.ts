@@ -1,5 +1,6 @@
 import type { CollectionEntry } from 'astro:content';
 import { normalizeAssetPath } from './content';
+import { siteSettings } from './settings';
 
 export interface PostRoute {
   year: string;
@@ -81,7 +82,7 @@ interface ParentCategoryPreset {
   children: { slug: string; label: string }[];
 }
 
-const PARENT_CATEGORY_PRESETS: ParentCategoryPreset[] = [
+const LEGACY_CATEGORY_PRESETS: ParentCategoryPreset[] = [
   {
     slug: 'study-log',
     label: 'study log',
@@ -121,10 +122,15 @@ const PARENT_CATEGORY_PRESETS: ParentCategoryPreset[] = [
   },
 ];
 
+const PARENT_CATEGORY_PRESETS: ParentCategoryPreset[] = siteSettings.categories.map((group) => ({
+  slug: group.slug,
+  label: group.name,
+  aliases: LEGACY_CATEGORY_PRESETS.find((preset) => preset.slug === group.slug)?.aliases ?? [group.slug],
+  children: group.children.map((child) => ({ slug: child.slug, label: child.name })),
+}));
 const PARENT_ALIAS_LOOKUP = new Map<string, ParentCategoryPreset>(
-  PARENT_CATEGORY_PRESETS.flatMap((preset) => preset.aliases.map((alias) => [alias, preset] as const))
+  [...LEGACY_CATEGORY_PRESETS, ...PARENT_CATEGORY_PRESETS].flatMap((preset) => preset.aliases.map((alias) => [alias, preset] as const))
 );
-
 const PARENT_CATEGORY_ORDER = new Map(PARENT_CATEGORY_PRESETS.map((preset, index) => [preset.slug, index]));
 const CHILD_CATEGORY_ORDER = new Map(
   PARENT_CATEGORY_PRESETS.flatMap((preset) => preset.children.map((child, index) => [`${preset.slug}/${child.slug}`, index] as const))
@@ -154,7 +160,12 @@ const PARENT_ONLY_ALIAS_SLUGS = new Set(['life', 'life-thoughts', 'thoughts', 'u
 
 export function getCategoryI18nKey(href: string): string | undefined {
   const normalized = href.endsWith('/') ? href : `${href}/`;
-  return CATEGORY_I18N_KEYS[normalized];
+  const [parentSlug, childSlug] = normalized.replace('/blog/category/', '').split('/');
+  const preset = PARENT_CATEGORY_PRESETS.find((group) => group.slug === parentSlug);
+  const legacy = LEGACY_CATEGORY_PRESETS.find((group) => group.slug === parentSlug);
+  const currentLabel = childSlug ? preset?.children.find((child) => child.slug === childSlug)?.label : preset?.label;
+  const originalLabel = childSlug ? legacy?.children.find((child) => child.slug === childSlug)?.label : legacy?.label;
+  return currentLabel === originalLabel ? CATEGORY_I18N_KEYS[normalized] : undefined;
 }
 
 function toTitleCaseWords(input: string): string {
@@ -185,7 +196,7 @@ function remapCategoryPath(names: string[], slugs: string[]): { names: string[];
 
   if (childName && childSlug) {
     return {
-      names: [preset.label, getCategoryLabel(childName, childSlug)],
+      names: [preset.label, preset.children.find((child) => child.slug === childSlug)?.label ?? getCategoryLabel(childName, childSlug)],
       slugs: [preset.slug, childSlug],
     };
   }
@@ -197,7 +208,7 @@ function remapCategoryPath(names: string[], slugs: string[]): { names: string[];
     };
   }
 
-  const childLabel = getCategoryLabel(parentName, parentSlug);
+  const childLabel = preset.children.find((child) => child.slug === parentSlug)?.label ?? getCategoryLabel(parentName, parentSlug);
   return {
     names: [preset.label, childLabel],
     slugs: [preset.slug, parentSlug],

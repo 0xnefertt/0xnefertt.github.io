@@ -5,6 +5,7 @@ import PostCard from '../components/PostCard.astro';
 import { getPublishedBlogPosts, sortPostsDesc, toBlogSummary } from '../lib/blog';
 import { normalizeAssetPath } from '../lib/content';
 import { siteConfig } from '../lib/site';
+import { siteSettings } from '../lib/settings';
 
 const pages = await getCollection('pages');
 const aboutPage = pages.find((entry) => entry.filePath?.endsWith('/about.md') || entry.id === 'about');
@@ -20,17 +21,6 @@ const latestPosts = allPosts.slice(0, latestLimit).map(toBlogSummary);
 const profile = aboutPage.data.profile;
 const subtitle = aboutPage.data.subtitle;
 const profileImage = normalizeAssetPath(profile?.image);
-
-interface FavoriteLink {
-  title: string;
-  href: string;
-  note?: string;
-}
-
-interface FavoriteCategory {
-  name: string;
-  items: FavoriteLink[];
-}
 
 interface UsefulInfoConfig {
   enabled: boolean;
@@ -49,83 +39,6 @@ const DEFAULT_USEFUL_INFO: UsefulInfoConfig = {
   baseCurrency: 'USD',
   targetCurrencies: ['KRW', 'CAD'],
 };
-
-const FAVORITE_PRIMARY_CATEGORIES = ['AI', 'Blockchain'];
-
-function toFavoriteLinks(input: unknown): FavoriteLink[] {
-  if (!Array.isArray(input)) {
-    return [];
-  }
-
-  return input
-    .map((item) => {
-      if (!item || typeof item !== 'object') {
-        return null;
-      }
-
-      const record = item as Record<string, unknown>;
-      const title = typeof record.title === 'string' ? record.title.trim() : '';
-      const href = typeof record.href === 'string' ? record.href.trim() : '';
-      const note = typeof record.note === 'string' ? record.note.trim() : undefined;
-
-      if (!title || !href) {
-        return null;
-      }
-
-      return {
-        title,
-        href,
-        note,
-      };
-    })
-    .filter((item): item is FavoriteLink => item !== null);
-}
-
-function toFavoriteCategories(input: unknown): FavoriteCategory[] {
-  const byName = new Map<string, FavoriteLink[]>();
-  FAVORITE_PRIMARY_CATEGORIES.forEach((name) => {
-    byName.set(name, []);
-  });
-
-  if (Array.isArray(input)) {
-    input.forEach((entry) => {
-      if (!entry || typeof entry !== 'object') {
-        return;
-      }
-
-      const record = entry as Record<string, unknown>;
-      const rawName = typeof record.name === 'string' ? record.name.trim() : typeof record.title === 'string' ? record.title.trim() : '';
-      const items = toFavoriteLinks(record.items);
-
-      if (rawName) {
-        if (rawName === 'Developer' || rawName === 'News') {
-          return;
-        }
-
-        if (!byName.has(rawName)) {
-          byName.set(rawName, items);
-        } else if (items.length > 0) {
-          byName.set(rawName, items);
-        }
-        return;
-      }
-    });
-  }
-
-  const ordered = FAVORITE_PRIMARY_CATEGORIES.map((name) => ({
-    name,
-    items: byName.get(name) ?? [],
-  }));
-
-  for (const [name, items] of byName.entries()) {
-    if (FAVORITE_PRIMARY_CATEGORIES.includes(name)) {
-      continue;
-    }
-    ordered.push({ name, items });
-  }
-
-  return ordered.filter((category) => category.items.length > 0);
-}
 
 function isExternalLink(href: string): boolean {
   return /^https?:\/\//.test(href);
@@ -168,7 +81,7 @@ function toUsefulInfoConfig(input: unknown): UsefulInfoConfig {
 }
 
 const aboutData = aboutPage.data as Record<string, unknown>;
-const favoriteCategories = toFavoriteCategories(aboutData.favorites);
+const favoriteCategories = siteSettings.favorites.filter((group) => group.items.length > 0);
 const usefulInfo = toUsefulInfoConfig(aboutData.useful_info);
 const homeVerticalAdSlot = '3436251506';
 const showHomeVerticalAd = siteConfig.adsensePublisherId.length > 0;
