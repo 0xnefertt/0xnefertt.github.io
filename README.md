@@ -95,6 +95,9 @@ Notes:
 
 ## Draft and publish flow
 
+Write and edit posts directly at `/admin/` (`/edit/` also opens the editor), with GitHub login, private drafts, image attachment, and category settings.
+See [the writing space documentation](writer/README.md). `PUBLIC_WRITER_URL` configures the backend API; the interface stays on the blog.
+
 - `draft: true` posts are excluded from:
   - blog lists
   - category pages

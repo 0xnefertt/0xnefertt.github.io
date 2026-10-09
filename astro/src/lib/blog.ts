@@ -307,7 +307,7 @@ export function getPostCategoryPaths(post: CollectionEntry<'blog'>): BlogCategor
   const explicitCategories = normalizeTaxonomy(post.data.categories).map((item) => item.trim()).filter(Boolean);
   const inferredCategoryPath = inferCategoryPathFromFilePath(post.filePath);
   const inferredParentSlug = inferredCategoryPath.length === 1 ? slugifyTerm(inferredCategoryPath[0]) : undefined;
-  const shouldUseInferredPath = inferredCategoryPath.length > 0 && !(explicitCategories.length > 0 && inferredParentSlug && LANGUAGE_CATEGORY_SLUGS.has(inferredParentSlug));
+  const shouldUseInferredPath = post.data.category_override !== true && inferredCategoryPath.length > 0 && !(explicitCategories.length > 0 && inferredParentSlug && LANGUAGE_CATEGORY_SLUGS.has(inferredParentSlug));
 
   const explicitEntries = explicitCategories.map(parseCategoryTerm).filter((segments) => segments.length > 0);
   const entries: string[][] = [...explicitEntries];
@@ -352,6 +352,12 @@ export function getPostCategoryPaths(post: CollectionEntry<'blog'>): BlogCategor
   }
 
   return [...uniqueByKey.values()];
+}
+
+export function getLegacyCategoryPaths(post: CollectionEntry<'blog'>): BlogCategoryPath[] {
+  return normalizeTaxonomy(post.data.legacy_categories)
+    .map((item) => toCategoryPath(parseCategoryTerm(item)))
+    .filter((item): item is BlogCategoryPath => Boolean(item));
 }
 
 export function getPostCategories(post: CollectionEntry<'blog'>): string[] {

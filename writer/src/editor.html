@@ -1,0 +1,102 @@
+<header class="writer-header">
+  <a class="brand" href="https://0xnefertt.github.io">0xnefertt<span> / 글쓰기</span></a>
+  <div class="header-actions"><span id="save-status" role="status">연결 중</span><button id="logout" hidden>로그아웃</button></div>
+</header>
+<main>
+  <section id="login-screen" class="welcome" hidden>
+    <span class="eyebrow">YOUR WRITING SPACE</span>
+    <h1>생각을 남기는 공간.</h1>
+    <p>어디서든 이어 쓰고, 준비가 되었을 때 발행하세요.<br />작성 중인 초안은 본인만 볼 수 있습니다.</p>
+    <a class="primary" id="login-link" href="/auth/login">GitHub로 로그인</a>
+    <p id="login-message" class="muted" role="status"></p>
+  </section>
+  <div id="workspace" class="workspace" hidden>
+    <aside class="library">
+      <button id="new-post" class="primary">＋ 새 글 쓰기</button>
+      <label class="search-label" for="search">글 찾기</label>
+      <input id="search" type="search" placeholder="제목이나 주소로 검색" />
+      <div class="library-tabs" role="group" aria-label="글 목록 선택">
+        <button id="draft-tab" aria-pressed="true">초안</button><button id="post-tab" aria-pressed="false">기존 글</button>
+      </div>
+      <div id="post-list" class="post-list" aria-live="polite"></div>
+      <p class="library-note">초안은 자동으로 비공개 저장됩니다.<br />발행한 글은 블로그에 공개됩니다.</p>
+    </aside>
+    <section class="writing-area" aria-label="글 편집">
+      <div id="empty" class="empty">
+        <span class="eyebrow">A LITTLE EVERY DAY</span>
+        <h2>오늘은 어떤 이야기를 남길까요?</h2>
+        <p>새 글을 쓰거나, 목록에서 이어 쓸 글을 선택하세요.</p>
+      </div>
+      <div id="editor" hidden>
+        <div class="editor-actions">
+          <span id="document-state">비공개 초안</span>
+          <div><button id="download">내려받기</button><button id="save">초안 저장</button><button class="primary" id="publish">발행하기</button></div>
+        </div>
+        <div id="notice" role="status" hidden></div>
+        <label class="sr-only" for="title">글 제목</label><input id="title" class="title-input" placeholder="제목을 입력하세요" maxlength="300" />
+        <label class="sr-only" for="description">한 줄 요약</label
+        ><input id="description" class="description-input" placeholder="독자에게 보여 줄 한 줄 요약" maxlength="1000" />
+        <details class="post-settings">
+          <summary>글 정보 · 카테고리, 태그, 날짜, 주소</summary>
+          <div class="settings-grid">
+            <label
+              >카테고리<select id="category">
+                <option value="study-log/dev">study log / dev</option>
+                <option value="study-log/english">study log / english</option>
+                <option value="study-log/career">study log / career</option>
+                <option value="money-talk/finance">money talk / finance</option>
+                <option value="money-talk/stock">money talk / stock</option>
+                <option value="money-talk/property">money talk / property</option>
+                <option value="life-thoughts/opinions-is-my-own">life · thoughts / opinions is my own</option>
+                <option value="life-thoughts/retrospect">life · thoughts / retrospect</option>
+                <option value="useful-tips/general">useful tips / general</option>
+                <option value="useful-tips/in-canada">useful tips / in canada</option>
+              </select></label
+            >
+            <label>태그<input id="tags" placeholder="astro, 기록, 개발" /></label>
+            <label>날짜<input id="date" type="date" /></label>
+            <label
+              >글 주소<input id="slug" placeholder="my-first-post" pattern="[a-z0-9]+(-[a-z0-9]+)*" /><small>영문 소문자·숫자·하이픈</small></label
+            >
+          </div>
+        </details>
+        <div class="editor-toolbar">
+          <div role="group" aria-label="편집 보기">
+            <button id="write-tab" aria-pressed="true">작성</button><button id="preview-tab" aria-pressed="false">미리보기</button>
+          </div>
+          <div>
+            <button id="attach">이미지 첨부</button
+            ><input id="image-file" class="sr-only" type="file" accept="image/png,image/jpeg,image/webp,image/gif" /><span
+              id="word-count"
+              class="muted"
+              >0자</span
+            >
+          </div>
+        </div>
+        <div id="write-panel">
+          <label class="sr-only" for="body">글 본문</label
+          ><textarea
+            id="body"
+            placeholder="이곳에 이야기를 써 주세요. Markdown을 사용할 수 있고, 이미지를 붙여넣거나 끌어 넣을 수 있습니다."
+          ></textarea>
+        </div>
+        <article id="preview-panel" class="post-preview" hidden>
+          <header class="post-header">
+            <h1 id="preview-title"></h1>
+            <p id="preview-date"></p>
+            <div id="preview-tags" class="tags"></div>
+          </header>
+          <div id="preview-body" class="post-body markdown-body"></div>
+        </article>
+      </div>
+    </section>
+  </div>
+</main>
+<dialog id="publish-dialog">
+  <form method="dialog">
+    <span class="eyebrow">READY TO SHARE?</span>
+    <h2>이 글을 발행할까요?</h2>
+    <p>글과 사용한 이미지가 블로그 저장소에 공개됩니다.<br />사이트에 반영되기까지 잠시 걸릴 수 있습니다.</p>
+    <div class="dialog-actions"><button value="cancel">계속 작성</button><button class="primary" value="publish">발행하기</button></div>
+  </form>
+</dialog>

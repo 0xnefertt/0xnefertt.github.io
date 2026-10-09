@@ -1,0 +1,80 @@
+# Personal writing space
+
+The writing interface lives at the blog's `/admin/` URL, with `/edit/` as an alias. Astro builds the shared editor into the GitHub Pages site.
+Cloudflare Workers handles GitHub login, private D1 storage, and repository publication. A separate authoring website is not needed. The Worker still
+serves a compatible standalone editor for older links.
+
+## Provisioned resources
+
+- Cloudflare account: `0xnefertt` (`c21794f0c62dc68f2ed8cc370f9fbf98`).
+- Worker: `nefertt-writer`.
+- URL: <https://nefertt-writer.0xnefertt-writer.workers.dev>.
+- D1 database: `nefertt-writer` (`7106355a-00d4-492d-8b33-c5a7c919ab83`).
+- GitHub repository and publication branch: `0xnefertt/0xnefertt.github.io`, `main`.
+- Allowed GitHub user ID: `170924802`. Authorization uses this immutable ID rather than the account name.
+- GitHub OAuth App: `0xnefertt Writer`, managed at <https://github.com/settings/applications/3918864>.
+
+## GitHub login setup
+
+1. Deploy the Worker to get its HTTPS address.
+2. Register a GitHub OAuth App at <https://github.com/settings/applications/new>:
+   - Application name: `0xnefertt Writer`.
+   - Homepage URL: the Worker HTTPS address.
+   - Authorization callback URL: `<worker-address>/auth/callback`.
+3. Set the app's Client ID in `vars.GITHUB_CLIENT_ID` in `wrangler.jsonc`.
+4. Store the Client Secret using `wrangler secret put GITHUB_CLIENT_SECRET` from this directory. Do not put it in source, chat, or public environment variables.
+5. Generate a random secret of at least 32 characters and store it with `wrangler secret put SESSION_SECRET`.
+6. Deploy again. The app refuses login until all required configuration is present.
+
+The app requests the GitHub `public_repo` scope so the owner can publish to this public repository. GitHub OAuth grants that scope across the owner's public repositories; this server only calls the configured repository. Only the configured owner's ID can obtain a session.
+
+## Development and verification
+
+From the repository root:
+
+```sh
+npm run writer:setup
+npm run writer:check
+npm run writer:test
+npm run writer:build
+```
+
+For local development, copy `.dev.vars.example` to `.dev.vars` in this directory, fill in the two secrets, and use a separate GitHub OAuth App with `http://localhost:8787/auth/callback` as its callback. Set its Client ID locally without committing credentials. Initialize local storage with `npm --prefix writer run db:local`, then run `npm run writer:dev`. Local storage is separate from production.
+
+Tests use the real Workers runtime and D1 SQLite implementation with simulated GitHub responses. They do not create public posts or send credentials to GitHub.
+
+## Deploying updates
+
+Use the `0xnefertt` Wrangler auth profile activated for this directory. If it needs re-authentication:
+
+```sh
+cd writer
+npx wrangler auth create 0xnefertt
+npx wrangler auth activate 0xnefertt
+npm run db:remote
+npm run deploy
+```
+
+The public site renders the complete editor at `/admin/`. `PUBLIC_WRITER_URL` configures its backend API origin and defaults to the Worker address
+above. To override it, set the repository Actions variable; `.github/workflows/deploy.yml` passes it to Astro. The Worker allows API requests only from
+its own origin and the origin configured in `SITE_URL`.
+Never put the GitHub Client Secret or the session secret in a `PUBLIC_` variable.
+
+## Saving and publication
+
+- Draft documents and images stay in D1, and every data endpoint requires a valid owner session. Drafts never enter the public repository.
+- The server stores opaque session identifiers as hashes. The GitHub access token is encrypted at rest; it is never returned to browser JavaScript. Cookies are HttpOnly, Secure on HTTPS, and SameSite=Lax. Mutations require a same-origin request and a session CSRF token. API and HTML responses are not cached.
+- For the blog's editor, OAuth returns to a fixed `/admin/` URL with an opaque session ID in the fragment and a client nonce. The browser validates
+  the nonce, removes the fragment, and stores the opaque session in sessionStorage. API requests send it as a bearer token and omit cross-site
+  cookies. This supports browsers that block third-party cookies. A strict Content Security Policy is used on the editor, with no analytics or ads.
+- Draft versions use optimistic concurrency. A stale edit is rejected instead of overwriting another device's work. If there is a conflict, download the local text before reopening the latest draft.
+- Markdown previews are sanitized. Raw HTML scripts and event handlers cannot execute. The preview shares the site's CSS, but it is not a full Astro build: legacy template syntax and custom Markdown processing may render differently.
+- Images accept PNG, JPEG, GIF, or WebP up to 1 MiB each, with up to 20 private attachments per working copy. Images share D1 storage; large image libraries should move to object storage. Downloading a draft exports text only; images remain in its private working copy.
+- Publication validates required fields, image references, and source revisions; formats Markdown with the repository's Prettier version; creates one Git commit containing the post and only its referenced images; and advances `main` without force. Removed or unused attachments stay private.
+- Existing posts retain their filename and unrelated front matter. Category changes write `category_override` and `legacy_categories` metadata;
+  Astro lists the post in its new category and keeps its previous category URLs available with the new canonical URL. Changing the date or slug, or
+  editing a redirect/external-link post, requires direct repository editing.
+- The publication button reports the repository commit and links to deployment status. The site becomes live only after the existing GitHub Actions checks and deployment succeed. Other invalid posts or formatting failures can still block deployment.
+- Publication keeps a private working copy tied to the new source revision. GitHub and D1 are separate systems: if GitHub succeeds but the subsequent D1 write fails, inspect the repository before retrying. Publication never force-overwrites a changed repository.
+
+Secrets, local database state, generated UI bundles, and test bundles are ignored by Git.

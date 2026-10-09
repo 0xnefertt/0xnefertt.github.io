@@ -14,6 +14,8 @@ const requiredFiles = [
   "robots.txt",
   "blog/search/index.html",
   "blog/search-index.json",
+  "admin/index.html",
+  "edit/index.html",
 ];
 
 async function exists(filePath) {
@@ -69,6 +71,16 @@ async function run() {
   }
 
   const searchHtml = await fs.readFile(path.join(distRoot, "blog", "search", "index.html"), "utf8");
+  const adminHtml = await fs.readFile(path.join(distRoot, "admin", "index.html"), "utf8");
+  if (
+    !adminHtml.includes('name="writer-api"') ||
+    !adminHtml.includes('id="workspace"') ||
+    !adminHtml.includes('name="robots" content="noindex, nofollow"') ||
+    loadsAdsense(adminHtml)
+  ) {
+    console.error("[verify-site-output] admin must contain the editor, API configuration, and noindex without ads");
+    process.exit(1);
+  }
   const searchScriptSrc = searchHtml.match(/<script[^>]+src="([^"]*blog-search[^"]*)"[^>]*>/)?.[1];
   if (!searchScriptSrc) {
     console.error("[verify-site-output] blog search script reference is missing");

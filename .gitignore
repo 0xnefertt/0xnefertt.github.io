@@ -15,3 +15,9 @@ reports/
 .env.local
 wealthsimple-crypto-job.md
 .gstack/
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+.wrangler/
+writer/dist/
+writer/.test-build/

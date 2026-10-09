@@ -1,0 +1,28 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "nefertt-writer",
+  "account_id": "c21794f0c62dc68f2ed8cc370f9fbf98",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-10-09",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": true,
+    "not_found_handling": "single-page-application"
+  },
+  "vars": {
+    "SITE_URL": "https://0xnefertt.github.io",
+    "GITHUB_REPOSITORY": "0xnefertt/0xnefertt.github.io",
+    "GITHUB_BRANCH": "main",
+    "OWNER_ID": "170924802",
+    "GITHUB_CLIENT_ID": "Ov23ctl29BzkDWDPKL6t"
+  },
+  "secrets": { "required": ["GITHUB_CLIENT_SECRET", "SESSION_SECRET"] },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "nefertt-writer", "database_id": "7106355a-00d4-492d-8b33-c5a7c919ab83", "migrations_dir": "migrations" }
+  ],
+  "observability": { "enabled": true, "head_sampling_rate": 1 }
+}
