@@ -202,3 +202,7 @@ What they validate:
 - Link check after deploy: `.github/workflows/broken-links-site.yml`
 - Weekly content health report: `.github/workflows/content-health.yml`
 - Accessibility check (manual): `.github/workflows/axe.yml`
+
+## Site administration
+
+Use `/admin/` after GitHub login to manage posts, category display names/order, and homepage favorite groups/links. Categories and favorites live in `_data/site-settings.json`; homepage biography and useful-information settings remain in `_pages/about.md`. Save settings with “저장하고 반영” to update the site. Existing category URLs are preserved, and categories used by posts or drafts cannot be deleted until reassigned.

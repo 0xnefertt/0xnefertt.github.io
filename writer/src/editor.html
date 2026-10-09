@@ -5,10 +5,39 @@
 <main>
   <section id="login-screen" class="welcome" hidden>
     <span class="eyebrow">ADMIN</span>
-    <h1>글 관리</h1>
-    <p>GitHub로 로그인해 글을 작성하고 수정하세요.<br />초안은 비공개로 저장됩니다.</p>
+    <h1>사이트 관리</h1>
+    <p>GitHub로 로그인해 글, 카테고리, 즐겨찾기를 관리하세요.<br />초안은 비공개로 저장됩니다.</p>
     <a class="primary" id="login-link" href="#login-screen">GitHub로 로그인</a>
     <p id="login-message" class="muted" role="status"></p>
+  </section>
+  <nav id="admin-nav" class="admin-nav" aria-label="관리 메뉴" hidden>
+    <button id="manage-posts" aria-pressed="true">글</button>
+    <button id="manage-categories" aria-pressed="false">카테고리</button>
+    <button id="manage-favorites" aria-pressed="false">즐겨찾기</button>
+    <a href="https://0xnefertt.github.io/" target="_blank" rel="noreferrer">블로그 보기 ↗</a>
+  </nav>
+  <section id="settings-panel" class="manager-panel" aria-labelledby="manager-heading" hidden>
+    <header class="manager-header">
+      <div>
+        <h1 id="manager-heading">카테고리</h1>
+        <p id="manager-description"></p>
+      </div>
+      <div class="manager-actions">
+        <button id="settings-download">내려받기</button><button id="settings-reload">다시 불러오기</button
+        ><button id="settings-save" class="primary" disabled>저장하고 반영</button>
+      </div>
+    </header>
+    <p id="settings-status" role="status" class="manager-status">설정을 불러오는 중입니다.</p>
+    <fieldset id="settings-fields" disabled>
+      <div id="category-manager">
+        <div id="category-groups"></div>
+        <button id="add-category">＋ 상위 카테고리 추가</button>
+      </div>
+      <div id="favorites-manager" hidden>
+        <div id="favorite-groups"></div>
+        <button id="add-favorite-group">＋ 즐겨찾기 그룹 추가</button>
+      </div>
+    </fieldset>
   </section>
   <div id="workspace" class="workspace" hidden>
     <aside class="library">

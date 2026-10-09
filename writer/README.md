@@ -78,3 +78,11 @@ Never put the GitHub Client Secret or the session secret in a `PUBLIC_` variable
 - Publication keeps a private working copy tied to the new source revision. GitHub and D1 are separate systems: if GitHub succeeds but the subsequent D1 write fails, inspect the repository before retrying. Publication never force-overwrites a changed repository.
 
 Secrets, local database state, generated UI bundles, and test bundles are ignored by Git.
+
+## Site management
+
+`/admin/` includes Posts, Categories, and Favorites. Category names and ordering are independent of their stable URL slugs. Add parents or children, rename display names, reorder entries, or remove an unused category. Categories referenced by published posts or private drafts cannot be removed until those posts are reassigned.
+
+Favorites supports group and link names, URLs, optional notes, ordering, addition, and removal. Empty groups are retained in admin but hidden on the home page. The initial migration preserves every link from `_pages/about.md`.
+
+Both settings sections share a working copy. “저장하고 반영” commits `_data/site-settings.json` to the configured repository and starts the existing site deployment. Settings are explicit-save, while post drafts continue to autosave. Export unsaved settings before reloading after a conflict. Authentication, owner checks, CSRF, bounded requests, and non-forced Git ref updates apply to settings as well as posts. The API uses batched GraphQL reads pinned to the repository head to check category usage.

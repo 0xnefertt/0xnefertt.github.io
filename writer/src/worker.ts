@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { boundedBody, github, publishPost, readPost, repositoryTree, type MediaFile } from "./github";
 import { HttpError, validateDocument, type Draft, type PostDocument } from "./model";
+import { getSiteSettings, saveSiteSettings } from "./settings-github";
 
 const SESSION_SECONDS = 60 * 60 * 24 * 7;
 const IMAGE_LIMIT = 1024 * 1024;
@@ -194,6 +195,11 @@ async function route(request: Request, env: Env): Promise<Response> {
   }
   if (path === "/api/session" && request.method === "GET")
     return json({ csrf: user.csrf, siteUrl: env.SITE_URL, repository: env.GITHUB_REPOSITORY, branch: env.GITHUB_BRANCH });
+  if (path === "/api/site-settings" && request.method === "GET") return json(await getSiteSettings(env, user.token));
+  if (path === "/api/site-settings" && request.method === "PUT") {
+    const data = await input(request);
+    return json(await saveSiteSettings(env, user.token, data.settings, data.sha));
+  }
   if (path === "/api/logout" && request.method === "POST") {
     await env.DB.prepare("DELETE FROM sessions WHERE id = ?").bind(user.id).run();
     const result = json({ ok: true });

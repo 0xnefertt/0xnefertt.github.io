@@ -1,6 +1,7 @@
 import DOMPurify from "dompurify";
 import { marked } from "marked";
 import type { Draft, PostDocument } from "./model";
+import { siteManager } from "./site-manager";
 import "../../astro/public/assets/styles/global.css";
 import "./style.css";
 import editor from "./editor.html?raw";
@@ -60,6 +61,8 @@ async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (!result.ok) throw new ApiError(data.error ?? "요청을 처리하지 못했습니다.", result.status);
   return data as T;
 }
+const manager = siteManager(api, leave);
+
 function status(value: string) {
   element("save-status").textContent = value;
 }
@@ -204,7 +207,7 @@ title.addEventListener("blur", () => {
   }
 });
 window.addEventListener("beforeunload", (event) => {
-  if (dirty || saveFlight || locked) {
+  if (dirty || saveFlight || locked || manager.isDirty()) {
     event.preventDefault();
   }
 });
@@ -388,7 +391,7 @@ element("new-post").addEventListener(
           description: "",
           date,
           slug: "",
-          category: "study-log/dev",
+          category: category.value || "study-log/dev",
           tags: [],
           body: "",
           metadata: {},
@@ -484,7 +487,7 @@ element("logout").addEventListener(
   "click",
   () =>
     void (async () => {
-      if (!(await leave())) return;
+      if (!manager.canLogout() || !(await leave())) return;
       await api("/api/logout", { method: "POST" });
       sessionStorage.removeItem(sessionKey);
       sessionToken = "";
@@ -500,12 +503,14 @@ async function start() {
     const session = await api<{ csrf: string }>("/api/session");
     csrf = session.csrf;
     element("workspace").hidden = false;
+    element("admin-nav").hidden = false;
     element("logout").hidden = false;
     status("연결됨");
     await refreshDrafts();
+    void manager.load();
   } catch (error) {
     element("login-screen").hidden = false;
-    status("본인용 글쓰기");
+    status("관리자 로그인");
     const login = new URLSearchParams(location.search).get("login");
     const message = element("login-message");
     if (login) {
