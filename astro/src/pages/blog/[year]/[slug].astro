@@ -1,13 +1,13 @@
 ---
 import { getCollection, type CollectionEntry } from 'astro:content';
 import PostDetail from '../../../components/PostDetail.astro';
-import { getPostCategoryPaths, getPostRoute, getPublishedBlogPosts } from '../../../lib/blog';
+import { getLegacyCategoryPaths, getPostCategoryPaths, getPostRoute, getPublishedBlogPosts } from '../../../lib/blog';
 
 export async function getStaticPaths() {
   const posts = getPublishedBlogPosts(await getCollection('blog'));
 
   return posts
-    .filter((post) => !getPostCategoryPaths(post).some((categoryPath) => categoryPath.childSlug))
+    .filter((post) => !getPostCategoryPaths(post).some((categoryPath) => categoryPath.childSlug) || getLegacyCategoryPaths(post).some((categoryPath) => !categoryPath.childSlug))
     .map((post) => {
       const route = getPostRoute(post);
 

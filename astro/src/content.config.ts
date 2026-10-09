@@ -15,6 +15,8 @@ const blog = defineCollection({
       description: z.string().optional(),
       tags: taxonomyField,
       categories: taxonomyField,
+      category_override: z.boolean().optional(),
+      legacy_categories: taxonomyField,
       redirect: z.string().optional(),
       slug: z.string().optional(),
       canonical: z.string().optional(),

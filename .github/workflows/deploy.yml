@@ -7,6 +7,7 @@ on:
       - main
     paths:
       - "astro/**"
+      - "writer/**"
       - "astro/public/assets/**"
       - "_pages/**"
       - "_posts/**"
@@ -22,6 +23,7 @@ on:
       - main
     paths:
       - "astro/**"
+      - "writer/**"
       - "astro/public/assets/**"
       - "_pages/**"
       - "_posts/**"
@@ -56,11 +58,13 @@ jobs:
         run: |
           npm ci
           npm --prefix astro ci
+          npm --prefix writer ci
 
       - name: Validate and build site ✅
         env:
           PUBLIC_ADSENSE_PUBLISHER_ID: ${{ vars.PUBLIC_ADSENSE_PUBLISHER_ID }}
           PUBLIC_GA_MEASUREMENT_ID: ${{ vars.PUBLIC_GA_MEASUREMENT_ID }}
+          PUBLIC_WRITER_URL: ${{ vars.PUBLIC_WRITER_URL }}
         run: |
           npm run format:check
           npm run verify:content
