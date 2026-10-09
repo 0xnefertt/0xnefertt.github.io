@@ -397,6 +397,33 @@ test("settings protect categories used by new drafts and handle concurrent branc
   }
 });
 
+test("styled HTML and table images publish with referenced media while missing HTML images are rejected", async () => {
+  const value = await create();
+  const image = await (
+    await request(`/api/drafts/${value.id}/media`, {
+      method: "POST",
+      headers: { "Content-Type": "image/png" },
+      body: Uint8Array.from([137, 80, 78, 71]),
+    })
+  ).json();
+  const body = `<p style="text-align: center"><span style="font-size: 24px">Styled text</span></p><table><tbody><tr><td><img src="${image.url}" alt="Chart"></td></tr></tbody></table>`;
+  const saved = await (
+    await request(`/api/drafts/${value.id}`, { method: "PUT", data: { version: value.version, document: { ...value.document, body } } })
+  ).json();
+  calls = [];
+  const result = await request(`/api/drafts/${value.id}/publish`, { method: "POST", data: { version: saved.version } });
+  assert.equal(result.status, 200, await result.clone().text());
+  const output = (await result.json()).draft.document.body;
+  assert.match(output, /font-size: 24px/);
+  assert.match(output, /text-align: center/);
+  assert.ok(output.includes("/assets/img/posts/") && !output.includes("/api/media/"));
+  for (const src of ["/assets/img/missing.png", "blob:temporary-image"]) {
+    const bad = await create(document({ body: `<img src="${src}">` }));
+    calls = [];
+    assert.equal((await request(`/api/drafts/${bad.id}/publish`, { method: "POST", data: { version: bad.version } })).status, 422);
+    assert.ok(!calls.some((call) => call.path.endsWith("/git/blobs") && call.method === "POST"));
+  }
+});
 test("logout invalidates the server session", async () => {
   const response = await request("/api/logout", { method: "POST" });
   assert.equal(response.status, 200);

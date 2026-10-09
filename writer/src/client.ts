@@ -2,6 +2,7 @@ import DOMPurify from "dompurify";
 import { marked } from "marked";
 import type { Draft, PostDocument } from "./model";
 import { siteManager } from "./site-manager";
+import { richEditor } from "./rich-editor";
 import "../../astro/public/assets/styles/global.css";
 import "./style.css";
 import editor from "./editor.html?raw";
@@ -62,6 +63,32 @@ async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   return data as T;
 }
 const manager = siteManager(api, leave);
+const composer = richEditor({
+  onChange: scheduleSave,
+  onComposition: (active) => {
+    clearTimeout(timer);
+    if (active) status("작성 중…");
+  },
+  upload: attach,
+  imageSrc,
+  report,
+});
+async function imageSrc(source: string): Promise<string> {
+  if (source.startsWith("/assets/")) return `https://0xnefertt.github.io${source}`;
+  if (!source.startsWith("/api/media/")) return source;
+  if (!mediaUrls.has(source))
+    mediaUrls.set(
+      source,
+      fetch(`${apiBase}${source}`, {
+        headers: sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {},
+        credentials: apiBase ? "omit" : "same-origin",
+      }).then(async (response) => {
+        if (!response.ok) throw new Error("이미지를 불러오지 못했습니다.");
+        return URL.createObjectURL(await response.blob());
+      })
+    );
+  return mediaUrls.get(source)!;
+}
 
 function status(value: string) {
   element("save-status").textContent = value;
@@ -82,7 +109,7 @@ function read(): PostDocument {
     ...current!.document,
     title: title.value,
     description: description.value,
-    body: body.value,
+    body: composer.getBody(),
     category: category.value,
     date: date.value,
     slug: slug.value,
@@ -94,7 +121,8 @@ function read(): PostDocument {
 }
 function setLocked(value: boolean) {
   locked = value;
-  for (const id of ["save", "publish", "attach", "new-post", "logout"]) element<HTMLButtonElement>(id).disabled = value;
+  composer.setLocked(value);
+  for (const id of ["save", "publish", "attach", "source-attach", "new-post", "logout"]) element<HTMLButtonElement>(id).disabled = value;
   for (const field of [title, description, body, category, tags, date, slug]) field.disabled = value;
   if (current?.document.sourcePath) slug.disabled = true;
   if (current?.document.sourcePath) {
@@ -109,7 +137,7 @@ function showDraft(value: Draft) {
   const doc = value.document;
   title.value = doc.title;
   description.value = doc.description;
-  body.value = doc.body;
+  composer.load(doc.body);
   date.value = doc.date;
   tags.value = doc.tags.join(", ");
   slug.value = doc.slug;
@@ -123,6 +151,7 @@ function showDraft(value: Draft) {
   element("notice").hidden = true;
   element("document-state").textContent = doc.sourcePath ? "수정 중 · 발행 전까지 비공개" : "비공개 초안";
   status("모든 변경사항 저장됨");
+  view(false);
   updatePreview();
   renderList();
 }
@@ -174,9 +203,11 @@ async function leave(): Promise<boolean> {
   }
 }
 function scheduleSave() {
+  if (!current) return;
   dirty = true;
-  status("저장 대기 중");
+  status(composer.isComposing() ? "작성 중…" : "저장 대기 중");
   clearTimeout(timer);
+  if (composer.isComposing()) return;
   timer = setTimeout(() => {
     void save().catch(() => {});
   }, 1500);
@@ -220,7 +251,7 @@ window.addEventListener("online", () => {
 
 function updatePreview() {
   if (!current) return;
-  element("word-count").textContent = `${body.value.length.toLocaleString()}자`;
+  element("word-count").textContent = `${composer.characters().toLocaleString()}자`;
   if (element("preview-panel").hidden) return;
   element("preview-title").textContent = title.value || "제목 없는 글";
   element("preview-date").textContent = `${date.value} · 0xnefertt`;
@@ -235,41 +266,32 @@ function updatePreview() {
       })
   );
   // Markdown is untrusted; raw scripts, event handlers, and unsafe links must never run.
-  element("preview-body").innerHTML = DOMPurify.sanitize(marked.parse(body.value, { async: false }) as string, {
+  element("preview-body").innerHTML = DOMPurify.sanitize(marked.parse(composer.getBody(), { async: false }) as string, {
     FORBID_TAGS: ["form", "input", "button", "style", "iframe"],
   });
   for (const img of element("preview-body").querySelectorAll("img")) {
     const source = img.getAttribute("src") ?? "";
-    if (source.startsWith("/assets/")) img.src = `https://0xnefertt.github.io${source}`;
-    if (apiBase && source.startsWith("/api/media/")) {
-      img.removeAttribute("src");
-      if (!mediaUrls.has(source))
-        mediaUrls.set(
-          source,
-          fetch(`${apiBase}${source}`, { headers: { Authorization: `Bearer ${sessionToken}` }, credentials: "omit" }).then(async (response) => {
-            if (!response.ok) throw new Error("이미지를 불러오지 못했습니다.");
-            return URL.createObjectURL(await response.blob());
-          })
-        );
-      void mediaUrls
-        .get(source)!
-        .then((url) => {
-          if (img.isConnected) img.src = url;
-        })
-        .catch(() => {
-          img.alt = "이미지를 불러오지 못했습니다.";
-        });
-    }
+    if (source.startsWith("/api/media/")) img.removeAttribute("src");
+    void imageSrc(source)
+      .then((url) => {
+        if (img.isConnected) img.src = url;
+      })
+      .catch(() => {
+        img.alt = "이미지를 불러오지 못했습니다.";
+      });
   }
 }
 function view(preview: boolean) {
   element("write-panel").hidden = preview;
+  element("source-attach").hidden = preview || !composer.isSource();
   element("preview-panel").hidden = !preview;
-  element("write-tab").setAttribute("aria-pressed", String(!preview));
+  element("write-tab").setAttribute("aria-pressed", String(!preview && !composer.isSource()));
+  element("source-tab").setAttribute("aria-pressed", String(!preview && composer.isSource()));
   element("preview-tab").setAttribute("aria-pressed", String(preview));
   if (preview) updatePreview();
 }
 element("write-tab").addEventListener("click", () => view(false));
+element("source-tab").addEventListener("click", () => view(false));
 element("preview-tab").addEventListener("click", () => view(true));
 element("save").addEventListener("click", () => void save().catch(() => {}));
 element("download").addEventListener("click", () => {
@@ -419,23 +441,24 @@ async function attach(file: File) {
   if (!current || locked) return;
   if (!/^image\/(png|jpeg|webp|gif)$/.test(file.type) || file.size > 1024 * 1024)
     throw new Error("1MB 이하의 PNG, JPG, WebP, GIF 이미지를 선택해 주세요.");
-  await save();
   setLocked(true);
   status("이미지 저장 중…");
   try {
+    await save();
     const result = await api<{ url: string }>(`/api/drafts/${current.id}/media`, {
       method: "POST",
       headers: { "Content-Type": file.type },
       body: file,
     });
     const alt = file.name.replace(/[\[\]\\\n]/g, "");
-    body.setRangeText(`\n![${alt}](${result.url})\n`, body.selectionStart, body.selectionEnd, "end");
+    composer.insertImage(result.url, alt);
     scheduleSave();
   } finally {
     setLocked(false);
   }
 }
 element("attach").addEventListener("click", () => element<HTMLInputElement>("image-file").click());
+element("source-attach").addEventListener("click", () => element<HTMLInputElement>("image-file").click());
 element("image-file").addEventListener("change", (event) => {
   const input = event.target as HTMLInputElement;
   if (input.files?.[0]) void attach(input.files[0]).catch(report);
