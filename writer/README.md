@@ -78,6 +78,7 @@ Never put the GitHub Client Secret or the session secret in a `PUBLIC_` variable
 - Publication keeps a private working copy tied to the new source revision. GitHub and D1 are separate systems: if GitHub succeeds but the subsequent D1 write fails, inspect the repository before retrying. Publication never force-overwrites a changed repository.
 
 Secrets, local database state, generated UI bundles, and test bundles are ignored by Git.
+`worker-configuration.d.ts` is also generated and ignored; `npm run writer:check` regenerates it before checking Worker types.
 
 ## Post editor
 
@@ -90,23 +91,24 @@ Source editing and sanitized preview remain available. Opening a post or saving 
 `/admin/` includes Posts, Bookshelf, Projects, About/Profile, Categories, and Favorites. Books and projects reuse the private drafts, rich text editor, image attachments,
 optimistic concurrency, and publication workflow. Each content section has its own draft and existing-item lists.
 
-Bookshelf edits the author, cover, reading status, rating, reading dates, categories, ISBN, Open Library ID, purchase link, and review body. Projects edits
+Bookshelf edits the author, cover, categories, and a freeform review body. Older book metadata is preserved when saving. Projects edits
 the description, image, status, period, role, ordering, stack, and a freeform body. Optional project details are collapsed by default. Tasks, lessons,
 links, headings, images, and tables can be placed anywhere in the body using the same editor as blog posts. Legacy highlights, lessons, and links
 are moved into editable body lists when a project or old private draft is opened; publishing removes those separate metadata fields. Older public
 content remains visible in the body without preset section headings. Cover attachments stay private until publication.
-New books are written to `_books/<slug>.md`, and new projects to `_projects/<slug>.md`. Existing filenames and unrelated metadata are preserved,
+New books are written to `_books/<lang>/<slug>.md`, and new projects to `_projects/<lang>/<slug>.md`. Existing filenames and unrelated metadata are preserved,
 including Unicode book filenames and numeric legacy fields. Books and projects do not require blog dates, tags, or blog categories, and are excluded
 from the blog category-usage checks. No D1 migration is needed because the content kind is stored in the draft JSON; old drafts default to blog posts.
 
-About/Profile opens the existing `_pages/about.md` as a private working copy. It edits the profile name, location, short bio, photo, subtitle, additional
+About/Profile opens `_pages/about.md` for English or `_pages/ko/about.md` for Korean as separate private working copies. It edits the profile name, location, short bio, photo, subtitle, additional
 profile lines, search description, and introduction body. Photos use the same private attachment workflow and publish atomically with the page. The
 homepage and owner byline use the saved profile. Other page settings (latest posts, weather/exchange configuration, layout and permalink) are retained.
-Only the exact about path is editable; other `_pages/` files and new about pages are rejected. No database migration is required.
+Only these two About paths are editable; other `_pages/` files and new About pages are rejected. No database migration is required.
 
 Deploy both the Worker backend and the Astro site to enable the new admin sections in production. Building only the editor does not update the API.
 
-Category names and ordering are independent of their stable URL slugs. Add parents or children, rename display names, reorder entries, or remove an
+Category names and ordering are independent of their stable URL slugs. Each parent and child has separate English and Korean names; the public site and post editor use the selected language.
+Add parents or children, rename display names, reorder entries, or remove an
 unused category. Categories referenced by published blog posts or private blog drafts cannot be removed until those posts are reassigned.
 
 Favorites supports group and link names, URLs, optional notes, ordering, addition, and removal. Empty groups are retained in admin but hidden on the home page. The initial migration preserves every link from `_pages/about.md`.

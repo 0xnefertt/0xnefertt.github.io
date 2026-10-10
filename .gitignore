@@ -21,3 +21,4 @@ wealthsimple-crypto-job.md
 .wrangler/
 writer/dist/
 writer/.test-build/
+writer/worker-configuration.d.ts

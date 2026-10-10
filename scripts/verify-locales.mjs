@@ -46,8 +46,12 @@ for (const locale of ["en", "ko"]) {
 }
 for (const file of await htmlFiles(root)) {
   const html = await fs.readFile(file, "utf8");
-  if (/http-equiv="refresh"|name="robots" content="noindex, nofollow"/.test(html)) continue;
   const relative = path.relative(root, file).replaceAll(path.sep, "/");
+  if (relative === "google00ac8e9b5e2f863a.html") {
+    assert.equal(html.trim(), `google-site-verification: ${relative}`, "Google verification must retain its original payload");
+    continue;
+  }
+  if (/http-equiv="refresh"|name="robots" content="noindex, nofollow"/.test(html)) continue;
   const expected = relative.startsWith("ko/") ? "ko" : "en";
   assert.ok(html.includes(`<html lang="${expected}">`), `Wrong page language: ${relative}`);
   for (const alternate of html.matchAll(/<link rel="alternate" hreflang="(en|ko)" href="([^"]+)"/g)) {
