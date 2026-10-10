@@ -17,6 +17,8 @@ const requiredFiles = [
   "rss.xml",
   "robots.txt",
   "google00ac8e9b5e2f863a.html",
+  "resources/index.html",
+  "ko/resources/index.html",
   "blog/search/index.html",
   "blog/search-index.json",
   "admin/index.html",

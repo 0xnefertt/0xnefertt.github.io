@@ -274,11 +274,21 @@ function getNavI18nKey(href: string): string | undefined {
         <div class="footer-links">
           <nav aria-label="Site links">
             <ul class="footer-site-links">
-              <li><a href={l('/privacy/')}>Privacy</a></li>
-              <li><a href="/admin/">Login</a></li>
-              <li><a href={l('/rss.xml')} type="application/rss+xml">RSS</a></li>
-              {socialLinks.map((item) => <li><a href={item.href}>{socialLabels[item.label] ?? item.label}</a></li>)}
-              <li>
+              <li class="footer-link-group">
+                <a href={l('/privacy/')}>Privacy</a>
+                <a href={l('/rss.xml')} type="application/rss+xml">RSS</a>
+              </li>
+              {socialLinks.length > 0 && <li class="footer-link-group">
+                <span class="footer-divider" aria-hidden="true">|</span>
+                {socialLinks.map((item) => <a href={item.href}>{socialLabels[item.label] ?? item.label}</a>)}
+              </li>}
+              <li class="footer-link-group">
+                <span class="footer-divider" aria-hidden="true">|</span>
+                <a href={l('/resources/')}>Resources</a>
+                <a href="/admin/">Login</a>
+              </li>
+              <li class="footer-link-group">
+                <span class="footer-divider" aria-hidden="true">|</span>
                 <div class="language-switch" role="group" aria-label="Language selector">
                   <a class:list={['language-option', { 'is-active': locale === 'en' }]} href={languageLinks[0].href} aria-current={locale === 'en' ? 'page' : undefined} title={languageLinks[0].translated ? 'English' : 'English version not published; opens English index'}>EN</a>
                   <span aria-hidden="true">|</span>

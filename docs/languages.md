@@ -1,6 +1,6 @@
 # Site languages
 
-English uses the existing root URLs (`/`, `/about/`, `/blog/`, `/books/`, `/projects/`). Korean uses `/ko/`, `/ko/about/`, `/ko/blog/`, `/ko/books/`, and `/ko/projects/`.
+English uses the existing root URLs (`/`, `/about/`, `/blog/`, `/books/`, `/projects/`, `/resources/`). Korean uses `/ko/`, `/ko/about/`, `/ko/blog/`, `/ko/books/`, `/ko/projects/`, and `/ko/resources/`.
 The URL determines the page language; browser language and old local storage preferences do not override it.
 
 Category settings store an English name (`name`) and an optional Korean name (`name_ko`) for each parent and child category.

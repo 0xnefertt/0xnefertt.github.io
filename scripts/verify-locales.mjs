@@ -15,13 +15,30 @@ async function htmlFiles(folder) {
 }
 for (const locale of ["en", "ko"]) {
   const prefix = locale === "ko" ? "ko/" : "";
-  for (const page of ["", "about/", "blog/", "blog/search/", "books/", "projects/", "privacy/"]) {
+  for (const page of ["", "about/", "blog/", "blog/search/", "books/", "projects/", "privacy/", "resources/"]) {
     const html = await fs.readFile(path.join(root, prefix, page, "index.html"), "utf8");
     assert.ok(html.includes(`<html lang="${locale}">`), `${prefix}${page} has the wrong HTML language`);
     assert.ok(!html.includes("site-language"), "The URL must control language independently of stored preferences");
     assert.ok(html.includes(`href="/${prefix}rss.xml"`), "Footer RSS must use the current language");
     assert.ok(html.includes('href="/admin/"'), "Both languages must use one admin page");
     assert.ok(html.includes(`href="/${prefix}about/"`), "About navigation must open the localized introduction page");
+    const navigation = html.match(/<nav[^>]+id="primary-nav"[^>]*>([\s\S]*?)<\/nav>/)?.[1];
+    assert.ok(navigation && !navigation.includes("resources/"), "Resources must not appear in the primary navigation");
+    const footer = html.match(/<footer\b[^>]*>([\s\S]*?)<\/footer>/)?.[1];
+    assert.ok(footer?.includes(`href="/${prefix}resources/"`), "Footer Resources must use the current language");
+    const footerLabels = [...footer.matchAll(/<a\b[^>]*>([\s\S]*?)<\/a>/g)].map((match) => match[1].replace(/<[^>]*>/g, "").trim());
+    assert.deepEqual(
+      footerLabels,
+      ["Privacy", "RSS", "Email", "GitHub", "X", "Resources", "Login", "EN", "KR"].filter((label) => footerLabels.includes(label)),
+      "Footer links must keep the requested order"
+    );
+    if (page === "") {
+      assert.ok(!html.includes("data-useful-info") && !html.includes("data-favorite-disclosure"), "Homepage resource panels must move to Resources");
+    }
+    if (page === "resources/") {
+      assert.ok(html.includes('class="resources-favorites"'), "Resources must display the favorite links section");
+      assert.ok(!html.includes("https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"), "Resources must stay ad-free");
+    }
     if (page === "about/") {
       assert.ok(html.includes('class="about-page"') && html.includes('class="about-photo"'), "About must render the introduction and profile photo");
       assert.ok(!html.includes('class="post-list"') && !html.includes('class="feed-more"'), "About must not render the blog feed");

@@ -1,0 +1,45 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+import UsefulInfo from '../components/UsefulInfo.astro';
+import { contentLocale, localeFromPath, localizedPath, localeText } from '../lib/locale';
+import { siteSettings } from '../lib/settings';
+
+const locale = localeFromPath(Astro.url.pathname);
+const about = (await getCollection('pages')).find((entry) => entry.filePath?.endsWith('/about.md') && contentLocale(entry) === locale);
+if (!about) throw new Error(`Missing ${locale} About settings`);
+const favorites = siteSettings.favorites.filter((group) => group.items.length > 0);
+const description = localeText(locale, 'Favorite links, Vancouver weather, and exchange rates in one place.', '자주 찾는 링크와 밴쿠버 날씨, 환율을 한곳에 모았습니다.');
+---
+
+<Layout title="Resources" description={description} currentPath={localizedPath('/resources/', locale)} mainClass="resources-content" disableAds>
+  <header class="page-header">
+    <h1>Resources</h1>
+    <p>{description}</p>
+  </header>
+  <div class="resources-layout">
+    <UsefulInfo config={about.data.useful_info} />
+    <section class="resources-favorites" aria-labelledby="resources-favorites-title">
+      <h2 id="resources-favorites-title">Favorite</h2>
+      {favorites.length === 0 && <p>{localeText(locale, 'No favorite links yet.', '아직 등록된 즐겨찾기가 없습니다.')}</p>}
+      <div class="resources-favorite-groups">
+        {favorites.map((group) => (
+          <details class="favorite-group resources-favorite-group" open>
+            <summary class="favorite-group-summary">
+              <span class="favorite-group-title">{group.name}</span>
+              <span class="favorite-group-count">({group.items.length})</span>
+            </summary>
+            <ul class="favorite-child-list">
+              {group.items.map((item) => (
+                <li class="favorite-item">
+                  <a href={item.href} target={/^https?:\/\//.test(item.href) ? '_blank' : undefined} rel={/^https?:\/\//.test(item.href) ? 'noreferrer' : undefined}>{item.title}</a>
+                  {item.note && <p class="favorite-note">{item.note}</p>}
+                </li>
+              ))}
+            </ul>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+</Layout>
