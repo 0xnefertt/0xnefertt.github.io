@@ -55,7 +55,14 @@ body {
 .home-content {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 240px;
+  align-content: start;
+  align-items: start;
   gap: 0 48px;
+  padding-bottom: 1.5rem;
+}
+
+.home-content + .site-footer {
+  margin-top: 0;
 }
 
 .blog-masthead {
