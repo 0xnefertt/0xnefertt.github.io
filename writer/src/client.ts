@@ -56,6 +56,7 @@ let timer: ReturnType<typeof setTimeout>;
 let drafts: { id: string; title: string; sourcePath: string | null; language?: string; updated: string }[] = [];
 let posts: { path: string; sha: string; language: string }[] | null = null;
 let showingPosts = false;
+let listRevision = 0;
 let selectedCollection: ContentCollection = "blog";
 const contentLabels = { blog: "글", books: "책", projects: "프로젝트", about: "소개" };
 
@@ -128,14 +129,30 @@ function configureCollection(kind: ContentCollection) {
   element<HTMLDetailsElement>("collection-settings").open = kind !== "projects";
   element("publish-heading").textContent = kind === "about" ? "소개와 프로필을 반영할까요?" : `이 ${object} 발행할까요?`;
   element("publish").textContent = kind === "about" ? "소개 반영하기" : "발행하기";
-  element("library-note").textContent = `초안은 자동으로 비공개 저장됩니다. 발행하면 ${
-    kind === "books" ? "책장" : kind === "projects" ? "프로젝트 페이지" : "블로그"
-  }에 공개됩니다.`;
+  element("library-note").textContent =
+    kind === "about"
+      ? "수정 내용은 비공개로 저장됩니다. 소개 반영하기를 누르면 소개 페이지에 공개됩니다."
+      : `초안은 자동으로 비공개 저장됩니다. 발행하면 ${kind === "books" ? "책장" : kind === "projects" ? "프로젝트 페이지" : "블로그"}에 공개됩니다.`;
+}
+function updateLanguageNote() {
+  const destination =
+    selectedCollection === "about"
+      ? language.value === "ko"
+        ? "한국어 · /ko/about/"
+        : "English · /about/"
+      : language.value === "ko"
+        ? "한국어 · /ko/"
+        : "English · 기본 사이트";
+  element("language-note").textContent =
+    selectedCollection === "about"
+      ? `${destination}에 반영됩니다. 영어·한국어 소개는 각각 수정할 수 있습니다.`
+      : `${destination}에 발행됩니다. 다른 언어 버전은 별도 초안과 발행 상태로 관리됩니다.`;
 }
 async function selectCollection(kind: ContentCollection): Promise<boolean> {
   if (switching) return false;
   if (selectedCollection === kind) return true;
   switching = true;
+  listRevision++;
   const menus = ["posts", "books", "projects", "about", "categories", "favorites"].map((item) => element<HTMLButtonElement>(`manage-${item}`));
   menus.forEach((button) => {
     button.disabled = true;
@@ -210,14 +227,13 @@ function report(error: unknown) {
   notice(message);
 }
 function read(): PostDocument {
+  const metadata: Record<string, unknown> = { ...details.read(current!.document.metadata), lang: language.value };
+  if (translation.value.trim()) metadata.translation_key = translation.value.trim();
+  else delete metadata.translation_key;
   return {
     ...current!.document,
     collection: selectedCollection,
-    metadata: {
-      ...details.read(current!.document.metadata),
-      lang: language.value,
-      ...(translation.value.trim() ? { translation_key: translation.value.trim() } : {}),
-    },
+    metadata,
     title: title.value,
     description: description.value,
     body: composer.getBody(),
@@ -260,9 +276,7 @@ function showDraft(value: Draft) {
   language.disabled = Boolean(doc.sourcePath);
   translation.disabled = false;
   element<HTMLButtonElement>("add-translation").disabled = !doc.sourcePath;
-  element("language-note").textContent = `${
-    language.value === "ko" ? "한국어 · /ko/" : "English · 기본 사이트"
-  }에 발행됩니다. 다른 언어 버전은 별도 초안과 발행 상태로 관리됩니다.`;
+  updateLanguageNote();
   title.value = doc.title;
   description.value = doc.description;
   composer.load(doc.body);
@@ -307,6 +321,7 @@ async function save(): Promise<void> {
     const entry = drafts.find((item) => item.id === id);
     if (entry) {
       entry.title = snapshot.title;
+      entry.language = documentLanguage(saved.document);
       entry.updated = saved.updated;
       renderList();
     }
@@ -384,7 +399,7 @@ function updatePreview() {
   if (!current) return;
   element("word-count").textContent = `${composer.characters().toLocaleString()}자`;
   if (element("preview-panel").hidden) return;
-  element("preview-title").textContent = title.value || "제목 없는 글";
+  element("preview-title").textContent = title.value || `제목 없는 ${contentLabels[selectedCollection]}`;
   const metadata = details.read(current.document.metadata);
   const profile = profileMetadata(metadata);
   if (selectedCollection === "about") element("preview-title").textContent = String(profile.name ?? "0xnefertt");
@@ -474,11 +489,21 @@ element("download").addEventListener("click", () => {
 });
 
 async function refreshDrafts() {
-  drafts = (await api<{ drafts: typeof drafts }>(`/api/drafts?collection=${selectedCollection}`)).drafts;
+  const kind = selectedCollection;
+  const revision = ++listRevision;
+  let result: { drafts: typeof drafts };
+  try {
+    result = await api<{ drafts: typeof drafts }>(`/api/drafts?collection=${kind}`);
+  } catch (error) {
+    if (revision === listRevision && kind === selectedCollection) throw error;
+    return;
+  }
+  if (revision !== listRevision || kind !== selectedCollection) return;
+  drafts = result.drafts;
   renderList();
 }
 function renderList() {
-  element<HTMLInputElement>("search").placeholder = showingPosts ? "글 주소로 검색" : "제목으로 검색";
+  element<HTMLInputElement>("search").placeholder = showingPosts ? `${contentLabels[selectedCollection]} 주소로 검색` : "제목으로 검색";
   const search = element<HTMLInputElement>("search").value.toLowerCase();
   const container = element("post-list");
   container.replaceChildren();
@@ -491,7 +516,7 @@ function renderList() {
         selected: current?.document.sourcePath === post.path,
       }))
     : drafts.map((draft) => ({
-        label: draft.title || "제목 없는 글",
+        label: draft.title || `제목 없는 ${contentLabels[selectedCollection]}`,
         language: draft.language,
         detail: `${draft.language === "ko" ? "한국어" : draft.language === "en" ? "English" : "언어 미지정"} · ${
           draft.sourcePath ? "수정 중" : "비공개 초안"
@@ -545,7 +570,7 @@ async function openPost(path: string) {
 languageFilter.addEventListener("change", renderList);
 language.addEventListener("change", () => {
   manager.refreshCategories();
-  element("language-note").textContent = language.value === "ko" ? "한국어 · /ko/에 발행됩니다." : "English · 기본 사이트에 발행됩니다.";
+  updateLanguageNote();
 });
 for (const locale of ["en", "ko"])
   element(`about-${locale}`).addEventListener("click", () => void openPost(locale === "ko" ? "_pages/ko/about.md" : "_pages/about.md").catch(report));
@@ -579,13 +604,23 @@ element("draft-tab").addEventListener("click", () => {
   void refreshDrafts().catch(report);
 });
 element("post-tab").addEventListener("click", () => {
+  const kind = selectedCollection;
+  const revision = ++listRevision;
   showingPosts = true;
   element("draft-tab").setAttribute("aria-pressed", "false");
   element("post-tab").setAttribute("aria-pressed", "true");
   void (async () => {
     if (!posts) {
       status(`기존 ${contentLabels[selectedCollection]} 불러오는 중…`);
-      posts = (await api<{ posts: NonNullable<typeof posts> }>(`/api/posts?collection=${selectedCollection}`)).posts;
+      let result: { posts: NonNullable<typeof posts> };
+      try {
+        result = await api<{ posts: NonNullable<typeof posts> }>(`/api/posts?collection=${kind}`);
+      } catch (error) {
+        if (revision === listRevision && kind === selectedCollection && showingPosts) throw error;
+        return;
+      }
+      if (revision !== listRevision || kind !== selectedCollection || !showingPosts) return;
+      posts = result.posts;
       status(`기존 ${selectedCollection === "projects" ? "프로젝트를" : contentLabels[selectedCollection] + "을"} 불러왔습니다`);
     }
     renderList();
@@ -683,16 +718,20 @@ body.addEventListener("drop", (event) => {
   }
 });
 const dialog = element<HTMLDialogElement>("publish-dialog");
-element("publish").addEventListener("click", () => dialog.showModal());
+element("publish").addEventListener("click", () => {
+  dialog.returnValue = "";
+  dialog.showModal();
+});
 dialog.addEventListener("close", () => {
   if (dialog.returnValue !== "publish" || !current || locked) return;
+  const draftId = current.id;
   void (async () => {
-    await save();
-    if (dirty) await save();
     setLocked(true);
-    status("발행 중…");
     try {
-      const result = await api<{ draft: Draft; workflowUrl: string }>(`/api/drafts/${current!.id}/publish`, {
+      await save();
+      if (dirty) await save();
+      status("발행 중…");
+      const result = await api<{ draft: Draft; workflowUrl: string }>(`/api/drafts/${draftId}/publish`, {
         method: "POST",
         body: JSON.stringify({ version: current!.version }),
       });
@@ -700,8 +739,10 @@ dialog.addEventListener("close", () => {
       posts = null;
       notice(
         selectedCollection === "about"
-          ? "소개와 프로필을 발행했습니다. 블로그에 반영되는 중입니다. "
-          : "글을 발행했습니다. 블로그에 반영되는 중입니다. "
+          ? "소개와 프로필을 발행했습니다. 소개 페이지에 반영되는 중입니다. "
+          : `${
+              selectedCollection === "projects" ? "프로젝트를" : contentLabels[selectedCollection] + "을"
+            } 발행했습니다. 사이트에 반영되는 중입니다. `
       );
       const link = document.createElement("a");
       link.href = result.workflowUrl;
@@ -709,6 +750,9 @@ dialog.addEventListener("close", () => {
       link.rel = "noopener noreferrer";
       link.textContent = "배포 상태 확인";
       element("notice").append(link);
+      showingPosts = false;
+      element("draft-tab").setAttribute("aria-pressed", "true");
+      element("post-tab").setAttribute("aria-pressed", "false");
       await refreshDrafts();
       status("발행 완료 · 사이트 반영 대기");
     } finally {
