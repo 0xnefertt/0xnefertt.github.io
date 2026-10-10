@@ -4,64 +4,78 @@
       "children": [
         {
           "name": "dev",
+          "name_ko": "개발",
           "slug": "dev"
         },
         {
           "name": "english",
+          "name_ko": "영어",
           "slug": "english"
         },
         {
           "name": "career",
+          "name_ko": "커리어",
           "slug": "career"
         }
       ],
       "name": "study log",
+      "name_ko": "공부 기록",
       "slug": "study-log"
     },
     {
       "children": [
         {
           "name": "finance",
+          "name_ko": "금융",
           "slug": "finance"
         },
         {
           "name": "stock",
+          "name_ko": "주식",
           "slug": "stock"
         },
         {
           "name": "property",
+          "name_ko": "부동산",
           "slug": "property"
         }
       ],
       "name": "money talk",
+      "name_ko": "돈 이야기",
       "slug": "money-talk"
     },
     {
       "children": [
         {
           "name": "opinions is my own",
+          "name_ko": "개인적인 생각",
           "slug": "opinions-is-my-own"
         },
         {
           "name": "retrospect",
+          "name_ko": "회고",
           "slug": "retrospect"
         }
       ],
       "name": "life · thoughts",
+      "name_ko": "일상 · 생각",
       "slug": "life-thoughts"
     },
     {
       "children": [
         {
           "name": "general",
+          "name_ko": "일반",
           "slug": "general"
         },
         {
           "name": "in canada",
+          "name_ko": "캐나다 생활",
           "slug": "in-canada"
         }
       ],
       "name": "useful tips",
+      "name_ko": "정보 공유",
       "slug": "useful-tips"
     }
   ],

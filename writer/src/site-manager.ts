@@ -1,4 +1,4 @@
-import { categoryOptions, validateSettings, type SettingsSnapshot, type SiteSettings } from "./site-settings";
+import { categoryName, categoryOptions, validateSettings, type CategoryChild, type SettingsSnapshot, type SiteSettings } from "./site-settings";
 import type { ContentCollection } from "./model";
 
 type Api = <T>(path: string, init?: RequestInit) => Promise<T>;
@@ -24,9 +24,10 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
     if (!settings) return;
     const select = el<HTMLSelectElement>("category");
     const value = select.value;
-    const options = categoryOptions(settings);
+    const options = categoryOptions(settings, el<HTMLSelectElement>("content-language").value === "ko" ? "ko" : "en");
     for (const path of Object.keys(usage))
       if (!options.some((item) => item.value === path)) options.push({ value: path, label: path.replaceAll("/", " / ") });
+    if (value && !options.some((item) => item.value === value)) options.push({ value, label: value.replaceAll("/", " / ") });
     select.replaceChildren(...options.map((item) => new Option(item.label, item.value)));
     if (value && options.some((item) => item.value === value)) select.value = value;
     el<HTMLButtonElement>("new-post").disabled = el("workspace").dataset.collection === "blog" && !select.value;
@@ -119,12 +120,20 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
     card.append(summary, content);
     return { card, content, summary };
   }
-  function categoryRow(value: { name: string; slug: string }, path: string, groupSlug?: string) {
+  function categoryRow(value: CategoryChild, path: string, groupSlug?: string) {
     const row = document.createElement("div");
     row.className = "category-row";
-    const name = input("표시 이름", value.name, (next) => {
+    const name = input("영어 이름", value.name, (next) => {
       value.name = next;
     });
+    const koreanName = input(
+      "한국어 이름",
+      value.name_ko ?? "",
+      (next) => {
+        value.name_ko = next;
+      },
+      { placeholder: "비워 두면 영어 이름을 표시합니다." }
+    );
     const slug = input(
       "주소",
       value.slug,
@@ -148,7 +157,7 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
     note.textContent = savedPaths.has(path)
       ? `${groupSlug ? `${groupSlug}/` : ""}${value.slug} · 글/초안 ${usage[path] ?? 0}개`
       : "저장 후 주소는 고정됩니다.";
-    row.append(name, slug, note);
+    row.append(name, koreanName, slug, note);
     return row;
   }
   function renderCategories() {
@@ -156,10 +165,10 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
     container.replaceChildren();
     if (!settings) return;
     settings.categories.forEach((group, index) => {
-      const { card, content, summary } = groupShell(group, group.name, `하위 ${group.children.length}개`, index);
+      const { card, content, summary } = groupShell(group, categoryName(group, "ko"), `하위 ${group.children.length}개`, index);
       const parentRow = categoryRow(group, group.slug);
-      parentRow.querySelector("input")!.addEventListener("input", () => {
-        summary.textContent = `${group.name || "새 그룹"} · 하위 ${group.children.length}개`;
+      parentRow.addEventListener("input", () => {
+        summary.textContent = `${categoryName(group, "ko") || "새 그룹"} · 하위 ${group.children.length}개`;
       });
       parentRow.append(order(settings!.categories, index, `${group.name || "상위 카테고리"} 카테고리`, !usage[group.slug]));
       content.append(parentRow);
@@ -231,7 +240,7 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
     el("manager-heading").textContent = next === "categories" ? "카테고리" : "즐겨찾기";
     el("manager-description").textContent =
       next === "categories"
-        ? "표시 이름과 순서를 변경할 수 있습니다. 글이 있는 카테고리는 삭제할 수 없으며, 새 카테고리는 글을 발행하면 블로그에 표시됩니다."
+        ? "영어·한국어 이름과 순서를 따로 설정하세요. 이름을 바꿔도 주소는 유지됩니다. 글이 있는 카테고리는 삭제할 수 없으며, 새 카테고리는 글을 발행하면 블로그에 표시됩니다."
         : "홈 화면에 표시할 그룹과 링크를 관리하세요. 순서는 위·아래 버튼으로 변경합니다. 빈 그룹은 홈 화면에 표시되지 않습니다.";
   }
   for (const item of ["posts", "books", "projects", "about", "categories", "favorites"] as const)
@@ -299,6 +308,7 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
   );
   return {
     load,
+    refreshCategories: refreshOptions,
     isDirty: () => changed || busy,
     canLogout: () => !busy && (!changed || window.confirm("저장하지 않은 설정이 있습니다. 로그아웃할까요?")),
   };

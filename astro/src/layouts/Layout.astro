@@ -1,7 +1,6 @@
 ---
 import { getNavItems, siteConfig } from '../lib/site';
 import { getSocialLinks } from '../lib/data';
-import { getCategoryI18nKey } from '../lib/blog';
 import { localeFromPath, localizedPath, unlocalizedPath } from '../lib/locale';
 import { getLanguageLinks } from '../lib/routes';
 import { t } from '../lib/messages';
@@ -226,8 +225,8 @@ function getNavI18nKey(href: string): string | undefined {
                       <ul class="nav-dropdown">
                         {item.children.map((child) => (
                           <li class={child.children && child.children.length > 0 ? 'nav-dropdown-item nav-dropdown-item--nested' : 'nav-dropdown-item'}>
-                            <a class={isActive(child.href, currentPath) ? 'active' : undefined} href={child.href} data-i18n-key={getCategoryI18nKey(child.href)}>
-                              {getCategoryI18nKey(child.href) ? t(locale, getCategoryI18nKey(child.href)!) : child.label}
+                            <a class={isActive(child.href, currentPath) ? 'active' : undefined} href={child.href}>
+                              {child.label}
                             </a>
                             {child.children && child.children.length > 0 && (
                               <ul class="nav-subdropdown">
@@ -236,9 +235,9 @@ function getNavI18nKey(href: string): string | undefined {
                                     <a
                                       class={isActive(grandchild.href, currentPath) ? 'active' : undefined}
                                       href={grandchild.href}
-                                      data-i18n-key={getCategoryI18nKey(grandchild.href)}
+
                                     >
-                                      {getCategoryI18nKey(grandchild.href) ? t(locale, getCategoryI18nKey(grandchild.href)!) : grandchild.label}
+                                      {grandchild.label}
                                     </a>
                                   </li>
                                 ))}

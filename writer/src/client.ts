@@ -272,6 +272,7 @@ function showDraft(value: Draft) {
   if (selectedCollection === "blog" && ![...category.options].some((item) => item.value === doc.category))
     category.add(new Option(doc.category, doc.category));
   category.value = doc.category;
+  manager.refreshCategories();
   slug.disabled = Boolean(doc.sourcePath);
   date.disabled = Boolean(doc.sourcePath);
   category.disabled = false;
@@ -543,6 +544,7 @@ async function openPost(path: string) {
 }
 languageFilter.addEventListener("change", renderList);
 language.addEventListener("change", () => {
+  manager.refreshCategories();
   element("language-note").textContent = language.value === "ko" ? "한국어 · /ko/에 발행됩니다." : "English · 기본 사이트에 발행됩니다.";
 });
 for (const locale of ["en", "ko"])

@@ -2,6 +2,7 @@ import { HttpError, list, type PostDocument } from "./model";
 
 export interface CategoryChild {
   name: string;
+  name_ko?: string;
   slug: string;
 }
 export interface CategoryGroup extends CategoryChild {
@@ -104,7 +105,11 @@ function category(value: unknown): CategoryChild {
   const row = object(value);
   const slug = text(row.slug, 60, "카테고리 주소");
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new HttpError(422, "카테고리 주소에는 영문 소문자, 숫자, 하이픈을 사용하세요.");
-  return { name: text(row.name, 100, "카테고리 이름"), slug };
+  return {
+    name: text(row.name, 100, "영어 카테고리 이름"),
+    ...(row.name_ko === undefined || row.name_ko === "" ? {} : { name_ko: text(row.name_ko, 100, "한국어 카테고리 이름") }),
+    slug,
+  };
 }
 function unique(values: string[], message: string) {
   if (new Set(values).size !== values.length) throw new HttpError(422, message);
@@ -155,10 +160,16 @@ export function validateSettings(value: unknown): SiteSettings {
   );
   return { categories, favorites };
 }
-export function categoryOptions(settings: SiteSettings): { value: string; label: string }[] {
+export function categoryName(category: CategoryChild, locale: "en" | "ko"): string {
+  return locale === "ko" ? category.name_ko || category.name : category.name;
+}
+export function categoryOptions(settings: SiteSettings, locale: "en" | "ko" = "en"): { value: string; label: string }[] {
   return settings.categories.flatMap((group) => [
-    { value: group.slug, label: group.name },
-    ...group.children.map((child) => ({ value: `${group.slug}/${child.slug}`, label: `${group.name} / ${child.name}` })),
+    { value: group.slug, label: categoryName(group, locale) },
+    ...group.children.map((child) => ({
+      value: `${group.slug}/${child.slug}`,
+      label: `${categoryName(group, locale)} / ${categoryName(child, locale)}`,
+    })),
   ]);
 }
 export function assertCategoryRemoval(previous: SiteSettings, next: SiteSettings, usage: Record<string, number>) {

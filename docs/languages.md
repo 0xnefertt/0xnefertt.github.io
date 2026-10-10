@@ -3,6 +3,10 @@
 English uses the existing root URLs (`/`, `/about/`, `/blog/`, `/books/`, `/projects/`). Korean uses `/ko/`, `/ko/about/`, `/ko/blog/`, `/ko/books/`, and `/ko/projects/`.
 The URL determines the page language; browser language and old local storage preferences do not override it.
 
+Category settings store an English name (`name`) and an optional Korean name (`name_ko`) for each parent and child category.
+The administrator has separate **영어 이름** and **한국어 이름** inputs. Public navigation, filters, category pages, breadcrumbs, search and RSS use the content language.
+Category addresses (`slug`) stay shared and unchanged when names change. A missing Korean name falls back to the English name for older settings.
+
 All content has `lang: en` or `lang: ko`. Lists, categories, recommendations, pagination, search indexes, and RSS contain only published content in that language.
 Existing Korean article URLs redirect to their Korean canonical URL. English translations can subsequently use the English route.
 

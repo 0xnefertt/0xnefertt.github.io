@@ -1,6 +1,6 @@
 import type { CollectionEntry } from 'astro:content';
-import { t } from './messages';
-import { contentLocale, localizedPath, unlocalizedPath, type Locale } from './locale';
+import { categoryName } from '../../../writer/src/site-settings';
+import { contentLocale, localizedPath, type Locale } from './locale';
 import { normalizeAssetPath } from './content';
 import { siteSettings } from './settings';
 
@@ -58,21 +58,6 @@ export interface BlogCategoryTreeParent {
   href: string;
   children: BlogCategoryTreeChild[];
 }
-
-const CATEGORY_I18N_KEYS: Record<string, string> = {
-  '/blog/category/study-log/': 'category_study_log',
-  '/blog/category/study-log/dev/': 'category_dev',
-  '/blog/category/study-log/english/': 'category_english',
-  '/blog/category/money-talk/': 'category_money_talk',
-  '/blog/category/money-talk/finance/': 'category_finance',
-  '/blog/category/money-talk/stock/': 'category_stock',
-  '/blog/category/money-talk/property/': 'category_property',
-  '/blog/category/life-thoughts/': 'category_life_thoughts',
-  '/blog/category/life-thoughts/opinions-is-my-own/': 'category_opinions_is_my_own',
-  '/blog/category/useful-tips/': 'category_useful_tips',
-  '/blog/category/useful-tips/general/': 'category_general',
-  '/blog/category/useful-tips/in-canada/': 'category_in_canada',
-};
 
 const WORDS_PER_MINUTE = 180;
 const FILE_NAME_PATTERN = /^(\d{4})-\d{2}-\d{2}-(.+)$/;
@@ -160,15 +145,10 @@ const HIDDEN_NAV_CHILD_CATEGORY_SLUGS = new Set(['writed-by-ai']);
 const LANGUAGE_CATEGORY_SLUGS = new Set(['en', 'english', 'ko', 'korean']);
 const PARENT_ONLY_ALIAS_SLUGS = new Set(['life', 'life-thoughts', 'thoughts', 'uncategory']);
 
-export function getCategoryI18nKey(href: string): string | undefined {
-  const plain = unlocalizedPath(href);
-  const normalized = plain.endsWith('/') ? plain : `${plain}/`;
-  const [parentSlug, childSlug] = normalized.replace('/blog/category/', '').split('/');
-  const preset = PARENT_CATEGORY_PRESETS.find((group) => group.slug === parentSlug);
-  const legacy = LEGACY_CATEGORY_PRESETS.find((group) => group.slug === parentSlug);
-  const currentLabel = childSlug ? preset?.children.find((child) => child.slug === childSlug)?.label : preset?.label;
-  const originalLabel = childSlug ? legacy?.children.find((child) => child.slug === childSlug)?.label : legacy?.label;
-  return currentLabel === originalLabel ? CATEGORY_I18N_KEYS[normalized] : undefined;
+function categoryLabel(parentSlug: string, childSlug: string | undefined, locale: Locale, fallback: string): string {
+  const parent = siteSettings.categories.find((group) => group.slug === parentSlug);
+  const category = childSlug ? parent?.children.find((child) => child.slug === childSlug) : parent;
+  return category ? categoryName(category, locale) : fallback;
 }
 
 function toTitleCaseWords(input: string): string {
@@ -367,12 +347,10 @@ export function getPostCategoryPaths(post: CollectionEntry<'blog'>): BlogCategor
 
   return [...uniqueByKey.values()].map((path) => {
     const locale = contentLocale(post);
-    const parentHref = `/blog/category/${path.parentSlug}/`;
-    const parentKey = getCategoryI18nKey(parentHref);
-    const childKey = getCategoryI18nKey(path.href);
-    const parent = parentKey ? t(locale, parentKey) : path.parentName;
-    const child = path.childSlug ? (childKey ? t(locale, childKey) : path.childName) : undefined;
-    return { ...path, label: child ? `${parent} / ${child}` : parent, href: localizedPath(path.href, locale) };
+    const parent = categoryLabel(path.parentSlug, undefined, locale, path.parentName);
+    const child = path.childSlug ? categoryLabel(path.parentSlug, path.childSlug, locale, path.childName!) : undefined;
+    const names: BlogCategoryPath['names'] = child ? [parent, child] : [parent];
+    return { ...path, names, parentName: parent, childName: child, label: child ? `${parent} / ${child}` : parent, href: localizedPath(path.href, locale) };
   });
 }
 
@@ -584,13 +562,13 @@ export function listBlogCategoryTree(posts: CollectionEntry<'blog'>[], locale: L
   return [...categoryMap.values()]
     .filter((parent) => parent.count > 0)
     .map((parent) => ({
-      name: getCategoryI18nKey(`/blog/category/${parent.slug}/`) ? t(locale, getCategoryI18nKey(`/blog/category/${parent.slug}/`)!) : parent.name,
+      name: categoryLabel(parent.slug, undefined, locale, parent.name),
       slug: parent.slug,
       count: parent.count,
       href: localizedPath(`/blog/category/${parent.slug}/`, locale),
       children: [...parent.children.values()]
         .filter((child) => child.count > 0)
-        .map((child) => ({ ...child, name: getCategoryI18nKey(child.href) ? t(locale, getCategoryI18nKey(child.href)!) : child.name }))
+        .map((child) => ({ ...child, name: categoryLabel(parent.slug, child.slug, locale, child.name) }))
         .sort((a, b) => {
           const aOrder = CHILD_CATEGORY_ORDER.get(`${parent.slug}/${a.slug}`) ?? Number.MAX_SAFE_INTEGER;
           const bOrder = CHILD_CATEGORY_ORDER.get(`${parent.slug}/${b.slug}`) ?? Number.MAX_SAFE_INTEGER;

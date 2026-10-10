@@ -385,6 +385,8 @@ test("settings load existing favorites and category usage only for the owner", a
 test("settings save writes only configuration atomically and refuses stale revisions", async () => {
   const settings = structuredClone(configuredSettings);
   settings.categories[0].name = "Development notes";
+  settings.categories[0].name_ko = "개발 기록";
+  settings.categories[0].children[0].name_ko = "개발 이야기";
   settings.favorites.reverse();
   settings.favorites.push({ name: "New group", items: [{ title: "Example", href: "https://example.com", note: "A note" }] });
   calls = [];
@@ -399,6 +401,9 @@ test("settings save writes only configuration atomically and refuses stale revis
   assert.equal(await prettier.check(content, { parser: "json", printWidth: 150, trailingComma: "es5" }), true);
   const parsed = JSON.parse(content);
   assert.equal(parsed.categories[0].name, "Development notes");
+  assert.equal(parsed.categories[0].name_ko, "개발 기록");
+  assert.equal(parsed.categories[0].children[0].name_ko, "개발 이야기");
+  assert.equal(parsed.categories[0].children[0].slug, "dev");
   assert.equal(parsed.favorites.at(-1).items[0].href, "https://example.com");
   assert.equal(calls.find((call) => call.method === "PATCH").data.force, false);
   calls = [];

@@ -3,7 +3,7 @@ import { localeFromPath, localizedPath } from '../lib/locale';
 import { t } from '../lib/messages';
 const locale = localeFromPath(Astro.url.pathname);
 const l = (path: string) => localizedPath(path, locale);
-import { getCategoryI18nKey, type BlogCategoryTreeParent } from '../lib/blog';
+import { type BlogCategoryTreeParent } from '../lib/blog';
 
 interface Props {
   activeChildSlug?: string;
@@ -25,7 +25,7 @@ const { activeChildSlug, activeParentSlug, categoryTree, isAllActive = false, to
         </a>
         {categoryTree.map((parent) => (
           <a href={parent.href} class={parent.slug === activeParentSlug ? 'active' : undefined} aria-current={parent.slug === activeParentSlug && !activeChildSlug ? 'page' : undefined}>
-            <span data-i18n-key={getCategoryI18nKey(parent.href)}>{getCategoryI18nKey(parent.href) ? t(locale, getCategoryI18nKey(parent.href)!) : parent.name}</span>
+            <span>{parent.name}</span>
           </a>
         ))}
       </nav>
@@ -41,7 +41,7 @@ const { activeChildSlug, activeParentSlug, categoryTree, isAllActive = false, to
             {categoryTree.map((parent) => (
               <li class="blog-category-parent-item">
                 <a href={parent.href} class={parent.slug === activeParentSlug && !activeChildSlug ? 'active' : undefined}>
-                  <span data-i18n-key={getCategoryI18nKey(parent.href)}>{getCategoryI18nKey(parent.href) ? t(locale, getCategoryI18nKey(parent.href)!) : parent.name}</span>{' '}
+                  <span>{parent.name}</span>{' '}
                   <span class="category-count">({parent.count})</span>
                 </a>
                 {parent.children.length > 0 && (
@@ -49,7 +49,7 @@ const { activeChildSlug, activeParentSlug, categoryTree, isAllActive = false, to
                     {parent.children.map((child) => (
                       <li>
                         <a href={child.href} class={parent.slug === activeParentSlug && child.slug === activeChildSlug ? 'active' : undefined}>
-                          <span data-i18n-key={getCategoryI18nKey(child.href)}>{getCategoryI18nKey(child.href) ? t(locale, getCategoryI18nKey(child.href)!) : child.name}</span>{' '}
+                          <span>{child.name}</span>{' '}
                           <span class="category-count">({child.count})</span>
                         </a>
                       </li>
