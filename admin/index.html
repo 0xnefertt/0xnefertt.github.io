@@ -46,6 +46,12 @@
     <aside class="library">
       <button id="new-post" class="primary" disabled>＋ 새 글 쓰기</button>
       <label class="search-label" id="library-search-label" for="search">글 찾기</label>
+      <label class="search-label" for="language-filter">콘텐츠 언어</label>
+      <select id="language-filter">
+        <option value="all">모든 언어</option>
+        <option value="en">English</option>
+        <option value="ko">한국어</option>
+      </select>
       <input id="search" type="search" placeholder="제목이나 주소로 검색" />
       <div class="library-tabs" role="group" aria-label="글 목록 선택">
         <button id="draft-tab" aria-pressed="true">초안</button><button id="post-tab" aria-pressed="false">기존 글</button>
@@ -75,6 +81,19 @@
             </select></label
           >
         </div>
+        <div class="post-meta-row">
+          <label
+            >콘텐츠 언어<select id="content-language">
+              <option value="en">English · 기본 사이트</option>
+              <option value="ko">한국어 · /ko/</option>
+            </select></label
+          >
+          <button id="add-translation" type="button">다른 언어 버전 추가</button>
+          <div id="about-languages" hidden>
+            <button id="about-en" type="button">English 소개</button><button id="about-ko" type="button">한국어 소개</button>
+          </div>
+        </div>
+        <p class="muted" id="language-note">선택한 언어의 목록·검색·RSS에 발행됩니다.</p>
         <label class="summary-field"
           ><span id="description-label">한 줄 요약</span
           ><input id="description" class="description-input" placeholder="글의 내용을 짧게 요약하세요" maxlength="1000"
@@ -88,6 +107,11 @@
         <details class="post-settings" id="extra-settings">
           <summary id="extra-settings-heading">추가 정보 · 태그, 날짜, 주소</summary>
           <div class="settings-grid">
+            <label
+              >번역 연결 주소<input id="translation-key" maxlength="200" placeholder="같은 글의 한·영 버전은 같은 주소" /><small
+                >연결된 버전은 언어 전환 시 서로 이동합니다.</small
+              ></label
+            >
             <label>태그<input id="tags" placeholder="astro, 기록, 개발" /></label>
             <label id="blog-date-field">날짜<input id="date" type="date" /></label>
             <label
@@ -485,4 +509,4 @@
     <div class="dialog-actions"><button id="insert-cancel" type="button">취소</button><button class="primary" type="submit">추가</button></div>
   </form>
 </dialog>
- <noscript>글쓰기를 사용하려면 JavaScript를 활성화해 주세요.</noscript> <script type="module" src="/_astro/admin.astro_astro_type_script_index_0_lang.cIR1HVdq.js"></script> </body> </html>
+ <noscript>글쓰기를 사용하려면 JavaScript를 활성화해 주세요.</noscript> <script type="module" src="/_astro/admin.astro_astro_type_script_index_0_lang.CWD4N7as.js"></script> </body> </html>
