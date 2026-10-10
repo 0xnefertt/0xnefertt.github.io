@@ -61,7 +61,8 @@ body {
   padding-bottom: 1.5rem;
 }
 
-.home-content ~ .site-footer {
+.home-content ~ .site-footer,
+.post-content ~ .site-footer {
   margin-top: 0;
 }
 
@@ -514,6 +515,10 @@ body {
 .post-item .post-card-preview {
   width: 100%;
   grid-auto-columns: 100%;
+}
+
+.post-content {
+  padding-bottom: 1.5rem;
 }
 
 .post-detail-layout {
