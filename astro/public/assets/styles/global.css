@@ -43,6 +43,22 @@ body {
   line-height: 1.7;
 }
 
+.site-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.site-layout > main {
+  flex-grow: 1;
+}
+
+.site-layout > .site-header,
+.site-layout > .site-footer {
+  flex-shrink: 0;
+}
+
 a {
   color: var(--accent);
   text-decoration: none;
