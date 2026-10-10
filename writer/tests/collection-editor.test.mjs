@@ -24,7 +24,7 @@ function setup() {
   const editor = collectionEditor(() => changes++);
   return { editor, dom, changes: () => changes };
 }
-test("book forms preserve untouched legacy metadata and serialize changed fields", () => {
+test("simplified book forms preserve hidden legacy metadata while editing author, cover and categories", () => {
   const { editor, dom, changes } = setup();
   const original = {
     author: "Original",
@@ -32,21 +32,30 @@ test("book forms preserve untouched legacy metadata and serialize changed fields
     released: 1969,
     categories: "classics crime",
     stars: 3,
+    status: "Finished",
+    started: "2024-08-23",
+    finished: "2024-09-07",
+    olid: "OL43499941M",
+    buy_link: "https://example.com/book",
+    goodreads_review: 6318556633,
     cover: "assets/img/cover.jpg",
     custom: { retained: true },
   };
   editor.load("books", original);
+  const hiddenKeys = ["released", "started", "finished", "stars", "status", "isbn", "olid", "buy_link", "goodreads_review"];
+  for (const key of hiddenKeys) assert.equal(document.getElementById(`metadata-${key}`), null);
   assert.deepEqual(editor.read(original), original);
   const author = document.getElementById("metadata-author");
   author.value = "Updated";
   author.dispatchEvent(new dom.window.Event("input"));
-  document.getElementById("metadata-stars").value = "4.5";
+  document.getElementById("metadata-categories").value = "classics, fiction";
   document.getElementById("metadata-cover").value = "";
   const changed = editor.read(original);
   assert.equal(changed.author, "Updated");
-  assert.equal(changed.stars, 4.5);
+  assert.deepEqual(changed.categories, ["classics", "fiction"]);
   assert.equal(changed.cover, undefined);
-  assert.equal(changed.isbn, original.isbn);
+  for (const key of hiddenKeys) assert.equal(changed[key], original[key]);
+  assert.equal(original.author, "Original");
   assert.deepEqual(changed.custom, original.custom);
   assert.equal(changes(), 1);
 });

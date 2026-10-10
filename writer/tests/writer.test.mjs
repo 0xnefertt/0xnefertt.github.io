@@ -522,7 +522,7 @@ test("editing a Unicode book path preserves metadata and updates its review", as
           ...value.document,
           title: "Updated book",
           body: "Updated review.",
-          metadata: { ...value.document.metadata, author: "Updated author", stars: 4.5 },
+          metadata: { ...value.document.metadata, author: "Updated author" },
         },
       },
     })
@@ -535,7 +535,10 @@ test("editing a Unicode book path preserves metadata and updates its review", as
   assert.equal(result.draft.document.collection, "books");
   const content = calls.find((call) => call.path.endsWith("/git/blobs") && call.data.encoding === "utf-8").data.content;
   assert.match(content, /author: Updated author/);
-  assert.match(content, /stars: 4.5/);
+  assert.match(content, /stars: 3/);
+  assert.match(content, /isbn: 7539967447/);
+  assert.match(content, /finished: 2025-07-14/);
+  assert.match(content, /status: Finished/);
   assert.match(content, /custom_marker: keep-this/);
   assert.match(content, /categories: parenting education/);
   assert.ok(!/^date:|^category_override:|^legacy_categories:/m.test(content));
@@ -551,7 +554,7 @@ test("new books publish without blog-only fields and reject invalid metadata", a
       tags: [],
       body: "",
       description: "",
-      metadata: { author: "Book author", stars: 4, status: "Reading" },
+      metadata: { author: "Book author" },
     })
   );
   calls = [];

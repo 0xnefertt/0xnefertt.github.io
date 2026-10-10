@@ -13,16 +13,7 @@ const fields: Record<Exclude<ContentCollection, "blog">, Field[]> = {
   books: [
     { key: "author", label: "저자" },
     { key: "cover", label: "표지 이미지", placeholder: "이미지 주소 또는 아래 첨부 버튼" },
-    { key: "status", label: "독서 상태", placeholder: "읽는 중, 완독, 읽고 싶은 책" },
-    { key: "stars", label: "별점 (0–5)", type: "number" },
-    { key: "started", label: "읽기 시작한 날짜", type: "date" },
-    { key: "finished", label: "읽기를 마친 날짜", type: "date" },
-    { key: "released", label: "출간 연도" },
     { key: "categories", label: "책 분류", type: "list", placeholder: "문학, 육아, 개발" },
-    { key: "isbn", label: "ISBN" },
-    { key: "olid", label: "Open Library ID" },
-    { key: "buy_link", label: "구매 링크", placeholder: "https://" },
-    { key: "goodreads_review", label: "Goodreads 리뷰 ID" },
   ],
   projects: [
     { key: "category", label: "프로젝트 분류", placeholder: "웹사이트, 앱, 연구" },

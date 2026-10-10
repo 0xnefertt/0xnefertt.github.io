@@ -124,11 +124,7 @@ function configureCollection(kind: ContentCollection) {
           : "글의 내용을 짧게 요약하세요";
   element("collection-settings").hidden = kind === "blog";
   element("collection-settings-heading").textContent =
-    kind === "books"
-      ? "도서 정보 · 저자, 표지, 독서 상태"
-      : kind === "about"
-        ? "프로필 · 이름, 소개, 사진"
-        : "프로젝트 정보 · 이미지, 분류 등 (선택)";
+    kind === "books" ? "도서 정보 · 저자, 표지, 분류" : kind === "about" ? "프로필 · 이름, 소개, 사진" : "프로젝트 정보 · 이미지, 분류 등 (선택)";
   element<HTMLDetailsElement>("collection-settings").open = kind !== "projects";
   element("publish-heading").textContent = kind === "about" ? "소개와 프로필을 반영할까요?" : `이 ${object} 발행할까요?`;
   element("publish").textContent = kind === "about" ? "소개 반영하기" : "발행하기";
