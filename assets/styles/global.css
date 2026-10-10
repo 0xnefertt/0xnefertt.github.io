@@ -1704,17 +1704,24 @@ main {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 0.45rem 0.85rem;
+  align-items: center;
+  font-size: 0.78rem;
 }
 
-.footer-site-links a {
+.footer-site-links a,
+.footer-site-links button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   color: var(--text-muted);
-  font-size: 0.78rem;
+  font: inherit;
   text-decoration: underline;
   text-decoration-color: color-mix(in srgb, var(--text-muted), transparent 62%);
   text-underline-offset: 0.18em;
 }
 
-.footer-site-links a:hover {
+.footer-site-links a:hover,
+.footer-site-links button:hover {
   color: var(--accent);
   text-decoration-color: currentColor;
 }
