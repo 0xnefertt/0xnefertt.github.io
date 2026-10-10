@@ -5,6 +5,7 @@ const locale = localeFromPath(Astro.url.pathname);
 const l = (path: string) => localizedPath(path, locale);
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
+import PostShare from './PostShare.astro';
 import { formatPostDate, getBlogHref, getPublishedBlogPosts, getPostCategories, getPostCategoryPaths, normalizeTaxonomy, slugifyTerm, sortPostsDesc, toBlogSummary } from '../lib/blog';
 import { siteConfig } from '../lib/site';
 import { normalizeAssetPath } from '../lib/content';
@@ -162,8 +163,7 @@ const showMultiplexAd = siteConfig.adsensePublisherId.length > 0 && !redirectTar
 
       <div class="post-reader-actions">
         <a href={l('/blog/')}>{localeText(locale, 'Back to blog', '글 목록으로')}</a>
-        <button type="button" data-copy-post-link>{localeText(locale, 'Copy link', '링크 복사')}</button>
-        <span class="post-copy-status" data-copy-post-status role="status"></span>
+        <PostShare title={post.data.title} url={canonicalPostUrl} locale={locale} />
       </div>
 
       {(previousPost || nextPost) && (
@@ -217,20 +217,6 @@ const showMultiplexAd = siteConfig.adsensePublisherId.length > 0 && !redirectTar
       </aside>
     )}
   </div>
-
-  <script>
-    const copyButton = document.querySelector<HTMLButtonElement>('[data-copy-post-link]');
-    const copyStatus = document.querySelector<HTMLElement>('[data-copy-post-status]');
-    copyButton?.addEventListener('click', async () => {
-      if (!copyStatus) return;
-      try {
-        await navigator.clipboard.writeText(window.location.href);
-        copyStatus.textContent = document.documentElement.lang === 'ko' ? '링크를 복사했습니다.' : 'Link copied.';
-      } catch {
-        copyStatus.textContent = document.documentElement.lang === 'ko' ? '주소창의 링크를 복사해 주세요.' : 'Please copy the URL from the address bar.';
-      }
-    });
-  </script>
 
   {showMultiplexAd && (
     <section class="post-ad-card post-ad-card--multiplex" aria-label="Advertisement">
