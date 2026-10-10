@@ -29,6 +29,16 @@ export function collectionEditor(change: () => void) {
   const container = document.getElementById("collection-fields") as HTMLFieldSetElement;
   let controls: { field: Field; input: HTMLInputElement | HTMLTextAreaElement; original: string }[] = [];
   let collection: ContentCollection = "blog";
+  function displayValue(field: Field, metadata: Record<string, unknown>): string {
+    const value = field.key.startsWith("profile.") ? profileMetadata(metadata)[field.key.slice(8)] : metadata[field.key];
+    const info = document.createElement("template");
+    if (field.type === "paragraphs") info.innerHTML = String(value ?? "");
+    return field.type === "list"
+      ? list(value).join(", ")
+      : field.type === "paragraphs"
+        ? [...info.content.querySelectorAll("p")].map((p) => p.textContent ?? "").join("\n") || info.content.textContent || ""
+        : String(value ?? field.fallback ?? "");
+  }
   function load(kind: ContentCollection, metadata: Record<string, unknown>) {
     collection = kind;
     controls = [];
@@ -50,15 +60,7 @@ export function collectionEditor(change: () => void) {
           if (field.key === "stars") input.max = "5";
         }
       }
-      const value = field.key.startsWith("profile.") ? profileMetadata(metadata)[field.key.slice(8)] : metadata[field.key];
-      const info = document.createElement("template");
-      if (field.type === "paragraphs") info.innerHTML = String(value ?? "");
-      input.value =
-        field.type === "list"
-          ? list(value).join(", ")
-          : field.type === "paragraphs"
-            ? [...info.content.querySelectorAll("p")].map((paragraph) => paragraph.textContent ?? "").join("\n") || info.content.textContent || ""
-            : String(value ?? field.fallback ?? "");
+      input.value = displayValue(field, metadata);
       controls.push({ field, input, original: input.value });
       input.addEventListener("input", change);
       wrapper.append(input);
@@ -107,6 +109,9 @@ export function collectionEditor(change: () => void) {
   return {
     load,
     read,
+    acceptSaved: (metadata: Record<string, unknown>) => {
+      for (const control of controls) control.original = displayValue(control.field, metadata);
+    },
     setLocked: (locked: boolean) => {
       container.disabled = locked;
     },

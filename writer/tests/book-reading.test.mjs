@@ -3,12 +3,13 @@ import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
 import { build } from "esbuild";
 
-let books, model;
+let books, model, github;
 before(async () => {
   await mkdir(".test-build", { recursive: true });
   for (const [entry, name] of [
     ["../astro/src/lib/books.ts", "book-reading"],
     ["src/model.ts", "book-dates"],
+    ["src/github.ts", "book-publication"],
   ]) {
     await build({
       entryPoints: [entry],
@@ -21,6 +22,7 @@ before(async () => {
   }
   books = await import("../.test-build/book-reading.mjs");
   model = await import("../.test-build/book-dates.mjs");
+  github = await import("../.test-build/book-publication.mjs");
 });
 
 function book(id, date, lang = "ko", draft = false) {
@@ -102,4 +104,59 @@ test("book publication dates survive edits while drafts and translations do not 
   assert.ok(!/^date:/m.test(model.renderPost(draft, new Map(), true)));
   const published = model.parsePost(model.renderPost(draft), "_books/en/review.md", "c".repeat(40));
   assert.equal(published.metadata.date, new Date().toISOString().slice(0, 10));
+});
+
+test("only an additive book publication-date backfill can refresh an older working copy", () => {
+  const original = model.parsePost("---\ntitle: Review\nlang: ko\n---\n\nOriginal body", "_books/ko/review.md", "a".repeat(40));
+  const latest = { ...original, sourceSha: "b".repeat(40), metadata: { ...original.metadata, date: "2026-10-10" } };
+  const edited = { ...original, body: "Private edits", metadata: { ...original.metadata, cover: "/api/media/private", date: "2024-11-20" } };
+  const merged = model.rebaseBookDateBackfill(edited, original, latest);
+  assert.equal(merged.sourceSha, latest.sourceSha);
+  assert.equal(merged.body, "Private edits");
+  assert.equal(merged.metadata.cover, "/api/media/private");
+  assert.equal(merged.metadata.date, "2024-11-20");
+  assert.equal(model.rebaseBookDateBackfill(original, original, latest).metadata.date, "2026-10-10");
+  assert.equal(model.rebaseBookDateBackfill(edited, original, { ...latest, body: "Remote edits" }), undefined);
+  assert.equal(model.rebaseBookDateBackfill(edited, { ...original, metadata: { date: "2025-01-01" } }, latest), undefined);
+});
+
+test("book publication rebases a date-only repository change but refuses remote body changes before any write", async () => {
+  const originalFetch = globalThis.fetch;
+  const path = "_books/ko/review.md",
+    oldSha = "a".repeat(40),
+    newSha = "b".repeat(40);
+  const original = "---\ntitle: Review\nlang: ko\n---\n\nOriginal body\n";
+  const source = model.parsePost(original, path, oldSha);
+  for (const changedBody of [false, true]) {
+    const writes = [];
+    const latest = "---\ntitle: Review\nlang: ko\ndate: 2026-10-10\n---\n\n" + (changedBody ? "Changed remote body" : "Original body") + "\n";
+    globalThis.fetch = async (input, init = {}) => {
+      const endpoint = new URL(input).pathname;
+      const reply = (data) => Response.json(data);
+      if (endpoint.endsWith("/git/ref/heads/main")) return reply({ object: { sha: "head" } });
+      if (endpoint.endsWith("/git/commits/head")) return reply({ tree: { sha: "tree" } });
+      if (endpoint.endsWith("/git/trees/tree")) return reply({ truncated: false, tree: [{ path, sha: newSha, type: "blob" }] });
+      if (endpoint.endsWith(`/git/blobs/${oldSha}`) || endpoint.endsWith(`/git/blobs/${newSha}`)) {
+        const content = endpoint.endsWith(oldSha) ? original : latest;
+        return reply({ content: Buffer.from(content).toString("base64"), size: Buffer.byteLength(content) });
+      }
+      writes.push({ endpoint, data: JSON.parse(init.body) });
+      return reply({ sha: "c".repeat(40) });
+    };
+    try {
+      const publish = () =>
+        github.publishPost({ GITHUB_REPOSITORY: "owner/site", GITHUB_BRANCH: "main" }, "fixture-token", { ...source, body: "Private edits" }, []);
+      if (changedBody) {
+        await assert.rejects(publish, (error) => error.status === 409);
+        assert.equal(writes.length, 0);
+      } else {
+        const result = await publish();
+        assert.equal(result.document.body.trim(), "Private edits");
+        assert.equal(result.document.metadata.date, "2026-10-10");
+        assert.equal(writes.find((item) => item.endpoint.endsWith("/git/refs/heads/main")).data.force, false);
+      }
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  }
 });

@@ -53,9 +53,18 @@ let locked = false;
 let switching = false;
 let saveFlight: Promise<void> | null = null;
 let timer: ReturnType<typeof setTimeout>;
-let drafts: { id: string; title: string; sourcePath: string | null; language?: string; updated: string }[] = [];
+let drafts: {
+  id: string;
+  title: string;
+  sourcePath: string | null;
+  language?: string;
+  updated: string;
+  version: number;
+  trashedAt?: string | null;
+}[] = [];
 let posts: { path: string; sha: string; language: string }[] | null = null;
 let showingPosts = false;
+let showingTrash = false;
 let listRevision = 0;
 let selectedCollection: ContentCollection = "blog";
 const contentLabels = { blog: "글", books: "책", projects: "프로젝트", about: "소개" };
@@ -174,6 +183,8 @@ async function selectCollection(kind: ContentCollection): Promise<boolean> {
     drafts = result.drafts;
     posts = null;
     showingPosts = false;
+    showingTrash = false;
+    element("trash-tab").setAttribute("aria-pressed", "false");
     element<HTMLInputElement>("search").value = "";
     element("draft-tab").setAttribute("aria-pressed", "true");
     element("post-tab").setAttribute("aria-pressed", "false");
@@ -250,7 +261,19 @@ function setLocked(value: boolean) {
   locked = value;
   composer.setLocked(value);
   details.setLocked(value);
-  for (const id of ["save", "publish", "attach", "source-attach", "cover-attach", "new-post", "logout", "add-translation", "about-en", "about-ko"])
+  for (const id of [
+    "save",
+    "publish",
+    "delete-draft",
+    "attach",
+    "source-attach",
+    "cover-attach",
+    "new-post",
+    "logout",
+    "add-translation",
+    "about-en",
+    "about-ko",
+  ])
     element<HTMLButtonElement>(id).disabled = value;
   element<HTMLButtonElement>("add-translation").disabled = value || !current?.document.sourcePath;
   for (const field of [title, description, body, category, tags, date, slug, language, translation]) field.disabled = value;
@@ -293,7 +316,7 @@ function showDraft(value: Draft) {
   element("empty").hidden = true;
   element("editor").hidden = false;
   element("notice").hidden = true;
-  element("document-state").textContent = doc.sourcePath ? "수정 중 · 발행 전까지 비공개" : "비공개 초안";
+  element("document-state").textContent = doc.sourcePath ? "발행된 글의 작업본 · 저장한 변경은 다시 발행해야 반영됩니다." : "비공개 초안";
   status("모든 변경사항 저장됨");
   view(false);
   updatePreview();
@@ -315,6 +338,7 @@ async function save(): Promise<void> {
     const saved = await api<Draft>(`/api/drafts/${id}`, { method: "PUT", body: JSON.stringify({ document: snapshot, version }) });
     if (current?.id === id) {
       current = saved;
+      details.acceptSaved(saved.document.metadata);
       dirty = JSON.stringify(read()) !== JSON.stringify(snapshot);
       status(dirty ? "저장 대기 중" : "모든 변경사항 저장됨");
     }
@@ -395,9 +419,53 @@ window.addEventListener("online", () => {
   if (dirty && !conflict) void save().catch(() => {});
 });
 
+function updateCoverThumbnail() {
+  if (!current || selectedCollection === "blog") return;
+  const metadata = details.read(current.document.metadata);
+  const profile = profileMetadata(metadata);
+  const image = element<HTMLImageElement>("cover-thumbnail");
+  const label = element("cover-status");
+  let source = String(selectedCollection === "about" ? profile.image ?? "" : metadata[selectedCollection === "books" ? "cover" : "img"] ?? "");
+  if (source.startsWith("assets/")) source = "/" + source;
+  if (source && !source.includes("/")) source = "/assets/img/" + source;
+  if (image.dataset.source === source && image.dataset.kind === selectedCollection) return;
+  image.dataset.kind = selectedCollection;
+  image.dataset.source = source;
+  image.hidden = true;
+  image.removeAttribute("src");
+  if (!source) {
+    label.textContent = selectedCollection === "about" ? "등록된 프로필 사진이 없습니다." : "등록된 표지가 없습니다.";
+    return;
+  }
+  if (!safeImage(source)) {
+    label.textContent = "이미지 주소를 확인하거나 첨부 버튼으로 다시 등록해 주세요.";
+    return;
+  }
+  label.textContent = "이미지를 불러오는 중…";
+  image.onload = () => {
+    if (image.dataset.source === source) label.textContent = "이미지 확인됨 · 저장한 변경은 발행해야 사이트에 반영됩니다.";
+  };
+  image.onerror = () => {
+    if (image.dataset.source === source) {
+      image.hidden = true;
+      label.textContent = "이미지를 불러올 수 없습니다. 주소를 확인하거나 다시 첨부해 주세요.";
+    }
+  };
+  void imageSrc(source)
+    .then((url) => {
+      if (image.dataset.source === source) {
+        image.src = url;
+        image.hidden = false;
+      }
+    })
+    .catch(() => {
+      if (image.dataset.source === source) label.textContent = "이미지를 불러올 수 없습니다. 다시 첨부해 주세요.";
+    });
+}
 function updatePreview() {
   if (!current) return;
   element("word-count").textContent = `${composer.characters().toLocaleString()}자`;
+  updateCoverThumbnail();
   if (element("preview-panel").hidden) return;
   element("preview-title").textContent = title.value || `제목 없는 ${contentLabels[selectedCollection]}`;
   const metadata = details.read(current.document.metadata);
@@ -490,15 +558,16 @@ element("download").addEventListener("click", () => {
 
 async function refreshDrafts() {
   const kind = selectedCollection;
+  const trash = showingTrash;
   const revision = ++listRevision;
   let result: { drafts: typeof drafts };
   try {
-    result = await api<{ drafts: typeof drafts }>(`/api/drafts?collection=${kind}`);
+    result = await api<{ drafts: typeof drafts }>(`/api/drafts?collection=${kind}${trash ? "&trash=1" : ""}`);
   } catch (error) {
-    if (revision === listRevision && kind === selectedCollection) throw error;
+    if (revision === listRevision && kind === selectedCollection && trash === showingTrash) throw error;
     return;
   }
-  if (revision !== listRevision || kind !== selectedCollection) return;
+  if (revision !== listRevision || kind !== selectedCollection || trash !== showingTrash) return;
   drafts = result.drafts;
   renderList();
 }
@@ -519,9 +588,9 @@ function renderList() {
         label: draft.title || `제목 없는 ${contentLabels[selectedCollection]}`,
         language: draft.language,
         detail: `${draft.language === "ko" ? "한국어" : draft.language === "en" ? "English" : "언어 미지정"} · ${
-          draft.sourcePath ? "수정 중" : "비공개 초안"
+          showingTrash ? "휴지통 · 클릭하여 복원" : draft.sourcePath ? "발행된 글의 작업본" : "비공개 초안"
         } · ${new Date(draft.updated).toLocaleDateString("ko-KR")}`,
-        action: () => openDraft(draft.id),
+        action: () => (showingTrash ? restoreDraft(draft.id, draft.version) : openDraft(draft.id)),
         selected: current?.id === draft.id,
       }));
   for (const item of items.filter(
@@ -542,7 +611,13 @@ function renderList() {
   if (!container.childElementCount) {
     const empty = document.createElement("p");
     empty.className = "muted";
-    empty.textContent = search ? "검색 결과가 없습니다." : showingPosts ? "불러온 글이 없습니다." : "아직 초안이 없습니다.";
+    empty.textContent = search
+      ? "검색 결과가 없습니다."
+      : showingTrash
+        ? "휴지통이 비어 있습니다."
+        : showingPosts
+          ? "불러온 글이 없습니다."
+          : "아직 초안이 없습니다.";
     container.append(empty);
   }
 }
@@ -553,6 +628,23 @@ async function openDraft(id: string) {
     if (!(await leave())) return;
     showDraft(await api<Draft>(`/api/drafts/${id}`));
   } finally {
+    switching = false;
+  }
+}
+async function restoreDraft(id: string, version: number) {
+  if (switching || locked) return;
+  switching = true;
+  setLocked(true);
+  try {
+    const restored = await api<Draft>(`/api/drafts/${id}/restore`, { method: "POST", body: JSON.stringify({ version }) });
+    showingTrash = false;
+    element("trash-tab").setAttribute("aria-pressed", "false");
+    element("draft-tab").setAttribute("aria-pressed", "true");
+    showDraft(restored);
+    await refreshDrafts();
+    status("초안을 복원했습니다.");
+  } finally {
+    setLocked(false);
     switching = false;
   }
 }
@@ -586,6 +678,8 @@ element("add-translation").addEventListener(
         const target = documentLanguage(document);
         showDraft(await api<Draft>("/api/drafts", { method: "POST", body: JSON.stringify({ document }) }));
         showingPosts = false;
+        showingTrash = false;
+        element("trash-tab").setAttribute("aria-pressed", "false");
         element("draft-tab").setAttribute("aria-pressed", "true");
         element("post-tab").setAttribute("aria-pressed", "false");
         await refreshDrafts();
@@ -597,8 +691,36 @@ element("add-translation").addEventListener(
     })().catch(report)
 );
 element("search").addEventListener("input", renderList);
+element("trash-tab").addEventListener(
+  "click",
+  () =>
+    void (async () => {
+      if (switching || locked) return;
+      switching = true;
+      try {
+        if (!(await leave())) return;
+        current = null;
+        dirty = false;
+        clearTimeout(timer);
+        showingPosts = false;
+        showingTrash = true;
+        element("editor").hidden = true;
+        element("empty").hidden = false;
+        element("empty-heading").textContent = "휴지통";
+        element("empty-description").textContent = "목록에서 초안을 클릭하면 본문과 첨부 이미지를 함께 복원합니다.";
+        element("draft-tab").setAttribute("aria-pressed", "false");
+        element("post-tab").setAttribute("aria-pressed", "false");
+        element("trash-tab").setAttribute("aria-pressed", "true");
+        await refreshDrafts();
+      } finally {
+        switching = false;
+      }
+    })().catch(report)
+);
 element("draft-tab").addEventListener("click", () => {
   showingPosts = false;
+  showingTrash = false;
+  element("trash-tab").setAttribute("aria-pressed", "false");
   element("draft-tab").setAttribute("aria-pressed", "true");
   element("post-tab").setAttribute("aria-pressed", "false");
   void refreshDrafts().catch(report);
@@ -607,6 +729,8 @@ element("post-tab").addEventListener("click", () => {
   const kind = selectedCollection;
   const revision = ++listRevision;
   showingPosts = true;
+  showingTrash = false;
+  element("trash-tab").setAttribute("aria-pressed", "false");
   element("draft-tab").setAttribute("aria-pressed", "false");
   element("post-tab").setAttribute("aria-pressed", "true");
   void (async () => {
@@ -655,6 +779,8 @@ element("new-post").addEventListener(
         };
         showDraft(await api<Draft>("/api/drafts", { method: "POST", body: JSON.stringify({ document }) }));
         showingPosts = false;
+        showingTrash = false;
+        element("trash-tab").setAttribute("aria-pressed", "false");
         element("draft-tab").setAttribute("aria-pressed", "true");
         element("post-tab").setAttribute("aria-pressed", "false");
         await refreshDrafts();
@@ -683,6 +809,7 @@ async function attach(file: File, target: "body" | "cover" | "img" | "profile.im
     if (target === "body") composer.insertImage(result.url, alt);
     else details.setImage(target, result.url);
     scheduleSave();
+    await save();
   } finally {
     setLocked(false);
   }
@@ -718,6 +845,43 @@ body.addEventListener("drop", (event) => {
   }
 });
 const dialog = element<HTMLDialogElement>("publish-dialog");
+const deleteDialog = element<HTMLDialogElement>("delete-dialog");
+let pendingTrashId: string | null = null;
+element("delete-draft").addEventListener("click", () => {
+  if (!current || locked || switching) return;
+  pendingTrashId = current.id;
+  element("delete-draft-title").textContent = current.document.title || "제목 없는 초안";
+  deleteDialog.returnValue = "";
+  deleteDialog.showModal();
+});
+deleteDialog.addEventListener("close", () => {
+  const id = pendingTrashId;
+  pendingTrashId = null;
+  if (deleteDialog.returnValue !== "trash" || !id || current?.id !== id || locked) return;
+  void (async () => {
+    setLocked(true);
+    try {
+      await save();
+      if (dirty) await save();
+      await api(`/api/drafts/${id}`, { method: "DELETE", body: JSON.stringify({ version: current!.version }) });
+      current = null;
+      dirty = false;
+      clearTimeout(timer);
+      element("editor").hidden = true;
+      element("empty").hidden = false;
+      configureCollection(selectedCollection);
+      showingPosts = false;
+      showingTrash = false;
+      element("draft-tab").setAttribute("aria-pressed", "true");
+      element("post-tab").setAttribute("aria-pressed", "false");
+      element("trash-tab").setAttribute("aria-pressed", "false");
+      await refreshDrafts();
+      status("초안을 휴지통으로 옮겼습니다. 휴지통에서 복원할 수 있습니다.");
+    } finally {
+      setLocked(false);
+    }
+  })().catch(report);
+});
 element("publish").addEventListener("click", () => {
   dialog.returnValue = "";
   dialog.showModal();
@@ -751,6 +915,8 @@ dialog.addEventListener("close", () => {
       link.textContent = "배포 상태 확인";
       element("notice").append(link);
       showingPosts = false;
+      showingTrash = false;
+      element("trash-tab").setAttribute("aria-pressed", "false");
       element("draft-tab").setAttribute("aria-pressed", "true");
       element("post-tab").setAttribute("aria-pressed", "false");
       await refreshDrafts();

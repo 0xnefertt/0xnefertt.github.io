@@ -9,6 +9,7 @@ import {
   contentImages,
   documentLanguage,
   documentTranslationKey,
+  rebaseBookDateBackfill,
   type PostDocument,
 } from "./model";
 import { format } from "prettier/standalone";
@@ -129,6 +130,15 @@ export async function publishPost(env: Env, token: string, doc: PostDocument, me
   const repo = await repositoryTree(env, token);
   const path = postPath(doc);
   const current = repo.files.find((file) => file.path === path);
+  if (doc.sourcePath && current && current.sha !== doc.sourceSha && documentCollection(doc) === "books") {
+    const load = async (sha: string) => {
+      const blob = await github<{ content: string; size: number }>(token, `${repo.root}/git/blobs/${sha}`);
+      if (blob.size > 600_000) throw new HttpError(413, "이 글은 웹 편집기로 열기에는 너무 큽니다.");
+      return parsePost(new TextDecoder().decode(Uint8Array.from(atob(blob.content.replace(/\s/g, "")), (c) => c.charCodeAt(0))), path, sha);
+    };
+    const [base, latest] = await Promise.all([load(doc.sourceSha!), load(current.sha)]);
+    doc = rebaseBookDateBackfill(doc, base, latest) ?? doc;
+  }
   if (doc.sourcePath ? current?.sha !== doc.sourceSha : current)
     throw new HttpError(409, "같은 주소의 글이 있거나 원본이 변경되었습니다. 새로 불러온 후 발행해 주세요.");
   const files = repo.files.filter(

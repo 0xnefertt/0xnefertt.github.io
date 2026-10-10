@@ -137,7 +137,7 @@ before(async () => {
     })
   );
   const db = await mf.getD1Database("DB");
-  const migration = await readFile("migrations/0001_writer.sql", "utf8");
+  const migration = (await readFile("migrations/0001_writer.sql", "utf8")) + (await readFile("migrations/0002_draft_trash.sql", "utf8"));
   await db.batch(
     migration
       .split(";")
@@ -827,6 +827,62 @@ test("Korean About edits its own source and profile without changing English Abo
   const tree = calls.find((call) => call.path.endsWith("/git/trees") && call.method === "POST").data.tree;
   assert.ok(tree.some((file) => file.path === aboutKoPath));
   assert.ok(!tree.some((file) => file.path === aboutPath));
+});
+
+test("trash preserves private attachments and the document, hides active access, and restores them with revision protection", async () => {
+  const value = await create(document({ collection: "books", title: "Private review" }));
+  const media = await (
+    await request(`/api/drafts/${value.id}/media`, {
+      method: "POST",
+      headers: { "Content-Type": "image/png" },
+      body: Uint8Array.from([137, 80, 78, 71]),
+    })
+  ).json();
+  const saved = await (
+    await request(`/api/drafts/${value.id}`, {
+      method: "PUT",
+      data: { version: value.version, document: { ...value.document, metadata: { cover: media.url } } },
+    })
+  ).json();
+  for (const headers of [{ Origin: "https://evil.example" }, { "X-CSRF-Token": "" }]) {
+    assert.equal((await request(`/api/drafts/${value.id}`, { method: "DELETE", data: { version: saved.version }, headers })).status, 403);
+  }
+  assert.equal((await request(`/api/drafts/${value.id}`, { method: "DELETE", data: { version: value.version } })).status, 409);
+  const db = await mf.getD1Database("DB");
+  await db
+    .prepare("UPDATE drafts SET publishing = ? WHERE id = ?")
+    .bind(Date.now() + 600000, value.id)
+    .run();
+  assert.equal((await request(`/api/drafts/${value.id}`, { method: "DELETE", data: { version: saved.version } })).status, 409);
+  await db.prepare("UPDATE drafts SET publishing = 0 WHERE id = ?").bind(value.id).run();
+  calls = [];
+  assert.equal((await request(`/api/drafts/${value.id}`, { method: "DELETE", data: { version: saved.version } })).status, 200);
+  assert.equal((await request(`/api/drafts/${value.id}`)).status, 404);
+  assert.equal((await request(media.url)).status, 404);
+  assert.equal((await request(`/api/drafts/${value.id}/publish`, { method: "POST", data: { version: saved.version } })).status, 404);
+  const active = await (await request("/api/drafts?collection=books")).json();
+  assert.ok(!active.drafts.some((d) => d.id === value.id));
+  const trash = await (await request("/api/drafts?collection=books&trash=1")).json();
+  const item = trash.drafts.find((d) => d.id === value.id);
+  assert.ok(item);
+  assert.equal((await request(`/api/drafts/${value.id}/restore`, { method: "POST", data: { version: saved.version } })).status, 409);
+  const restored = await (await request(`/api/drafts/${value.id}/restore`, { method: "POST", data: { version: item.version } })).json();
+  assert.deepEqual(restored.document, saved.document);
+  assert.equal((await request(media.url)).status, 200);
+  assert.ok(!calls.some((call) => call.path.includes("/git/")));
+});
+
+test("trashing a published working copy keeps GitHub content and refuses restoration over a new active working copy", async () => {
+  const opened = await (await request("/api/posts/open", { method: "POST", data: { path: bookPath } })).json();
+  calls = [];
+  assert.equal((await request(`/api/drafts/${opened.id}`, { method: "DELETE", data: { version: opened.version } })).status, 200);
+  assert.equal(calls.length, 0);
+  const fresh = await (await request("/api/posts/open", { method: "POST", data: { path: bookPath } })).json();
+  assert.notEqual(fresh.id, opened.id);
+  assert.equal(fresh.document.sourcePath, bookPath);
+  const trash = await (await request("/api/drafts?collection=books&trash=1")).json();
+  const archived = trash.drafts.find((d) => d.id === opened.id);
+  assert.equal((await request(`/api/drafts/${opened.id}/restore`, { method: "POST", data: { version: archived.version } })).status, 409);
 });
 
 test("logout invalidates the server session", async () => {

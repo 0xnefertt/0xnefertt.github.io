@@ -31,6 +31,35 @@ export function pathCollection(path: string): ContentCollection {
 export function documentCollection(doc: Pick<PostDocument, "collection" | "sourcePath">): ContentCollection {
   return contentCollection(doc.collection ?? (doc.sourcePath ? pathCollection(doc.sourcePath) : "blog"));
 }
+
+// Existing book working copies may predate the one-time publication-date backfill.
+// Accept only that additive field; all other repository changes still conflict.
+export function rebaseBookDateBackfill(doc: PostDocument, base: PostDocument, latest: PostDocument): PostDocument | undefined {
+  if (
+    [doc, base, latest].some((item) => documentCollection(item) !== "books") ||
+    base.metadata.date !== undefined ||
+    typeof latest.metadata.date !== "string"
+  )
+    return;
+  validateCollectionMetadata(latest);
+  const comparable = (item: PostDocument) => {
+    const { date, ...metadata } = item.metadata;
+    const { sourceSha, ...rest } = item;
+    const ordered = (value: unknown): unknown =>
+      Array.isArray(value)
+        ? value.map(ordered)
+        : value && typeof value === "object"
+          ? Object.fromEntries(
+              Object.entries(value)
+                .sort(([a], [b]) => a.localeCompare(b))
+                .map(([key, item]) => [key, ordered(item)])
+            )
+          : value;
+    return JSON.stringify(ordered({ ...rest, metadata }));
+  };
+  if (comparable(base) !== comparable(latest)) return;
+  return { ...doc, sourceSha: latest.sourceSha, metadata: { ...doc.metadata, date: doc.metadata.date ?? latest.metadata.date } };
+}
 export function isContentPath(path: string): boolean {
   try {
     pathCollection(path);

@@ -115,12 +115,14 @@ async function setup() {
       return response({
         drafts: [...drafts.values()]
           .filter((d) => d.document.collection === url.searchParams.get("collection"))
+          .filter((d) => Boolean(d.trashedAt) === (url.searchParams.get("trash") === "1"))
           .map((d) => ({
             id: d.id,
             title: d.document.title,
             language: d.document.metadata.lang,
             sourcePath: d.document.sourcePath,
             updated: d.updated,
+            version: d.version,
           })),
       });
     }
@@ -130,6 +132,16 @@ async function setup() {
       return response(draft);
     }
     const draft = drafts.get(url.pathname.split("/")[3]);
+    if (init.method === "DELETE") {
+      draft.trashedAt = new Date().toISOString();
+      draft.version++;
+      return response({ id: draft.id, trashedAt: draft.trashedAt });
+    }
+    if (url.pathname.endsWith("/restore")) {
+      draft.trashedAt = null;
+      draft.version++;
+      return response(draft);
+    }
     if (init.method === "PUT") {
       if (pendingSave) {
         const wait = pendingSave;
@@ -258,4 +270,53 @@ test("a custom book publication date survives saving and reopening without resto
   ui.edit("metadata-date", "");
   await ui.click("save");
   assert.ok(!("date" in ui.drafts.get("draft-1").document.metadata));
+});
+
+test("cover thumbnails appear while writing, report failures, and can be cleared after saving", async () => {
+  const ui = await setup();
+  await ui.click("manage-books");
+  await ui.click("new-post");
+  assert.match(document.getElementById("cover-status").textContent, /등록된 표지가 없습니다/);
+  ui.edit("metadata-cover", "assets/img/cover.jpg");
+  await settle();
+  const thumbnail = document.getElementById("cover-thumbnail");
+  assert.equal(thumbnail.src, "https://0xnefertt.github.io/assets/img/cover.jpg");
+  assert.equal(thumbnail.hidden, false);
+  assert.equal(document.getElementById("preview-panel").hidden, true);
+  thumbnail.dispatchEvent(new dom.window.Event("load"));
+  assert.match(document.getElementById("cover-status").textContent, /이미지 확인됨/);
+  await ui.click("save");
+  ui.edit("metadata-cover", "");
+  await ui.click("save");
+  assert.ok(!("cover" in ui.drafts.get("draft-1").document.metadata));
+  assert.equal(thumbnail.hidden, true);
+  ui.edit("metadata-cover", "https://example.com/missing.jpg");
+  await settle();
+  thumbnail.dispatchEvent(new dom.window.Event("error"));
+  assert.equal(thumbnail.hidden, true);
+  assert.match(document.getElementById("cover-status").textContent, /불러올 수 없습니다/);
+});
+
+test("draft trash confirmation resets on cancel and restores the same saved document", async () => {
+  const ui = await setup();
+  await ui.click("manage-books");
+  await ui.click("new-post");
+  ui.edit("title", "Saved review");
+  await ui.click("delete-draft");
+  document.getElementById("delete-dialog").close("trash");
+  await settle();
+  assert.ok(ui.drafts.get("draft-1").trashedAt);
+  assert.equal(document.getElementById("editor").hidden, true);
+  await ui.click("trash-tab");
+  assert.match(document.getElementById("post-list").textContent, /Saved review.*복원/s);
+  document.querySelector("#post-list .post-item").click();
+  await settle();
+  assert.equal(ui.drafts.get("draft-1").trashedAt, null);
+  assert.equal(document.getElementById("title").value, "Saved review");
+  assert.equal(document.getElementById("editor").hidden, false);
+  await ui.click("delete-draft");
+  assert.equal(document.getElementById("delete-dialog").returnValue, "");
+  document.getElementById("delete-dialog").close();
+  await settle();
+  assert.equal(ui.calls.filter((call) => call.method === "DELETE").length, 1);
 });

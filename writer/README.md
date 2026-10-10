@@ -80,6 +80,10 @@ Never put the GitHub Client Secret or the session secret in a `PUBLIC_` variable
 Secrets, local database state, generated UI bundles, and test bundles are ignored by Git.
 `worker-configuration.d.ts` is also generated and ignored; `npm run writer:check` regenerates it before checking Worker types.
 
+Use **초안 삭제** to move a working copy to **휴지통**. Clicking its entry in Trash restores the document and private attachments. Published GitHub content and public images remain untouched.
+Trash requires migration `0002_draft_trash.sql` before deploying the updated Worker. Deletion/restoration require the current revision and CSRF, and are blocked during publication.
+Published copies are labeled **발행된 글의 작업본** because saving a private change and publishing it are separate actions.
+
 ## Post editor
 
 The visual editor supports headings, fonts, sizes, line spacing, bold, italic, underline, strikethrough, colors, highlighting, alignment, lists, quotes, code, links, images, and tables. Images can also be pasted or dropped into the body. Table controls add or remove rows and columns, toggle header rows, and merge or split cells. Undo history is isolated to the open post.
@@ -97,6 +101,8 @@ links, headings, images, and tables can be placed anywhere in the body using the
 are moved into editable body lists when a project or old private draft is opened; publishing removes those separate metadata fields. Older public
 content remains visible in the body without preset section headings. Cover attachments stay private until publication.
 Book reviews allow a custom publication date. Leaving it blank records the first publication date automatically; later edits retain it unless explicitly changed and update `last_updated`. Translated reviews start without a publication date.
+The cover thumbnail is visible while writing. Attachment uploads immediately save their reference; the cover reaches the public site after publication.
+Older book working copies can retain their edits when the repository changed only by adding the initial publication date. Any other remote change still requires conflict resolution.
 New books are written to `_books/<lang>/<slug>.md`, and new projects to `_projects/<lang>/<slug>.md`. Existing filenames and unrelated metadata are preserved,
 including Unicode book filenames and numeric legacy fields. Books and projects do not require blog dates, tags, or blog categories, and are excluded
 from the blog category-usage checks. No D1 migration is needed because the content kind is stored in the draft JSON; old drafts default to blog posts.

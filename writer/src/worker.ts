@@ -30,6 +30,7 @@ interface DraftRow {
   version: number;
   updated: string;
   publishing: number;
+  deleted_at: string | null;
 }
 
 function random(): string {
@@ -119,10 +120,10 @@ function draft(row: DraftRow): Draft {
 function validId(id: string): void {
   if (!/^[a-f0-9-]{36}$/.test(id)) throw new HttpError(400, "초안 주소가 올바르지 않습니다.");
 }
-async function getDraft(env: Env, id: string): Promise<DraftRow> {
+async function getDraft(env: Env, id: string, includeTrash = false): Promise<DraftRow> {
   validId(id);
   const row = await env.DB.prepare("SELECT * FROM drafts WHERE id = ?").bind(id).first<DraftRow>();
-  if (!row) throw new HttpError(404, "초안을 찾을 수 없습니다.");
+  if (!row || (row.deleted_at && !includeTrash)) throw new HttpError(404, "초안을 찾을 수 없습니다.");
   return row;
 }
 
@@ -233,7 +234,7 @@ async function route(request: Request, env: Env): Promise<Response> {
     const data = await input(request);
     const doc = await readPost(env, user.token, String(data.path ?? ""));
     // Return an existing working copy instead of overwriting edits from another device.
-    const existing = await env.DB.prepare("SELECT * FROM drafts WHERE json_extract(document, '$.sourcePath') = ?")
+    const existing = await env.DB.prepare("SELECT * FROM drafts WHERE json_extract(document, '$.sourcePath') = ? AND deleted_at IS NULL")
       .bind(doc.sourcePath)
       .first<DraftRow>();
     if (existing) return json(draft(existing));
@@ -244,15 +245,26 @@ async function route(request: Request, env: Env): Promise<Response> {
   }
   if (path === "/api/drafts" && request.method === "GET") {
     const collection = contentCollection(url.searchParams.get("collection") ?? "blog");
+    const trash = url.searchParams.get("trash") === "1";
     const rows = await env.DB.prepare(
-      "SELECT id, json_extract(document, '$.title') AS title, json_extract(document, '$.sourcePath') AS sourcePath, document, updated FROM drafts WHERE COALESCE(json_extract(document, '$.collection'), 'blog') = ? ORDER BY updated DESC LIMIT 500"
+      `SELECT id, json_extract(document, '$.title') AS title, json_extract(document, '$.sourcePath') AS sourcePath, document, updated, version, deleted_at FROM drafts WHERE COALESCE(json_extract(document, '$.collection'), 'blog') = ? AND deleted_at IS ${
+        trash ? "NOT " : ""
+      }NULL ORDER BY updated DESC LIMIT 500`
     )
       .bind(collection)
       .all();
     return json({
       drafts: rows.results.map((row) => {
         const doc = JSON.parse(String(row.document)) as PostDocument;
-        return { id: row.id, title: row.title, sourcePath: row.sourcePath, updated: row.updated, language: documentLanguage(doc) };
+        return {
+          id: row.id,
+          title: row.title,
+          sourcePath: row.sourcePath,
+          updated: row.updated,
+          version: row.version,
+          trashedAt: row.deleted_at,
+          language: documentLanguage(doc),
+        };
       }),
     });
   }
@@ -265,10 +277,39 @@ async function route(request: Request, env: Env): Promise<Response> {
     await env.DB.prepare("INSERT INTO drafts (id, document, updated) VALUES (?, ?, ?)").bind(id, JSON.stringify(doc), updated).run();
     return json({ id, document: doc, version: 1, updated }, 201);
   }
-  const match = path.match(/^\/api\/drafts\/([^/]+)(?:\/(publish|media))?$/);
+  const match = path.match(/^\/api\/drafts\/([^/]+)(?:\/(publish|media|restore))?$/);
   if (match) {
     const [, id, action] = match;
-    const row = await getDraft(env, id);
+    const row = await getDraft(env, id, action === "restore");
+    if (!action && request.method === "DELETE") {
+      const data = await input(request);
+      const deletedAt = new Date().toISOString();
+      const deleted = await env.DB.prepare(
+        "UPDATE drafts SET deleted_at = ?, updated = ?, version = version + 1 WHERE id = ? AND version = ? AND publishing <= ? AND deleted_at IS NULL RETURNING id"
+      )
+        .bind(deletedAt, deletedAt, id, Number(data.version), Date.now())
+        .first();
+      if (!deleted) throw new HttpError(409, "초안이 변경되었거나 발행 중입니다. 다시 열어 확인해 주세요.");
+      return json({ id, trashedAt: deletedAt });
+    }
+    if (action === "restore" && request.method === "POST") {
+      const data = await input(request);
+      if (!row.deleted_at) throw new HttpError(409, "이미 복원된 초안입니다.");
+      const original = JSON.parse(row.document) as PostDocument;
+      if (original.sourcePath) {
+        const active = await env.DB.prepare("SELECT id FROM drafts WHERE deleted_at IS NULL AND json_extract(document, '$.sourcePath') = ?")
+          .bind(original.sourcePath)
+          .first();
+        if (active) throw new HttpError(409, "이 글의 다른 작업본이 있습니다. 기존 작업본을 먼저 확인해 주세요.");
+      }
+      const restored = await env.DB.prepare(
+        "UPDATE drafts SET deleted_at = NULL, updated = ?, version = version + 1 WHERE id = ? AND version = ? AND publishing <= ? AND deleted_at IS NOT NULL AND NOT EXISTS (SELECT 1 FROM drafts AS active WHERE active.deleted_at IS NULL AND json_extract(active.document, '$.sourcePath') = ? AND active.id <> ?) RETURNING *"
+      )
+        .bind(new Date().toISOString(), id, Number(data.version), Date.now(), original.sourcePath, id)
+        .first<DraftRow>();
+      if (!restored) throw new HttpError(409, "휴지통 상태가 변경되었습니다. 목록을 다시 확인해 주세요.");
+      return json(draft(restored));
+    }
     if (!action && request.method === "GET") return json(draft(row));
     if (!action && request.method === "PUT") {
       const data = await input(request);
@@ -339,7 +380,11 @@ async function route(request: Request, env: Env): Promise<Response> {
   }
   const mediaMatch = path.match(/^\/api\/media\/([a-f0-9-]{36})$/);
   if (mediaMatch && request.method === "GET") {
-    const object = await env.DB.prepare("SELECT data, mime FROM media WHERE id = ?").bind(mediaMatch[1]).first<{ data: number[]; mime: string }>();
+    const object = await env.DB.prepare(
+      "SELECT media.data, media.mime FROM media JOIN drafts ON drafts.id = media.draft_id WHERE media.id = ? AND drafts.deleted_at IS NULL"
+    )
+      .bind(mediaMatch[1])
+      .first<{ data: number[]; mime: string }>();
     if (!object) throw new HttpError(404, "이미지를 찾을 수 없습니다.");
     return new Response(Uint8Array.from(object.data), {
       headers: { "Content-Type": object.mime, "Content-Disposition": "inline" },
@@ -366,7 +411,7 @@ export default {
     const origin = request.headers.get("Origin");
     if (origin && allowedOrigin(request, env)) {
       result.headers.set("Access-Control-Allow-Origin", origin);
-      result.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS");
+      result.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
       result.headers.set("Access-Control-Allow-Headers", "Authorization, Content-Type, X-CSRF-Token");
       result.headers.set("Vary", "Origin");
     }

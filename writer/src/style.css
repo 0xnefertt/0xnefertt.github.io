@@ -193,7 +193,30 @@ button[aria-pressed="true"] {
 }
 .editor-actions > div {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.4rem;
+}
+
+.cover-status-panel {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.cover-status-panel p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.cover-thumbnail {
+  width: 100px;
+  height: 140px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
 }
 .title-input,
 .description-input {
