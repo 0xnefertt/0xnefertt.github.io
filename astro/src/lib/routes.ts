@@ -27,7 +27,7 @@ async function buildRoutes(): Promise<SiteRoute[]> {
     routes.set(localized, { path: localized, view, props, group, locale, noindex });
   }
   for (const locale of locales) {
-    for (const [path, view] of [['/', 'index'], ['/blog/', 'blog/index'], ['/blog/search/', 'blog/search'], ['/books/', 'books/index'], ['/projects/', 'projects/index'], ['/privacy/', 'privacy']]) {
+    for (const [path, view] of [['/', 'index'], ['/about/', 'about'], ['/blog/', 'blog/index'], ['/blog/search/', 'blog/search'], ['/books/', 'books/index'], ['/projects/', 'projects/index'], ['/privacy/', 'privacy']]) {
       add(path, view, locale, {}, path, path === '/blog/search/');
     }
     const published = getPublishedBlogPosts(sortPostsDesc(posts), locale);

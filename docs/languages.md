@@ -1,6 +1,6 @@
 # Site languages
 
-English uses the existing root URLs (`/`, `/blog/`, `/books/`, `/projects/`). Korean uses `/ko/`, `/ko/blog/`, `/ko/books/`, and `/ko/projects/`.
+English uses the existing root URLs (`/`, `/about/`, `/blog/`, `/books/`, `/projects/`). Korean uses `/ko/`, `/ko/about/`, `/ko/blog/`, `/ko/books/`, and `/ko/projects/`.
 The URL determines the page language; browser language and old local storage preferences do not override it.
 
 All content has `lang: en` or `lang: ko`. Lists, categories, recommendations, pagination, search indexes, and RSS contain only published content in that language.
@@ -15,6 +15,7 @@ Untranslated items link to the other language's collection index and do not adve
 
 English About is stored in `_pages/about.md`; Korean About is in `_pages/ko/about.md`. Open either with the two About buttons in the editor.
 Profile text and photos can be edited in each language's About document. The initial photos use the same asset.
+The dedicated About pages show the full introduction; the blog home shows a short profile linking to About. Both read these same administrator-editable documents.
 
 New administrator content uses `_posts/<lang>/<category>/<date>-<slug>.md`, `_books/<lang>/<slug>.md`, or `_projects/<lang>/<slug>.md`.
 Existing source files retain their paths so existing working copies can still be opened. Legacy private drafts infer a language until saved with explicit metadata.

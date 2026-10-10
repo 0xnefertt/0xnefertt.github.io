@@ -15,12 +15,21 @@ async function htmlFiles(folder) {
 }
 for (const locale of ["en", "ko"]) {
   const prefix = locale === "ko" ? "ko/" : "";
-  for (const page of ["", "blog/", "blog/search/", "books/", "projects/", "privacy/"]) {
+  for (const page of ["", "about/", "blog/", "blog/search/", "books/", "projects/", "privacy/"]) {
     const html = await fs.readFile(path.join(root, prefix, page, "index.html"), "utf8");
     assert.ok(html.includes(`<html lang="${locale}">`), `${prefix}${page} has the wrong HTML language`);
     assert.ok(!html.includes("site-language"), "The URL must control language independently of stored preferences");
     assert.ok(html.includes(`href="/${prefix}rss.xml"`), "Footer RSS must use the current language");
     assert.ok(html.includes('href="/admin/"'), "Both languages must use one admin page");
+    assert.ok(html.includes(`href="/${prefix}about/"`), "About navigation must open the localized introduction page");
+    if (page === "about/") {
+      assert.ok(html.includes('class="about-page"') && html.includes('class="about-photo"'), "About must render the introduction and profile photo");
+      assert.ok(!html.includes('class="post-list"') && !html.includes('class="feed-more"'), "About must not render the blog feed");
+      assert.ok(
+        html.includes(`href="https://0xnefertt.github.io/${prefix === "" ? "ko/" : ""}about/"`),
+        "About must link to its translated counterpart"
+      );
+    }
   }
   const posts = JSON.parse(await fs.readFile(path.join(root, prefix, "blog/search-index.json"), "utf8"));
   for (const post of posts.filter((post) => !post.external)) {

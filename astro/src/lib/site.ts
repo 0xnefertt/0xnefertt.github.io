@@ -36,7 +36,7 @@ export interface NavItem {
 export async function getNavItems(locale: Locale = 'en'): Promise<NavItem[]> {
   const blogCategoryTree = listBlogCategoryTree(getPublishedBlogPosts(await getCollection('blog'), locale), locale);
   return [
-    { label: t(locale, 'nav_about'), href: localizedPath('/#about', locale) },
+    { label: t(locale, 'nav_about'), href: localizedPath('/about/', locale) },
     { label: t(locale, 'nav_blog'), href: localizedPath('/blog/', locale), children: blogCategoryTree.map((parent) => ({
       label: parent.name, href: parent.href, children: parent.children.map((child) => ({label: child.name, href: child.href})),
     })) },

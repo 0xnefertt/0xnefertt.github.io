@@ -131,7 +131,7 @@ const showMultiplexAd = siteConfig.adsensePublisherId.length > 0 && !redirectTar
     <h1>{post.data.title}</h1>
     <p class="post-byline">
       {ownerPost && authorImage && <img class="post-author-avatar" src={authorImage} alt="" width="28" height="28" />}
-      <a href="/#about" rel="author">{authorName}</a>
+      <a href={l('/about/')} rel="author">{authorName}</a>
       <time datetime={post.data.date?.toISOString()}>{formatPostDate(post.data.date)}</time>
       {post.data.external_source ? ` · ${post.data.external_source}` : ''}
     </p>
