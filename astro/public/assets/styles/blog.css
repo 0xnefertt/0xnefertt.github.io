@@ -216,10 +216,6 @@ body {
   content: "−";
 }
 
-.profile-rss {
-  font-size: 0.8rem;
-}
-
 .home-content .home-intro > .favorite-rail,
 .home-content .home-intro > .home-right-rail {
   position: static;
@@ -565,13 +561,30 @@ body {
 
 .footer-links .language-switch {
   border: 0;
+  border-radius: 0;
   background: transparent;
-  gap: 0.3rem;
+  padding: 0;
+  gap: 0.4rem;
 }
 
 .footer-links .language-option {
   min-height: 44px;
-  min-width: 44px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.footer-links .language-option.is-active {
+  font-weight: 600;
+}
+
+.footer-links .language-option:hover {
+  color: var(--accent);
 }
 
 @media (max-width: 840px) {
