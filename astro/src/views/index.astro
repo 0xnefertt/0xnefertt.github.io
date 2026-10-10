@@ -89,12 +89,10 @@ function toUsefulInfoConfig(input: unknown): UsefulInfoConfig {
 const aboutData = aboutPage.data as Record<string, unknown>;
 const favoriteCategories = siteSettings.favorites.filter((group) => group.items.length > 0);
 const usefulInfo = toUsefulInfoConfig(aboutData.useful_info);
-const homeVerticalAdSlot = '3436251506';
-const showHomeVerticalAd = siteConfig.adsensePublisherId.length > 0;
 const introClassName = [
   'home-intro',
   favoriteCategories.length > 0 ? 'home-intro--with-favorites' : 'home-intro--without-favorites',
-  usefulInfo.enabled || showHomeVerticalAd ? 'home-intro--with-useful-info' : 'home-intro--without-useful-info',
+  usefulInfo.enabled ? 'home-intro--with-useful-info' : 'home-intro--without-useful-info',
 ].join(' ');
 ---
 
@@ -158,7 +156,7 @@ const introClassName = [
       )
     }
 
-    {(usefulInfo.enabled || showHomeVerticalAd) && (
+    {usefulInfo.enabled && (
       <aside class="home-right-rail">
         {usefulInfo.enabled && (
           <section
@@ -185,20 +183,6 @@ const introClassName = [
             </div>
           </section>
         )}
-
-        {showHomeVerticalAd && (
-          <section class="home-ad-card" aria-label="Advertisement">
-            <ins
-              class="adsbygoogle"
-              style="display:block"
-              data-ad-client={siteConfig.adsensePublisherId}
-              data-ad-slot={homeVerticalAdSlot}
-              data-ad-format="auto"
-              data-full-width-responsive="true"
-              data-adsense-slot
-            ></ins>
-          </section>
-        )}
       </aside>
     )}
 
@@ -221,28 +205,6 @@ const introClassName = [
       </details>
     </section>
   </div>
-
-  {
-    showHomeVerticalAd && (
-      <script is:inline>
-        (() => {
-          const slots = document.querySelectorAll('[data-adsense-slot]:not([data-adsense-initialized])');
-          slots.forEach((slot) => {
-            if (!(slot instanceof HTMLElement)) {
-              return;
-            }
-
-            slot.dataset.adsenseInitialized = 'true';
-            try {
-              (window.adsbygoogle = window.adsbygoogle || []).push({});
-            } catch {
-              slot.dataset.adsenseInitialized = 'false';
-            }
-          });
-        })();
-      </script>
-    )
-  }
 
   {
     favoriteCategories.length > 0 && (
