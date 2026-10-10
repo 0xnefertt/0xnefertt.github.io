@@ -1,13 +1,17 @@
 name: Check for broken links on site
 
 on:
+  push:
+    branches: [main, master]
+    paths:
+      - ".github/workflows/broken-links-site.yml"
   workflow_run:
     workflows: [Deploy site]
     types: [completed]
 
 jobs:
   check-links-on-site:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
@@ -36,5 +40,6 @@ jobs:
       - name: Link Checker 🔗
         uses: lycheeverse/lychee-action@v2.0.2
         with:
+          lycheeVersion: v0.24.2
           fail: true
-          args: --offline --root-dir astro/dist --verbose --no-progress 'astro/dist/**/*.html'
+          args: --offline --root-dir '${{ github.workspace }}/astro/dist' --verbose --no-progress 'astro/dist/**/*.html'
