@@ -61,7 +61,7 @@ body {
   padding-bottom: 1.5rem;
 }
 
-.home-content + .site-footer {
+.home-content ~ .site-footer {
   margin-top: 0;
 }
 
