@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: "파이썬 타입 시스템 정리"
 date: 2026-06-15

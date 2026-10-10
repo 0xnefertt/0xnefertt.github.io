@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: "포트폴리오 (2026년 5월)"
 date: 2026-05-22

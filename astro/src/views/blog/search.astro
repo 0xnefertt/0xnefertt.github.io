@@ -1,4 +1,8 @@
 ---
+import { localeFromPath, localizedPath, localeText } from '../../lib/locale';
+import { t } from '../../lib/messages';
+const locale = localeFromPath(Astro.url.pathname);
+const l = (path: string) => localizedPath(path, locale);
 import Layout from '../../layouts/Layout.astro';
 import { toSafeJson } from '../../lib/blogSearch';
 import { siteConfig } from '../../lib/site';
@@ -7,7 +11,7 @@ import blogSearchScriptUrl from '../../scripts/blog-search.js?url';
 const searchConfigJson = toSafeJson([
   {
     mode: 'search-page',
-    indexUrl: '/blog/search-index.json',
+    indexUrl: l('/blog/search-index.json'),
     formId: 'blog-search-form',
     inputId: 'blog-search-input',
     resultsId: 'blog-search-results',
@@ -18,27 +22,27 @@ const searchConfigJson = toSafeJson([
 ]);
 ---
 
-<Layout title="blog search" description={siteConfig.blogDescription} currentPath="/blog/" disableAds>
+<Layout title="blog search" description={localeText(locale, siteConfig.blogDescription, siteConfig.blogDescriptionKo)} currentPath={l('/blog/')} disableAds>
   <section class="blog-header">
     <h1>{siteConfig.blogName}</h1>
-    <p data-i18n-key="search_all_posts">Search across all posts</p>
+    <p data-i18n-key="search_all_posts">{t(locale, 'search_all_posts')}</p>
 
-    <form class="blog-search-form" id="blog-search-form" action="/blog/search/" method="get">
+    <form class="blog-search-form" id="blog-search-form" action={l('/blog/search/')} method="get">
       <input
         class="blog-search-input"
         id="blog-search-input"
         type="search"
         name="q"
-        placeholder="Search posts"
+        placeholder={t(locale, 'search_placeholder')}
         aria-label="Search posts"
         data-i18n-placeholder="search_placeholder"
         autocomplete="off"
       />
-      <button class="blog-search-button" type="submit" data-i18n-key="search_button">Search</button>
+      <button class="blog-search-button" type="submit" data-i18n-key="search_button">{t(locale, 'search_button')}</button>
     </form>
 
     <div class="blog-category-filter">
-      <a href="/blog/" class="active" data-i18n-key="search_back">back to blog</a>
+      <a href={l('/blog/')} class="active" data-i18n-key="search_back">{t(locale, 'search_back')}</a>
     </div>
   </section>
 
@@ -47,7 +51,7 @@ const searchConfigJson = toSafeJson([
   <ul class="post-list" id="blog-search-results"></ul>
 
   <section class="card" id="blog-search-empty" hidden>
-    <p>No matching posts found.</p>
+    <p>{localeText(locale, 'No matching posts found.', '검색 결과가 없습니다.')}</p>
   </section>
 
   <script is:inline define:vars={{ searchConfigJson }}>

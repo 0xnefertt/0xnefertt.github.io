@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: page
 title: Site Platform
 description: Astro 기반 개인 블로그 플랫폼 정비

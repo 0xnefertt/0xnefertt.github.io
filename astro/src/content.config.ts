@@ -10,6 +10,9 @@ const blog = defineCollection({
   }),
   schema: z
     .object({
+      lang: z.enum(['ko', 'en']).optional(),
+      translation_key: z.string().optional(),
+      draft: z.boolean().optional(),
       title: z.string(),
       date: z.coerce.date().optional(),
       description: z.string().optional(),
@@ -22,14 +25,12 @@ const blog = defineCollection({
       canonical: z.string().optional(),
       canonical_url: z.string().optional(),
       external_source: z.string().optional(),
-      draft: z.coerce.boolean().optional(),
       series: z.string().optional(),
       featured: z.coerce.boolean().optional(),
       cover: z.string().optional(),
       thumbnail: z.string().optional(),
       gallery: z.union([z.array(z.string()), z.string()]).optional(),
       author: z.string().optional(),
-      lang: z.enum(['ko', 'en']).optional(),
       last_updated: z.coerce.date().optional(),
       giscus_comments: z.coerce.boolean().optional(),
       disqus_comments: z.coerce.boolean().optional(),
@@ -46,6 +47,9 @@ const pages = defineCollection({
   }),
   schema: z
     .object({
+      lang: z.enum(['ko', 'en']).optional(),
+      translation_key: z.string().optional(),
+      draft: z.boolean().optional(),
       title: z.string().optional(),
       permalink: z.string().optional(),
       description: z.string().optional(),
@@ -61,7 +65,10 @@ const pages = defineCollection({
       children: z
         .array(
           z.object({
-            title: z.string(),
+            lang: z.enum(['ko', 'en']).optional(),
+      translation_key: z.string().optional(),
+      draft: z.boolean().optional(),
+      title: z.string(),
             permalink: z.string().optional(),
           })
         )
@@ -95,6 +102,9 @@ const projects = defineCollection({
   }),
   schema: z
     .object({
+      lang: z.enum(['ko', 'en']).optional(),
+      translation_key: z.string().optional(),
+      draft: z.boolean().optional(),
       title: z.string(),
       description: z.string().optional(),
       img: z.any().optional(),
@@ -128,6 +138,9 @@ const books = defineCollection({
   }),
   schema: z
     .object({
+      lang: z.enum(['ko', 'en']).optional(),
+      translation_key: z.string().optional(),
+      draft: z.boolean().optional(),
       title: z.string(),
       author: z.string().optional(),
       cover: z.string().optional(),

@@ -1,48 +1,14 @@
 ---
+import { localeFromPath, localizedPath, localeText } from '../../../../../lib/locale';
+import { t } from '../../../../../lib/messages';
+const locale = localeFromPath(Astro.url.pathname);
+const l = (path: string) => localizedPath(path, locale);
 import { getCollection } from 'astro:content';
 import BlogCategoryFilter from '../../../../../components/BlogCategoryFilter.astro';
 import PostCard from '../../../../../components/PostCard.astro';
 import Layout from '../../../../../layouts/Layout.astro';
 import { getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from '../../../../../lib/blog';
 import { siteConfig } from '../../../../../lib/site';
-
-export async function getStaticPaths() {
-  const postsPerPage = 8;
-  const rawPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')));
-  const categoryTree = listBlogCategoryTree(rawPosts);
-  const summaries = rawPosts.map(toBlogSummary);
-
-  return categoryTree.flatMap((parentCategory) =>
-    parentCategory.children.flatMap((childCategory) => {
-      const categoryPostCount = summaries.filter(
-        (post) => post.categoryPaths.some((item) => item.parentSlug === parentCategory.slug && item.childSlug === childCategory.slug)
-      ).length;
-
-      const totalPages = Math.max(1, Math.ceil(categoryPostCount / postsPerPage));
-
-      return Array.from({ length: totalPages }, (_, index) => index + 1)
-        .filter((page) => page > 1)
-        .map((page) => ({
-          params: {
-            parent: parentCategory.slug,
-            child: childCategory.slug,
-            page: String(page),
-          },
-          props: {
-            parentCategory: {
-              name: parentCategory.name,
-              slug: parentCategory.slug,
-            },
-            childCategory: {
-              name: childCategory.name,
-              slug: childCategory.slug,
-            },
-            currentPage: page,
-          },
-        }));
-    })
-  );
-}
 
 interface Props {
   parentCategory: {
@@ -58,7 +24,7 @@ interface Props {
 
 const { parentCategory, childCategory, currentPage } = Astro.props;
 const postsPerPage = 8;
-const rawPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')));
+const rawPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')), locale);
 const categoryTree = listBlogCategoryTree(rawPosts);
 const allPosts = rawPosts
   .map(toBlogSummary)
@@ -70,24 +36,24 @@ const posts = allPosts.slice(pageStart, pageStart + postsPerPage);
 
 function getPageHref(page: number): string {
   return page <= 1
-    ? `/blog/category/${parentCategory.slug}/${childCategory.slug}/`
-    : `/blog/category/${parentCategory.slug}/${childCategory.slug}/page-${page}/`;
+    ? l(`/blog/category/${parentCategory.slug}/${childCategory.slug}/`)
+    : l(`/blog/category/${parentCategory.slug}/${childCategory.slug}/page-${page}/`);
 }
 ---
 
 <Layout
   title={`blog · ${parentCategory.name} / ${childCategory.name} · page ${pageIndex}`}
   description={`Posts in ${parentCategory.name} / ${childCategory.name}`}
-  currentPath={`/blog/category/${parentCategory.slug}/${childCategory.slug}/`}
+  currentPath={l(`/blog/category/${parentCategory.slug}/${childCategory.slug}/`)}
 >
   <section class="blog-header">
     <h1>{siteConfig.blogName}</h1>
     <p>
-      Category: <strong>{parentCategory.name} / {childCategory.name}</strong> ({allPosts.length}) · Page {pageIndex} of {totalPages}
+      {localeText(locale, 'Category', '카테고리')}: <strong>{parentCategory.name} / {childCategory.name}</strong> ({allPosts.length}) · {localeText(locale, `Page ${pageIndex} of ${totalPages}`, `${totalPages}페이지 중 ${pageIndex}페이지`)}
     </p>
-    <form class="blog-search-form" action="/blog/search/" method="get">
-      <input class="blog-search-input" type="search" name="q" placeholder="Search posts" data-i18n-placeholder="search_placeholder" />
-      <button class="blog-search-button" type="submit" data-i18n-key="search_button">Search</button>
+    <form class="blog-search-form" action={l('/blog/search/')} method="get">
+      <input class="blog-search-input" type="search" name="q" placeholder={t(locale, 'search_placeholder')} data-i18n-placeholder="search_placeholder" />
+      <button class="blog-search-button" type="submit" data-i18n-key="search_button">{t(locale, 'search_button')}</button>
     </form>
     <BlogCategoryFilter categoryTree={categoryTree} totalCount={rawPosts.length} activeParentSlug={parentCategory.slug} activeChildSlug={childCategory.slug} />
   </section>
@@ -110,15 +76,11 @@ function getPageHref(page: number): string {
         <ul class="pagination-list">
           {pageIndex > 1 ? (
             <li>
-              <a class="pagination-link" href={getPageHref(pageIndex - 1)} data-i18n-key="pagination_prev">
-                Previous
-              </a>
+              <a class="pagination-link" href={getPageHref(pageIndex - 1)} data-i18n-key="pagination_prev">{t(locale, 'pagination_prev')}</a>
             </li>
           ) : (
             <li>
-              <span class="pagination-link pagination-link--disabled" data-i18n-key="pagination_prev">
-                Previous
-              </span>
+              <span class="pagination-link pagination-link--disabled" data-i18n-key="pagination_prev">{t(locale, 'pagination_prev')}</span>
             </li>
           )}
 
@@ -132,15 +94,11 @@ function getPageHref(page: number): string {
 
           {pageIndex < totalPages ? (
             <li>
-              <a class="pagination-link" href={getPageHref(pageIndex + 1)} data-i18n-key="pagination_next">
-                Next
-              </a>
+              <a class="pagination-link" href={getPageHref(pageIndex + 1)} data-i18n-key="pagination_next">{t(locale, 'pagination_next')}</a>
             </li>
           ) : (
             <li>
-              <span class="pagination-link pagination-link--disabled" data-i18n-key="pagination_next">
-                Next
-              </span>
+              <span class="pagination-link pagination-link--disabled" data-i18n-key="pagination_next">{t(locale, 'pagination_next')}</span>
             </li>
           )}
         </ul>

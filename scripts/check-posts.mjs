@@ -245,13 +245,15 @@ async function run() {
     const content = await fs.readFile(filePath, "utf8");
     const relativePath = toRelativeFromRepo(filePath);
 
+    const frontmatter = getFrontmatter(content);
+    const route = extractRouteKey(filePath);
     metadata.push({
       filePath,
       relativePath,
       content,
       frontmatter: getFrontmatter(content),
       body: getBody(content),
-      routeKey: extractRouteKey(filePath),
+      routeKey: route ? `${getScalar(frontmatter, "lang").replace(/['"]/g, "") || "en"}/${route}` : undefined,
     });
   }
 

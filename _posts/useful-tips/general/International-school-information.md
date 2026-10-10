@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: "국제학교"
 date: 2026-06-16

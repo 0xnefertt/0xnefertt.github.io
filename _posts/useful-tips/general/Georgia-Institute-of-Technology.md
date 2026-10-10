@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: "Georgia Institute of Technology"
 date: 2026-06-29

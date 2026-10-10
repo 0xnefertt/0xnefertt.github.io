@@ -60,6 +60,7 @@ function markdownStrongFallback() {
 
 export default defineConfig({
   site: 'https://0xnefertt.github.io',
+  i18n: { defaultLocale: 'en', locales: ['en', 'ko'], routing: { prefixDefaultLocale: false } },
   markdown: {
     remarkPlugins: [markdownStrongFallback],
   },

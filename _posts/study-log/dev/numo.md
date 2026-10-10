@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: "Numo 연구 노트"
 date: 2026-05-22

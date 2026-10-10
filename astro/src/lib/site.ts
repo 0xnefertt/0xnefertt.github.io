@@ -1,4 +1,6 @@
 import { getCollection } from 'astro:content';
+import { localizedPath, type Locale } from './locale';
+import { t } from './messages';
 import { getPublishedBlogPosts, listBlogCategoryTree } from './blog';
 
 const gaMeasurementId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID?.trim() ?? '';
@@ -6,11 +8,12 @@ const adsensePublisherId = import.meta.env.PUBLIC_ADSENSE_PUBLISHER_ID?.trim() ?
 
 export const siteConfig = {
   title: "0xnefertt's thoughts",
-  description: '소프트웨어 개발, 캐나다 생활, 커리어와 금융 리서치를 직접 경험과 공식 자료를 바탕으로 기록하는 0xnefertt의 블로그입니다.',
-  lang: 'ko',
+  description: 'Personal notes on software development, life in Canada, careers, and financial research.',
+  lang: 'en',
   siteUrl: 'https://0xnefertt.github.io',
   blogName: "0xnefertt's Blog",
-  blogDescription: '소프트웨어 개발, 캐나다 생활, 커리어와 금융에 관한 학습 기록과 실용적인 리서치',
+  blogDescriptionKo: '소프트웨어 개발, 캐나다 생활, 커리어와 금융에 관한 학습 기록과 실용적인 리서치',
+  blogDescription: 'Learning notes and practical research on software development, life in Canada, careers, and finance.',
   defaultOgImage: '/assets/img/prof_pic.jpg',
   xHandle: '@0xnefertt',
   adsensePublisherId,
@@ -30,42 +33,14 @@ export interface NavItem {
   children?: NavItem[];
 }
 
-export async function getNavItems(): Promise<NavItem[]> {
-  const [pages, posts] = await Promise.all([getCollection('pages'), getCollection('blog')]);
-  const blogCategoryTree = listBlogCategoryTree(getPublishedBlogPosts(posts));
-
-  const aboutPage = pages.find((entry) => entry.data.permalink === '/');
-  const aboutTitle = aboutPage?.data.title ?? 'about';
-
-  const ordered = pages
-    .filter((entry) => entry.data.nav && entry.data.permalink && entry.data.permalink !== '/')
-    .sort((a, b) => {
-      const aOrder = a.data.nav_order ?? Number.MAX_SAFE_INTEGER;
-      const bOrder = b.data.nav_order ?? Number.MAX_SAFE_INTEGER;
-      if (aOrder === bOrder) {
-        return (a.data.title ?? '').localeCompare(b.data.title ?? '');
-      }
-      return aOrder - bOrder;
-    })
-    .map((entry) => {
-      const href = entry.data.permalink ?? '/';
-      const isBlogNav = href === '/blog/';
-
-      return {
-        label: entry.data.title ?? entry.id,
-        href,
-        children: isBlogNav
-          ? blogCategoryTree.map((parent) => ({
-              label: parent.name,
-              href: parent.href,
-              children: parent.children.map((child) => ({
-                label: child.name,
-                href: child.href,
-              })),
-            }))
-          : undefined,
-      };
-    });
-
-  return [{ label: aboutTitle, href: '/#about' }, ...ordered];
+export async function getNavItems(locale: Locale = 'en'): Promise<NavItem[]> {
+  const blogCategoryTree = listBlogCategoryTree(getPublishedBlogPosts(await getCollection('blog'), locale), locale);
+  return [
+    { label: t(locale, 'nav_about'), href: localizedPath('/#about', locale) },
+    { label: t(locale, 'nav_blog'), href: localizedPath('/blog/', locale), children: blogCategoryTree.map((parent) => ({
+      label: parent.name, href: parent.href, children: parent.children.map((child) => ({label: child.name, href: child.href})),
+    })) },
+    { label: t(locale, 'nav_bookshelf'), href: localizedPath('/books/', locale) },
+    { label: t(locale, 'nav_projects'), href: localizedPath('/projects/', locale) },
+  ];
 }

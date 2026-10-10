@@ -8,6 +8,7 @@ on:
     paths:
       - "astro/**"
       - "writer/**"
+      - "shared/**"
       - "astro/public/assets/**"
       - "_pages/**"
       - "_posts/**"
@@ -24,6 +25,7 @@ on:
     paths:
       - "astro/**"
       - "writer/**"
+      - "shared/**"
       - "astro/public/assets/**"
       - "_pages/**"
       - "_posts/**"

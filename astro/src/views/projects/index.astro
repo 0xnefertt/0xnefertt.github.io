@@ -1,10 +1,14 @@
 ---
+import { localeFromPath, localizedPath, inLocale, localeText } from '../../lib/locale';
+import { t } from '../../lib/messages';
+const locale = localeFromPath(Astro.url.pathname);
+const l = (path: string) => localizedPath(path, locale);
 import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import { getProjectRoute, normalizeAssetPath, sortProjects } from '../../lib/content';
 
 const pageDef = (await getCollection('pages')).find((entry) => entry.filePath?.endsWith('/projects.md'));
-const allProjects = sortProjects(await getCollection('projects'));
+const allProjects = sortProjects(inLocale(await getCollection('projects'), locale));
 const categories = pageDef?.data.display_categories;
 
 const groupedProjects =
@@ -17,13 +21,14 @@ const groupedProjects =
 const visibleGroups = groupedProjects.filter((group) => group.items.length > 0);
 ---
 
-<Layout title="projects" description={pageDef?.data.description ?? 'Selected project case studies'} currentPath="/projects/">
+<Layout title="projects" description={pageDef?.data.description ?? 'Selected project case studies'} currentPath={l('/projects/')}>
   <section class="page-header project-portfolio-header">
     <p class="eyebrow">Portfolio</p>
-    <h1>Projects</h1>
-    <p>{pageDef?.data.description ?? 'A curated collection of things I built, improved, and learned from.'}</p>
+    <h1>{t(locale, 'nav_projects')}</h1>
+    <p>{localeText(locale, pageDef?.data.description ?? 'A curated collection of things I built, improved, and learned from.', '만들고 개선하며 배운 프로젝트와 실험을 기록합니다.')}</p>
   </section>
 
+  {visibleGroups.length === 0 && <p>{localeText(locale, 'No English projects have been published yet.', '아직 한국어 프로젝트가 없습니다.')}</p>}
   {
     visibleGroups.map((group) => (
       <section class="project-section">

@@ -1,4 +1,5 @@
 ---
+lang: en
 layout: post
 title: "CELPIP Study Day 1"
 date: 2026-07-02

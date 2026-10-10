@@ -1,10 +1,14 @@
 ---
+import { localeFromPath, localizedPath, inLocale, localeText } from '../../lib/locale';
+import { t } from '../../lib/messages';
+const locale = localeFromPath(Astro.url.pathname);
+const l = (path: string) => localizedPath(path, locale);
 import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import { formatPostDate, normalizeTaxonomy } from '../../lib/blog';
 import { getBookRoute, normalizeAssetPath } from '../../lib/content';
 
-const books = await getCollection('books');
+const books = inLocale(await getCollection('books'), locale);
 const ordered = [...books].sort((a, b) => {
   const aDate = a.data.finished?.getTime() ?? 0;
   const bDate = b.data.finished?.getTime() ?? 0;
@@ -12,12 +16,13 @@ const ordered = [...books].sort((a, b) => {
 });
 ---
 
-<Layout title="bookshelf" description="Books collection" currentPath="/books/">
+<Layout title="bookshelf" description="Books collection" currentPath={l('/books/')}>
   <section class="page-header">
-    <h1>bookshelf</h1>
-    <p>Books that are being read, finished, or planned.</p>
+    <h1>{t(locale, 'nav_bookshelf')}</h1>
+    <p>{localeText(locale, 'Books that are being read, finished, or planned.', '읽고 있거나 읽은 책, 앞으로 읽을 책을 기록합니다.')}</p>
   </section>
 
+  {ordered.length === 0 && <p>{localeText(locale, 'No English book reviews have been published yet.', '아직 한국어 독서 기록이 없습니다.')}</p>}
   <ul class="book-list">
     {
       ordered.map((book) => {

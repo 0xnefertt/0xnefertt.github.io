@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: Enbridge 기업 분석
 date: 2026-02-05 10:30:00

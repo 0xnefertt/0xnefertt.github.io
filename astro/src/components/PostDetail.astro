@@ -1,17 +1,11 @@
 ---
+import { localeFromPath, localizedPath, localeText, contentLocale } from '../lib/locale';
+import { t } from '../lib/messages';
+const locale = localeFromPath(Astro.url.pathname);
+const l = (path: string) => localizedPath(path, locale);
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
-import {
-  formatPostDate,
-  getBlogHref,
-  getPublishedBlogPosts,
-  getPostCategories,
-  getPostCategoryPaths,
-  normalizeTaxonomy,
-  slugifyTerm,
-  sortPostsDesc,
-  toBlogSummary,
-} from '../lib/blog';
+import { formatPostDate, getBlogHref, getPublishedBlogPosts, getPostCategories, getPostCategoryPaths, normalizeTaxonomy, slugifyTerm, sortPostsDesc, toBlogSummary } from '../lib/blog';
 import { siteConfig } from '../lib/site';
 import { normalizeAssetPath } from '../lib/content';
 
@@ -26,7 +20,7 @@ const tags = normalizeTaxonomy(post.data.tags);
 const categories = getPostCategories(post);
 const categoryPaths = getPostCategoryPaths(post);
 const redirectTarget = post.data.redirect;
-const allPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')));
+const allPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')), locale);
 
 const currentTagSlugs = new Set(tags.map((tag) => slugifyTerm(tag)));
 const currentCategorySlugs = new Set(categories.map((category) => slugifyTerm(category)));
@@ -70,12 +64,12 @@ function toAbsoluteUrl(input: string): string {
 }
 
 const articleImageUrl = toAbsoluteUrl(post.data.thumbnail ?? siteConfig.defaultOgImage);
-const aboutPage = (await getCollection('pages')).find((entry) => entry.id === 'about' || entry.filePath?.endsWith('/about.md'));
+const aboutPage = (await getCollection('pages')).find((entry) => entry.filePath?.endsWith('/about.md') && contentLocale(entry) === locale);
 const profile = aboutPage?.data.profile;
 const ownerPost = !post.data.author || post.data.author === '0xnefertt' || post.data.author === profile?.name;
 const authorName = ownerPost ? profile?.name ?? '0xnefertt' : post.data.author;
 const authorImage = normalizeAssetPath(profile?.image);
-const authorUrl = new URL('/', siteConfig.siteUrl).toString();
+const authorUrl = new URL(l('/'), siteConfig.siteUrl).toString();
 const publishedIso = post.data.date?.toISOString();
 const modifiedIso = (post.data.last_updated ?? post.data.date)?.toISOString();
 const keywordValues = [...tags, ...categories];
@@ -83,6 +77,7 @@ const articleJsonLd = JSON.stringify({
   '@context': 'https://schema.org',
   '@type': 'Article',
   headline: post.data.title,
+  inLanguage: locale,
   description: post.data.description ?? post.data.title,
   author: {
     '@type': 'Person',
@@ -116,20 +111,20 @@ const showMultiplexAd = siteConfig.adsensePublisherId.length > 0 && !redirectTar
 <Layout
   title={post.data.title}
   description={post.data.description ?? post.data.title}
-  currentPath="/blog/"
+  currentPath={l('/blog/')}
   canonicalHref={post.data.canonical ?? post.data.canonical_url ?? postHref}
   ogType="article"
   ogImage={post.data.thumbnail ?? siteConfig.defaultOgImage}
   articlePublishedTime={post.data.date}
   articleModifiedTime={post.data.last_updated ?? post.data.date}
-  lang={post.data.lang ?? 'ko'}
+  lang={locale}
 >
   {redirectTarget && <meta slot="head" http-equiv="refresh" content={`0; url=${redirectTarget}`} />}
   <script slot="head" type="application/ld+json" set:html={articleJsonLd}></script>
 
   <article class="post-header">
     <nav class="post-breadcrumbs" aria-label="글 카테고리">
-      <a href="/blog/" data-i18n-key="blog_all">전체 글</a>
+      <a href={l('/blog/')} data-i18n-key="blog_all">{t(locale, 'blog_all')}</a>
       {categoryPaths[0] && <>{' / '}<a href={categoryPaths[0].href}>{categoryPaths[0].label}</a></>}
     </nav>
     <h1>{post.data.title}</h1>
@@ -151,7 +146,7 @@ const showMultiplexAd = siteConfig.adsensePublisherId.length > 0 && !redirectTar
     <div class="post-main">
       {outline.length > 1 && (
         <details class="post-outline">
-          <summary>목차 · {outline.length}개 항목</summary>
+          <summary>{localeText(locale, `Contents · ${outline.length} sections`, `목차 · ${outline.length}개 항목`)}</summary>
           <ul>{outline.map((heading) => <li><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ul>
         </details>
       )}
@@ -166,8 +161,8 @@ const showMultiplexAd = siteConfig.adsensePublisherId.length > 0 && !redirectTar
       </div>
 
       <div class="post-reader-actions">
-        <a href="/blog/">글 목록으로</a>
-        <button type="button" data-copy-post-link>링크 복사</button>
+        <a href={l('/blog/')}>{localeText(locale, 'Back to blog', '글 목록으로')}</a>
+        <button type="button" data-copy-post-link>{localeText(locale, 'Copy link', '링크 복사')}</button>
         <span class="post-copy-status" data-copy-post-status role="status"></span>
       </div>
 
@@ -180,9 +175,7 @@ const showMultiplexAd = siteConfig.adsensePublisherId.length > 0 && !redirectTar
               target={previousPost.external ? '_blank' : undefined}
               rel={previousPost.external ? 'noreferrer' : undefined}
             >
-              <span class="post-pager-label" data-i18n-key="post_previous">
-                &lt; Previous
-              </span>
+              <span class="post-pager-label" data-i18n-key="post_previous">{t(locale, 'post_previous')}</span>
               <span class="post-pager-title">{previousPost.title}</span>
             </a>
           ) : (
@@ -196,9 +189,7 @@ const showMultiplexAd = siteConfig.adsensePublisherId.length > 0 && !redirectTar
               target={nextPost.external ? '_blank' : undefined}
               rel={nextPost.external ? 'noreferrer' : undefined}
             >
-              <span class="post-pager-label" data-i18n-key="post_next">
-                Next &gt;
-              </span>
+              <span class="post-pager-label" data-i18n-key="post_next">{t(locale, 'post_next')}</span>
               <span class="post-pager-title">{nextPost.title}</span>
             </a>
           ) : (
@@ -210,7 +201,7 @@ const showMultiplexAd = siteConfig.adsensePublisherId.length > 0 && !redirectTar
 
     {recommendedPosts.length > 0 && (
       <aside class="post-related card" aria-label="Recommended posts">
-        <h2 data-i18n-key="post_more_to_read">More to read</h2>
+        <h2 data-i18n-key="post_more_to_read">{t(locale, 'post_more_to_read')}</h2>
         <ul class="post-related-list">
           {recommendedPosts.map((item) => (
             <li class="post-related-item">
@@ -218,7 +209,7 @@ const showMultiplexAd = siteConfig.adsensePublisherId.length > 0 && !redirectTar
                 {item.title}
               </a>
               <p class="post-related-meta">
-                {formatPostDate(item.date)} · {item.readMinutes} min read
+                {formatPostDate(item.date)} · {localeText(locale, `${item.readMinutes} min read`, `${item.readMinutes}분 읽기`)}
               </p>
             </li>
           ))}
@@ -234,9 +225,9 @@ const showMultiplexAd = siteConfig.adsensePublisherId.length > 0 && !redirectTar
       if (!copyStatus) return;
       try {
         await navigator.clipboard.writeText(window.location.href);
-        copyStatus.textContent = '링크를 복사했습니다.';
+        copyStatus.textContent = document.documentElement.lang === 'ko' ? '링크를 복사했습니다.' : 'Link copied.';
       } catch {
-        copyStatus.textContent = '주소창의 링크를 복사해 주세요.';
+        copyStatus.textContent = document.documentElement.lang === 'ko' ? '주소창의 링크를 복사해 주세요.' : 'Please copy the URL from the address bar.';
       }
     });
   </script>

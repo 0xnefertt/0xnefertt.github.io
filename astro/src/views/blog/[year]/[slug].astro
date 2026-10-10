@@ -1,0 +1,15 @@
+---
+import { localeFromPath, localizedPath } from '../../../lib/locale';
+
+const locale = localeFromPath(Astro.url.pathname);
+import { type CollectionEntry } from 'astro:content';
+import PostDetail from '../../../components/PostDetail.astro';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+---
+
+<PostDetail post={post} />

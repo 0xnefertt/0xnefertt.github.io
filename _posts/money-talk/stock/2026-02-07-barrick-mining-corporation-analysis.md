@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: Barrick Mining Corporation 기업 분석
 date: 2026-02-07 12:30:00

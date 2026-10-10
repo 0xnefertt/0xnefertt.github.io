@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: "BC주에서 중고차 살 때 확인할 것"
 date: 2026-06-22

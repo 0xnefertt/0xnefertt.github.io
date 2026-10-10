@@ -1,4 +1,6 @@
 import type { CollectionEntry } from 'astro:content';
+import { t } from './messages';
+import { contentLocale, localizedPath, unlocalizedPath, type Locale } from './locale';
 import { normalizeAssetPath } from './content';
 import { siteSettings } from './settings';
 
@@ -159,7 +161,8 @@ const LANGUAGE_CATEGORY_SLUGS = new Set(['en', 'english', 'ko', 'korean']);
 const PARENT_ONLY_ALIAS_SLUGS = new Set(['life', 'life-thoughts', 'thoughts', 'uncategory']);
 
 export function getCategoryI18nKey(href: string): string | undefined {
-  const normalized = href.endsWith('/') ? href : `${href}/`;
+  const plain = unlocalizedPath(href);
+  const normalized = plain.endsWith('/') ? plain : `${plain}/`;
   const [parentSlug, childSlug] = normalized.replace('/blog/category/', '').split('/');
   const preset = PARENT_CATEGORY_PRESETS.find((group) => group.slug === parentSlug);
   const legacy = LEGACY_CATEGORY_PRESETS.find((group) => group.slug === parentSlug);
@@ -269,7 +272,7 @@ function inferCategoryPathFromFilePath(filePath?: string): string[] {
     return [];
   }
 
-  return toTwoLevelSegments(relativeSegments.slice(0, -1));
+  return toTwoLevelSegments(relativeSegments.slice(['en', 'ko'].includes(relativeSegments[0]) ? 1 : 0, -1));
 }
 
 function toCategoryPath(segments: string[]): BlogCategoryPath | undefined {
@@ -362,7 +365,15 @@ export function getPostCategoryPaths(post: CollectionEntry<'blog'>): BlogCategor
     }
   }
 
-  return [...uniqueByKey.values()];
+  return [...uniqueByKey.values()].map((path) => {
+    const locale = contentLocale(post);
+    const parentHref = `/blog/category/${path.parentSlug}/`;
+    const parentKey = getCategoryI18nKey(parentHref);
+    const childKey = getCategoryI18nKey(path.href);
+    const parent = parentKey ? t(locale, parentKey) : path.parentName;
+    const child = path.childSlug ? (childKey ? t(locale, childKey) : path.childName) : undefined;
+    return { ...path, label: child ? `${parent} / ${child}` : parent, href: localizedPath(path.href, locale) };
+  });
 }
 
 export function getLegacyCategoryPaths(post: CollectionEntry<'blog'>): BlogCategoryPath[] {
@@ -496,7 +507,7 @@ function extractPostImageUrls(markdown?: string): string[] {
   return [...imageUrls];
 }
 
-export function listBlogCategoryTree(posts: CollectionEntry<'blog'>[]): BlogCategoryTreeParent[] {
+export function listBlogCategoryTree(posts: CollectionEntry<'blog'>[], locale: Locale = posts[0] ? contentLocale(posts[0]) : 'en'): BlogCategoryTreeParent[] {
   const categoryMap = new Map<string, { name: string; slug: string; count: number; children: Map<string, BlogCategoryTreeChild> }>();
 
   for (const preset of PARENT_CATEGORY_PRESETS) {
@@ -511,7 +522,7 @@ export function listBlogCategoryTree(posts: CollectionEntry<'blog'>[]): BlogCate
             name: child.label,
             slug: child.slug,
             count: 0,
-            href: `/blog/category/${preset.slug}/${child.slug}/`,
+            href: localizedPath(`/blog/category/${preset.slug}/${child.slug}/`, locale),
           },
         ])
       ),
@@ -573,12 +584,13 @@ export function listBlogCategoryTree(posts: CollectionEntry<'blog'>[]): BlogCate
   return [...categoryMap.values()]
     .filter((parent) => parent.count > 0)
     .map((parent) => ({
-      name: parent.name,
+      name: getCategoryI18nKey(`/blog/category/${parent.slug}/`) ? t(locale, getCategoryI18nKey(`/blog/category/${parent.slug}/`)!) : parent.name,
       slug: parent.slug,
       count: parent.count,
-      href: `/blog/category/${parent.slug}/`,
+      href: localizedPath(`/blog/category/${parent.slug}/`, locale),
       children: [...parent.children.values()]
         .filter((child) => child.count > 0)
+        .map((child) => ({ ...child, name: getCategoryI18nKey(child.href) ? t(locale, getCategoryI18nKey(child.href)!) : child.name }))
         .sort((a, b) => {
           const aOrder = CHILD_CATEGORY_ORDER.get(`${parent.slug}/${a.slug}`) ?? Number.MAX_SAFE_INTEGER;
           const bOrder = CHILD_CATEGORY_ORDER.get(`${parent.slug}/${b.slug}`) ?? Number.MAX_SAFE_INTEGER;
@@ -604,8 +616,8 @@ export function isDraftPost(post: CollectionEntry<'blog'>): boolean {
   return post.data.draft === true;
 }
 
-export function getPublishedBlogPosts(posts: CollectionEntry<'blog'>[]): CollectionEntry<'blog'>[] {
-  return posts.filter((post) => !isDraftPost(post));
+export function getPublishedBlogPosts(posts: CollectionEntry<'blog'>[], locale?: Locale): CollectionEntry<'blog'>[] {
+  return posts.filter((post) => !isDraftPost(post) && (!locale || contentLocale(post) === locale));
 }
 
 function isExternalUrl(url: string): boolean {
@@ -625,13 +637,13 @@ export function getBlogHref(post: CollectionEntry<'blog'>): { href: string; exte
 
   if (primaryCategoryPath?.childSlug) {
     return {
-      href: `/blog/category/${primaryCategoryPath.parentSlug}/${primaryCategoryPath.childSlug}/${slug}/`,
+      href: localizedPath(`/blog/category/${primaryCategoryPath.parentSlug}/${primaryCategoryPath.childSlug}/${slug}/`, contentLocale(post)),
       external: false,
     };
   }
 
   return {
-    href: `/blog/${year}/${slug}/`,
+    href: localizedPath(`/blog/${year}/${slug}/`, contentLocale(post)),
     external: false,
   };
 }

@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: "Tax saving strategies in Canada"
 date: 2026-05-31

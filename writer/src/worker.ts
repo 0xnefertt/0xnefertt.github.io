@@ -1,5 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
-import { boundedBody, github, publishPost, readPost, repositoryTree, type MediaFile } from "./github";
+import { boundedBody, github, publishPost, readPost, repositoryTree, readDocuments, type MediaFile } from "./github";
 import {
   HttpError,
   validateDocument,
@@ -9,6 +9,7 @@ import {
   pathCollection,
   contentImages,
   editableDocument,
+  documentLanguage,
   type Draft,
   type PostDocument,
 } from "./model";
@@ -220,11 +221,13 @@ async function route(request: Request, env: Env): Promise<Response> {
   if (path === "/api/posts" && request.method === "GET") {
     const collection = contentCollection(url.searchParams.get("collection") ?? "blog");
     const repo = await repositoryTree(env, user.token);
-    return json({
-      posts: repo.files
-        .filter((file) => file.type === "blob" && isContentPath(file.path) && pathCollection(file.path) === collection)
-        .map((file) => ({ path: file.path, sha: file.sha })),
-    });
+    const files = repo.files.filter((file) => file.type === "blob" && isContentPath(file.path) && pathCollection(file.path) === collection);
+    const posts = (await readDocuments(env, user.token, repo, files)).map((doc) => ({
+      path: doc.sourcePath,
+      sha: doc.sourceSha,
+      language: documentLanguage(doc),
+    }));
+    return json({ posts });
   }
   if (path === "/api/posts/open" && request.method === "POST") {
     const data = await input(request);
@@ -242,11 +245,16 @@ async function route(request: Request, env: Env): Promise<Response> {
   if (path === "/api/drafts" && request.method === "GET") {
     const collection = contentCollection(url.searchParams.get("collection") ?? "blog");
     const rows = await env.DB.prepare(
-      "SELECT id, json_extract(document, '$.title') AS title, json_extract(document, '$.sourcePath') AS sourcePath, updated FROM drafts WHERE COALESCE(json_extract(document, '$.collection'), 'blog') = ? ORDER BY updated DESC LIMIT 500"
+      "SELECT id, json_extract(document, '$.title') AS title, json_extract(document, '$.sourcePath') AS sourcePath, document, updated FROM drafts WHERE COALESCE(json_extract(document, '$.collection'), 'blog') = ? ORDER BY updated DESC LIMIT 500"
     )
       .bind(collection)
       .all();
-    return json({ drafts: rows.results });
+    return json({
+      drafts: rows.results.map((row) => {
+        const doc = JSON.parse(String(row.document)) as PostDocument;
+        return { id: row.id, title: row.title, sourcePath: row.sourcePath, updated: row.updated, language: documentLanguage(doc) };
+      }),
+    });
   }
   if (path === "/api/drafts" && request.method === "POST") {
     const data = await input(request);
@@ -269,6 +277,8 @@ async function route(request: Request, env: Env): Promise<Response> {
       if (documentCollection(doc) !== documentCollection(original)) throw new HttpError(400, "초안의 콘텐츠 종류는 변경할 수 없습니다.");
       if (doc.sourcePath !== original.sourcePath || doc.sourceSha !== original.sourceSha)
         throw new HttpError(400, "원본 글 정보는 변경할 수 없습니다.");
+      if (original.sourcePath && documentLanguage(doc) !== documentLanguage(original))
+        throw new HttpError(400, "기존 글의 언어는 변경할 수 없습니다. 다른 언어 버전을 추가해 주세요.");
       if (original.sourcePath && (doc.date !== original.date || doc.slug !== original.slug))
         throw new HttpError(400, "기존 글의 날짜와 주소는 저장소에서 변경해 주세요.");
       const updated = new Date().toISOString();

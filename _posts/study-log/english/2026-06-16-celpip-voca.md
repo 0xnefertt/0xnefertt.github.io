@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: "CELPIP 단어"
 date: 2026-06-16

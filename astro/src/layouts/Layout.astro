@@ -2,6 +2,9 @@
 import { getNavItems, siteConfig } from '../lib/site';
 import { getSocialLinks } from '../lib/data';
 import { getCategoryI18nKey } from '../lib/blog';
+import { localeFromPath, localizedPath, unlocalizedPath } from '../lib/locale';
+import { getLanguageLinks } from '../lib/routes';
+import { t } from '../lib/messages';
 import Favicon from '../components/Favicon.astro';
 
 interface Props {
@@ -40,14 +43,17 @@ const {
   articleModifiedTime,
   noindex = false,
   disableAds = false,
-  lang = siteConfig.lang,
+  lang = localeFromPath(Astro.url.pathname),
 } = Astro.props;
+const locale = localeFromPath(Astro.url.pathname);
+const l = (path: string) => localizedPath(path, locale);
+const languageLinks = await getLanguageLinks(Astro.url.pathname);
 const pageTitle = title ? `${title} | ${siteConfig.title}` : siteConfig.title;
 const canonicalUrl = canonicalHref ? toAbsoluteCanonicalUrl(canonicalHref) : new URL(Astro.url.pathname, siteConfig.siteUrl).toString();
-const isBlogPaginationPage = /^\/blog\/(?:page-\d+|category\/[^/]+(?:\/[^/]+)?\/page-\d+)\/?$/.test(Astro.url.pathname);
-const shouldNoindex = noindex || Astro.url.pathname === '/blog/search/' || isBlogPaginationPage;
+const isBlogPaginationPage = /^\/blog\/(?:page-\d+|category\/[^/]+(?:\/[^/]+)?\/page-\d+)\/?$/.test(unlocalizedPath(Astro.url.pathname));
+const shouldNoindex = noindex || unlocalizedPath(Astro.url.pathname) === '/blog/search/' || isBlogPaginationPage;
 const currentYear = new Date().getFullYear();
-const navItems = await getNavItems();
+const navItems = await getNavItems(locale);
 const socialLinks = (await getSocialLinks()).filter((item) => item.label !== 'rss');
 const socialLabels: Record<string, string> = { email: 'Email', github: 'GitHub', x: 'X' };
 const gaMeasurementId = siteConfig.gaMeasurementId?.trim() ?? '';
@@ -92,7 +98,7 @@ function getNavI18nKey(href: string): string | undefined {
     '/projects/': 'nav_projects',
   };
 
-  return map[href];
+  return map[unlocalizedPath(href)];
 }
 ---
 
@@ -106,7 +112,9 @@ function getNavI18nKey(href: string): string | undefined {
     <meta name="description" content={description} />
     {shouldNoindex && <meta name="robots" content="noindex, follow" />}
     <link rel="canonical" href={canonicalUrl} />
-    <link rel="alternate" type="application/rss+xml" title={`${siteConfig.title} RSS Feed`} href="/rss.xml" />
+    {languageLinks.filter((link) => link.translated).map((link) => <link rel="alternate" hreflang={link.locale} href={new URL(link.href, siteConfig.siteUrl)} />)}
+    <meta property="og:locale" content={locale === 'ko' ? 'ko_KR' : 'en_US'} />
+    <link rel="alternate" type="application/rss+xml" title={`${siteConfig.title} RSS Feed`} href={l('/rss.xml')} />
     <meta property="og:site_name" content={siteConfig.title} />
     <meta property="og:type" content={ogType} />
     <meta property="og:title" content={pageTitle} />
@@ -187,13 +195,13 @@ function getNavI18nKey(href: string): string | undefined {
         document.documentElement.dataset.theme = theme;
       })();
     </script>
-    <link rel="stylesheet" href="/assets/styles/global.css?v=20261009-7" />
-    <link rel="stylesheet" href="/assets/styles/blog.css?v=20261009-4" />
+    <link rel="stylesheet" href="/assets/styles/global.css?v=20261010-1" />
+    <link rel="stylesheet" href="/assets/styles/blog.css?v=20261010-1" />
   </head>
   <body class="site-layout">
     <header class="site-header">
       <div class="container header-inner">
-        <a class="site-title" href="/">{siteConfig.title}</a>
+        <a class="site-title" href={l('/')}>{siteConfig.title}</a>
         <button
           type="button"
           class="menu-toggle"
@@ -203,7 +211,7 @@ function getNavI18nKey(href: string): string | undefined {
           aria-label="Open navigation menu"
         >
           <span class="menu-toggle-icon" aria-hidden="true"></span>
-          <span data-i18n-key="nav_menu">Menu</span>
+          <span>{t(locale, 'nav_menu')}</span>
         </button>
         <div class="header-controls" id="site-menu-panel">
           <nav aria-label="Primary" id="primary-nav">
@@ -212,14 +220,14 @@ function getNavI18nKey(href: string): string | undefined {
                 navItems.map((item) => (
                   <li class={item.children && item.children.length > 0 ? 'nav-item nav-item--dropdown' : 'nav-item'}>
                     <a class={isActive(item.href, currentPath) ? 'active' : undefined} href={item.href} data-i18n-key={getNavI18nKey(item.href)}>
-                      {item.label}
+                      {getNavI18nKey(item.href) ? t(locale, getNavI18nKey(item.href)!) : item.label}
                     </a>
                     {item.children && item.children.length > 0 && (
                       <ul class="nav-dropdown">
                         {item.children.map((child) => (
                           <li class={child.children && child.children.length > 0 ? 'nav-dropdown-item nav-dropdown-item--nested' : 'nav-dropdown-item'}>
                             <a class={isActive(child.href, currentPath) ? 'active' : undefined} href={child.href} data-i18n-key={getCategoryI18nKey(child.href)}>
-                              {child.label}
+                              {getCategoryI18nKey(child.href) ? t(locale, getCategoryI18nKey(child.href)!) : child.label}
                             </a>
                             {child.children && child.children.length > 0 && (
                               <ul class="nav-subdropdown">
@@ -230,7 +238,7 @@ function getNavI18nKey(href: string): string | undefined {
                                       href={grandchild.href}
                                       data-i18n-key={getCategoryI18nKey(grandchild.href)}
                                     >
-                                      {grandchild.label}
+                                      {getCategoryI18nKey(grandchild.href) ? t(locale, getCategoryI18nKey(grandchild.href)!) : grandchild.label}
                                     </a>
                                   </li>
                                 ))}
@@ -267,15 +275,15 @@ function getNavI18nKey(href: string): string | undefined {
         <div class="footer-links">
           <nav aria-label="Site links">
             <ul class="footer-site-links">
-              <li><a href="/privacy/">Privacy</a></li>
+              <li><a href={l('/privacy/')}>Privacy</a></li>
               <li><a href="/admin/">Login</a></li>
-              <li><a href="/rss.xml" type="application/rss+xml">RSS</a></li>
+              <li><a href={l('/rss.xml')} type="application/rss+xml">RSS</a></li>
               {socialLinks.map((item) => <li><a href={item.href}>{socialLabels[item.label] ?? item.label}</a></li>)}
               <li>
                 <div class="language-switch" role="group" aria-label="Language selector">
-                  <button type="button" class="language-option is-active" data-lang-option="en">EN</button>
+                  <a class:list={['language-option', { 'is-active': locale === 'en' }]} href={languageLinks[0].href} aria-current={locale === 'en' ? 'page' : undefined} title={languageLinks[0].translated ? 'English' : 'English version not published; opens English index'}>EN</a>
                   <span aria-hidden="true">|</span>
-                  <button type="button" class="language-option" data-lang-option="ko">KR</button>
+                  <a class:list={['language-option', { 'is-active': locale === 'ko' }]} href={languageLinks[1].href} aria-current={locale === 'ko' ? 'page' : undefined} title={languageLinks[1].translated ? '한국어' : '한국어 번역이 없어 목록으로 이동합니다'}>KR</a>
                 </div>
               </li>
             </ul>
@@ -470,147 +478,6 @@ function getNavI18nKey(href: string): string | undefined {
       })();
     </script>
 
-    <script is:inline>
-      (() => {
-        const STORAGE_KEY = 'site-language';
-        const FALLBACK_LANG = 'en';
-        const SUPPORTED = ['en', 'ko'];
-        const DICTIONARY = {
-          en: {
-            blog_all: 'All posts',
-            blog_categories: 'Categories',
-            blog_recent: 'Latest posts',
-            nav_about: 'About',
-            nav_menu: 'Menu',
-            nav_blog: 'Blog',
-            nav_bookshelf: 'Bookshelf',
-            nav_projects: 'Projects',
-            category_study_log: 'study log',
-            category_dev: 'dev',
-            category_english: 'english',
-            category_money_talk: 'money talk',
-            category_finance: 'finance',
-            category_stock: 'stock',
-            category_property: 'property',
-            category_life_thoughts: 'life · thoughts',
-            category_opinions_is_my_own: 'opinions is my own',
-            category_useful_tips: 'useful tips',
-            category_general: 'general',
-            category_in_canada: 'in canada',
-            post_more_to_read: 'More to read',
-            post_previous: '< Previous',
-            post_next: 'Next >',
-            pagination_prev: 'Previous',
-            pagination_next: 'Next',
-            search_button: 'Search',
-            search_placeholder: 'Search posts',
-            search_back: 'back to blog',
-            search_all_posts: 'Search across all posts',
-          },
-          ko: {
-            blog_all: '전체 글',
-            blog_categories: '카테고리',
-            blog_recent: '최근 글',
-            nav_about: '소개',
-            nav_menu: '메뉴',
-            nav_blog: '블로그',
-            nav_bookshelf: '책장',
-            nav_projects: '프로젝트',
-            category_study_log: '공부 기록',
-            category_dev: 'dev',
-            category_english: 'english',
-            category_money_talk: '돈 이야기',
-            category_finance: 'finance',
-            category_stock: 'stock',
-            category_property: 'property',
-            category_life_thoughts: '일상 · 생각',
-            category_opinions_is_my_own: 'opinions is my own',
-            category_useful_tips: '정보 공유',
-            category_general: 'general',
-            category_in_canada: 'in canada',
-            post_more_to_read: '함께 읽으면 좋은 글',
-            post_previous: '< 이전 글',
-            post_next: '다음 글 >',
-            pagination_prev: '이전',
-            pagination_next: '다음',
-            search_button: '검색',
-            search_placeholder: '글 검색',
-            search_back: '블로그로 돌아가기',
-            search_all_posts: '전체 글에서 검색',
-          },
-        };
 
-        function normalizeLanguage(input) {
-          if (!input) {
-            return FALLBACK_LANG;
-          }
-
-          const short = String(input).toLowerCase().slice(0, 2);
-          return SUPPORTED.includes(short) ? short : FALLBACK_LANG;
-        }
-
-        function setActiveLanguageOption(language) {
-          document.querySelectorAll('[data-lang-option]').forEach((node) => {
-            const optionLanguage = node.getAttribute('data-lang-option');
-            const isActive = optionLanguage === language;
-            node.classList.toggle('is-active', isActive);
-            node.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-          });
-        }
-
-        function applyLanguage(language) {
-          const normalized = normalizeLanguage(language);
-          const messages = DICTIONARY[normalized] || DICTIONARY[FALLBACK_LANG];
-
-          document.documentElement.lang = normalized;
-          setActiveLanguageOption(normalized);
-
-          document.querySelectorAll('[data-i18n-key]').forEach((node) => {
-            const key = node.getAttribute('data-i18n-key');
-            if (!key || !(key in messages)) {
-              return;
-            }
-
-            node.textContent = messages[key];
-          });
-
-          document.querySelectorAll('[data-i18n-placeholder]').forEach((node) => {
-            const key = node.getAttribute('data-i18n-placeholder');
-            if (!key || !(key in messages) || !(node instanceof HTMLInputElement)) {
-              return;
-            }
-
-            node.setAttribute('placeholder', messages[key]);
-          });
-
-          try {
-            window.localStorage.setItem(STORAGE_KEY, normalized);
-          } catch {}
-        }
-
-        const stored = (() => {
-          try {
-            return window.localStorage.getItem(STORAGE_KEY);
-          } catch {
-            return null;
-          }
-        })();
-
-        const browserPreferred = normalizeLanguage(window.navigator.language);
-        const initialLanguage = normalizeLanguage(stored || browserPreferred || FALLBACK_LANG);
-        applyLanguage(initialLanguage);
-
-        document.querySelectorAll('[data-lang-option]').forEach((node) => {
-          node.addEventListener('click', () => {
-            const selected = node.getAttribute('data-lang-option');
-            if (!selected) {
-              return;
-            }
-
-            applyLanguage(selected);
-          });
-        });
-      })();
-    </script>
   </body>
 </html>

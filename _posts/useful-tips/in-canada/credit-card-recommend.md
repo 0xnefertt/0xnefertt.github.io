@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: "캐나다 신용카드 추천"
 date: 2026-01-19

@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: Brookfield Corporation 기업 분석
 date: 2026-02-06 10:00:00

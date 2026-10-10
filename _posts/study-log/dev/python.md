@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: "Python 기초 정리"
 date: 2026-05-22

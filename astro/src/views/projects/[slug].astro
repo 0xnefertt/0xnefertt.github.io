@@ -1,20 +1,11 @@
 ---
-import { getCollection, render, type CollectionEntry } from 'astro:content';
+import { localeFromPath, localizedPath, localeText } from '../../lib/locale';
+
+const locale = localeFromPath(Astro.url.pathname);
+const l = (path: string) => localizedPath(path, locale);
+import { render, type CollectionEntry } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
-import { getProjectRoute, normalizeAssetPath } from '../../lib/content';
-
-export async function getStaticPaths() {
-  const projects = await getCollection('projects', (entry) => !entry.data.redirect);
-
-  return projects.map((project) => {
-    const route = getProjectRoute(project);
-
-    return {
-      params: { slug: route.slug },
-      props: { project },
-    };
-  });
-}
+import { normalizeAssetPath } from '../../lib/content';
 
 interface Props {
   project: CollectionEntry<'projects'>;
@@ -29,8 +20,8 @@ const lessons = project.data.lessons ?? [];
 const links = project.data.links ?? [];
 ---
 
-<Layout title={project.data.title} description={project.data.description ?? project.data.title} currentPath="/projects/">
-  <a class="back-link" href="/projects/">Back to projects</a>
+<Layout title={project.data.title} description={project.data.description ?? project.data.title} currentPath={l('/projects/')}>
+  <a class="back-link" href={l('/projects/')}>{localeText(locale, 'Back to projects', '프로젝트 목록으로 돌아가기')}</a>
 
   <article class="project-detail-header">
     <div>
@@ -60,19 +51,19 @@ const links = project.data.links ?? [];
       <dl>
         {project.data.status && (
           <>
-            <dt>Status</dt>
+            <dt>{localeText(locale, 'Status', '상태')}</dt>
             <dd>{project.data.status}</dd>
           </>
         )}
         {project.data.period && (
           <>
-            <dt>Period</dt>
+            <dt>{localeText(locale, 'Period', '기간')}</dt>
             <dd>{project.data.period}</dd>
           </>
         )}
         {project.data.role && (
           <>
-            <dt>Role</dt>
+            <dt>{localeText(locale, 'Role', '역할')}</dt>
             <dd>{project.data.role}</dd>
           </>
         )}

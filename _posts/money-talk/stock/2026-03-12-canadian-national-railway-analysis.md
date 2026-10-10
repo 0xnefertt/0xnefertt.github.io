@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: Canadian National Railway 기업 분석
 date: 2026-03-12 06:00:00

@@ -1,11 +1,13 @@
+import type { APIRoute } from 'astro';
+import { localeFromPath } from '../../lib/locale';
 import { getCollection } from 'astro:content';
 import { getPublishedBlogPosts, sortPostsDesc } from '../../lib/blog';
 import { buildBlogSearchIndex } from '../../lib/blogSearch';
 
 export const prerender = true;
 
-export async function GET() {
-  const rawPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')));
+export const GET: APIRoute = async ({ url }) => {
+  const rawPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')), localeFromPath(url.pathname));
 
   return new Response(JSON.stringify(buildBlogSearchIndex(rawPosts)), {
     headers: {

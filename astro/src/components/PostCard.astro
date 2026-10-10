@@ -1,4 +1,7 @@
 ---
+import { localeFromPath, localizedPath, localeText } from '../lib/locale';
+
+const locale = localeFromPath(Astro.url.pathname);
 import { formatPostDate, type BlogSummary } from '../lib/blog';
 
 interface Props {
@@ -35,7 +38,7 @@ const visibleImages = previewImages;
     {showDescription && post.description && <p class="post-excerpt">{post.description}</p>}
     <p class="post-meta">
       <time datetime={post.date?.toISOString()}>{formatPostDate(post.date)}</time>
-      <span>· {post.readMinutes} min read</span>
+      <span>· {localeText(locale, `${post.readMinutes} min read`, `${post.readMinutes}분 읽기`)}</span>
       {post.externalSource && <span>· {post.externalSource}</span>}
     </p>
     {post.categoryPaths.length > 0 && (

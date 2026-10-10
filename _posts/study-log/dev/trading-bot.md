@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: "트레이딩 봇 수수료 메모"
 date: 2026-05-24

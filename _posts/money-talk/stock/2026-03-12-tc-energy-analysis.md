@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: TC Energy 기업 분석
 date: 2026-03-12 07:00:00

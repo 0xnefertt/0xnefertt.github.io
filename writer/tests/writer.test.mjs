@@ -13,6 +13,8 @@ const existing =
 const bookPath = "_books/세상에서_가장_쉬운_본질육아.md";
 const projectPath = "_projects/2026-05-06-site-platform.md";
 const aboutPath = "_pages/about.md";
+const aboutKoPath = "_pages/ko/about.md";
+let aboutKoContent;
 let aboutContent;
 const bookContent =
   "---\ntitle: Existing book\nauthor: Original author\ncover: assets/img/book_covers/세상에서_가장_쉬운_본질육아.png\nisbn: 7539967447\ncategories: parenting education\nfinished: 2025-07-14\nstars: 3\nstatus: Finished\ncustom_marker: keep-this\n---\n\nOriginal book review.\n";
@@ -28,6 +30,7 @@ let auth;
 
 before(async () => {
   aboutContent = await readFile("../_pages/about.md", "utf8");
+  aboutKoContent = await readFile("../_pages/ko/about.md", "utf8");
   configuredSettings = JSON.parse(await readFile("../_data/site-settings.json", "utf8"));
   await mkdir(".test-build", { recursive: true });
   await build({
@@ -74,6 +77,7 @@ before(async () => {
               { path: bookPath, sha: originalSha, type: "blob" },
               { path: projectPath, sha: originalSha, type: "blob" },
               { path: aboutPath, sha: originalSha, type: "blob" },
+              { path: aboutKoPath, sha: originalSha, type: "blob" },
               { path: "astro/public/assets/img/prof_pic.jpg", sha: originalSha, type: "blob" },
               { path: "astro/public/assets/img/book_covers/세상에서_가장_쉬운_본질육아.png", sha: originalSha, type: "blob" },
               { path: "_data/site-settings.json", sha: settingsSha, type: "blob" },
@@ -89,13 +93,39 @@ before(async () => {
               repository: Object.fromEntries(
                 Object.keys(data.variables)
                   .filter((key) => /^p\d+$/.test(key))
-                  .map((key) => [key, { text: existing }])
+                  .map((key) => {
+                    const path = data.variables[key].split(":").slice(1).join(":");
+                    return [
+                      key,
+                      {
+                        text:
+                          path === bookPath
+                            ? bookContent
+                            : path === projectPath
+                              ? projectContent
+                              : path === aboutPath
+                                ? aboutContent
+                                : path === aboutKoPath
+                                  ? aboutKoContent
+                                  : existing,
+                      },
+                    ];
+                  })
               ),
             },
           });
         if (url.pathname.includes("/contents/")) {
           const path = decodeURIComponent(url.pathname.split("/contents/")[1]);
-          const content = path === bookPath ? bookContent : path === projectPath ? projectContent : path === aboutPath ? aboutContent : existing;
+          const content =
+            path === bookPath
+              ? bookContent
+              : path === projectPath
+                ? projectContent
+                : path === aboutPath
+                  ? aboutContent
+                  : path === aboutKoPath
+                    ? aboutKoContent
+                    : existing;
           return json({ content: Buffer.from(content).toString("base64"), sha: originalSha, size: content.length });
         }
         if (url.pathname.endsWith("/git/blobs")) return json({ sha: "d".repeat(40) });
@@ -527,7 +557,7 @@ test("new books publish without blog-only fields and reject invalid metadata", a
   calls = [];
   const response = await request(`/api/drafts/${value.id}/publish`, { method: "POST", data: { version: value.version } });
   assert.equal(response.status, 200, await response.clone().text());
-  assert.equal((await response.json()).path, `_books/${value.document.slug}.md`);
+  assert.equal((await response.json()).path, `_books/ko/${value.document.slug}.md`);
   for (const metadata of [{ stars: 6 }, { finished: "2026-02-30" }, { buy_link: "javascript:alert(1)" }]) {
     const invalid = await create(document({ collection: "books", metadata }));
     calls = [];
@@ -652,7 +682,7 @@ test("about editing keeps one working copy, preserves home settings and publishe
   const library = await (await request("/api/posts?collection=about")).json();
   assert.deepEqual(
     library.posts.map((post) => post.path),
-    [aboutPath]
+    [aboutPath, aboutKoPath]
   );
   for (const path of ["_pages/privacy.md", "_pages/../about.md", "_pages/about-copy.md"]) {
     assert.equal((await request("/api/posts/open", { method: "POST", data: { path } })).status, 400);
@@ -690,7 +720,7 @@ test("about editing keeps one working copy, preserves home settings and publishe
     await update({ ...original.metadata, profile: { ...originalProfile, image } });
     calls = [];
     assert.equal((await request(`/api/drafts/${value.id}/publish`, { method: "POST", data: { version: value.version } })).status, 422);
-    assert.ok(!calls.some((call) => call.method !== "GET"));
+    assert.ok(!calls.some((call) => call.method !== "GET" && !(call.path === "/graphql" && /^query\b/.test(call.data.query))));
   }
   const imageResponse = await request(`/api/drafts/${value.id}/media`, {
     method: "POST",
@@ -733,6 +763,59 @@ test("about editing keeps one working copy, preserves home settings and publishe
   assert.ok(tree.some((file) => file.path === aboutPath));
   assert.ok(tree.some((file) => file.path.startsWith("astro/public/assets/img/about/")));
   assert.equal(calls.find((call) => call.path.endsWith("/git/refs/heads/main")).data.force, false);
+});
+
+test("English translations may share a Korean slug, while duplicate translation groups and language changes are rejected", async () => {
+  const opened = await (await request("/api/posts/open", { method: "POST", data: { path: sourcePath } })).json();
+  const original = opened.document;
+  const languageChange = await request(`/api/drafts/${opened.id}`, {
+    method: "PUT",
+    data: { version: opened.version, document: { ...original, metadata: { ...original.metadata, lang: "en" } } },
+  });
+  assert.equal(languageChange.status, 400);
+  const english = await create(
+    document({
+      title: "English translation",
+      date: original.date,
+      slug: original.slug,
+      metadata: { lang: "en", translation_key: original.metadata.translation_key },
+    })
+  );
+  const published = await request(`/api/drafts/${english.id}/publish`, { method: "POST", data: { version: english.version } });
+  assert.equal(published.status, 200, await published.clone().text());
+  const result = await published.json();
+  assert.equal(result.path, "_posts/en/study-log/dev/2026-01-01-existing.md");
+  assert.equal(result.draft.document.metadata.lang, "en");
+  const duplicate = await create(document({ metadata: { lang: "ko", translation_key: original.metadata.translation_key } }));
+  calls = [];
+  assert.equal((await request(`/api/drafts/${duplicate.id}/publish`, { method: "POST", data: { version: duplicate.version } })).status, 409);
+  assert.ok(!calls.some((call) => call.method === "POST" && call.path.endsWith("/git/blobs")));
+  assert.equal((await request("/api/drafts", { method: "POST", data: { document: document({ metadata: { lang: "fr" } }) } })).status, 422);
+});
+
+test("Korean About edits its own source and profile without changing English About", async () => {
+  const value = await (await request("/api/posts/open", { method: "POST", data: { path: aboutKoPath } })).json();
+  assert.equal(value.document.metadata.lang, "ko");
+  assert.equal(value.document.metadata.permalink, "/ko/");
+  const saved = await (
+    await request(`/api/drafts/${value.id}`, {
+      method: "PUT",
+      data: {
+        version: value.version,
+        document: {
+          ...value.document,
+          body: "수정된 한국어 소개",
+          metadata: { ...value.document.metadata, profile: { ...value.document.metadata.profile, bio: "새 소개" } },
+        },
+      },
+    })
+  ).json();
+  calls = [];
+  const result = await request(`/api/drafts/${value.id}/publish`, { method: "POST", data: { version: saved.version } });
+  assert.equal(result.status, 200, await result.clone().text());
+  const tree = calls.find((call) => call.path.endsWith("/git/trees") && call.method === "POST").data.tree;
+  assert.ok(tree.some((file) => file.path === aboutKoPath));
+  assert.ok(!tree.some((file) => file.path === aboutPath));
 });
 
 test("logout invalidates the server session", async () => {

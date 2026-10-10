@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: Canadian Pacific Kansas City 기업 분석
 date: 2026-03-13 06:00:00

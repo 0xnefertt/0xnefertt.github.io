@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: "캐나다 학교 제도 메모"
 date: 2026-06-07

@@ -1,4 +1,8 @@
 ---
+import { localeFromPath, localizedPath, localeText } from '../../../lib/locale';
+import { t } from '../../../lib/messages';
+const locale = localeFromPath(Astro.url.pathname);
+const l = (path: string) => localizedPath(path, locale);
 import { getCollection } from 'astro:content';
 import BlogCategoryFilter from '../../../components/BlogCategoryFilter.astro';
 import PostCard from '../../../components/PostCard.astro';
@@ -7,16 +11,6 @@ import { getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSumma
 import { siteConfig } from '../../../lib/site';
 
 const POSTS_PER_PAGE = 8;
-
-export async function getStaticPaths() {
-  const posts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')));
-  const categories = listBlogCategoryTree(posts);
-
-  return categories.map((category) => ({
-    params: { category: category.slug },
-    props: { category },
-  }));
-}
 
 interface Props {
   category: {
@@ -27,7 +21,7 @@ interface Props {
 }
 
 const { category } = Astro.props;
-const rawPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')));
+const rawPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')), locale);
 const categoryTree = listBlogCategoryTree(rawPosts);
 const allPosts = rawPosts.map(toBlogSummary).filter((post) => post.categoryPaths.some((item) => item.parentSlug === category.slug));
 const totalPages = Math.max(1, Math.ceil(allPosts.length / POSTS_PER_PAGE));
@@ -35,19 +29,19 @@ const currentPage = 1;
 const posts = allPosts.slice(0, POSTS_PER_PAGE);
 
 function getPageHref(page: number): string {
-  return page <= 1 ? `/blog/category/${category.slug}/` : `/blog/category/${category.slug}/page-${page}/`;
+  return page <= 1 ? l(`/blog/category/${category.slug}/`) : l(`/blog/category/${category.slug}/page-${page}/`);
 }
 ---
 
-<Layout title={`blog · ${category.name}`} description={`Posts in ${category.name}`} currentPath={`/blog/category/${category.slug}/`}>
+<Layout title={`blog · ${category.name}`} description={`Posts in ${category.name}`} currentPath={l(`/blog/category/${category.slug}/`)}>
   <section class="blog-header">
     <h1>{siteConfig.blogName}</h1>
     <p>
-      Category: <strong>{category.name}</strong> ({allPosts.length})
+      {localeText(locale, 'Category', '카테고리')}: <strong>{category.name}</strong> ({allPosts.length})
     </p>
-    <form class="blog-search-form" action="/blog/search/" method="get">
-      <input class="blog-search-input" type="search" name="q" placeholder="Search posts" data-i18n-placeholder="search_placeholder" />
-      <button class="blog-search-button" type="submit" data-i18n-key="search_button">Search</button>
+    <form class="blog-search-form" action={l('/blog/search/')} method="get">
+      <input class="blog-search-input" type="search" name="q" placeholder={t(locale, 'search_placeholder')} data-i18n-placeholder="search_placeholder" />
+      <button class="blog-search-button" type="submit" data-i18n-key="search_button">{t(locale, 'search_button')}</button>
     </form>
     <BlogCategoryFilter categoryTree={categoryTree} totalCount={rawPosts.length} activeParentSlug={category.slug} />
   </section>
@@ -70,15 +64,11 @@ function getPageHref(page: number): string {
         <ul class="pagination-list">
           {currentPage > 1 ? (
             <li>
-              <a class="pagination-link" href={getPageHref(currentPage - 1)} data-i18n-key="pagination_prev">
-                Previous
-              </a>
+              <a class="pagination-link" href={getPageHref(currentPage - 1)} data-i18n-key="pagination_prev">{t(locale, 'pagination_prev')}</a>
             </li>
           ) : (
             <li>
-              <span class="pagination-link pagination-link--disabled" data-i18n-key="pagination_prev">
-                Previous
-              </span>
+              <span class="pagination-link pagination-link--disabled" data-i18n-key="pagination_prev">{t(locale, 'pagination_prev')}</span>
             </li>
           )}
 
@@ -92,15 +82,11 @@ function getPageHref(page: number): string {
 
           {currentPage < totalPages ? (
             <li>
-              <a class="pagination-link" href={getPageHref(currentPage + 1)} data-i18n-key="pagination_next">
-                Next
-              </a>
+              <a class="pagination-link" href={getPageHref(currentPage + 1)} data-i18n-key="pagination_next">{t(locale, 'pagination_next')}</a>
             </li>
           ) : (
             <li>
-              <span class="pagination-link pagination-link--disabled" data-i18n-key="pagination_next">
-                Next
-              </span>
+              <span class="pagination-link pagination-link--disabled" data-i18n-key="pagination_next">{t(locale, 'pagination_next')}</span>
             </li>
           )}
         </ul>

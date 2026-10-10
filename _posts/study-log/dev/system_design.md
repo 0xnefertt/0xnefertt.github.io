@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: "System design 메모"
 date: 2026-05-22

@@ -7,6 +7,8 @@ import {
   postPath,
   renderPost,
   contentImages,
+  documentLanguage,
+  documentTranslationKey,
   type PostDocument,
 } from "./model";
 import { format } from "prettier/standalone";
@@ -84,6 +86,38 @@ export async function readPost(env: Env, token: string, path: string): Promise<P
   return parsePost(new TextDecoder().decode(Uint8Array.from(atob(file.content.replace(/\s/g, "")), (c) => c.charCodeAt(0))), path, file.sha);
 }
 
+// Batch metadata reads to stay within Workers subrequest limits as the library grows.
+export async function readDocuments(
+  env: Env,
+  token: string,
+  repo: Awaited<ReturnType<typeof repositoryTree>>,
+  files: { path: string; sha: string }[]
+): Promise<PostDocument[]> {
+  const [owner, name] = env.GITHUB_REPOSITORY.split("/");
+  const documents: PostDocument[] = [];
+  for (let start = 0; start < files.length; start += 30) {
+    const batch = files.slice(start, start + 30);
+    const variables: Record<string, string> = { owner, name };
+    batch.forEach((file, index) => (variables[`p${index}`] = `${repo.head}:${file.path}`));
+    const expressions = batch.map((_, index) => `$p${index}:String!`).join(",");
+    const fields = batch.map((_, index) => `p${index}:object(expression:$p${index}){... on Blob{text}}`).join(" ");
+    const result = await github<{ data?: { repository: Record<string, { text: string } | null> }; errors?: unknown[] }>(token, "/graphql", {
+      method: "POST",
+      body: JSON.stringify({
+        query: `query($owner:String!,$name:String!,${expressions}){repository(owner:$owner,name:$name){${fields}}}`,
+        variables,
+      }),
+    });
+    if (result.errors?.length || !result.data?.repository) throw new HttpError(502, "콘텐츠 언어 정보를 불러오지 못했습니다.");
+    for (const [index, file] of batch.entries()) {
+      const text = result.data.repository[`p${index}`]?.text;
+      if (typeof text !== "string") throw new HttpError(502, "콘텐츠를 불러오지 못했습니다.");
+      documents.push(parsePost(text, file.path, file.sha));
+    }
+  }
+  return documents;
+}
+
 export interface MediaFile {
   id: string;
   filename: string;
@@ -97,15 +131,19 @@ export async function publishPost(env: Env, token: string, doc: PostDocument, me
   const current = repo.files.find((file) => file.path === path);
   if (doc.sourcePath ? current?.sha !== doc.sourceSha : current)
     throw new HttpError(409, "같은 주소의 글이 있거나 원본이 변경되었습니다. 새로 불러온 후 발행해 주세요.");
-  if (!doc.sourcePath) {
-    const route = path.split("/").at(-1)!;
+  const files = repo.files.filter(
+    (file) => file.type === "blob" && file.path !== path && isContentPath(file.path) && pathCollection(file.path) === documentCollection(doc)
+  );
+  // Languages may share a slug; each language must have only one version of a translation group.
+  for (const candidate of await readDocuments(env, token, repo, files)) {
+    if (documentLanguage(candidate) !== documentLanguage(doc)) continue;
     if (
-      repo.files.some(
-        (file) => isContentPath(file.path) && pathCollection(file.path) === documentCollection(doc) && file.path.split("/").at(-1) === route
-      )
-    ) {
-      throw new HttpError(409, "같은 날짜와 주소를 사용하는 글이 있습니다. 글 주소를 변경해 주세요.");
-    }
+      documentTranslationKey(candidate) === documentTranslationKey(doc) ||
+      (candidate.slug === doc.slug &&
+        (documentCollection(doc) !== "blog" ||
+          (candidate.category === doc.category && (doc.category.includes("/") || candidate.date.slice(0, 4) === doc.date.slice(0, 4)))))
+    )
+      throw new HttpError(409, "이 언어에 같은 주소나 번역 연결을 사용하는 글이 있습니다. 기존 글을 열어 수정해 주세요.");
   }
   const imageFolder = documentCollection(doc) === "blog" ? "posts" : documentCollection(doc);
   const mediaPaths = new Map(media.map((file) => [`/api/media/${file.id}`, `/assets/img/${imageFolder}/${file.filename}`]));

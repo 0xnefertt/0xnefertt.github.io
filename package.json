@@ -16,7 +16,7 @@
     "verify:content": "node scripts/check-posts.mjs",
     "report:content": "node scripts/report-content.mjs",
     "verify:site-output": "node scripts/verify-site-output.mjs",
-    "verify:build": "npm run astro:build && npm run verify:site-output",
+    "verify:build": "npm run astro:build && npm run verify:site-output && node scripts/verify-locales.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "serve": "npm run astro:dev",

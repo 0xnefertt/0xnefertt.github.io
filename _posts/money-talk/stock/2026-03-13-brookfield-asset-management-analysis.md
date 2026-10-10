@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: Brookfield Asset Management 기업 분석
 date: 2026-03-13 07:00:00

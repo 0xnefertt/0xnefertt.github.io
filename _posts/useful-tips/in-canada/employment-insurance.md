@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: "캐나다 고용 형태와 노동 기준 메모"
 date: 2026-06-22

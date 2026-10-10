@@ -1,3 +1,4 @@
+import { inferContentLanguage, contentTranslationKey, type ContentLanguage } from "../../shared/content-language";
 import { parseDocument, stringify } from "yaml";
 
 export interface PostDocument {
@@ -21,7 +22,7 @@ export function contentCollection(value: unknown = "blog"): ContentCollection {
   return value;
 }
 export function pathCollection(path: string): ContentCollection {
-  if (path === "_pages/about.md") return "about";
+  if (path === "_pages/about.md" || path === "_pages/ko/about.md") return "about";
   if (isPostPath(path)) return "blog";
   if (/^_books\/(?:[\p{L}\p{N}_-]+\/)*[\p{L}\p{N}_-]+\.md$/u.test(path)) return "books";
   if (/^_projects\/(?:[\p{L}\p{N}_-]+\/)*[\p{L}\p{N}_-]+\.md$/u.test(path)) return "projects";
@@ -71,7 +72,7 @@ export function list(value: unknown): string[] {
 }
 
 export function isPostPath(path: string): boolean {
-  return /^_posts\/(?:[a-zA-Z0-9_-]+\/){1,2}[a-zA-Z0-9_.-]+\.md$/.test(path) && !path.includes("..");
+  return /^_posts\/(?:(?:en|ko)\/)?(?:[a-zA-Z0-9_-]+\/){1,2}[a-zA-Z0-9_.-]+\.md$/.test(path) && !path.includes("..");
 }
 
 function validateCollectionMetadata(doc: PostDocument): void {
@@ -79,7 +80,8 @@ function validateCollectionMetadata(doc: PostDocument): void {
   if (kind === "blog") return;
   const metadata = doc.metadata;
   if (kind === "about") {
-    if (metadata.layout !== "about" || metadata.permalink !== "/") throw new HttpError(422, "소개 페이지의 주소와 레이아웃은 변경할 수 없습니다.");
+    if (metadata.layout !== "about" || metadata.permalink !== (documentLanguage(doc) === "ko" ? "/ko/" : "/"))
+      throw new HttpError(422, "소개 페이지의 주소와 레이아웃은 변경할 수 없습니다.");
     if (metadata.profile !== undefined && (!metadata.profile || typeof metadata.profile !== "object" || Array.isArray(metadata.profile)))
       throw new HttpError(422, "프로필 정보 형식을 확인해 주세요.");
     const profile = profileMetadata(metadata);
@@ -168,12 +170,7 @@ export function parsePost(content: string, sourcePath: string, sourceSha: string
     description: String(metadata.description ?? ""),
     date: collection === "blog" ? String(metadata.date ?? filenameMatch?.[1] ?? "").slice(0, 10) : "",
     slug: collection === "blog" ? String(metadata.slug ?? filenameMatch?.[2] ?? filename) : filename,
-    category:
-      collection === "blog"
-        ? metadata.category_override === true
-          ? list(metadata.categories)[0]
-          : sourcePath.split("/").slice(1, -1).join("/")
-        : "",
+    category: collection === "blog" ? (metadata.category_override === true ? list(metadata.categories)[0] : sourceCategory(sourcePath)) : "",
     tags: list(metadata.tags),
     body: content.replace(/\r\n/g, "\n").slice(match[0].length).replace(/^\n+/, ""),
     metadata,
@@ -183,7 +180,42 @@ export function parsePost(content: string, sourcePath: string, sourceSha: string
 }
 
 // Legacy project sections become ordinary Markdown that can be edited in one body.
+export function documentLanguage(doc: PostDocument): ContentLanguage {
+  return inferContentLanguage({ ...doc.metadata, title: doc.title }, doc.body, doc.sourcePath ?? "");
+}
+export function documentTranslationKey(doc: PostDocument): string {
+  if (!doc.sourcePath && !doc.slug && !doc.metadata.translation_key) return "";
+  return contentTranslationKey(
+    doc.metadata,
+    doc.sourcePath ?? (documentCollection(doc) === "blog" ? `${doc.date}-${doc.slug}.md` : `${doc.slug}.md`)
+  );
+}
+export function translationDraft(source: PostDocument): PostDocument {
+  if (!source.sourcePath || documentCollection(source) === "about") throw new HttpError(400, "발행된 글을 열어 번역본을 추가해 주세요.");
+  if (source.body.includes("/api/media/") || JSON.stringify(source.metadata).includes("/api/media/"))
+    throw new HttpError(422, "첨부 사진을 포함한 원본 변경을 먼저 발행한 뒤 번역본을 추가해 주세요.");
+  const metadata = { ...source.metadata, lang: documentLanguage(source) === "en" ? "ko" : "en", translation_key: documentTranslationKey(source) };
+  for (const key of ["canonical", "canonical_url", "redirect", "external_source", "draft", "last_updated"])
+    delete (metadata as Record<string, unknown>)[key];
+  return {
+    ...source,
+    metadata,
+    title: "",
+    description: "",
+    body: "",
+    sourcePath: null,
+    sourceSha: null,
+    slug: /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(source.slug) ? source.slug : "",
+  };
+}
+export function sourceCategory(path: string): string {
+  const segments = path.split("/").slice(1, -1);
+  if (segments[0] === "en" || segments[0] === "ko") segments.shift();
+  return segments.join("/");
+}
 export function editableDocument(doc: PostDocument): PostDocument {
+  const key = documentTranslationKey(doc);
+  doc = { ...doc, metadata: { ...doc.metadata, lang: documentLanguage(doc), ...(key ? { translation_key: key } : {}) } };
   if (documentCollection(doc) !== "projects" || !["highlights", "lessons", "links"].some((key) => key in doc.metadata)) return doc;
   validateCollectionMetadata(doc);
   const text = (value: string) => value.replace(/[\r\n]+/g, " ").replace(/[\\`*_[\]<>]/g, "\\$&");
@@ -221,7 +253,17 @@ export function validateDocument(value: unknown, publishing = false): PostDocume
   ) {
     throw new HttpError(400, "원본 글 정보가 올바르지 않습니다.");
   }
-  if (collection === "about" && doc.sourcePath !== "_pages/about.md") throw new HttpError(400, "소개 페이지는 기존 소개 글을 불러와 수정해 주세요.");
+  if (collection === "about" && !doc.sourcePath?.match(/^_pages\/(?:ko\/)?about\.md$/))
+    throw new HttpError(400, "소개 페이지는 기존 소개 글을 불러와 수정해 주세요.");
+  if (doc.metadata.lang !== undefined && doc.metadata.lang !== "en" && doc.metadata.lang !== "ko")
+    throw new HttpError(422, "콘텐츠 언어를 선택해 주세요.");
+  if (
+    doc.metadata.translation_key !== undefined &&
+    (typeof doc.metadata.translation_key !== "string" || !/^[\p{L}\p{N}_-]{1,200}$/u.test(doc.metadata.translation_key))
+  )
+    throw new HttpError(422, "번역 연결 주소는 문자, 숫자, 하이픈으로 입력해 주세요.");
+  if (collection === "about" && doc.sourcePath && documentLanguage(doc) !== (doc.sourcePath.includes("/ko/") ? "ko" : "en"))
+    throw new HttpError(422, "소개 페이지 언어와 원본 경로가 일치하지 않습니다.");
   if (publishing) {
     if (!doc.title.trim()) throw new HttpError(422, "제목을 입력해 주세요.");
     if (collection === "blog" && (!doc.description.trim() || !doc.body.trim() || !doc.tags.some((tag) => tag.trim()))) {
@@ -245,7 +287,12 @@ export function validateDocument(value: unknown, publishing = false): PostDocume
 
 export function postPath(doc: PostDocument): string {
   const collection = documentCollection(doc);
-  return doc.sourcePath ?? (collection === "blog" ? `_posts/${doc.category}/${doc.date}-${doc.slug}.md` : `_${collection}/${doc.slug}.md`);
+  return (
+    doc.sourcePath ??
+    (collection === "blog"
+      ? `_posts/${documentLanguage(doc)}/${doc.category}/${doc.date}-${doc.slug}.md`
+      : `_${collection}/${documentLanguage(doc)}/${doc.slug}.md`)
+  );
 }
 
 export function renderPost(doc: PostDocument, mediaPaths: Map<string, string> = new Map(), privateDraft = false): string {
@@ -254,12 +301,14 @@ export function renderPost(doc: PostDocument, mediaPaths: Map<string, string> = 
   const metadata: Record<string, unknown> = {
     ...doc.metadata,
     title: doc.title.trim(),
+    lang: documentLanguage(doc),
+    translation_key: documentTranslationKey(doc),
   };
   if (collection === "blog" || doc.description.trim() || "description" in metadata) metadata.description = doc.description.trim();
   if (collection === "blog" || doc.tags.length || "tags" in metadata) metadata.tags = doc.tags;
   if (collection === "blog") {
     metadata.date = doc.date;
-    const folderCategory = doc.sourcePath?.split("/").slice(1, -1).join("/");
+    const folderCategory = doc.sourcePath ? sourceCategory(doc.sourcePath) : undefined;
     const previousCategory = doc.metadata.category_override === true ? list(doc.metadata.categories)[0] : folderCategory;
     const changedCategory = Boolean(doc.sourcePath && doc.category !== previousCategory);
     if (changedCategory) {

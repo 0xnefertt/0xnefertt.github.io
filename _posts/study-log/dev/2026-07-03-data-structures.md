@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: "자료구조 (Data Structures)"
 date: 2026-07-03

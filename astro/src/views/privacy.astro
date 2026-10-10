@@ -1,0 +1,56 @@
+---
+import { localeFromPath, localizedPath, localeText } from '../lib/locale';
+
+const locale = localeFromPath(Astro.url.pathname);
+const l = (path: string) => localizedPath(path, locale);
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title={localeText(locale, 'Privacy', '개인정보 안내')} description="A short note on cookies, analytics, and external services on this personal blog." currentPath={l('/privacy/')} lang={locale} disableAds>
+  <article class="privacy-page markdown-body">
+    {locale === 'en' ? <>
+    <h1>Privacy</h1>
+    <p class="privacy-updated">Last updated: October 9, 2026</p>
+    <p>This is 0xnefertt's personal blog. Here is how browsing data and cookies may be used.</p>
+
+    <h2>Cookies, analytics, and ads</h2>
+    <p>
+      This site saves your theme preference in your browser. When enabled, Google Analytics measures page visits and interactions,
+      including browser, device, and approximate location information. Google AdSense and other advertising providers may use cookies to show
+      ads based on visits to this and other websites. See <a href="https://policies.google.com/privacy">Google's privacy policy</a> and
+      <a href="https://support.google.com/adsense/answer/9012903">Google's advertising partners</a> for details.
+    </p>
+    <p>
+      You can manage or delete cookies through your browser, opt out of personalized ads through
+      <a href="https://adssettings.google.com/">Google Ads Settings</a> or
+      <a href="https://optout.aboutads.info/">AboutAds</a>, and use the
+      <a href="https://tools.google.com/dlpage/gaoptout">Google Analytics opt-out add-on</a>. Where a consent message is shown, you can manage
+      your choices there.
+    </p>
+
+    <h2>External services</h2>
+    <p>
+      GitHub Pages hosts the blog. GitHub/Giscus handles comments when enabled, and Open-Meteo and Frankfurter supply weather and exchange rates.
+      Your browser may send these services technical information, such as your IP address, when making requests. Their own privacy policies apply.
+      The owner's writing area uses GitHub sign-in and Cloudflare to store private drafts and login sessions; drafts become public when published.
+    </p>
+
+    <h2>Questions</h2>
+    <p>
+      If you email me, I use your address and message to respond. For privacy questions, contact
+      <a href="mailto:adrwss2@gmail.com">adrwss2@gmail.com</a>.
+    </p>
+    </> : <>
+      <h1>개인정보 안내</h1>
+      <p class="privacy-updated">최종 수정: 2026년 10월 9일</p>
+      <p>0xnefertt의 개인 블로그에서 방문 정보와 쿠키를 사용하는 방법을 안내합니다.</p>
+      <h2>쿠키, 방문 통계와 광고</h2>
+      <p>이 사이트는 브라우저에 화면 테마 설정을 저장합니다. 활성화된 경우 Google Analytics로 페이지 방문과 상호작용을 측정하며, 브라우저·기기·대략적인 위치 정보가 포함될 수 있습니다. Google AdSense와 광고 제공업체는 이 사이트와 다른 사이트의 방문 기록에 따라 광고를 표시하기 위해 쿠키를 사용할 수 있습니다. 자세한 내용은 <a href="https://policies.google.com/privacy">Google 개인정보처리방침</a>과 <a href="https://support.google.com/adsense/answer/9012903">Google 광고 파트너 안내</a>를 확인하세요.</p>
+      <p>브라우저에서 쿠키를 관리하거나 삭제할 수 있습니다. <a href="https://adssettings.google.com/">Google 광고 설정</a>, <a href="https://optout.aboutads.info/">AboutAds</a>, <a href="https://tools.google.com/dlpage/gaoptout">Google Analytics 차단 부가기능</a>에서도 관련 설정을 관리할 수 있습니다. 동의 안내가 표시되는 경우 해당 안내에서 선택을 변경할 수 있습니다.</p>
+      <h2>외부 서비스</h2>
+      <p>GitHub Pages가 블로그를 호스팅합니다. 댓글 기능이 활성화된 경우 GitHub와 Giscus를 사용하며, 날씨와 환율은 Open-Meteo와 Frankfurter에서 제공합니다. 요청 과정에서 IP 주소 등의 기술 정보가 해당 서비스에 전달될 수 있으며 각 서비스의 개인정보처리방침이 적용됩니다. 관리자 작성 공간은 GitHub 로그인과 Cloudflare를 사용해 비공개 초안과 로그인 세션을 저장합니다. 초안은 발행할 때 공개됩니다.</p>
+      <h2>문의</h2>
+      <p>이메일을 보내주시면 답변을 위해 이메일 주소와 메시지를 사용합니다. 개인정보 관련 문의는 <a href="mailto:adrwss2@gmail.com">adrwss2@gmail.com</a>으로 보내주세요.</p>
+    </>}
+  </article>
+</Layout>

@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: Wheaton Precious Metals 기업 분석
 date: 2026-03-19 06:00:00

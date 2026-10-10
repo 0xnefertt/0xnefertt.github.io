@@ -1,4 +1,5 @@
 import type { CollectionEntry } from 'astro:content';
+import { contentLocale, localizedPath } from './locale';
 
 function getFileStem(filePath?: string): string | undefined {
   if (!filePath) {
@@ -68,7 +69,7 @@ export function getProjectRoute(project: CollectionEntry<'projects'>): RouteInfo
   const slug = getFileStem(project.filePath) ?? fallbackSlug(project.id);
   return {
     slug,
-    href: `/projects/${slug}/`,
+    href: localizedPath(`/projects/${slug}/`, contentLocale(project)),
     external: false,
   };
 }
@@ -77,7 +78,7 @@ export function getBookRoute(book: CollectionEntry<'books'>): RouteInfo {
   const slug = getFileStem(book.filePath) ?? fallbackSlug(book.id);
   return {
     slug,
-    href: `/books/${slug}/`,
+    href: localizedPath(`/books/${slug}/`, contentLocale(book)),
     external: false,
   };
 }

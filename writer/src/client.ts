@@ -1,6 +1,16 @@
 import DOMPurify from "dompurify";
 import { marked } from "marked";
-import { documentCollection, profileMetadata, renderPost, type Draft, type PostDocument, type ContentCollection } from "./model";
+import {
+  documentCollection,
+  documentLanguage,
+  documentTranslationKey,
+  translationDraft,
+  profileMetadata,
+  renderPost,
+  type Draft,
+  type PostDocument,
+  type ContentCollection,
+} from "./model";
 import { collectionEditor } from "./collection-editor";
 import { safeImage } from "./rich-content";
 import { siteManager } from "./site-manager";
@@ -31,6 +41,9 @@ const body = element<HTMLTextAreaElement>("body");
 const category = element<HTMLSelectElement>("category");
 const tags = element<HTMLInputElement>("tags");
 const date = element<HTMLInputElement>("date");
+const language = element<HTMLSelectElement>("content-language");
+const translation = element<HTMLInputElement>("translation-key");
+const languageFilter = element<HTMLSelectElement>("language-filter");
 const slug = element<HTMLInputElement>("slug");
 let csrf = "";
 let current: Draft | null = null;
@@ -40,8 +53,8 @@ let locked = false;
 let switching = false;
 let saveFlight: Promise<void> | null = null;
 let timer: ReturnType<typeof setTimeout>;
-let drafts: { id: string; title: string; sourcePath: string | null; updated: string }[] = [];
-let posts: { path: string; sha: string }[] | null = null;
+let drafts: { id: string; title: string; sourcePath: string | null; language?: string; updated: string }[] = [];
+let posts: { path: string; sha: string; language: string }[] | null = null;
 let showingPosts = false;
 let selectedCollection: ContentCollection = "blog";
 const contentLabels = { blog: "글", books: "책", projects: "프로젝트", about: "소개" };
@@ -91,6 +104,9 @@ function configureCollection(kind: ContentCollection) {
   element("empty-heading").textContent = `${object} 선택하세요`;
   element("empty-description").textContent = `새 ${object} 작성하거나 목록에서 수정할 항목을 선택하세요.`;
   element("title-label").textContent = kind === "books" ? "책 제목" : kind === "projects" ? "프로젝트 이름" : "게시글 제목";
+  element("about-languages").hidden = kind !== "about";
+  element("add-translation").hidden = kind === "about";
+  element("new-post").hidden = kind === "about";
   element("blog-category-field").hidden = kind !== "blog";
   element("blog-date-field").hidden = kind !== "blog";
   element("title-row").hidden = kind === "about";
@@ -201,7 +217,11 @@ function read(): PostDocument {
   return {
     ...current!.document,
     collection: selectedCollection,
-    metadata: details.read(current!.document.metadata),
+    metadata: {
+      ...details.read(current!.document.metadata),
+      lang: language.value,
+      ...(translation.value.trim() ? { translation_key: translation.value.trim() } : {}),
+    },
     title: title.value,
     description: description.value,
     body: composer.getBody(),
@@ -218,10 +238,14 @@ function setLocked(value: boolean) {
   locked = value;
   composer.setLocked(value);
   details.setLocked(value);
-  for (const id of ["save", "publish", "attach", "source-attach", "cover-attach", "new-post", "logout"])
+  for (const id of ["save", "publish", "attach", "source-attach", "cover-attach", "new-post", "logout", "add-translation", "about-en", "about-ko"])
     element<HTMLButtonElement>(id).disabled = value;
-  for (const field of [title, description, body, category, tags, date, slug]) field.disabled = value;
-  if (current?.document.sourcePath) slug.disabled = true;
+  element<HTMLButtonElement>("add-translation").disabled = value || !current?.document.sourcePath;
+  for (const field of [title, description, body, category, tags, date, slug, language, translation]) field.disabled = value;
+  if (current?.document.sourcePath) {
+    slug.disabled = true;
+    language.disabled = true;
+  }
   if (current?.document.sourcePath) {
     date.disabled = true;
   }
@@ -235,6 +259,14 @@ function showDraft(value: Draft) {
   selectedCollection = documentCollection(doc);
   configureCollection(selectedCollection);
   details.load(selectedCollection, doc.metadata);
+  language.value = documentLanguage(doc);
+  translation.value = documentTranslationKey(doc);
+  language.disabled = Boolean(doc.sourcePath);
+  translation.disabled = false;
+  element<HTMLButtonElement>("add-translation").disabled = !doc.sourcePath;
+  element("language-note").textContent = `${
+    language.value === "ko" ? "한국어 · /ko/" : "English · 기본 사이트"
+  }에 발행됩니다. 다른 언어 버전은 별도 초안과 발행 상태로 관리됩니다.`;
   title.value = doc.title;
   description.value = doc.description;
   composer.load(doc.body);
@@ -314,7 +346,7 @@ function scheduleSave() {
   }, 1500);
   updatePreview();
 }
-for (const input of [title, description, body, category, tags, date, slug])
+for (const input of [title, description, body, category, tags, date, slug, language, translation])
   input.addEventListener("input", (event) => {
     if (event instanceof InputEvent && event.isComposing) {
       dirty = true;
@@ -456,17 +488,24 @@ function renderList() {
   const items = showingPosts
     ? (posts ?? []).map((post) => ({
         label: post.path.split("/").at(-1)!.replace(/\.md$/, ""),
-        detail: post.path.split("/").slice(1, -1).join(" / "),
+        language: post.language,
+        detail: `${post.language === "ko" ? "한국어" : "English"} · ${post.path.split("/").slice(1, -1).join(" / ")}`,
         action: () => openPost(post.path),
         selected: current?.document.sourcePath === post.path,
       }))
     : drafts.map((draft) => ({
         label: draft.title || "제목 없는 글",
-        detail: `${draft.sourcePath ? "수정 중" : "비공개 초안"} · ${new Date(draft.updated).toLocaleDateString("ko-KR")}`,
+        language: draft.language,
+        detail: `${draft.language === "ko" ? "한국어" : draft.language === "en" ? "English" : "언어 미지정"} · ${
+          draft.sourcePath ? "수정 중" : "비공개 초안"
+        } · ${new Date(draft.updated).toLocaleDateString("ko-KR")}`,
         action: () => openDraft(draft.id),
         selected: current?.id === draft.id,
       }));
-  for (const item of items.filter((item) => `${item.label} ${item.detail}`.toLowerCase().includes(search))) {
+  for (const item of items.filter(
+    (item) =>
+      (languageFilter.value === "all" || item.language === languageFilter.value) && `${item.label} ${item.detail}`.toLowerCase().includes(search)
+  )) {
     const button = document.createElement("button");
     button.className = "post-item";
     button.setAttribute("aria-current", String(item.selected));
@@ -506,6 +545,34 @@ async function openPost(path: string) {
     switching = false;
   }
 }
+languageFilter.addEventListener("change", renderList);
+language.addEventListener("change", () => {
+  element("language-note").textContent = language.value === "ko" ? "한국어 · /ko/에 발행됩니다." : "English · 기본 사이트에 발행됩니다.";
+});
+for (const locale of ["en", "ko"])
+  element(`about-${locale}`).addEventListener("click", () => void openPost(locale === "ko" ? "_pages/ko/about.md" : "_pages/about.md").catch(report));
+element("add-translation").addEventListener(
+  "click",
+  () =>
+    void (async () => {
+      if (!current?.document.sourcePath || switching || locked) return;
+      switching = true;
+      try {
+        if (!(await leave())) return;
+        const document = translationDraft(read());
+        const target = documentLanguage(document);
+        showDraft(await api<Draft>("/api/drafts", { method: "POST", body: JSON.stringify({ document }) }));
+        showingPosts = false;
+        element("draft-tab").setAttribute("aria-pressed", "true");
+        element("post-tab").setAttribute("aria-pressed", "false");
+        await refreshDrafts();
+        notice(`${target === "ko" ? "한국어" : "English"} 번역 초안을 만들었습니다. 제목·요약·본문을 작성한 뒤 별도로 발행하세요.`);
+        title.focus();
+      } finally {
+        switching = false;
+      }
+    })().catch(report)
+);
 element("search").addEventListener("input", renderList);
 element("draft-tab").addEventListener("click", () => {
   showingPosts = false;
@@ -549,7 +616,7 @@ element("new-post").addEventListener(
           category: selectedCollection === "blog" ? category.value : "",
           tags: [],
           body: "",
-          metadata: {},
+          metadata: { lang: languageFilter.value === "ko" ? "ko" : "en" },
           sourcePath: null,
           sourceSha: null,
         };

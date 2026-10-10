@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: "2026년 상반기 회고"
 date: 2026-06-30

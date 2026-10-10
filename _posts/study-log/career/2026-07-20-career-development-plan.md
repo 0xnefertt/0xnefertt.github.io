@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: "역량 진단 및 보완 계획"
 date: 2026-07-20

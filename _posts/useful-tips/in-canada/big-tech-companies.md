@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: "밴쿠버 테크 회사 목록"
 date: 2026-06-22

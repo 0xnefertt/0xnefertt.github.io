@@ -1,0 +1,11 @@
+---
+import { getSiteRoutes } from '../lib/routes';
+const views = import.meta.glob('../views/**/*.astro', { eager: true, import: 'default' });
+export async function getStaticPaths() {
+  return (await getSiteRoutes()).map((route) => ({ params: { path: route.path.slice(1, -1) || undefined }, props: { route } }));
+}
+const { route } = Astro.props;
+const View = views[`../views/${route.view}.astro`];
+if (!View) throw new Error(`Missing view: ${route.view}`);
+---
+<View {...route.props} destination={route.redirect} />

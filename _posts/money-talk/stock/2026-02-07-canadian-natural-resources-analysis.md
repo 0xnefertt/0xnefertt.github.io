@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: Canadian Natural Resources Limited 기업 분석
 date: 2026-02-07 12:00:00

@@ -64,6 +64,7 @@ export function postCategoryKeys(doc: Pick<PostDocument, "metadata" | "sourcePat
       .filter(Boolean)
   );
   const folder = doc.sourcePath?.split("/").slice(1, -1) ?? [];
+  if (folder[0] === "en" || folder[0] === "ko") folder.shift();
   const inferred =
     doc.metadata.category_override !== true &&
     folder.length > 0 &&

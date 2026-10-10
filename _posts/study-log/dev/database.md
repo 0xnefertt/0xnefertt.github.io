@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: "데이터베이스 서비스 메모"
 date: 2026-05-23

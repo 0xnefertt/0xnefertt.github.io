@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: "React 상태 관리"
 date: 2026-06-23

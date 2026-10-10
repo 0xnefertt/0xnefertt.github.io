@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: "캐나다에서 계란 살 때 참고 메모"
 date: 2026-05-22

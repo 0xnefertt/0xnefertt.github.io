@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { localeFromPath, localizedPath, localeText } from '../lib/locale';
 import { getCollection } from 'astro:content';
 import { getPostCategories, getPublishedBlogPosts, sortPostsDesc, toBlogSummary } from '../lib/blog';
 import { siteConfig } from '../lib/site';
@@ -32,9 +33,10 @@ function excerpt(input: string, maxLength: number): string {
   return `${input.slice(0, Math.max(0, maxLength - 1)).trim()}…`;
 }
 
-export const GET: APIRoute = async ({ site }) => {
+export const GET: APIRoute = async ({ site, url }) => {
+  const locale = localeFromPath(url.pathname);
   const base = (site?.toString() ?? siteConfig.siteUrl).replace(/\/$/, '');
-  const posts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')))
+  const posts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')), locale)
     .filter((entry) => !entry.data.redirect)
     .slice(0, 60);
 
@@ -61,7 +63,7 @@ export const GET: APIRoute = async ({ site }) => {
     })
     .join('');
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n  <channel>\n    <title>${escapeXml(siteConfig.blogName)}</title>\n    <description>${escapeXml(siteConfig.blogDescription)}</description>\n    <link>${escapeXml(`${base}/blog/`)}</link>\n    <atom:link href="${escapeXml(`${base}/rss.xml`)}" rel="self" type="application/rss+xml" />\n    <language>en-us</language>\n    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>\n    ${itemsXml}\n  </channel>\n</rss>`;
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n  <channel>\n    <title>${escapeXml(siteConfig.blogName)}</title>\n    <description>${escapeXml(localeText(locale, siteConfig.blogDescription, siteConfig.blogDescriptionKo))}</description>\n    <link>${escapeXml(`${base}${localizedPath('/blog/', locale)}`)}</link>\n    <atom:link href="${escapeXml(`${base}${localizedPath('/rss.xml', locale)}`)}" rel="self" type="application/rss+xml" />\n    <language>${locale}</language>\n    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>\n    ${itemsXml}\n  </channel>\n</rss>`;
 
   return new Response(xml, {
     headers: {

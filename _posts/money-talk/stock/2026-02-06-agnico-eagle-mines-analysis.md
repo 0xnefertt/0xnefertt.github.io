@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: Agnico Eagle Mines Limited 기업 분석
 date: 2026-02-06 11:00:00

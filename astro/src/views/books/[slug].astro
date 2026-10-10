@@ -1,20 +1,12 @@
 ---
-import { getCollection, render, type CollectionEntry } from 'astro:content';
+import { localeFromPath, localizedPath, localeText } from '../../lib/locale';
+
+const locale = localeFromPath(Astro.url.pathname);
+const l = (path: string) => localizedPath(path, locale);
+import { render, type CollectionEntry } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import { formatPostDate, normalizeTaxonomy } from '../../lib/blog';
-import { getBookRoute, normalizeAssetPath } from '../../lib/content';
-
-export async function getStaticPaths() {
-  const entries = await getCollection('books');
-
-  return entries.map((entry) => {
-    const route = getBookRoute(entry);
-    return {
-      params: { slug: route.slug },
-      props: { entry },
-    };
-  });
-}
+import { normalizeAssetPath } from '../../lib/content';
 
 interface Props {
   entry: CollectionEntry<'books'>;
@@ -27,7 +19,7 @@ const categories = normalizeTaxonomy(entry.data.categories);
 const tags = normalizeTaxonomy(entry.data.tags);
 ---
 
-<Layout title={entry.data.title} description={entry.data.title} currentPath="/books/">
+<Layout title={entry.data.title} description={entry.data.title} currentPath={l('/books/')}>
   <article class="post-header">
     <h1>{entry.data.title}</h1>
     <p>
@@ -44,11 +36,11 @@ const tags = normalizeTaxonomy(entry.data.tags);
       </div>
     )}
 
-    {entry.data.started && <p class="book-meta">Started: {formatPostDate(entry.data.started)}</p>}
-    {entry.data.finished && <p class="book-meta">Finished: {formatPostDate(entry.data.finished)}</p>}
+    {entry.data.started && <p class="book-meta">{localeText(locale, 'Started', '읽기 시작')}: {formatPostDate(entry.data.started)}</p>}
+    {entry.data.finished && <p class="book-meta">{localeText(locale, 'Finished', '완독')}: {formatPostDate(entry.data.finished)}</p>}
     {entry.data.buy_link && (
       <p class="book-meta">
-        <a href={entry.data.buy_link} target="_blank" rel="noreferrer">Buy link</a>
+        <a href={entry.data.buy_link} target="_blank" rel="noreferrer">{localeText(locale, 'Buy link', '구매 링크')}</a>
       </p>
     )}
   </article>

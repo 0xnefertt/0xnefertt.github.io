@@ -1,4 +1,5 @@
 ---
+lang: ko
 layout: post
 title: "네트워킹에서 자주 쓰이는 영어 회화"
 date: 2026-06-15

@@ -1,4 +1,8 @@
 ---
+import { localeFromPath, localizedPath, localeText } from '../../lib/locale';
+import { t } from '../../lib/messages';
+const locale = localeFromPath(Astro.url.pathname);
+const l = (path: string) => localizedPath(path, locale);
 import { getCollection } from 'astro:content';
 import BlogCategoryFilter from '../../components/BlogCategoryFilter.astro';
 import PostCard from '../../components/PostCard.astro';
@@ -9,7 +13,7 @@ import { siteConfig } from '../../lib/site';
 import blogSearchScriptUrl from '../../scripts/blog-search.js?url';
 
 const POSTS_PER_PAGE = 8;
-const rawPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')));
+const rawPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')), locale);
 const allPosts = rawPosts.map(toBlogSummary);
 const categoryTree = listBlogCategoryTree(rawPosts);
 const currentPage = 1;
@@ -18,7 +22,7 @@ const posts = allPosts.slice(0, POSTS_PER_PAGE);
 const searchConfigJson = toSafeJson([
   {
     mode: 'inline',
-    indexUrl: '/blog/search-index.json',
+    indexUrl: l('/blog/search-index.json'),
     formId: 'blog-inline-search-form',
     inputId: 'blog-inline-search-input',
     resultsId: 'blog-inline-search-results',
@@ -29,32 +33,33 @@ const searchConfigJson = toSafeJson([
 ]);
 
 function getPageHref(page: number): string {
-  return page <= 1 ? '/blog/' : `/blog/page-${page}/`;
+  return page <= 1 ? l('/blog/') : l(`/blog/page-${page}/`);
 }
 ---
 
-<Layout title="blog" description={siteConfig.blogDescription} currentPath="/blog/">
+<Layout title="blog" description={localeText(locale, siteConfig.blogDescription, siteConfig.blogDescriptionKo)} currentPath={l('/blog/')}>
   <section class="blog-header">
     <h1>{siteConfig.blogName}</h1>
-    <p>{siteConfig.blogDescription}</p>
-    <form class="blog-search-form" id="blog-inline-search-form" action="/blog/search/" method="get">
+    <p>{localeText(locale, siteConfig.blogDescription, siteConfig.blogDescriptionKo)}</p>
+    <form class="blog-search-form" id="blog-inline-search-form" action={l('/blog/search/')} method="get">
       <input
         class="blog-search-input"
         id="blog-inline-search-input"
         type="search"
         name="q"
-        placeholder="Search posts"
+        placeholder={t(locale, 'search_placeholder')}
         aria-label="Search posts"
         data-i18n-placeholder="search_placeholder"
         autocomplete="off"
       />
-      <button class="blog-search-button" type="submit" data-i18n-key="search_button">Search</button>
+      <button class="blog-search-button" type="submit" data-i18n-key="search_button">{t(locale, 'search_button')}</button>
     </form>
     <BlogCategoryFilter categoryTree={categoryTree} totalCount={allPosts.length} isAllActive />
   </section>
 
   <p class="search-results-meta" id="blog-inline-search-meta" hidden></p>
 
+  {posts.length === 0 && <p>{localeText(locale, 'No English posts have been published yet.', '아직 발행된 한국어 글이 없습니다.')}</p>}
   <ul class="post-list" id="blog-inline-search-results" style="margin-top: 1rem;">
     {
       posts.map((post) => <PostCard post={post} />)
@@ -62,7 +67,7 @@ function getPageHref(page: number): string {
   </ul>
 
   <section class="card" id="blog-inline-search-empty" hidden>
-    <p>No matching posts found.</p>
+    <p>{localeText(locale, 'No matching posts found.', '검색 결과가 없습니다.')}</p>
   </section>
 
   {
@@ -71,15 +76,11 @@ function getPageHref(page: number): string {
         <ul class="pagination-list">
           {currentPage > 1 ? (
             <li>
-              <a class="pagination-link" href={getPageHref(currentPage - 1)} data-i18n-key="pagination_prev">
-                Previous
-              </a>
+              <a class="pagination-link" href={getPageHref(currentPage - 1)} data-i18n-key="pagination_prev">{t(locale, 'pagination_prev')}</a>
             </li>
           ) : (
             <li>
-              <span class="pagination-link pagination-link--disabled" data-i18n-key="pagination_prev">
-                Previous
-              </span>
+              <span class="pagination-link pagination-link--disabled" data-i18n-key="pagination_prev">{t(locale, 'pagination_prev')}</span>
             </li>
           )}
 
@@ -93,15 +94,11 @@ function getPageHref(page: number): string {
 
           {currentPage < totalPages ? (
             <li>
-              <a class="pagination-link" href={getPageHref(currentPage + 1)} data-i18n-key="pagination_next">
-                Next
-              </a>
+              <a class="pagination-link" href={getPageHref(currentPage + 1)} data-i18n-key="pagination_next">{t(locale, 'pagination_next')}</a>
             </li>
           ) : (
             <li>
-              <span class="pagination-link pagination-link--disabled" data-i18n-key="pagination_next">
-                Next
-              </span>
+              <span class="pagination-link pagination-link--disabled" data-i18n-key="pagination_next">{t(locale, 'pagination_next')}</span>
             </li>
           )}
         </ul>

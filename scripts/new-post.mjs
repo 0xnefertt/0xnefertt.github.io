@@ -144,6 +144,8 @@ async function run() {
   const args = parseArgs(process.argv.slice(2));
   const interactiveRequested = parseBoolean(args.interactive) === true;
 
+  const language = args.lang?.trim() || "en";
+  if (!["en", "ko"].includes(language)) throw new Error("--lang must be en or ko");
   let title = args.title?.trim() ?? "";
   let description = args.description?.trim() ?? "";
   let category = args.category?.trim() ?? "";
@@ -205,7 +207,7 @@ async function run() {
   const normalizedCover = cover.trim();
   const normalizedCanonical = canonical.trim();
 
-  const categoryDir = path.join(postsRoot, ...primaryCategory.slugs);
+  const categoryDir = path.join(postsRoot, language, ...primaryCategory.slugs);
   const filename = `${date}-${slug}.md`;
   const filePath = path.join(categoryDir, filename);
 
@@ -236,6 +238,7 @@ async function run() {
 
   const content = `---
 layout: post
+lang: ${language}
 title: ${quoteYaml(title)}
 date: ${date}
 description: ${quoteYaml(description)}

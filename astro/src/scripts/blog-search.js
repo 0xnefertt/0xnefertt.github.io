@@ -1,4 +1,5 @@
 (() => {
+  const korean = document.documentElement.lang === 'ko';
   function readJsonScript(id, fallback) {
     if (!id) {
       return fallback;
@@ -131,7 +132,7 @@
 
     const meta = document.createElement('p');
     meta.className = 'post-meta';
-    meta.textContent = `${post.dateLabel} · ${post.readMinutes} min read${post.externalSource ? ` · ${post.externalSource}` : ''}`;
+    meta.textContent = `${post.dateLabel} · ${korean ? `${post.readMinutes}분 읽기` : `${post.readMinutes} min read`}${post.externalSource ? ` · ${post.externalSource}` : ''}`;
 
     if (post.description) {
       const description = document.createElement('p');
@@ -227,7 +228,7 @@
     const renderSearchPageDefault = () => {
       const latest = [...posts].sort((a, b) => (b.dateValue || 0) - (a.dateValue || 0)).slice(0, latestLimit);
       metaNode.hidden = false;
-      metaNode.textContent = `Showing latest ${latest.length} posts. Enter a keyword to search all ${posts.length} posts.`;
+      metaNode.textContent = korean ? `최근 글 ${latest.length}개 · 전체 ${posts.length}개 글에서 검색하세요.` : `Showing latest ${latest.length} posts. Enter a keyword to search all ${posts.length} posts.`;
       renderPosts(resultsContainer, latest);
       emptyNode.hidden = latest.length > 0;
       return latest.length;
@@ -236,7 +237,7 @@
     const renderSearchResults = (items, rawQuery) => {
       renderPosts(resultsContainer, items);
       metaNode.hidden = false;
-      metaNode.textContent = `${items.length} result${items.length === 1 ? '' : 's'} for "${rawQuery.trim()}".`;
+      metaNode.textContent = korean ? `"${rawQuery.trim()}" 검색 결과 ${items.length}개` : `${items.length} result${items.length === 1 ? '' : 's'} for "${rawQuery.trim()}".`;
       emptyNode.hidden = items.length > 0;
       if (paginationNode) {
         paginationNode.hidden = true;
