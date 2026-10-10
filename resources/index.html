@@ -1,0 +1,434 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48" href="/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><title>Resources | 0xnefertt&#39;s thoughts</title><meta name="description" content="Favorite links, Vancouver weather, and exchange rates in one place."><link rel="canonical" href="https://0xnefertt.github.io/resources/"><link rel="alternate" hreflang="en" href="https://0xnefertt.github.io/resources/"><link rel="alternate" hreflang="ko" href="https://0xnefertt.github.io/ko/resources/"><meta property="og:locale" content="en_US"><link rel="alternate" type="application/rss+xml" title="0xnefertt's thoughts RSS Feed" href="/rss.xml"><meta property="og:site_name" content="0xnefertt's thoughts"><meta property="og:type" content="website"><meta property="og:title" content="Resources | 0xnefertt's thoughts"><meta property="og:description" content="Favorite links, Vancouver weather, and exchange rates in one place."><meta property="og:url" content="https://0xnefertt.github.io/resources/"><meta property="og:image" content="https://0xnefertt.github.io/assets/img/prof_pic.jpg"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Resources | 0xnefertt's thoughts"><meta name="twitter:description" content="Favorite links, Vancouver weather, and exchange rates in one place."><meta name="twitter:image" content="https://0xnefertt.github.io/assets/img/prof_pic.jpg"><meta name="twitter:site" content="@0xnefertt"><meta name="twitter:creator" content="@0xnefertt"><script>
+      (() => {
+        window.dataLayer = window.dataLayer || [];
+        window.gtag =
+          window.gtag ||
+          function gtag() {
+            window.dataLayer.push(arguments);
+          };
+
+        window.gtag('consent', 'default', {
+          ad_storage: 'denied',
+          ad_user_data: 'denied',
+          ad_personalization: 'denied',
+          analytics_storage: 'denied',
+          wait_for_update: 2000,
+        });
+        window.gtag('set', 'ads_data_redaction', true);
+      })();
+    </script><script async src="https://www.googletagmanager.com/gtag/js?id=G-XKLJ41F6PS"></script><script>(function(){const gaMeasurementId = "G-XKLJ41F6PS";
+
+          window.gtag('js', new Date());
+          window.gtag('config', gaMeasurementId);
+        })();</script><script>(function(){const gaMeasurementId = "G-XKLJ41F6PS";
+
+      (() => {
+        const analytics = window.siteAnalytics || {};
+        analytics.track =
+          analytics.track ||
+          function track(eventName, params = {}) {
+            if (!gaMeasurementId || typeof window.gtag !== 'function') {
+              return;
+            }
+
+            window.gtag('event', eventName, params);
+          };
+        window.siteAnalytics = analytics;
+      })();
+    })();</script><script>
+      (() => {
+        const STORAGE_KEY = 'site-theme';
+        const storedTheme = localStorage.getItem(STORAGE_KEY);
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = storedTheme === 'light' || storedTheme === 'dark' ? storedTheme : prefersDark ? 'dark' : 'light';
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script><link rel="stylesheet" href="/assets/styles/global.css?v=20261010-1"><link rel="stylesheet" href="/assets/styles/blog.css?v=20261010-6"></head> <body class="site-layout"> <header class="site-header"> <div class="container header-inner"> <a class="site-title" href="/">0xnefertt&#39;s thoughts</a> <button type="button" class="menu-toggle" data-menu-toggle aria-controls="site-menu-panel" aria-expanded="false" aria-label="Open navigation menu"> <span class="menu-toggle-icon" aria-hidden="true"></span> <span>Menu</span> </button> <div class="header-controls" id="site-menu-panel"> <nav aria-label="Primary" id="primary-nav"> <ul class="nav-list"> <li class="nav-item"> <a href="/about/" data-i18n-key="nav_about"> About </a>  </li><li class="nav-item"> <a href="/blog/" data-i18n-key="nav_blog"> Blog </a>  </li><li class="nav-item"> <a href="/books/" data-i18n-key="nav_bookshelf"> Bookshelf </a>  </li><li class="nav-item"> <a href="/projects/" data-i18n-key="nav_projects"> Projects </a>  </li> </ul> </nav> <div class="preference-controls"> <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch to dark mode" aria-pressed="false"> <span class="theme-toggle-icon" aria-hidden="true"></span> </button> </div> </div> </div> </header> <main class="container resources-content">  <header class="page-header"> <h1>Resources</h1> <p>Favorite links, Vancouver weather, and exchange rates in one place.</p> </header> <div class="resources-layout"> <section class="card useful-info-card resources-useful-info" data-useful-info data-location="Vancouver, BC" data-lat="49.2827" data-lon="-123.1207" data-base-currency="USD" data-target-currencies="KRW,CAD"><h2 class="useful-info-title">Useful Info</h2><p class="useful-info-location">Vancouver, BC</p><div class="useful-info-block"><p class="useful-info-label">Weather</p><p class="useful-info-value" data-weather-temp>--</p><p class="useful-info-meta" data-weather-desc>Loading weather...</p></div><div class="useful-info-block"><p class="useful-info-label">Exchange</p><ul class="useful-info-rate-list" data-exchange-list><li class="useful-info-meta">Loading exchange rates...</li></ul></div></section><script>
+      (() => {
+        const panel = document.querySelector('[data-useful-info]');
+        if (!(panel instanceof HTMLElement)) {
+          return;
+        }
+
+        const latitude = Number(panel.dataset.lat);
+        const longitude = Number(panel.dataset.lon);
+        const baseCurrency = (panel.dataset.baseCurrency || 'USD').toUpperCase();
+        const targetCurrencies = (panel.dataset.targetCurrencies || '')
+          .split(',')
+          .map((item) => item.trim().toUpperCase())
+          .filter((item) => /^[A-Z]{3}$/.test(item));
+
+        const weatherTempNode = panel.querySelector('[data-weather-temp]');
+        const weatherDescNode = panel.querySelector('[data-weather-desc]');
+        const exchangeListNode = panel.querySelector('[data-exchange-list]');
+
+        const weatherCodeMap = {
+          0: 'Clear',
+          1: 'Mainly clear',
+          2: 'Partly cloudy',
+          3: 'Overcast',
+          45: 'Fog',
+          48: 'Rime fog',
+          51: 'Light drizzle',
+          53: 'Drizzle',
+          55: 'Heavy drizzle',
+          61: 'Light rain',
+          63: 'Rain',
+          65: 'Heavy rain',
+          71: 'Light snow',
+          73: 'Snow',
+          75: 'Heavy snow',
+          80: 'Rain showers',
+          81: 'Heavy showers',
+          82: 'Violent showers',
+          95: 'Thunderstorm',
+        };
+
+        function setWeatherFallback() {
+          if (weatherTempNode) {
+            weatherTempNode.textContent = '--';
+          }
+          if (weatherDescNode) {
+            weatherDescNode.textContent = 'Weather unavailable';
+          }
+        }
+
+        function setExchangeFallback() {
+          if (!exchangeListNode) {
+            return;
+          }
+          exchangeListNode.innerHTML = '';
+          const fallbackItem = document.createElement('li');
+          fallbackItem.className = 'useful-info-meta';
+          fallbackItem.textContent = 'Exchange rates unavailable';
+          exchangeListNode.appendChild(fallbackItem);
+        }
+
+        function parseExchangeRates(payload) {
+          const parsedRates = {};
+
+          if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
+            const nestedRates = payload.rates;
+            if (nestedRates && typeof nestedRates === 'object') {
+              Object.entries(nestedRates).forEach(([currency, value]) => {
+                const rate = Number(value);
+                if (/^[A-Z]{3}$/.test(currency) && Number.isFinite(rate)) {
+                  parsedRates[currency] = rate;
+                }
+              });
+            }
+          }
+
+          if (Array.isArray(payload)) {
+            payload.forEach((entry) => {
+              if (!entry || typeof entry !== 'object') {
+                return;
+              }
+              const quote = typeof entry.quote === 'string' ? entry.quote.trim().toUpperCase() : '';
+              const rate = Number(entry.rate);
+              if (/^[A-Z]{3}$/.test(quote) && Number.isFinite(rate)) {
+                parsedRates[quote] = rate;
+              }
+            });
+          }
+
+          return parsedRates;
+        }
+
+        async function loadWeather() {
+          if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+            setWeatherFallback();
+            return;
+          }
+
+          const weatherUrl = new URL('https://api.open-meteo.com/v1/forecast');
+          weatherUrl.searchParams.set('latitude', String(latitude));
+          weatherUrl.searchParams.set('longitude', String(longitude));
+          weatherUrl.searchParams.set('current', 'temperature_2m,weather_code');
+          weatherUrl.searchParams.set('timezone', 'auto');
+
+          try {
+            const response = await fetch(weatherUrl.toString());
+            if (!response.ok) {
+              throw new Error('weather-fetch-failed');
+            }
+
+            const data = await response.json();
+            const temperature = data?.current?.temperature_2m;
+            const weatherCode = Number(data?.current?.weather_code);
+
+            if (weatherTempNode) {
+              weatherTempNode.textContent = typeof temperature === 'number' ? `${temperature.toFixed(1)}°C` : '--';
+            }
+            if (weatherDescNode) {
+              weatherDescNode.textContent = weatherCodeMap[weatherCode] ?? 'Current conditions';
+            }
+          } catch {
+            setWeatherFallback();
+          }
+        }
+
+        async function loadExchangeRates() {
+          if (!exchangeListNode || targetCurrencies.length === 0) {
+            return;
+          }
+
+          const exchangeUrls = [
+            (() => {
+              const url = new URL('https://api.frankfurter.dev/v1/latest');
+              url.searchParams.set('base', baseCurrency);
+              url.searchParams.set('symbols', targetCurrencies.join(','));
+              return url;
+            })(),
+            (() => {
+              const url = new URL('https://api.frankfurter.app/latest');
+              url.searchParams.set('from', baseCurrency);
+              url.searchParams.set('to', targetCurrencies.join(','));
+              return url;
+            })(),
+            (() => {
+              const url = new URL('https://api.frankfurter.dev/v2/rates');
+              url.searchParams.set('base', baseCurrency);
+              url.searchParams.set('quotes', targetCurrencies.join(','));
+              return url;
+            })(),
+          ];
+
+          try {
+            let rates = null;
+
+            for (const exchangeUrl of exchangeUrls) {
+              try {
+                const response = await fetch(exchangeUrl.toString(), {
+                  headers: { accept: 'application/json' },
+                });
+
+                if (!response.ok) {
+                  continue;
+                }
+
+                const data = await response.json();
+                const parsedRates = parseExchangeRates(data);
+                if (Object.keys(parsedRates).length > 0) {
+                  rates = parsedRates;
+                  break;
+                }
+              } catch {
+                continue;
+              }
+            }
+
+            if (!rates) {
+              throw new Error('exchange-fetch-failed');
+            }
+
+            exchangeListNode.innerHTML = '';
+            targetCurrencies.forEach((currency) => {
+              const rate = Number(rates[currency]);
+              const listItem = document.createElement('li');
+              listItem.className = 'useful-info-rate-item';
+              listItem.textContent = Number.isFinite(rate) ? `1 ${baseCurrency} = ${rate.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${currency}` : `1 ${baseCurrency} = -- ${currency}`;
+              exchangeListNode.appendChild(listItem);
+            });
+
+            const cadRate = Number(rates.CAD);
+            const krwRate = Number(rates.KRW);
+            if (Number.isFinite(cadRate) && cadRate > 0 && Number.isFinite(krwRate)) {
+              const cadToKrw = krwRate / cadRate;
+              const crossItem = document.createElement('li');
+              crossItem.className = 'useful-info-rate-item';
+              crossItem.textContent = `1 CAD = ${cadToKrw.toLocaleString(undefined, { maximumFractionDigits: 2 })} KRW`;
+              exchangeListNode.appendChild(crossItem);
+            }
+          } catch {
+            setExchangeFallback();
+          }
+        }
+
+        void loadWeather();
+        void loadExchangeRates();
+      })();
+    </script> <section class="resources-favorites" aria-labelledby="resources-favorites-title"> <h2 id="resources-favorites-title">Favorite</h2>  <div class="resources-favorite-groups"> <details class="favorite-group resources-favorite-group" open> <summary class="favorite-group-summary"> <span class="favorite-group-title">AI</span> <span class="favorite-group-count">(2)</span> </summary> <ul class="favorite-child-list"> <li class="favorite-item"> <a href="https://programbench.com/" target="_blank" rel="noreferrer">Programbench</a>  </li><li class="favorite-item"> <a href="https://robostrategy.co/" target="_blank" rel="noreferrer">Robostrategy</a>  </li> </ul> </details><details class="favorite-group resources-favorite-group" open> <summary class="favorite-group-summary"> <span class="favorite-group-title">Blockchain</span> <span class="favorite-group-count">(15)</span> </summary> <ul class="favorite-child-list"> <li class="favorite-item"> <a href="https://polymarket.com/" target="_blank" rel="noreferrer">Polymarket</a>  </li><li class="favorite-item"> <a href="https://defillama.com/" target="_blank" rel="noreferrer">Defillama</a>  </li><li class="favorite-item"> <a href="https://www.coindesk.com/" target="_blank" rel="noreferrer">Coindesk</a>  </li><li class="favorite-item"> <a href="https://research.4pillars.io/en/" target="_blank" rel="noreferrer">4pillars Research</a>  </li><li class="favorite-item"> <a href="https://jumpcrypto.com/insights" target="_blank" rel="noreferrer">Jump Crypto Insights</a>  </li><li class="favorite-item"> <a href="https://www.paradigm.xyz/writing" target="_blank" rel="noreferrer">Paradigm Writing</a>  </li><li class="favorite-item"> <a href="https://a16zcrypto.com/" target="_blank" rel="noreferrer">a16z Crypto</a>  </li><li class="favorite-item"> <a href="https://www.galaxy.com/" target="_blank" rel="noreferrer">Galaxy</a>  </li><li class="favorite-item"> <a href="https://www.coinbase.com/en-ca/institutional/research-insights/research" target="_blank" rel="noreferrer">Coinbase Institutional Research</a>  </li><li class="favorite-item"> <a href="https://www.binance.com/en/research" target="_blank" rel="noreferrer">Binance Research</a>  </li><li class="favorite-item"> <a href="https://blog.ethereum.org/" target="_blank" rel="noreferrer">Ethereum Blog</a>  </li><li class="favorite-item"> <a href="https://l2beat.com/scaling/summary" target="_blank" rel="noreferrer">L2BEAT</a>  </li><li class="favorite-item"> <a href="https://www.coingecko.com/" target="_blank" rel="noreferrer">CoinGecko</a>  </li><li class="favorite-item"> <a href="https://cryptorank.io/" target="_blank" rel="noreferrer">CryptoRank</a>  </li><li class="favorite-item"> <a href="https://panteracapital.com/insights/" target="_blank" rel="noreferrer">Pantera Capital</a>  </li> </ul> </details><details class="favorite-group resources-favorite-group" open> <summary class="favorite-group-summary"> <span class="favorite-group-title">Reading</span> <span class="favorite-group-count">(11)</span> </summary> <ul class="favorite-child-list"> <li class="favorite-item"> <a href="https://www.thetimes.com/us" target="_blank" rel="noreferrer">The Times</a>  </li><li class="favorite-item"> <a href="https://substack.com/" target="_blank" rel="noreferrer">Substack</a>  </li><li class="favorite-item"> <a href="https://www.lindahall.org/" target="_blank" rel="noreferrer">Linda Hall Library</a>  </li><li class="favorite-item"> <a href="https://www.reddit.com/" target="_blank" rel="noreferrer">Reddit</a>  </li><li class="favorite-item"> <a href="https://news.hada.io/" target="_blank" rel="noreferrer">GeekNews</a>  </li><li class="favorite-item"> <a href="https://rekt.news/" target="_blank" rel="noreferrer">rekt</a>  </li><li class="favorite-item"> <a href="https://tradingeconomics.com/" target="_blank" rel="noreferrer">Trading economics</a>  </li><li class="favorite-item"> <a href="https://companiesmarketcap.com/" target="_blank" rel="noreferrer">Marketcap</a>  </li><li class="favorite-item"> <a href="https://www.bis.org/" target="_blank" rel="noreferrer">BIS</a>  </li><li class="favorite-item"> <a href="https://www.imf.org/en/home" target="_blank" rel="noreferrer">IMF</a>  </li><li class="favorite-item"> <a href="https://www.fsb.org/" target="_blank" rel="noreferrer">FSB</a>  </li> </ul> </details><details class="favorite-group resources-favorite-group" open> <summary class="favorite-group-summary"> <span class="favorite-group-title">Security</span> <span class="favorite-group-count">(30)</span> </summary> <ul class="favorite-child-list"> <li class="favorite-item"> <a href="https://trailofbits.com/" target="_blank" rel="noreferrer">Trail of Bits</a>  </li><li class="favorite-item"> <a href="https://www.nccgroup.com/" target="_blank" rel="noreferrer">NCC Group</a>  </li><li class="favorite-item"> <a href="https://cure53.de/" target="_blank" rel="noreferrer">Cure53</a>  </li><li class="favorite-item"> <a href="https://bishopfox.com/" target="_blank" rel="noreferrer">Bishop Fox</a>  </li><li class="favorite-item"> <a href="https://www.openzeppelin.com/security-audits" target="_blank" rel="noreferrer">OpenZeppelin</a>  </li><li class="favorite-item"> <a href="https://spearbit.com/" target="_blank" rel="noreferrer">Spearbit</a>  </li><li class="favorite-item"> <a href="https://cantina.xyz/" target="_blank" rel="noreferrer">Cantina</a>  </li><li class="favorite-item"> <a href="https://www.zellic.io/" target="_blank" rel="noreferrer">Zellic</a>  </li><li class="favorite-item"> <a href="https://sigmaprime.io/" target="_blank" rel="noreferrer">Sigma Prime</a>  </li><li class="favorite-item"> <a href="https://consensys.io/diligence" target="_blank" rel="noreferrer">Consensys Diligence</a>  </li><li class="favorite-item"> <a href="https://chainsecurity.com/" target="_blank" rel="noreferrer">ChainSecurity</a>  </li><li class="favorite-item"> <a href="https://www.certora.com/" target="_blank" rel="noreferrer">Certora</a>  </li><li class="favorite-item"> <a href="https://runtimeverification.com/" target="_blank" rel="noreferrer">Runtime Verification</a>  </li><li class="favorite-item"> <a href="https://galois.com/" target="_blank" rel="noreferrer">Galois</a>  </li><li class="favorite-item"> <a href="https://www.halborn.com/" target="_blank" rel="noreferrer">Halborn</a>  </li><li class="favorite-item"> <a href="https://quantstamp.com/" target="_blank" rel="noreferrer">Quantstamp</a>  </li><li class="favorite-item"> <a href="https://www.certik.com/" target="_blank" rel="noreferrer">CertiK</a>  </li><li class="favorite-item"> <a href="https://hacken.io/" target="_blank" rel="noreferrer">Hacken</a>  </li><li class="favorite-item"> <a href="https://sherlock.xyz/" target="_blank" rel="noreferrer">Sherlock</a>  </li><li class="favorite-item"> <a href="https://www.latacora.com/" target="_blank" rel="noreferrer">Latacora</a>  </li><li class="favorite-item"> <a href="https://includesecurity.com/" target="_blank" rel="noreferrer">Include Security</a>  </li><li class="favorite-item"> <a href="https://www.praetorian.com/" target="_blank" rel="noreferrer">Praetorian</a>  </li><li class="favorite-item"> <a href="https://www.ioactive.com/" target="_blank" rel="noreferrer">IOActive</a>  </li><li class="favorite-item"> <a href="https://www.quarkslab.com/" target="_blank" rel="noreferrer">Quarkslab</a>  </li><li class="favorite-item"> <a href="https://www.synacktiv.com/" target="_blank" rel="noreferrer">Synacktiv</a>  </li><li class="favorite-item"> <a href="https://ret2.io/" target="_blank" rel="noreferrer">RET2 Systems</a>  </li><li class="favorite-item"> <a href="https://www.grimm-co.com/" target="_blank" rel="noreferrer">GRIMM</a>  </li><li class="favorite-item"> <a href="https://www.mandiant.com/" target="_blank" rel="noreferrer">Mandiant</a>  </li><li class="favorite-item"> <a href="https://www.netspi.com/" target="_blank" rel="noreferrer">NetSPI</a>  </li><li class="favorite-item"> <a href="https://www.cobalt.io/" target="_blank" rel="noreferrer">Cobalt</a>  </li> </ul> </details><details class="favorite-group resources-favorite-group" open> <summary class="favorite-group-summary"> <span class="favorite-group-title">Space</span> <span class="favorite-group-count">(3)</span> </summary> <ul class="favorite-child-list"> <li class="favorite-item"> <a href="https://www.spacex.com/" target="_blank" rel="noreferrer">SpaceX</a>  </li><li class="favorite-item"> <a href="https://www.blueorigin.com/" target="_blank" rel="noreferrer">Blue Origin</a>  </li><li class="favorite-item"> <a href="https://ast-science.com/" target="_blank" rel="noreferrer">Space Mobile</a>  </li> </ul> </details><details class="favorite-group resources-favorite-group" open> <summary class="favorite-group-summary"> <span class="favorite-group-title">Health / Bio</span> <span class="favorite-group-count">(4)</span> </summary> <ul class="favorite-child-list"> <li class="favorite-item"> <a href="https://www.calicolabs.com/" target="_blank" rel="noreferrer">Calio</a>  </li><li class="favorite-item"> <a href="https://www.altoslabs.com/" target="_blank" rel="noreferrer">Altos Labs</a>  </li><li class="favorite-item"> <a href="https://crisprtx.com/" target="_blank" rel="noreferrer">CRISPR Therapeutics</a>  </li><li class="favorite-item"> <a href="https://www.intelliatx.com/" target="_blank" rel="noreferrer">Intellia Therapeutics</a>  </li> </ul> </details> </div> </section> </div>  </main> <footer class="site-footer"> <div class="container footer-inner"> <p>
+© 2026 0xnefertt.
+</p> <div class="footer-links"> <nav aria-label="Site links"> <ul class="footer-site-links"> <li class="footer-link-group"> <a href="/privacy/">Privacy</a> <a href="/rss.xml" type="application/rss+xml">RSS</a> </li> <li class="footer-link-group"> <span class="footer-divider" aria-hidden="true">|</span> <a href="mailto:adrwss2@gmail.com">Email</a><a href="https://github.com/0xnefertt">GitHub</a><a href="https://x.com/0xnefertt">X</a> </li> <li class="footer-link-group"> <span class="footer-divider" aria-hidden="true">|</span> <a href="/resources/">Resources</a> <a href="/admin/">Login</a> </li> <li class="footer-link-group"> <span class="footer-divider" aria-hidden="true">|</span> <div class="language-switch" role="group" aria-label="Language selector"> <a class="language-option is-active" href="/resources/" aria-current="page" title="English">EN</a> <span aria-hidden="true">|</span> <a class="language-option" href="/ko/resources/" title="한국어">KR</a> </div> </li> </ul> </nav> </div> </div> </footer> <script>(function(){const gaMeasurementId = "G-XKLJ41F6PS";
+
+      (() => {
+        function track(eventName, params = {}) {
+          if (!gaMeasurementId || typeof window.gtag !== 'function') {
+            return;
+          }
+
+          window.gtag('event', eventName, params);
+        }
+
+        window.siteAnalytics = {
+          track,
+        };
+
+        const pagePath = window.location.pathname;
+        if (/^\/blog\/\d{4}\//.test(pagePath)) {
+          track('post_opened', {
+            page_path: pagePath,
+            page_title: document.title,
+          });
+        }
+
+        document.addEventListener('click', (event) => {
+          const clickTarget = event.target;
+          if (!(clickTarget instanceof Element)) {
+            return;
+          }
+
+          const anchor = clickTarget.closest('a[href]');
+          if (!(anchor instanceof HTMLAnchorElement)) {
+            return;
+          }
+
+          if (anchor.dataset.trackIgnore === 'true') {
+            return;
+          }
+
+          const href = anchor.getAttribute('href');
+          if (!href) {
+            return;
+          }
+
+          let url;
+          try {
+            url = new URL(href, window.location.href);
+          } catch {
+            return;
+          }
+
+          if (url.origin === window.location.origin) {
+            return;
+          }
+
+          track('outbound_click', {
+            destination_url: url.toString(),
+            link_text: (anchor.textContent || '').trim().slice(0, 120),
+            page_path: pagePath,
+          });
+        });
+
+        let sentAdPlaceholder = false;
+        const sendAdPlaceholderEvent = () => {
+          if (sentAdPlaceholder) {
+            return;
+          }
+
+          sentAdPlaceholder = true;
+          track('adsense_script_present_engagement', {
+            page_path: pagePath,
+          });
+        };
+
+        const hasAdSenseScript = Boolean(document.querySelector('script[src*="googlesyndication.com/pagead/js/adsbygoogle.js"]'));
+        if (!hasAdSenseScript) {
+          return;
+        }
+
+        setTimeout(sendAdPlaceholderEvent, 45000);
+        window.addEventListener(
+          'scroll',
+          () => {
+            const doc = document.documentElement;
+            const scrollableHeight = Math.max(doc.scrollHeight - window.innerHeight, 1);
+            const ratio = window.scrollY / scrollableHeight;
+
+            if (ratio >= 0.55) {
+              sendAdPlaceholderEvent();
+            }
+          },
+          { passive: true }
+        );
+      })();
+    })();</script> <script>
+      (() => {
+        const STORAGE_KEY = 'site-theme';
+        const themeToggle = document.querySelector('[data-theme-toggle]');
+
+        if (!(themeToggle instanceof HTMLButtonElement)) {
+          return;
+        }
+
+        function getCurrentTheme() {
+          return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+        }
+
+        function applyTheme(nextTheme) {
+          document.documentElement.dataset.theme = nextTheme;
+          localStorage.setItem(STORAGE_KEY, nextTheme);
+          const isDark = nextTheme === 'dark';
+          themeToggle.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+          themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+        }
+
+        applyTheme(getCurrentTheme());
+
+        themeToggle.addEventListener('click', () => {
+          applyTheme(getCurrentTheme() === 'dark' ? 'light' : 'dark');
+        });
+      })();
+    </script> <script>
+      (() => {
+        const header = document.querySelector('.site-header');
+        const menuToggle = document.querySelector('[data-menu-toggle]');
+        const menuPanel = document.getElementById('site-menu-panel');
+
+        if (!(header instanceof HTMLElement) || !(menuToggle instanceof HTMLButtonElement) || !(menuPanel instanceof HTMLElement)) {
+          return;
+        }
+
+        const mobileMedia = window.matchMedia('(max-width: 840px)');
+
+        function setMenuOpen(nextOpen) {
+          header.classList.toggle('menu-open', nextOpen);
+          menuToggle.setAttribute('aria-expanded', nextOpen ? 'true' : 'false');
+          menuToggle.setAttribute('aria-label', nextOpen ? 'Close navigation menu' : 'Open navigation menu');
+        }
+
+        function closeMenu() {
+          setMenuOpen(false);
+        }
+
+        menuToggle.addEventListener('click', () => {
+          const willOpen = !header.classList.contains('menu-open');
+          setMenuOpen(willOpen);
+        });
+
+        menuPanel.addEventListener('click', (event) => {
+          const target = event.target;
+          if (!(target instanceof Element)) {
+            return;
+          }
+
+          if (target.closest('a[href]') && mobileMedia.matches) {
+            closeMenu();
+          }
+        });
+
+        document.addEventListener('click', (event) => {
+          if (!mobileMedia.matches) {
+            return;
+          }
+
+          const target = event.target;
+          if (!(target instanceof Node)) {
+            return;
+          }
+
+          if (header.contains(target)) {
+            return;
+          }
+
+          closeMenu();
+        });
+
+        mobileMedia.addEventListener('change', () => {
+          if (!mobileMedia.matches) {
+            closeMenu();
+          }
+        });
+      })();
+    </script> </body> </html>
