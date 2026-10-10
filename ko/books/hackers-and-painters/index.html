@@ -1,0 +1,272 @@
+<!DOCTYPE html><html lang="ko"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48" href="/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><title>해커와 화가, 폴 그레이엄 | 0xnefertt&#39;s thoughts</title><meta name="description" content="해커와 화가, 폴 그레이엄"><link rel="canonical" href="https://0xnefertt.github.io/ko/books/hackers-and-painters/"><link rel="alternate" hreflang="ko" href="https://0xnefertt.github.io/ko/books/hackers-and-painters/"><meta property="og:locale" content="ko_KR"><link rel="alternate" type="application/rss+xml" title="0xnefertt's thoughts RSS Feed" href="/ko/rss.xml"><meta property="og:site_name" content="0xnefertt's thoughts"><meta property="og:type" content="website"><meta property="og:title" content="해커와 화가, 폴 그레이엄 | 0xnefertt's thoughts"><meta property="og:description" content="해커와 화가, 폴 그레이엄"><meta property="og:url" content="https://0xnefertt.github.io/ko/books/hackers-and-painters/"><meta property="og:image" content="https://0xnefertt.github.io/assets/img/prof_pic.jpg"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="해커와 화가, 폴 그레이엄 | 0xnefertt's thoughts"><meta name="twitter:description" content="해커와 화가, 폴 그레이엄"><meta name="twitter:image" content="https://0xnefertt.github.io/assets/img/prof_pic.jpg"><meta name="twitter:site" content="@0xnefertt"><meta name="twitter:creator" content="@0xnefertt"><script>
+      (() => {
+        window.dataLayer = window.dataLayer || [];
+        window.gtag =
+          window.gtag ||
+          function gtag() {
+            window.dataLayer.push(arguments);
+          };
+
+        window.gtag('consent', 'default', {
+          ad_storage: 'denied',
+          ad_user_data: 'denied',
+          ad_personalization: 'denied',
+          analytics_storage: 'denied',
+          wait_for_update: 2000,
+        });
+        window.gtag('set', 'ads_data_redaction', true);
+      })();
+    </script><script async src="https://www.googletagmanager.com/gtag/js?id=G-XKLJ41F6PS"></script><script>(function(){const gaMeasurementId = "G-XKLJ41F6PS";
+
+          window.gtag('js', new Date());
+          window.gtag('config', gaMeasurementId);
+        })();</script><script>(function(){const gaMeasurementId = "G-XKLJ41F6PS";
+
+      (() => {
+        const analytics = window.siteAnalytics || {};
+        analytics.track =
+          analytics.track ||
+          function track(eventName, params = {}) {
+            if (!gaMeasurementId || typeof window.gtag !== 'function') {
+              return;
+            }
+
+            window.gtag('event', eventName, params);
+          };
+        window.siteAnalytics = analytics;
+      })();
+    })();</script><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8138616027618632" crossorigin="anonymous"></script><script>
+      (() => {
+        const STORAGE_KEY = 'site-theme';
+        const storedTheme = localStorage.getItem(STORAGE_KEY);
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = storedTheme === 'light' || storedTheme === 'dark' ? storedTheme : prefersDark ? 'dark' : 'light';
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script><link rel="stylesheet" href="/assets/styles/global.css?v=20261010-1"><link rel="stylesheet" href="/assets/styles/blog.css?v=20261010-6"></head> <body class="site-layout"> <header class="site-header"> <div class="container header-inner"> <a class="site-title" href="/ko/">0xnefertt&#39;s thoughts</a> <button type="button" class="menu-toggle" data-menu-toggle aria-controls="site-menu-panel" aria-expanded="false" aria-label="Open navigation menu"> <span class="menu-toggle-icon" aria-hidden="true"></span> <span>메뉴</span> </button> <div class="header-controls" id="site-menu-panel"> <nav aria-label="Primary" id="primary-nav"> <ul class="nav-list"> <li class="nav-item"> <a href="/ko/about/" data-i18n-key="nav_about"> 소개 </a>  </li><li class="nav-item nav-item--dropdown"> <a href="/ko/blog/" data-i18n-key="nav_blog"> 블로그 </a> <ul class="nav-dropdown"> <li class="nav-dropdown-item nav-dropdown-item--nested"> <a href="/ko/blog/category/study-log/"> 공부 기록 </a> <ul class="nav-subdropdown"> <li> <a href="/ko/blog/category/study-log/dev/"> 개발 </a> </li><li> <a href="/ko/blog/category/study-log/english/"> 영어 </a> </li> </ul> </li><li class="nav-dropdown-item nav-dropdown-item--nested"> <a href="/ko/blog/category/money-talk/"> 돈 이야기 </a> <ul class="nav-subdropdown"> <li> <a href="/ko/blog/category/money-talk/finance/"> 금융 </a> </li><li> <a href="/ko/blog/category/money-talk/stock/"> 주식 </a> </li> </ul> </li><li class="nav-dropdown-item nav-dropdown-item--nested"> <a href="/ko/blog/category/life-thoughts/"> 일상 · 생각 </a> <ul class="nav-subdropdown"> <li> <a href="/ko/blog/category/life-thoughts/opinions-is-my-own/"> 개인적인 생각 </a> </li><li> <a href="/ko/blog/category/life-thoughts/retrospect/"> 회고 </a> </li> </ul> </li><li class="nav-dropdown-item nav-dropdown-item--nested"> <a href="/ko/blog/category/useful-tips/"> 정보 공유 </a> <ul class="nav-subdropdown"> <li> <a href="/ko/blog/category/useful-tips/general/"> 일반 </a> </li><li> <a href="/ko/blog/category/useful-tips/in-canada/"> 캐나다 생활 </a> </li> </ul> </li> </ul> </li><li class="nav-item"> <a class="active" href="/ko/books/" data-i18n-key="nav_bookshelf"> 책장 </a>  </li><li class="nav-item"> <a href="/ko/projects/" data-i18n-key="nav_projects"> 프로젝트 </a>  </li> </ul> </nav> <div class="preference-controls"> <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch to dark mode" aria-pressed="false"> <span class="theme-toggle-icon" aria-hidden="true"></span> </button> </div> </div> </div> </header> <main class="container">  <article class="post-header"> <h1>해커와 화가, 폴 그레이엄</h1> <p> 폴 그레이엄    </p> <div class="tags">  <span>#폴그레이엄</span><span>#해커와화가</span> </div>    </article> <div class="post-body markdown-body"> <p><span>얼마 전, </span> <a href="https://x.com/paulg"><span>폴 그레이엄(<em>Paul Graham</em>)</span></a><span>의 “<strong><em>해커와 화가</em></strong>” 라는 책을 읽었다. 책 제목만 봐서는 어느 내용일지 감이 안잡힐 수 있다. 나 또한 그랬다. 신기하게도 이 책은 컴퓨터 관련 서적 이면서 인문학적인 요소가 많이 담겨있다. 심지어 이 책은 20년 전에 집필 되었는데, 지금 읽어도 전혀 시대에 뒤떨어지지 않으며 오히려 배울 점이 많았다. “명품은 유행을 타지 않는다” 라는 말이 떠오를 정도로, 책을 읽는 내내 여러 번 감탄 하고 밑줄을 그어가면서 읽어 나갔다.</span></p>
+<p><img src="https://mynonsense2.wordpress.com/wp-content/uploads/2024/11/image-2.png?w=1024" alt=""></p>
+<p><span>책을 다 읽고 나서, 저자인 폴 그레이엄에 대해 더 알고 싶어 찾아보았다. 폴 그레이엄은 리스프(Lisp)라는 프로그래밍 언어를 누구보다 좋아하는 사람이었다. 그는 리스프를 활용해 Arc라는 프로그래밍 언어를 만들었고, 이를 기반으로 게시판을 개발했다. 이 게시판이 바로 우리가 종종 보는 해커 뉴스(Hacker News) 이다.</span></p>
+<p><span>책에서는 언급되지 않았지만, 그는 과거 ViaWeb을 야후에 매각한 뒤 Y Combinator를 설립한 초대 사장이기도 했다. 그래서 해커 뉴스의 로고가 ‘Y’인 것이다. 폴이 Y Combinator에서 근무하던 당시, 레딧, 트위치, 히로쿠 등에 투자하며 이 회사는 성공적인 엑셀러레이터로 자리 잡았다. 이후 2014년, 그는 우리가 잘 아는 OpenAI의 CEO인 </span> <a href="https://x.com/sama"><span>샘 올트먼(<em>Sam Altman</em>)</span></a><span>에게 사장 자리를 넘겼다고 한다.</span></p>
+<hr>
+<p><img src="https://mynonsense2.wordpress.com/wp-content/uploads/2024/11/hacker-8003399_640.jpg?w=640" alt=""></p>
+<p><span>보통 ‘해커’라고 하면 컴퓨터를 이용해 남의 데이터를 탈취하거나 불법적인 일을 하는 사람을 떠올리기 쉽다. 하지만 이 책에서 언급하는 해커의 의미는 컴퓨터에 대해 많은 지식을 갖고 있거나 능숙하게 다루는 사람에 더 가깝다. 한편으로는 창조자 같은 느낌을 주기에, 화가, 소설가 또는 건축가와 닮아 있다고도 이야기한다. 그래서 이 책의 제목이 <em>해커와 화가</em> 인 것이다. 이 책에서 해커를 ‘공부벌레(bookworm)’ 라는 단어를 사용해서 표현한다. 요즘 시대 말로 표현하자면 ‘괴짜’ 또는 ‘공대 너드남(?)’이 비슷한 느낌이지 않을까 싶다.</span></p>
+<p><span>‘소프트웨어 = 건축물 = 예술작품’ 이라는 관점으로 아래 문장을 한번 읽어보자.</span></p>
+<ul>
+<li><span>“아름다운 소프트웨어인지 아닌지 측정할 수 있는 유일한 외적인 방법은 시간이다. 시간이 지남에 따라서 아름다운 것은 퍼지고 못난 것은 사라진다.”</span></li>
+<li><span>“무엇을 진정으로 사랑하지 않는다면 그것을 정말로 잘 해낼 수 없다. 마찬가지로 해킹을 정말로 좋아한다면 자기 자신의 프로젝트를 수행하지 않고는 견딜 수가 없을 것이다”</span></li>
+<li><span>“대부분의 소프트웨어는 그림과 마찬가지로 사람을 위해서 만들어진다. 해커가 위대한 작품을 남기기 위해서는 화가와 마찬가지로 감정이입을 할 줄 알아야 한다. 즉, 사물을 사용자의 입장에서 바라볼 줄 알아야 한다.”</span></li>
+</ul>
+<p><span>어쩌면 너무 당연한 내용이라 읽고도 별다른 감흥이 없을 수 있다. 그렇다면 스스로에게 솔직하게 질문해보자. 내가 지금 하고 있는 일은 누구를 위한 것인가? 이에 대한 답변이 이 책에서 가장 중요한 메시지이자, 모든 영역에서 본질이 되어야 할 질문이라고 생각한다. 그리고 우리는 종종 본질을 잊고 살아갈 때가 많다.</span></p>
+<hr>
+<p><img src="https://mynonsense2.wordpress.com/wp-content/uploads/2024/11/kermit-196497_640.jpg?w=480" alt=""></p>
+<p><span>부자가 되고 싶은가?아마 전 세계 대부분의 사람들이 부자가 되기를 원할 것이다. 부자가 되는 것을 마다하는 사람을 찾는 것이 더 어려울지도 모른다.</span></p>
+<p><span>​</span></p>
+<p><span>이 책에는 부자가 되는 법에 대한 내용도 담겨 있다. 아쉽게도 그 방법은 부동산, 주식, 코인과 같은 투자 개념이 아니다. 폴은 비아웹을 야후에 매각한 창업자이기에, 창업자의 관점에서 부자가 되는 법을 설명한다. 이 또한 우리에게 비현실적인 내용처럼 느껴질 수도 있지만, 한편으로는 우리가 본질을 잊고 타성에 젖어 살고 있는 게 아닌가 하는 생각을 불러일으킨다.</span></p>
+<ul>
+<li><span>“비즈니스에 대해서 알아야 하는 것은 오직 두 가지 뿐이다. 사용자가 좋아할 만한 것을 만드는 것, 그리고 자기가 쓰는 비용보다 더 많은 돈을 벌어야 한다는 것이 그것이다.”</span></li>
+<li><span>“회사라는 것은 결국 사람들이 원하는 일을 하기 위해서 여러 사람이 한 자리에 모인 것에 불과하다.”</span></li>
+<li><span>“부자가 되기 위해서는 두 가지를 갖춘 환경에 있어야 한다. 두 가지란 바로 정당한 평가와 영향력이다. 무엇보다도 우선 사람들의 능력을 공평하게 평가하는 곳에 있어야 한다. 그렇지 않으면 더 많이 일해서 더 많이 받는 것이 불가능하기 때문이다. 그와 동시에 영향력도 있어야 한다. 당신이 내린 결정이 뭔가 큰 영향을 행사할 수 있는 상황을 만들 필요가 있다는 뜻이다.”</span></li>
+<li><span>“사람들에게 있어서 언제나 최고의 동기부여는 얻는 것에 대한 희망이 아니라 잃어버리는 것에 대한 두려움이다.”</span></li>
+<li><span>“무언가를 원한다면 스스로 만들거나 아니면 그것을 살 돈을 벌기 위해서 일을 해야 한다. 실제 세상에서 부는 아빠가 나눠 주는 것이 아니라, 스스로 창출해야 하는 것이다(도둑이나 도박사 같은 특별한 사람을 제외하면)”</span></li>
+</ul>
+<p><span>​</span></p>
+<p><span>위와 같은 관점에서 보면, 부동산, 코인, 주식은 부자가 되는 방법에 속하지 않는다. 코로나 이후 많은 사람들이 투자에 관심을 보이기 시작했지만 동시에 관련해서 사기 건 수도 많이 늘어났고 피해자들도 생기고있다. 투자라고 읽지만 투기이기 때문이다. 최근 비트코인 가격이 급등하면서 사람들의 관심이 다시금 높아지고 있다. 코인으로 부를 쌓은 신흥부자들이 나타날 것이다. 이를 부의 재분배로 볼 수도 있겠지만, 나는 개인적으로 이러한 현상을 비관적으로 바라보고 있다. 대부분의 재테크 활동은 결국 누군가를 위해서 하는 활동이 아니기 때문이다.</span></p>
+<hr>
+<p><img src="https://mynonsense2.wordpress.com/wp-content/uploads/2024/11/artist-4622221_640.jpg?w=640" alt=""></p>
+<p><span>마지막으로 창조자의 관점에서 좋은 결과물을 만들어내기 위한 방법들에 대해 다룬다.</span></p>
+<ul>
+<li><span>“좋은 디자인은 간단하다. 간단하고 쉽게 보이도록 드러내기란 무수한 연습을 통해서만 가능해진다.”</span></li>
+<li><span>“자기가 무얼 하는지도 모르고 따라 하기만 하는 것은 형편없는 디자인을 만드는 지름길이다. 자기 아이디어가 어디에 근거를 두고 있는 것인지 모른다면, 모조품을 만드는 것이다.”</span></li>
+<li><span>“좋은 디자인은 어렵다. 위대한 작품을 탄생시킨 사람들이 가진 공통점은 그들이 엄청난 노력을 기울였다는 사실이다. 당신이 지금 엄청난 노력을 기울이고 있지 않다면, 스스로 시간을 낭비하고 있는 것이다.”</span></li>
+<li><span>“좋은 작품을 산출하는 사람들은 대개 그들이 일하는 동안에는 자기가 형편없는 작품을 만들고 있다고 생각한다. 다른 사람들은 그 작품을 보고서 놀랍다고 생각을 하지만, 창조자는 오로지 결점만을 보게 된다. 이러한 패턴은 우연이 아니다. 근심이 좋은 작품을 만드는 것이다.”</span></li>
+<li><span>“무엇을 원하는가”가 아니라 “무엇이 필요한가”에 주목하기 바란다.</span></li>
+<li><span>“예술의 분야에 따라서 다르겠지만, 고객이 원하는 대로만 따라가는 사람이 최고의 작품을 만들게 되는 분야는 없다.”</span></li>
+</ul>
+<hr>
+<p><span>이 책을 읽다 보면 내용이 약간 자기계발서에 가깝다는 느낌을 받을 수도 있다. 하지만 이 책은 엄연히 프로그래머와 창업자의 관점에서 쓰였다고 볼 수 있다. 글에서 언급하지 않았지만, 실제로 책에는 IT 용어들이 다수 등장한다. 관련 배경지식이 없다면 다소 지루하게 느껴질 수도 있다. 하지만 위 내용을 읽고 관심이 생긴다면, 한 번 읽어보길 추천한다.</span></p>
+<p><span>​</span></p>
+<p><span>이 책이 출판된지 무려 20년이 지난 지금에도 유행을 타지 않는다고 생각되는 이유는 아마도 본질적인 내용이기 때문이다. 살다 보면 우리는 본질을 잊고 살아갈 때가 많다. 이 책은 우리가 그동안 깜빡하고 있던 본질을 다시금 상기시켜주는 그런 책이다.</span></p>
+<p><span>​</span></p> </div>  </main> <footer class="site-footer"> <div class="container footer-inner"> <p>
+© 2026 0xnefertt.
+</p> <div class="footer-links"> <nav aria-label="Site links"> <ul class="footer-site-links"> <li><a href="/ko/privacy/">Privacy</a></li> <li><a href="/admin/">Login</a></li> <li><a href="/ko/rss.xml" type="application/rss+xml">RSS</a></li> <li><a href="mailto:adrwss2@gmail.com">Email</a></li><li><a href="https://github.com/0xnefertt">GitHub</a></li><li><a href="https://x.com/0xnefertt">X</a></li> <li> <div class="language-switch" role="group" aria-label="Language selector"> <a class="language-option" href="/books/" title="English version not published; opens English index">EN</a> <span aria-hidden="true">|</span> <a class="language-option is-active" href="/ko/books/hackers-and-painters/" aria-current="page" title="한국어">KR</a> </div> </li> </ul> </nav> </div> </div> </footer> <script>(function(){const gaMeasurementId = "G-XKLJ41F6PS";
+
+      (() => {
+        function track(eventName, params = {}) {
+          if (!gaMeasurementId || typeof window.gtag !== 'function') {
+            return;
+          }
+
+          window.gtag('event', eventName, params);
+        }
+
+        window.siteAnalytics = {
+          track,
+        };
+
+        const pagePath = window.location.pathname;
+        if (/^\/blog\/\d{4}\//.test(pagePath)) {
+          track('post_opened', {
+            page_path: pagePath,
+            page_title: document.title,
+          });
+        }
+
+        document.addEventListener('click', (event) => {
+          const clickTarget = event.target;
+          if (!(clickTarget instanceof Element)) {
+            return;
+          }
+
+          const anchor = clickTarget.closest('a[href]');
+          if (!(anchor instanceof HTMLAnchorElement)) {
+            return;
+          }
+
+          if (anchor.dataset.trackIgnore === 'true') {
+            return;
+          }
+
+          const href = anchor.getAttribute('href');
+          if (!href) {
+            return;
+          }
+
+          let url;
+          try {
+            url = new URL(href, window.location.href);
+          } catch {
+            return;
+          }
+
+          if (url.origin === window.location.origin) {
+            return;
+          }
+
+          track('outbound_click', {
+            destination_url: url.toString(),
+            link_text: (anchor.textContent || '').trim().slice(0, 120),
+            page_path: pagePath,
+          });
+        });
+
+        let sentAdPlaceholder = false;
+        const sendAdPlaceholderEvent = () => {
+          if (sentAdPlaceholder) {
+            return;
+          }
+
+          sentAdPlaceholder = true;
+          track('adsense_script_present_engagement', {
+            page_path: pagePath,
+          });
+        };
+
+        const hasAdSenseScript = Boolean(document.querySelector('script[src*="googlesyndication.com/pagead/js/adsbygoogle.js"]'));
+        if (!hasAdSenseScript) {
+          return;
+        }
+
+        setTimeout(sendAdPlaceholderEvent, 45000);
+        window.addEventListener(
+          'scroll',
+          () => {
+            const doc = document.documentElement;
+            const scrollableHeight = Math.max(doc.scrollHeight - window.innerHeight, 1);
+            const ratio = window.scrollY / scrollableHeight;
+
+            if (ratio >= 0.55) {
+              sendAdPlaceholderEvent();
+            }
+          },
+          { passive: true }
+        );
+      })();
+    })();</script> <script>
+      (() => {
+        const STORAGE_KEY = 'site-theme';
+        const themeToggle = document.querySelector('[data-theme-toggle]');
+
+        if (!(themeToggle instanceof HTMLButtonElement)) {
+          return;
+        }
+
+        function getCurrentTheme() {
+          return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+        }
+
+        function applyTheme(nextTheme) {
+          document.documentElement.dataset.theme = nextTheme;
+          localStorage.setItem(STORAGE_KEY, nextTheme);
+          const isDark = nextTheme === 'dark';
+          themeToggle.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+          themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+        }
+
+        applyTheme(getCurrentTheme());
+
+        themeToggle.addEventListener('click', () => {
+          applyTheme(getCurrentTheme() === 'dark' ? 'light' : 'dark');
+        });
+      })();
+    </script> <script>
+      (() => {
+        const header = document.querySelector('.site-header');
+        const menuToggle = document.querySelector('[data-menu-toggle]');
+        const menuPanel = document.getElementById('site-menu-panel');
+
+        if (!(header instanceof HTMLElement) || !(menuToggle instanceof HTMLButtonElement) || !(menuPanel instanceof HTMLElement)) {
+          return;
+        }
+
+        const mobileMedia = window.matchMedia('(max-width: 840px)');
+
+        function setMenuOpen(nextOpen) {
+          header.classList.toggle('menu-open', nextOpen);
+          menuToggle.setAttribute('aria-expanded', nextOpen ? 'true' : 'false');
+          menuToggle.setAttribute('aria-label', nextOpen ? 'Close navigation menu' : 'Open navigation menu');
+        }
+
+        function closeMenu() {
+          setMenuOpen(false);
+        }
+
+        menuToggle.addEventListener('click', () => {
+          const willOpen = !header.classList.contains('menu-open');
+          setMenuOpen(willOpen);
+        });
+
+        menuPanel.addEventListener('click', (event) => {
+          const target = event.target;
+          if (!(target instanceof Element)) {
+            return;
+          }
+
+          if (target.closest('a[href]') && mobileMedia.matches) {
+            closeMenu();
+          }
+        });
+
+        document.addEventListener('click', (event) => {
+          if (!mobileMedia.matches) {
+            return;
+          }
+
+          const target = event.target;
+          if (!(target instanceof Node)) {
+            return;
+          }
+
+          if (header.contains(target)) {
+            return;
+          }
+
+          closeMenu();
+        });
+
+        mobileMedia.addEventListener('change', () => {
+          if (!mobileMedia.matches) {
+            closeMenu();
+          }
+        });
+      })();
+    </script> </body> </html>
