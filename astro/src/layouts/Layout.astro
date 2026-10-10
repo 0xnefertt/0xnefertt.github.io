@@ -86,7 +86,6 @@ function isActive(href: string, path: string): boolean {
 
 function getNavI18nKey(href: string): string | undefined {
   const map: Record<string, string> = {
-    '/': 'nav_about',
     '/#about': 'nav_about',
     '/blog/': 'nav_blog',
     '/books/': 'nav_bookshelf',
@@ -212,7 +211,7 @@ function getNavI18nKey(href: string): string | undefined {
               {
                 navItems.map((item) => (
                   <li class={item.children && item.children.length > 0 ? 'nav-item nav-item--dropdown' : 'nav-item'}>
-                    <a class={isActive(item.href, currentPath) ? 'active' : undefined} href={item.href} data-i18n-key={item.href === '/' ? 'nav_home' : getNavI18nKey(item.href)}>
+                    <a class={isActive(item.href, currentPath) ? 'active' : undefined} href={item.href} data-i18n-key={getNavI18nKey(item.href)}>
                       {item.label}
                     </a>
                     {item.children && item.children.length > 0 && (
@@ -478,16 +477,15 @@ function getNavI18nKey(href: string): string | undefined {
         const SUPPORTED = ['en', 'ko'];
         const DICTIONARY = {
           en: {
-            nav_home: 'Home',
             blog_all: 'All posts',
             blog_categories: 'Categories',
             blog_recent: 'Latest posts',
             footer_rss: 'RSS subscribe',
-            nav_about: 'about',
+            nav_about: 'About',
             nav_menu: 'Menu',
-            nav_blog: 'blog',
-            nav_bookshelf: 'bookshelf',
-            nav_projects: 'projects',
+            nav_blog: 'Blog',
+            nav_bookshelf: 'Bookshelf',
+            nav_projects: 'Projects',
             category_study_log: 'study log',
             category_dev: 'dev',
             category_english: 'english',
@@ -511,7 +509,6 @@ function getNavI18nKey(href: string): string | undefined {
             search_all_posts: 'Search across all posts',
           },
           ko: {
-            nav_home: '홈',
             blog_all: '전체 글',
             blog_categories: '카테고리',
             blog_recent: '최근 글',

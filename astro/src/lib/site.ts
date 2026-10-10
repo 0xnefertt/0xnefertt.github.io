@@ -67,5 +67,5 @@ export async function getNavItems(): Promise<NavItem[]> {
       };
     });
 
-  return [{ label: '홈', href: '/' }, ...ordered, { label: aboutTitle, href: '/#about' }];
+  return [{ label: aboutTitle, href: '/#about' }, ...ordered];
 }
