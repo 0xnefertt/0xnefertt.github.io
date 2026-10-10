@@ -7,13 +7,10 @@ import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import { formatPostDate, normalizeTaxonomy } from '../../lib/blog';
 import { getBookRoute, normalizeAssetPath } from '../../lib/content';
+import { sortBooks } from '../../lib/books';
 
 const books = inLocale(await getCollection('books'), locale);
-const ordered = [...books].sort((a, b) => {
-  const aDate = a.data.finished?.getTime() ?? 0;
-  const bDate = b.data.finished?.getTime() ?? 0;
-  return bDate - aDate;
-});
+const ordered = sortBooks(books);
 ---
 
 <Layout title="bookshelf" description="Books collection" currentPath={l('/books/')}>

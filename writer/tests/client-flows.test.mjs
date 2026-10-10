@@ -241,3 +241,21 @@ test("clearing an explicit translation key and changing a draft language survive
   filter.dispatchEvent(new dom.window.Event("change"));
   assert.match(document.getElementById("post-list").textContent, /한국어/);
 });
+
+test("a custom book publication date survives saving and reopening without restoring removed inputs", async () => {
+  const ui = await setup();
+  await ui.click("manage-books");
+  await ui.click("new-post");
+  ui.edit("title", "Book review");
+  ui.edit("metadata-date", "2024-11-20");
+  await ui.click("save");
+  assert.equal(ui.drafts.get("draft-1").document.metadata.date, "2024-11-20");
+  document.querySelector("#post-list button.post-item").click();
+  await settle();
+  assert.equal(document.getElementById("metadata-date").value, "2024-11-20");
+  assert.equal(document.getElementById("metadata-author"), null);
+  assert.equal(document.getElementById("metadata-categories"), null);
+  ui.edit("metadata-date", "");
+  await ui.click("save");
+  assert.ok(!("date" in ui.drafts.get("draft-1").document.metadata));
+});

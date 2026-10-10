@@ -1,5 +1,6 @@
 ---
 author: 폴 그레이엄
+date: 2026-10-10
 lang: ko
 last_updated: 2026-10-10
 tags:

@@ -107,12 +107,12 @@ function validateCollectionMetadata(doc: PostDocument): void {
     )
       throw new HttpError(422, key === "stars" ? "별점은 0부터 5까지 입력해 주세요." : "정렬 순서는 0 이상의 정수로 입력해 주세요.");
   }
-  for (const key of ["started", "finished"]) {
+  for (const key of ["started", "finished", ...(kind === "books" ? ["date"] : [])]) {
     if (metadata[key] === undefined) continue;
     const value = metadata[key];
     const date = new Date(`${value}T00:00:00Z`);
     if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value) || Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value)
-      throw new HttpError(422, "독서 날짜를 확인해 주세요.");
+      throw new HttpError(422, "날짜를 확인해 주세요.");
   }
   for (const key of ["stack", "highlights", "lessons", "categories"]) {
     const value = metadata[key];
@@ -197,6 +197,7 @@ export function translationDraft(source: PostDocument): PostDocument {
   const metadata = { ...source.metadata, lang: documentLanguage(source) === "en" ? "ko" : "en", translation_key: documentTranslationKey(source) };
   for (const key of ["canonical", "canonical_url", "redirect", "external_source", "draft", "last_updated"])
     delete (metadata as Record<string, unknown>)[key];
+  if (documentCollection(source) === "books") delete (metadata as Record<string, unknown>).date;
   return {
     ...source,
     metadata,
@@ -317,7 +318,9 @@ export function renderPost(doc: PostDocument, mediaPaths: Map<string, string> = 
     }
     metadata.categories = changedCategory || !doc.sourcePath ? [doc.category] : doc.metadata.categories ?? [doc.category];
   }
-  metadata.last_updated = new Date().toISOString().slice(0, 10);
+  const publicationDate = new Date().toISOString().slice(0, 10);
+  if (collection === "books" && !privateDraft && !metadata.date) metadata.date = publicationDate;
+  metadata.last_updated = publicationDate;
   delete metadata.draft;
   if (privateDraft) metadata.draft = true;
   let body = doc.body;

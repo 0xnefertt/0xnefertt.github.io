@@ -91,11 +91,12 @@ Source editing and sanitized preview remain available. Opening a post or saving 
 `/admin/` includes Posts, Bookshelf, Projects, About/Profile, Categories, and Favorites. Books and projects reuse the private drafts, rich text editor, image attachments,
 optimistic concurrency, and publication workflow. Each content section has its own draft and existing-item lists.
 
-Bookshelf edits the author, cover, categories, and a freeform review body. Older book metadata is preserved when saving. Projects edits
+Bookshelf edits the publication date, cover, and a freeform review body. Author and category inputs have been removed; older book metadata is preserved when saving. Projects edits
 the description, image, status, period, role, ordering, stack, and a freeform body. Optional project details are collapsed by default. Tasks, lessons,
 links, headings, images, and tables can be placed anywhere in the body using the same editor as blog posts. Legacy highlights, lessons, and links
 are moved into editable body lists when a project or old private draft is opened; publishing removes those separate metadata fields. Older public
 content remains visible in the body without preset section headings. Cover attachments stay private until publication.
+Book reviews allow a custom publication date. Leaving it blank records the first publication date automatically; later edits retain it unless explicitly changed and update `last_updated`. Translated reviews start without a publication date.
 New books are written to `_books/<lang>/<slug>.md`, and new projects to `_projects/<lang>/<slug>.md`. Existing filenames and unrelated metadata are preserved,
 including Unicode book filenames and numeric legacy fields. Books and projects do not require blog dates, tags, or blog categories, and are excluded
 from the blog category-usage checks. No D1 migration is needed because the content kind is stored in the draft JSON; old drafts default to blog posts.

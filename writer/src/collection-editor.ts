@@ -1,6 +1,6 @@
 import { list, profileMetadata, type ContentCollection } from "./model";
 
-type Field = { key: string; label: string; type?: "number" | "date" | "list" | "paragraphs"; placeholder?: string; fallback?: string };
+type Field = { key: string; label: string; type?: "number" | "date" | "list" | "paragraphs"; placeholder?: string; fallback?: string; note?: string };
 const fields: Record<Exclude<ContentCollection, "blog">, Field[]> = {
   about: [
     { key: "profile.name", label: "프로필 이름", fallback: "0xnefertt" },
@@ -11,9 +11,8 @@ const fields: Record<Exclude<ContentCollection, "blog">, Field[]> = {
     { key: "profile.more_info", label: "추가 프로필 정보 · 한 줄에 하나씩", type: "paragraphs" },
   ],
   books: [
-    { key: "author", label: "저자" },
+    { key: "date", label: "발행일", type: "date", note: "비워 두면 처음 발행하는 날로 저장됩니다." },
     { key: "cover", label: "표지 이미지", placeholder: "이미지 주소 또는 아래 첨부 버튼" },
-    { key: "categories", label: "책 분류", type: "list", placeholder: "문학, 육아, 개발" },
   ],
   projects: [
     { key: "category", label: "프로젝트 분류", placeholder: "웹사이트, 앱, 연구" },
@@ -63,6 +62,11 @@ export function collectionEditor(change: () => void) {
       controls.push({ field, input, original: input.value });
       input.addEventListener("input", change);
       wrapper.append(input);
+      if (field.note) {
+        const note = document.createElement("small");
+        note.textContent = field.note;
+        wrapper.append(note);
+      }
       container.append(wrapper);
     }
   }

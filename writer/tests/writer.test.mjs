@@ -17,7 +17,7 @@ const aboutKoPath = "_pages/ko/about.md";
 let aboutKoContent;
 let aboutContent;
 const bookContent =
-  "---\ntitle: Existing book\nauthor: Original author\ncover: assets/img/book_covers/세상에서_가장_쉬운_본질육아.png\nisbn: 7539967447\ncategories: parenting education\nfinished: 2025-07-14\nstars: 3\nstatus: Finished\ncustom_marker: keep-this\n---\n\nOriginal book review.\n";
+  "---\ntitle: Existing book\ndate: 2026-01-07\nauthor: Original author\ncover: assets/img/book_covers/세상에서_가장_쉬운_본질육아.png\nisbn: 7539967447\ncategories: parenting education\nfinished: 2025-07-14\nstars: 3\nstatus: Finished\ncustom_marker: keep-this\n---\n\nOriginal book review.\n";
 const projectContent =
   "---\ntitle: Existing project\ndescription: Project summary\nimg: assets/img/prof_pic.jpg\nimportance: 1\ncategory: website\nstatus: In progress\nperiod: 2026\nrole: Personal project\nstack: [Astro, TypeScript]\nhighlights: [Original highlight]\nlessons: [Original lesson]\nlinks: [{label: Repository, url: 'https://github.com/0xnefertt/0xnefertt.github.io'}]\nrelated_publications: false\n---\n\nOriginal project body.\n";
 let mf;
@@ -546,11 +546,12 @@ test("editing a Unicode book path preserves metadata and updates its review", as
   assert.match(content, /status: Finished/);
   assert.match(content, /custom_marker: keep-this/);
   assert.match(content, /categories: parenting education/);
-  assert.ok(!/^date:|^category_override:|^legacy_categories:/m.test(content));
+  assert.match(content, /^date: ['"]?2026-01-07['"]?$/m);
+  assert.ok(!/^category_override:|^legacy_categories:/m.test(content));
   assert.match(content, /Updated review/);
 });
 
-test("new books publish without blog-only fields and reject invalid metadata", async () => {
+test("new books record the first publication date without requiring blog fields and reject invalid metadata", async () => {
   const value = await create(
     document({
       collection: "books",
@@ -565,8 +566,10 @@ test("new books publish without blog-only fields and reject invalid metadata", a
   calls = [];
   const response = await request(`/api/drafts/${value.id}/publish`, { method: "POST", data: { version: value.version } });
   assert.equal(response.status, 200, await response.clone().text());
-  assert.equal((await response.json()).path, `_books/ko/${value.document.slug}.md`);
-  for (const metadata of [{ stars: 6 }, { finished: "2026-02-30" }, { buy_link: "javascript:alert(1)" }]) {
+  const result = await response.json();
+  assert.equal(result.path, `_books/ko/${value.document.slug}.md`);
+  assert.equal(result.draft.document.metadata.date, new Date().toISOString().slice(0, 10));
+  for (const metadata of [{ stars: 6 }, { finished: "2026-02-30" }, { date: "2026-02-30" }, { buy_link: "javascript:alert(1)" }]) {
     const invalid = await create(document({ collection: "books", metadata }));
     calls = [];
     const response = await request(`/api/drafts/${invalid.id}/publish`, { method: "POST", data: { version: invalid.version } });

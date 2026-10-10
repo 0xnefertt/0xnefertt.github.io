@@ -1,53 +1,139 @@
 ---
-import { localeFromPath, localizedPath, localeText } from '../../lib/locale';
-
-const locale = localeFromPath(Astro.url.pathname);
-const l = (path: string) => localizedPath(path, locale);
-import { render, type CollectionEntry } from 'astro:content';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
+import PostShare from '../../components/PostShare.astro';
+import { contentLocale, localeFromPath, localizedPath, localeText } from '../../lib/locale';
+import { t } from '../../lib/messages';
 import { formatPostDate, normalizeTaxonomy } from '../../lib/blog';
-import { normalizeAssetPath } from '../../lib/content';
+import { getBookRoute, normalizeAssetPath } from '../../lib/content';
+import { getBookNeighbors, getBookRecommendations } from '../../lib/books';
+import { siteConfig } from '../../lib/site';
 
 interface Props {
   entry: CollectionEntry<'books'>;
 }
 
+const locale = localeFromPath(Astro.url.pathname);
+const l = (path: string) => localizedPath(path, locale);
 const { entry } = Astro.props;
-const { Content } = await render(entry);
+const { Content, headings } = await render(entry);
+const outline = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
 const cover = normalizeAssetPath(entry.data.cover);
 const categories = normalizeTaxonomy(entry.data.categories);
 const tags = normalizeTaxonomy(entry.data.tags);
+const [books, posts, pages] = await Promise.all([getCollection('books'), getCollection('blog'), getCollection('pages')]);
+const { previous, next } = getBookNeighbors(entry, books, locale);
+const recommendations = getBookRecommendations(entry, books, posts, locale);
+const profile = pages.find((page) => page.filePath?.endsWith('/about.md') && contentLocale(page) === locale)?.data.profile;
+const reviewer = profile?.name ?? '0xnefertt';
+const avatar = normalizeAssetPath(profile?.image);
+const canonicalUrl = new URL(getBookRoute(entry).href, siteConfig.siteUrl).toString();
+const hasSidebar = outline.length > 0 || recommendations.length > 0;
+const articleJsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: entry.data.title,
+  inLanguage: locale,
+  author: { '@type': 'Person', name: reviewer, url: new URL(l('/about/'), siteConfig.siteUrl).toString() },
+  datePublished: entry.data.date?.toISOString(),
+  dateModified: (entry.data.last_updated ?? entry.data.date)?.toISOString(),
+  mainEntityOfPage: canonicalUrl,
+  about: { '@type': 'Book', name: entry.data.title, ...(entry.data.author ? { author: { '@type': 'Person', name: entry.data.author } } : {}) },
+}).replace(/</g, '\\u003c');
 ---
 
-<Layout title={entry.data.title} description={entry.data.title} currentPath={l('/books/')}>
+<Layout
+  title={entry.data.title}
+  description={entry.data.title}
+  currentPath={l('/books/')}
+  canonicalHref={canonicalUrl}
+  ogType="article"
+  ogImage={cover ?? siteConfig.defaultOgImage}
+  articlePublishedTime={entry.data.date}
+  articleModifiedTime={entry.data.last_updated ?? entry.data.date}
+  mainClass="post-content book-content"
+>
+  <script slot="head" type="application/ld+json" set:html={articleJsonLd}></script>
   <article class="post-header">
+    <nav class="post-breadcrumbs" aria-label={localeText(locale, 'Bookshelf', '책장')}>
+      <a href={l('/books/')}>{t(locale, 'nav_bookshelf')}</a>
+    </nav>
     <h1>{entry.data.title}</h1>
-    <p>
-      {entry.data.author ? entry.data.author : 'Unknown author'}
-      {entry.data.released ? ` · ${entry.data.released}` : ''}
-      {entry.data.stars ? ` · ${entry.data.stars}/5` : ''}
-      {entry.data.status ? ` · ${entry.data.status}` : ''}
+    <p class="post-byline">
+      {avatar && <img class="post-author-avatar" src={avatar} alt="" width="28" height="28" />}
+      <a href={l('/about/')} rel="author">{reviewer}</a>
+      {entry.data.date && <time datetime={entry.data.date.toISOString()}>{localeText(locale, 'Published', '발행')} {formatPostDate(entry.data.date)}</time>}
+      {entry.data.last_updated && entry.data.last_updated.getTime() !== entry.data.date?.getTime() && (
+        <span>{localeText(locale, 'Updated', '수정')} <time datetime={entry.data.last_updated.toISOString()}>{formatPostDate(entry.data.last_updated)}</time></span>
+      )}
     </p>
-
+    {entry.data.author && <p class="book-meta">{localeText(locale, 'Book author', '책 저자')}: {entry.data.author}</p>}
     {(categories.length > 0 || tags.length > 0) && (
       <div class="tags">
         {categories.map((category) => <span>{category}</span>)}
         {tags.map((tag) => <span>#{tag}</span>)}
       </div>
     )}
-
-    {entry.data.started && <p class="book-meta">{localeText(locale, 'Started', '읽기 시작')}: {formatPostDate(entry.data.started)}</p>}
-    {entry.data.finished && <p class="book-meta">{localeText(locale, 'Finished', '완독')}: {formatPostDate(entry.data.finished)}</p>}
-    {entry.data.buy_link && (
-      <p class="book-meta">
-        <a href={entry.data.buy_link} target="_blank" rel="noreferrer">{localeText(locale, 'Buy link', '구매 링크')}</a>
-      </p>
-    )}
   </article>
 
-  {cover && <img class="profile-image" src={cover} alt={`${entry.data.title} cover`} loading="lazy" />}
-
-  <div class="post-body markdown-body">
-    <Content />
+  <div class:list={['post-detail-layout', 'book-detail-layout', { 'book-detail-layout--single': !hasSidebar }]}>
+    <div class="post-main">
+      {outline.length > 0 && (
+        <details class="post-outline book-outline-mobile">
+          <summary>{localeText(locale, `Contents · ${outline.length} sections`, `목차 · ${outline.length}개 항목`)}</summary>
+          <ul>{outline.map((heading) => <li class:list={{ 'book-outline-subheading': heading.depth === 3 }}><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ul>
+        </details>
+      )}
+      {cover && <img class="book-detail-cover" src={cover} alt={localeText(locale, `${entry.data.title} cover`, `${entry.data.title} 표지`)} loading="lazy" />}
+      <div class="post-body markdown-body">
+        <Content />
+      </div>
+      <div class="post-reader-actions">
+        <a href={l('/books/')}>{localeText(locale, 'Back to bookshelf', '책 목록으로')}</a>
+        <PostShare title={entry.data.title} url={canonicalUrl} locale={locale} />
+      </div>
+      {(previous || next) && (
+        <nav class="post-pager book-pager" aria-label={localeText(locale, 'Book review navigation', '독서 기록 이전·다음 글')}>
+          {previous ? (
+            <a class="post-pager-link post-pager-link--prev" href={getBookRoute(previous).href} rel="prev">
+              <span class="post-pager-label">{t(locale, 'post_previous')}</span>
+              <span class="post-pager-title">{previous.data.title}</span>
+            </a>
+          ) : <span aria-hidden="true"></span>}
+          {next ? (
+            <a class="post-pager-link post-pager-link--next" href={getBookRoute(next).href} rel="next">
+              <span class="post-pager-label">{t(locale, 'post_next')}</span>
+              <span class="post-pager-title">{next.data.title}</span>
+            </a>
+          ) : <span aria-hidden="true"></span>}
+        </nav>
+      )}
+    </div>
+    {hasSidebar && (
+      <aside class="post-related book-sidebar" aria-label={localeText(locale, 'Contents and more to read', '목차와 함께 읽으면 좋은 글')}>
+        {outline.length > 0 && (
+          <nav class="book-outline-desktop" aria-label={localeText(locale, 'Contents', '목차')}>
+            <h2>{localeText(locale, 'Contents', '목차')}</h2>
+            <ul class="book-outline-list">{outline.map((heading) => <li class:list={{ 'book-outline-subheading': heading.depth === 3 }}><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ul>
+          </nav>
+        )}
+        {recommendations.length > 0 && (
+          <section>
+            <h2>{t(locale, 'post_more_to_read')}</h2>
+            <ul class="post-related-list">
+              {recommendations.map((item) => (
+                <li class="post-related-item">
+                  <a href={item.href}>{item.title}</a>
+                  <p class="post-related-meta">
+                    {localeText(locale, item.kind === 'books' ? 'Book review' : 'Blog', item.kind === 'books' ? '독서 기록' : '블로그')}
+                    {item.date && ` · ${formatPostDate(item.date)}`}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+      </aside>
+    )}
   </div>
 </Layout>

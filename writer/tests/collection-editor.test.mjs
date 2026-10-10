@@ -24,9 +24,10 @@ function setup() {
   const editor = collectionEditor(() => changes++);
   return { editor, dom, changes: () => changes };
 }
-test("simplified book forms preserve hidden legacy metadata while editing author, cover and categories", () => {
+test("book forms edit publication date and cover while preserving removed author, category and legacy fields", () => {
   const { editor, dom, changes } = setup();
   const original = {
+    date: "2026-01-07",
     author: "Original",
     isbn: 7539967447,
     released: 1969,
@@ -42,22 +43,24 @@ test("simplified book forms preserve hidden legacy metadata while editing author
     custom: { retained: true },
   };
   editor.load("books", original);
-  const hiddenKeys = ["released", "started", "finished", "stars", "status", "isbn", "olid", "buy_link", "goodreads_review"];
+  const hiddenKeys = ["author", "categories", "released", "started", "finished", "stars", "status", "isbn", "olid", "buy_link", "goodreads_review"];
   for (const key of hiddenKeys) assert.equal(document.getElementById(`metadata-${key}`), null);
   assert.deepEqual(editor.read(original), original);
-  const author = document.getElementById("metadata-author");
-  author.value = "Updated";
-  author.dispatchEvent(new dom.window.Event("input"));
-  document.getElementById("metadata-categories").value = "classics, fiction";
+  const date = document.getElementById("metadata-date");
+  assert.equal(date.type, "date");
+  assert.equal(date.value, "2026-01-07");
+  date.value = "2025-11-20";
+  date.dispatchEvent(new dom.window.Event("input"));
   document.getElementById("metadata-cover").value = "";
   const changed = editor.read(original);
-  assert.equal(changed.author, "Updated");
-  assert.deepEqual(changed.categories, ["classics", "fiction"]);
+  assert.equal(changed.date, "2025-11-20");
   assert.equal(changed.cover, undefined);
   for (const key of hiddenKeys) assert.equal(changed[key], original[key]);
   assert.equal(original.author, "Original");
   assert.deepEqual(changed.custom, original.custom);
   assert.equal(changes(), 1);
+  date.value = "";
+  assert.ok(!("date" in editor.read(original)));
 });
 test("project forms keep optional details without imposing tasks, lessons or link sections", () => {
   const { editor } = setup();
