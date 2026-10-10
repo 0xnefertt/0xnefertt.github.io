@@ -1,7 +1,8 @@
 import { categoryOptions, validateSettings, type SettingsSnapshot, type SiteSettings } from "./site-settings";
+import type { ContentCollection } from "./model";
 
 type Api = <T>(path: string, init?: RequestInit) => Promise<T>;
-export function siteManager(api: Api, leave: () => Promise<boolean>) {
+export function siteManager(api: Api, leave: () => Promise<boolean>, selectContent: (kind: ContentCollection) => Promise<boolean>) {
   const el = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
   let settings: SiteSettings | null = null;
   let sha = "";
@@ -9,7 +10,7 @@ export function siteManager(api: Api, leave: () => Promise<boolean>) {
   let changed = false;
   let busy = false;
   let savedPaths = new Set<string>();
-  let section: "posts" | "categories" | "favorites" = "posts";
+  let section: "posts" | "books" | "projects" | "about" | "categories" | "favorites" = "posts";
   const expanded = new WeakSet<object>();
   const message = (value: string) => {
     el("settings-status").textContent = value;
@@ -28,7 +29,7 @@ export function siteManager(api: Api, leave: () => Promise<boolean>) {
       if (!options.some((item) => item.value === path)) options.push({ value: path, label: path.replaceAll("/", " / ") });
     select.replaceChildren(...options.map((item) => new Option(item.label, item.value)));
     if (value && options.some((item) => item.value === value)) select.value = value;
-    el<HTMLButtonElement>("new-post").disabled = !select.value;
+    el<HTMLButtonElement>("new-post").disabled = el("workspace").dataset.collection === "blog" && !select.value;
   }
   function apply(snapshot: SettingsSnapshot) {
     settings = structuredClone(snapshot.settings);
@@ -218,19 +219,23 @@ export function siteManager(api: Api, leave: () => Promise<boolean>) {
   }
   async function show(next: typeof section) {
     if (!(await leave())) return;
+    const content = next === "posts" || next === "books" || next === "projects" || next === "about";
+    if (content && !(await selectContent(next === "posts" ? "blog" : next))) return;
     section = next;
-    el("workspace").hidden = next !== "posts";
-    el("settings-panel").hidden = next === "posts";
+    el("workspace").hidden = !content;
+    el("settings-panel").hidden = content;
     el("category-manager").hidden = next !== "categories";
     el("favorites-manager").hidden = next !== "favorites";
-    for (const item of ["posts", "categories", "favorites"]) el(`manage-${item}`).setAttribute("aria-pressed", String(item === next));
+    for (const item of ["posts", "books", "projects", "about", "categories", "favorites"])
+      el(`manage-${item}`).setAttribute("aria-pressed", String(item === next));
     el("manager-heading").textContent = next === "categories" ? "카테고리" : "즐겨찾기";
     el("manager-description").textContent =
       next === "categories"
         ? "표시 이름과 순서를 변경할 수 있습니다. 글이 있는 카테고리는 삭제할 수 없으며, 새 카테고리는 글을 발행하면 블로그에 표시됩니다."
         : "홈 화면에 표시할 그룹과 링크를 관리하세요. 순서는 위·아래 버튼으로 변경합니다. 빈 그룹은 홈 화면에 표시되지 않습니다.";
   }
-  for (const item of ["posts", "categories", "favorites"] as const) el(`manage-${item}`).addEventListener("click", () => void show(item));
+  for (const item of ["posts", "books", "projects", "about", "categories", "favorites"] as const)
+    el(`manage-${item}`).addEventListener("click", () => void show(item));
   el("add-category").addEventListener("click", () => {
     if (!settings) return;
     const group = { children: [], name: "", slug: "" };

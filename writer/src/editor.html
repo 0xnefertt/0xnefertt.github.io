@@ -6,12 +6,15 @@
   <section id="login-screen" class="welcome" hidden>
     <span class="eyebrow">ADMIN</span>
     <h1>사이트 관리</h1>
-    <p>GitHub로 로그인해 글, 카테고리, 즐겨찾기를 관리하세요.<br />초안은 비공개로 저장됩니다.</p>
+    <p>GitHub로 로그인해 글, 책장, 프로젝트, 소개와 사이트 설정을 관리하세요.<br />초안은 비공개로 저장됩니다.</p>
     <a class="primary" id="login-link" href="#login-screen">GitHub로 로그인</a>
     <p id="login-message" class="muted" role="status"></p>
   </section>
   <nav id="admin-nav" class="admin-nav" aria-label="관리 메뉴" hidden>
     <button id="manage-posts" aria-pressed="true">글</button>
+    <button id="manage-books" aria-pressed="false">책장</button>
+    <button id="manage-projects" aria-pressed="false">프로젝트</button>
+    <button id="manage-about" aria-pressed="false">소개·프로필</button>
     <button id="manage-categories" aria-pressed="false">카테고리</button>
     <button id="manage-favorites" aria-pressed="false">즐겨찾기</button>
     <a href="https://0xnefertt.github.io/" target="_blank" rel="noreferrer">블로그 보기 ↗</a>
@@ -39,22 +42,22 @@
       </div>
     </fieldset>
   </section>
-  <div id="workspace" class="workspace" hidden>
+  <div id="workspace" class="workspace" data-collection="blog" hidden>
     <aside class="library">
       <button id="new-post" class="primary" disabled>＋ 새 글 쓰기</button>
-      <label class="search-label" for="search">글 찾기</label>
+      <label class="search-label" id="library-search-label" for="search">글 찾기</label>
       <input id="search" type="search" placeholder="제목이나 주소로 검색" />
       <div class="library-tabs" role="group" aria-label="글 목록 선택">
         <button id="draft-tab" aria-pressed="true">초안</button><button id="post-tab" aria-pressed="false">기존 글</button>
       </div>
       <div id="post-list" class="post-list" aria-live="polite"></div>
-      <p class="library-note">초안은 자동으로 비공개 저장됩니다.<br />발행한 글은 블로그에 공개됩니다.</p>
+      <p class="library-note" id="library-note">초안은 자동으로 비공개 저장됩니다.<br />발행한 글은 블로그에 공개됩니다.</p>
     </aside>
     <section class="writing-area" aria-label="글 편집">
       <div id="empty" class="empty">
-        <span class="eyebrow">POSTS</span>
-        <h2>글을 선택하세요</h2>
-        <p>새 글을 작성하거나 목록에서 수정할 글을 선택하세요.</p>
+        <span class="eyebrow" id="empty-kind">POSTS</span>
+        <h2 id="empty-heading">글을 선택하세요</h2>
+        <p id="empty-description">새 글을 작성하거나 목록에서 수정할 글을 선택하세요.</p>
       </div>
       <div id="editor" hidden>
         <div class="editor-actions">
@@ -62,22 +65,31 @@
           <div><button id="download">내려받기</button><button id="save">초안 저장</button><button class="primary" id="publish">발행하기</button></div>
         </div>
         <div id="notice" role="status" hidden></div>
-        <div class="post-meta-row">
-          <label>게시글 제목<input id="title" class="title-input" placeholder="제목을 입력하세요" maxlength="300" /></label>
+        <div class="post-meta-row" id="title-row">
           <label
+            ><span id="title-label">게시글 제목</span><input id="title" class="title-input" placeholder="제목을 입력하세요" maxlength="300"
+          /></label>
+          <label id="blog-category-field"
             >분류<select id="category">
               <option value="">카테고리를 선택하세요</option>
             </select></label
           >
         </div>
         <label class="summary-field"
-          >한 줄 요약<input id="description" class="description-input" placeholder="글의 내용을 짧게 요약하세요" maxlength="1000"
+          ><span id="description-label">한 줄 요약</span
+          ><input id="description" class="description-input" placeholder="글의 내용을 짧게 요약하세요" maxlength="1000"
         /></label>
-        <details class="post-settings">
-          <summary>추가 정보 · 태그, 날짜, 주소</summary>
+        <details id="collection-settings" class="post-settings" hidden open>
+          <summary id="collection-settings-heading">상세 정보</summary>
+          <fieldset id="collection-fields" class="settings-grid"></fieldset>
+          <button id="cover-attach" type="button">표지 이미지 첨부</button>
+          <input id="cover-image-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden />
+        </details>
+        <details class="post-settings" id="extra-settings">
+          <summary id="extra-settings-heading">추가 정보 · 태그, 날짜, 주소</summary>
           <div class="settings-grid">
             <label>태그<input id="tags" placeholder="astro, 기록, 개발" /></label>
-            <label>날짜<input id="date" type="date" /></label>
+            <label id="blog-date-field">날짜<input id="date" type="date" /></label>
             <label
               >글 주소<input id="slug" placeholder="my-first-post" pattern="[a-z0-9]+(-[a-z0-9]+)*" /><small>영문 소문자·숫자·하이픈</small></label
             >
@@ -441,7 +453,11 @@
             <p id="preview-date"></p>
             <div id="preview-tags" class="tags"></div>
           </header>
+          <img id="preview-cover" class="preview-cover" alt="표지 미리보기" hidden />
+          <p id="preview-bio" hidden></p>
+          <p id="preview-subtitle" hidden></p>
           <div id="preview-body" class="post-body markdown-body"></div>
+          <div id="preview-profile-info" class="markdown-body" hidden></div>
         </article>
       </div>
     </section>
@@ -450,8 +466,8 @@
 <dialog id="publish-dialog">
   <form method="dialog">
     <span class="eyebrow">PUBLISH</span>
-    <h2>이 글을 발행할까요?</h2>
-    <p>글과 사용한 이미지가 블로그 저장소에 공개됩니다.<br />사이트에 반영되기까지 잠시 걸릴 수 있습니다.</p>
+    <h2 id="publish-heading">이 글을 발행할까요?</h2>
+    <p>작성한 내용과 사용한 이미지가 공개됩니다.<br />사이트에 반영되기까지 잠시 걸릴 수 있습니다.</p>
     <div class="dialog-actions"><button value="cancel">계속 작성</button><button class="primary" value="publish">발행하기</button></div>
   </form>
 </dialog>

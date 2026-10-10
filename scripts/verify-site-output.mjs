@@ -7,6 +7,10 @@ const repoRoot = process.cwd();
 const distRoot = path.join(repoRoot, "astro", "dist");
 const requiredFiles = [
   ".nojekyll",
+  "favicon.svg",
+  "favicon.ico",
+  "favicon-32x32.png",
+  "apple-touch-icon.png",
   "404.html",
   "ads.txt",
   "sitemap.xml",

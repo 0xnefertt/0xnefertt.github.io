@@ -2,7 +2,8 @@
 import { getCollection, render } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
 import PostCard from '../components/PostCard.astro';
-import { getPublishedBlogPosts, sortPostsDesc, toBlogSummary } from '../lib/blog';
+import BlogCategoryFilter from '../components/BlogCategoryFilter.astro';
+import { getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from '../lib/blog';
 import { normalizeAssetPath } from '../lib/content';
 import { siteConfig } from '../lib/site';
 import { siteSettings } from '../lib/settings';
@@ -18,6 +19,7 @@ const { Content } = await render(aboutPage);
 const allPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')));
 const latestLimit = aboutPage.data.latest_posts?.limit ?? 5;
 const latestPosts = allPosts.slice(0, latestLimit).map(toBlogSummary);
+const categoryTree = listBlogCategoryTree(allPosts);
 const profile = aboutPage.data.profile;
 const subtitle = aboutPage.data.subtitle;
 const profileImage = normalizeAssetPath(profile?.image);
@@ -85,8 +87,6 @@ const favoriteCategories = siteSettings.favorites.filter((group) => group.items.
 const usefulInfo = toUsefulInfoConfig(aboutData.useful_info);
 const homeVerticalAdSlot = '3436251506';
 const showHomeVerticalAd = siteConfig.adsensePublisherId.length > 0;
-const hasRightSidebar = Boolean(profile);
-const heroClassName = ['hero', hasRightSidebar ? 'hero--with-sidebar' : 'hero--without-sidebar'].join(' ');
 const introClassName = [
   'home-intro',
   favoriteCategories.length > 0 ? 'home-intro--with-favorites' : 'home-intro--without-favorites',
@@ -94,7 +94,26 @@ const introClassName = [
 ].join(' ');
 ---
 
-<Layout title={aboutPage.data.title ?? 'about'} description={aboutPage.data.description ?? 'About page'} currentPath="/">
+<Layout title="블로그" description={aboutPage.data.description ?? siteConfig.description} currentPath="/" mainClass="home-content">
+  <header class="blog-masthead">
+    <p class="blog-masthead-label">기록하고, 배우고, 나누는 공간</p>
+    <h1>{siteConfig.blogName}</h1>
+    <p class="blog-masthead-description">{siteConfig.blogDescription}</p>
+    <BlogCategoryFilter categoryTree={categoryTree} totalCount={allPosts.length} isAllActive />
+  </header>
+  <section class="home-latest-section" aria-labelledby="latest-posts-title">
+    <div class="home-latest-heading">
+      <h2 class="section-title" id="latest-posts-title"><span data-i18n-key="blog_recent">최근 글</span> <span class="feed-count">{latestPosts.length}</span></h2>
+      <form class="blog-search-form home-search" action="/blog/search/" method="get" role="search">
+        <input class="blog-search-input" type="search" name="q" placeholder="글 검색" aria-label="Search posts" data-i18n-placeholder="search_placeholder" />
+        <button class="blog-search-button" type="submit" data-i18n-key="search_button">검색</button>
+      </form>
+    </div>
+    <ul class="post-list">
+      {latestPosts.map((post) => <PostCard post={post} headingLevel={3} />)}
+    </ul>
+    <a class="feed-more" href="/blog/"><span data-i18n-key="blog_all">전체 글</span> {allPosts.length}개 보기 &rarr;</a>
+  </section>
   <div class={introClassName}>
     {
       favoriteCategories.length > 0 && (
@@ -178,25 +197,24 @@ const introClassName = [
       </aside>
     )}
 
-    <section class={heroClassName}>
-      <article class="card markdown-body">
-        <h1>{aboutPage.data.title ?? 'about'}</h1>
-        {subtitle && <p class="home-subtitle" set:html={subtitle} />}
-        <Content />
-      </article>
-
-      {
-        hasRightSidebar && (
-          <aside class="hero-side">
-            {profile && (
-              <section class="card">
-                {profileImage && <img class="profile-image" src={profileImage} alt={`${aboutPage.data.title ?? 'Profile'} image`} loading="lazy" />}
-                {profile.more_info && <div class="profile-meta" set:html={profile.more_info} />}
-              </section>
-            )}
-          </aside>
-        )
-      }
+    <section class="home-profile" id="about" aria-labelledby="profile-name">
+      <div class="home-profile-heading">
+        {profileImage && <img class="profile-avatar" src={profileImage} alt={`${profile?.name ?? '0xnefertt'} 프로필`} loading="lazy" width="64" height="64" />}
+        <div>
+          <h2 id="profile-name">{profile?.name ?? '0xnefertt'}</h2>
+          <p>{profile?.location ?? 'Vancouver, Canada'}</p>
+        </div>
+      </div>
+      <p class="home-profile-bio">{profile?.bio ?? '개발하며 배운 것, 캐나다에서의 일상, 관심 있는 것들을 기록합니다.'}</p>
+      <details class="profile-description">
+        <summary>소개 더보기</summary>
+        <div class="markdown-body">
+          {subtitle && <p class="home-subtitle">{subtitle}</p>}
+          <Content />
+          {profile?.more_info && <div class="profile-meta" set:html={profile.more_info} />}
+        </div>
+      </details>
+      <a class="profile-rss" href="/rss.xml">RSS 구독 &rarr;</a>
     </section>
   </div>
 
@@ -458,14 +476,5 @@ const introClassName = [
       </script>
     )
   }
-
-  <section class="home-latest-section">
-    <h2 class="section-title">Latest Posts</h2>
-    <ul class="post-list">
-      {
-        latestPosts.map((post) => <PostCard post={post} headingLevel={3} />)
-      }
-    </ul>
-  </section>
 
 </Layout>

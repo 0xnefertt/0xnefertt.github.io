@@ -38,43 +38,21 @@ const links = project.data.links ?? [];
       <h1>{project.data.title}</h1>
       {project.data.description && <p>{project.data.description}</p>}
     </div>
-    <div class="project-detail-actions">
-      {links.map((link) => (
-        <a href={link.url} target="_blank" rel="noreferrer">
-          {link.label}
-        </a>
-      ))}
-    </div>
   </article>
 
   <div class="project-detail-layout">
     <div class="project-detail-main">
       {image && <img class="project-detail-image" src={image} alt={`${project.data.title} cover`} loading="lazy" />}
 
-      {highlights.length > 0 && (
-        <section class="project-detail-section">
-          <h2>What I worked on</h2>
-          <ul class="project-detail-list">
-            {highlights.map((highlight) => (
-              <li>{highlight}</li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {lessons.length > 0 && (
-        <section class="project-detail-section">
-          <h2>Lessons learned</h2>
-          <ul class="project-detail-list">
-            {lessons.map((lesson) => (
-              <li>{lesson}</li>
-            ))}
-          </ul>
-        </section>
-      )}
-
       <section class="post-body markdown-body">
         <Content />
+        {/* Keep older repository content visible until it is saved as an editable body. */}
+        {[...highlights, ...lessons].length > 0 && (
+          <ul>{[...highlights, ...lessons].map((item) => <li>{item}</li>)}</ul>
+        )}
+        {links.length > 0 && (
+          <ul>{links.map((link) => <li><a href={link.url}>{link.label}</a></li>)}</ul>
+        )}
       </section>
     </div>
 

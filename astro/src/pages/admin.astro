@@ -1,5 +1,6 @@
 ---
 import editor from '../../../writer/src/editor.html?raw';
+import Favicon from '../components/Favicon.astro';
 const backend = new URL(import.meta.env.PUBLIC_WRITER_URL?.trim() || 'https://nefertt-writer.0xnefertt-writer.workers.dev').origin;
 const policy = `default-src 'self'; script-src 'self'; style-src 'self'; style-src-attr 'unsafe-inline'; img-src 'self' https: blob:; connect-src 'self' ${backend}; frame-src 'none'; base-uri 'none'; form-action 'self'`;
 ---
@@ -9,6 +10,7 @@ const policy = `default-src 'self'; script-src 'self'; style-src 'self'; style-s
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <Favicon />
     <meta name="robots" content="noindex, nofollow" />
     <meta name="referrer" content="no-referrer" />
     <meta http-equiv="Content-Security-Policy" content={policy} />

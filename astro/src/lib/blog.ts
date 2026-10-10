@@ -671,10 +671,5 @@ export function formatPostDate(date?: Date): string {
     return 'Unknown date';
   }
 
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: '2-digit',
-    timeZone: 'UTC',
-  }).format(date);
+  return date.toISOString().slice(0, 10).replaceAll('-', '.') + '.';
 }

@@ -1,6 +1,17 @@
 import { timingSafeEqual } from "node:crypto";
 import { boundedBody, github, publishPost, readPost, repositoryTree, type MediaFile } from "./github";
-import { HttpError, validateDocument, type Draft, type PostDocument } from "./model";
+import {
+  HttpError,
+  validateDocument,
+  contentCollection,
+  documentCollection,
+  isContentPath,
+  pathCollection,
+  contentImages,
+  editableDocument,
+  type Draft,
+  type PostDocument,
+} from "./model";
 import { getSiteSettings, saveSiteSettings } from "./settings-github";
 
 const SESSION_SECONDS = 60 * 60 * 24 * 7;
@@ -102,7 +113,7 @@ async function input(request: Request): Promise<Record<string, unknown>> {
   }
 }
 function draft(row: DraftRow): Draft {
-  return { id: row.id, document: JSON.parse(row.document), version: row.version, updated: row.updated };
+  return { id: row.id, document: editableDocument(JSON.parse(row.document)), version: row.version, updated: row.updated };
 }
 function validId(id: string): void {
   if (!/^[a-f0-9-]{36}$/.test(id)) throw new HttpError(400, "초안 주소가 올바르지 않습니다.");
@@ -207,10 +218,11 @@ async function route(request: Request, env: Env): Promise<Response> {
     return result;
   }
   if (path === "/api/posts" && request.method === "GET") {
+    const collection = contentCollection(url.searchParams.get("collection") ?? "blog");
     const repo = await repositoryTree(env, user.token);
     return json({
       posts: repo.files
-        .filter((file) => file.type === "blob" && /^_posts\/.*\.md$/.test(file.path))
+        .filter((file) => file.type === "blob" && isContentPath(file.path) && pathCollection(file.path) === collection)
         .map((file) => ({ path: file.path, sha: file.sha })),
     });
   }
@@ -228,9 +240,12 @@ async function route(request: Request, env: Env): Promise<Response> {
     return json({ id, document: doc, version: 1, updated });
   }
   if (path === "/api/drafts" && request.method === "GET") {
+    const collection = contentCollection(url.searchParams.get("collection") ?? "blog");
     const rows = await env.DB.prepare(
-      "SELECT id, json_extract(document, '$.title') AS title, json_extract(document, '$.sourcePath') AS sourcePath, updated FROM drafts ORDER BY updated DESC LIMIT 500"
-    ).all();
+      "SELECT id, json_extract(document, '$.title') AS title, json_extract(document, '$.sourcePath') AS sourcePath, updated FROM drafts WHERE COALESCE(json_extract(document, '$.collection'), 'blog') = ? ORDER BY updated DESC LIMIT 500"
+    )
+      .bind(collection)
+      .all();
     return json({ drafts: rows.results });
   }
   if (path === "/api/drafts" && request.method === "POST") {
@@ -251,6 +266,7 @@ async function route(request: Request, env: Env): Promise<Response> {
       const data = await input(request);
       const doc = validateDocument(data.document);
       const original = JSON.parse(row.document) as PostDocument;
+      if (documentCollection(doc) !== documentCollection(original)) throw new HttpError(400, "초안의 콘텐츠 종류는 변경할 수 없습니다.");
       if (doc.sourcePath !== original.sourcePath || doc.sourceSha !== original.sourceSha)
         throw new HttpError(400, "원본 글 정보는 변경할 수 없습니다.");
       if (original.sourcePath && (doc.date !== original.date || doc.slug !== original.slug))
@@ -290,10 +306,7 @@ async function route(request: Request, env: Env): Promise<Response> {
         const doc = validateDocument(JSON.parse(locked.document), true);
         const files = await env.DB.prepare("SELECT id, filename, mime, size FROM media WHERE draft_id = ?").bind(id).all<MediaFile>();
         const referenced = files.results.filter(
-          (file) =>
-            doc.body.includes(`/api/media/${file.id}`) ||
-            doc.metadata.cover === `/api/media/${file.id}` ||
-            doc.metadata.thumbnail === `/api/media/${file.id}`
+          (file) => doc.body.includes(`/api/media/${file.id}`) || contentImages(doc.metadata).includes(`/api/media/${file.id}`)
         );
         const result = await publishPost(env, user.token, doc, referenced);
         // Keep a working copy, so subsequent edits retain the original URL and revision.

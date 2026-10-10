@@ -10,6 +10,14 @@ const originalSha = "a".repeat(40);
 const sourcePath = "_posts/study-log/dev/2026-01-01-existing.md";
 const existing =
   "---\ntitle: Existing\ndate: 2026-01-01\ndescription: Existing post\ncategories:\n  - study-log/dev\ntags:\n  - astro\nslug: existing\nlang: ko\nseries: Notes\ngiscus_comments: false\n---\n\nOriginal body.\n";
+const bookPath = "_books/세상에서_가장_쉬운_본질육아.md";
+const projectPath = "_projects/2026-05-06-site-platform.md";
+const aboutPath = "_pages/about.md";
+let aboutContent;
+const bookContent =
+  "---\ntitle: Existing book\nauthor: Original author\ncover: assets/img/book_covers/세상에서_가장_쉬운_본질육아.png\nisbn: 7539967447\ncategories: parenting education\nfinished: 2025-07-14\nstars: 3\nstatus: Finished\ncustom_marker: keep-this\n---\n\nOriginal book review.\n";
+const projectContent =
+  "---\ntitle: Existing project\ndescription: Project summary\nimg: assets/img/prof_pic.jpg\nimportance: 1\ncategory: website\nstatus: In progress\nperiod: 2026\nrole: Personal project\nstack: [Astro, TypeScript]\nhighlights: [Original highlight]\nlessons: [Original lesson]\nlinks: [{label: Repository, url: 'https://github.com/0xnefertt/0xnefertt.github.io'}]\nrelated_publications: false\n---\n\nOriginal project body.\n";
 let mf;
 let ownerId = 170924802;
 let failBranch = false;
@@ -19,6 +27,7 @@ let configuredSettings;
 let auth;
 
 before(async () => {
+  aboutContent = await readFile("../_pages/about.md", "utf8");
   configuredSettings = JSON.parse(await readFile("../_data/site-settings.json", "utf8"));
   await mkdir(".test-build", { recursive: true });
   await build({
@@ -62,6 +71,11 @@ before(async () => {
             truncated: false,
             tree: [
               { path: sourcePath, sha: originalSha, type: "blob" },
+              { path: bookPath, sha: originalSha, type: "blob" },
+              { path: projectPath, sha: originalSha, type: "blob" },
+              { path: aboutPath, sha: originalSha, type: "blob" },
+              { path: "astro/public/assets/img/prof_pic.jpg", sha: originalSha, type: "blob" },
+              { path: "astro/public/assets/img/book_covers/세상에서_가장_쉬운_본질육아.png", sha: originalSha, type: "blob" },
               { path: "_data/site-settings.json", sha: settingsSha, type: "blob" },
             ],
           });
@@ -79,8 +93,11 @@ before(async () => {
               ),
             },
           });
-        if (url.pathname.includes("/contents/"))
-          return json({ content: Buffer.from(existing).toString("base64"), sha: originalSha, size: existing.length });
+        if (url.pathname.includes("/contents/")) {
+          const path = decodeURIComponent(url.pathname.split("/contents/")[1]);
+          const content = path === bookPath ? bookContent : path === projectPath ? projectContent : path === aboutPath ? aboutContent : existing;
+          return json({ content: Buffer.from(content).toString("base64"), sha: originalSha, size: content.length });
+        }
         if (url.pathname.endsWith("/git/blobs")) return json({ sha: "d".repeat(40) });
         if (url.pathname.endsWith("/git/trees")) return json({ sha: "e".repeat(40) });
         if (url.pathname.endsWith("/git/commits")) return json({ sha: "f".repeat(40) });
@@ -424,6 +441,300 @@ test("styled HTML and table images publish with referenced media while missing H
     assert.ok(!calls.some((call) => call.path.endsWith("/git/blobs") && call.method === "POST"));
   }
 });
+test("books and projects have separate authenticated libraries and private drafts", async () => {
+  const book = await create(document({ collection: "books", title: "Private book", category: "books-only/private" }));
+  const project = await create(document({ collection: "projects", title: "Private project" }));
+  for (const [kind, expected] of [
+    ["blog", sourcePath],
+    ["books", bookPath],
+    ["projects", projectPath],
+  ]) {
+    const response = await request(`/api/posts?collection=${kind}`);
+    assert.equal(response.status, 200);
+    assert.deepEqual(
+      (await response.json()).posts.map((item) => item.path),
+      [expected]
+    );
+    assert.equal((await mf.dispatchFetch(`${origin}/api/posts?collection=${kind}`)).status, 401);
+  }
+  const books = (await (await request("/api/drafts?collection=books")).json()).drafts;
+  const projects = (await (await request("/api/drafts?collection=projects")).json()).drafts;
+  assert.ok(books.some((item) => item.id === book.id));
+  assert.ok(!books.some((item) => item.id === project.id));
+  assert.ok(projects.some((item) => item.id === project.id));
+  assert.ok(!(await (await request("/api/drafts")).json()).drafts.some((item) => item.id === book.id));
+  assert.equal((await request("/api/posts?collection=pages")).status, 400);
+  assert.equal(
+    (
+      await request(`/api/drafts/${book.id}`, {
+        method: "PUT",
+        data: { version: book.version, document: { ...book.document, collection: "projects" } },
+      })
+    ).status,
+    400
+  );
+  const settings = await (await request("/api/site-settings")).json();
+  assert.equal(settings.usage["books-only/private"], undefined);
+});
+
+test("editing a Unicode book path preserves metadata and updates its review", async () => {
+  const opened = await request("/api/posts/open", { method: "POST", data: { path: bookPath } });
+  assert.equal(opened.status, 200);
+  const value = await opened.json();
+  assert.equal(value.document.collection, "books");
+  assert.equal(value.document.metadata.isbn, 7539967447);
+  const saved = await (
+    await request(`/api/drafts/${value.id}`, {
+      method: "PUT",
+      data: {
+        version: value.version,
+        document: {
+          ...value.document,
+          title: "Updated book",
+          body: "Updated review.",
+          metadata: { ...value.document.metadata, author: "Updated author", stars: 4.5 },
+        },
+      },
+    })
+  ).json();
+  calls = [];
+  const response = await request(`/api/drafts/${value.id}/publish`, { method: "POST", data: { version: saved.version } });
+  assert.equal(response.status, 200, await response.clone().text());
+  const result = await response.json();
+  assert.equal(result.path, bookPath);
+  assert.equal(result.draft.document.collection, "books");
+  const content = calls.find((call) => call.path.endsWith("/git/blobs") && call.data.encoding === "utf-8").data.content;
+  assert.match(content, /author: Updated author/);
+  assert.match(content, /stars: 4.5/);
+  assert.match(content, /custom_marker: keep-this/);
+  assert.match(content, /categories: parenting education/);
+  assert.ok(!/^date:|^category_override:|^legacy_categories:/m.test(content));
+  assert.match(content, /Updated review/);
+});
+
+test("new books publish without blog-only fields and reject invalid metadata", async () => {
+  const value = await create(
+    document({
+      collection: "books",
+      date: "",
+      category: "",
+      tags: [],
+      body: "",
+      description: "",
+      metadata: { author: "Book author", stars: 4, status: "Reading" },
+    })
+  );
+  calls = [];
+  const response = await request(`/api/drafts/${value.id}/publish`, { method: "POST", data: { version: value.version } });
+  assert.equal(response.status, 200, await response.clone().text());
+  assert.equal((await response.json()).path, `_books/${value.document.slug}.md`);
+  for (const metadata of [{ stars: 6 }, { finished: "2026-02-30" }, { buy_link: "javascript:alert(1)" }]) {
+    const invalid = await create(document({ collection: "books", metadata }));
+    calls = [];
+    const response = await request(`/api/drafts/${invalid.id}/publish`, { method: "POST", data: { version: invalid.version } });
+    assert.equal(response.status, 422);
+    assert.equal(calls.length, 0);
+  }
+});
+
+test("existing projects keep their URL and convert legacy sections into a freeform body", async () => {
+  const response = await request("/api/posts/open", { method: "POST", data: { path: projectPath } });
+  assert.equal(response.status, 200);
+  const value = await response.json();
+  assert.equal(value.document.slug, "2026-05-06-site-platform");
+  assert.match(value.document.body, /Original project body/);
+  assert.match(value.document.body, /Original highlight/);
+  assert.match(value.document.body, /Original lesson/);
+  assert.match(value.document.body, /\[Repository\]/);
+  assert.ok(!("highlights" in value.document.metadata));
+  assert.ok(!("lessons" in value.document.metadata));
+  assert.ok(!("links" in value.document.metadata));
+  const saved = await (
+    await request(`/api/drafts/${value.id}`, {
+      method: "PUT",
+      data: {
+        version: value.version,
+        document: {
+          ...value.document,
+          metadata: {
+            ...value.document.metadata,
+            role: "Lead developer",
+            stack: ["Astro", "Workers"],
+            highlights: ["New highlight"],
+            links: [{ label: "Demo", url: "https://example.com" }],
+          },
+        },
+      },
+    })
+  ).json();
+  calls = [];
+  const published = await request(`/api/drafts/${value.id}/publish`, { method: "POST", data: { version: saved.version } });
+  assert.equal(published.status, 200, await published.clone().text());
+  const result = await published.json();
+  assert.equal(result.path, projectPath);
+  assert.equal(result.draft.document.metadata.related_publications, false);
+  assert.deepEqual(result.draft.document.metadata.stack, ["Astro", "Workers"]);
+  assert.match(result.draft.document.body, /New highlight/);
+  assert.match(result.draft.document.body, /\[Demo\]\(https:\/\/example.com\/\)/);
+  assert.ok(!("highlights" in result.draft.document.metadata));
+  assert.ok(!("lessons" in result.draft.document.metadata));
+  assert.ok(!("links" in result.draft.document.metadata));
+  assert.equal(calls.find((call) => call.path.endsWith("/git/refs/heads/main")).data.force, false);
+});
+
+test("old private project drafts expose legacy content once and save as ordinary body text", async () => {
+  const original = document({
+    collection: "projects",
+    body: "## My own topic\n\n自由롭게 작성한 본문.",
+    metadata: {
+      highlights: ["A task", "<script>alert(1)</script>"],
+      lessons: ["A lesson"],
+      links: [{ label: "[Custom link]", url: "https://example.com/a)b" }],
+      role: "Developer",
+    },
+  });
+  const value = await create(original);
+  const loaded = await (await request(`/api/drafts/${value.id}`)).json();
+  assert.match(loaded.document.body, /## My own topic/);
+  assert.match(loaded.document.body, /A task/);
+  assert.match(loaded.document.body, /A lesson/);
+  assert.ok(loaded.document.body.includes("\\<script\\>alert(1)\\</script\\>"));
+  assert.ok(loaded.document.body.includes("[\\[Custom link\\]](<https://example.com/a)b>)"));
+  assert.equal(loaded.document.metadata.role, "Developer");
+  assert.ok(!("links" in loaded.document.metadata));
+  const saved = await request(`/api/drafts/${value.id}`, { method: "PUT", data: { version: value.version, document: loaded.document } });
+  assert.equal(saved.status, 200);
+  const reloaded = await (await request(`/api/drafts/${value.id}`)).json();
+  assert.equal(reloaded.document.body, loaded.document.body);
+  const published = await request(`/api/drafts/${value.id}/publish`, { method: "POST", data: { version: reloaded.version } });
+  assert.equal(published.status, 200, await published.clone().text());
+  const result = await published.json();
+  assert.ok(!("highlights" in result.draft.document.metadata));
+  assert.ok(!("lessons" in result.draft.document.metadata));
+  assert.ok(!("links" in result.draft.document.metadata));
+  assert.equal(result.draft.document.body.split("A task").length, 2);
+});
+
+test("project cover attachments publish atomically and unsafe paths and links are rejected", async () => {
+  const value = await create(document({ collection: "projects" }));
+  const image = await (
+    await request(`/api/drafts/${value.id}/media`, {
+      method: "POST",
+      headers: { "Content-Type": "image/png" },
+      body: Uint8Array.from([137, 80, 78, 71]),
+    })
+  ).json();
+  const saved = await (
+    await request(`/api/drafts/${value.id}`, {
+      method: "PUT",
+      data: { version: value.version, document: { ...value.document, metadata: { img: image.url } } },
+    })
+  ).json();
+  calls = [];
+  const published = await request(`/api/drafts/${value.id}/publish`, { method: "POST", data: { version: saved.version } });
+  assert.equal(published.status, 200, await published.clone().text());
+  const result = await published.json();
+  assert.match(result.draft.document.metadata.img, /^\/assets\/img\/projects\//);
+  const tree = calls.find((call) => call.path.endsWith("/git/trees") && call.method === "POST").data.tree;
+  assert.equal(tree.length, 2);
+  assert.ok(tree.some((file) => file.path.startsWith("_projects/")));
+  assert.ok(tree.some((file) => file.path.startsWith("astro/public/assets/img/projects/")));
+  const invalid = await create(document({ collection: "projects", metadata: { links: [{ label: "Unsafe", url: "javascript:alert(1)" }] } }));
+  calls = [];
+  assert.equal((await request(`/api/drafts/${invalid.id}/publish`, { method: "POST", data: { version: invalid.version } })).status, 422);
+  assert.equal(calls.length, 0);
+  for (const path of ["_books/../_pages/about.md", "_pages/privacy.md", "_projects/../../README.md"]) {
+    assert.equal((await request("/api/posts/open", { method: "POST", data: { path } })).status, 400);
+  }
+});
+
+test("about editing keeps one working copy, preserves home settings and publishes profile photos atomically", async () => {
+  const library = await (await request("/api/posts?collection=about")).json();
+  assert.deepEqual(
+    library.posts.map((post) => post.path),
+    [aboutPath]
+  );
+  for (const path of ["_pages/privacy.md", "_pages/../about.md", "_pages/about-copy.md"]) {
+    assert.equal((await request("/api/posts/open", { method: "POST", data: { path } })).status, 400);
+  }
+  assert.equal((await request("/api/drafts", { method: "POST", data: { document: document({ collection: "about" }) } })).status, 400);
+  const opened = await request("/api/posts/open", { method: "POST", data: { path: aboutPath } });
+  assert.equal(opened.status, 200);
+  let value = await opened.json();
+  const original = value.document;
+  assert.equal(original.collection, "about");
+  assert.equal(original.date, "");
+  assert.equal(original.slug, "about");
+  assert.equal((await (await request("/api/posts/open", { method: "POST", data: { path: aboutPath } })).json()).id, value.id);
+  const originalProfile = original.metadata.profile;
+  async function update(metadata) {
+    const response = await request(`/api/drafts/${value.id}`, {
+      method: "PUT",
+      data: { version: value.version, document: { ...original, body: "## Updated introduction\n\nA new profile body.", metadata } },
+    });
+    assert.equal(response.status, 200, await response.clone().text());
+    value = await response.json();
+  }
+  for (const metadata of [
+    { ...original.metadata, permalink: "/other/" },
+    { ...original.metadata, profile: [] },
+    { ...original.metadata, profile: { ...originalProfile, image: "javascript:alert(1)" } },
+    { ...original.metadata, profile: { ...originalProfile, image: "../private.png" } },
+  ]) {
+    await update(metadata);
+    calls = [];
+    assert.equal((await request(`/api/drafts/${value.id}/publish`, { method: "POST", data: { version: value.version } })).status, 422);
+    assert.equal(calls.length, 0);
+  }
+  for (const image of [`/api/media/${crypto.randomUUID()}`, "/assets/img/missing-profile.jpg"]) {
+    await update({ ...original.metadata, profile: { ...originalProfile, image } });
+    calls = [];
+    assert.equal((await request(`/api/drafts/${value.id}/publish`, { method: "POST", data: { version: value.version } })).status, 422);
+    assert.ok(!calls.some((call) => call.method !== "GET"));
+  }
+  const imageResponse = await request(`/api/drafts/${value.id}/media`, {
+    method: "POST",
+    headers: { "Content-Type": "image/png" },
+    body: Uint8Array.from([137, 80, 78, 71]),
+  });
+  assert.equal(imageResponse.status, 201);
+  const image = await imageResponse.json();
+  await update({
+    ...original.metadata,
+    subtitle: "New subtitle",
+    profile: { ...originalProfile, name: "New name", location: "Seoul", bio: "New short bio", image: image.url },
+  });
+  const stale = await request(`/api/drafts/${value.id}`, { method: "PUT", data: { version: value.version - 1, document: value.document } });
+  assert.equal(stale.status, 409);
+  const listing = await (await request("/api/drafts?collection=about")).json();
+  assert.deepEqual(
+    listing.drafts.map((draft) => draft.id),
+    [value.id]
+  );
+  calls = [];
+  const published = await request(`/api/drafts/${value.id}/publish`, { method: "POST", data: { version: value.version } });
+  assert.equal(published.status, 200, await published.clone().text());
+  const result = await published.json();
+  assert.equal(result.path, aboutPath);
+  assert.equal(result.draft.document.collection, "about");
+  const metadata = result.draft.document.metadata;
+  assert.match(metadata.profile.image, /^\/assets\/img\/about\//);
+  assert.equal(metadata.profile.name, "New name");
+  assert.equal(metadata.profile.align, originalProfile.align);
+  assert.equal(metadata.profile.image_circular, originalProfile.image_circular);
+  assert.equal(metadata.profile.more_info, originalProfile.more_info);
+  assert.deepEqual(metadata.useful_info, original.metadata.useful_info);
+  assert.deepEqual(metadata.latest_posts, original.metadata.latest_posts);
+  assert.equal(metadata.permalink, "/");
+  assert.equal(metadata.layout, "about");
+  assert.ok(!("date" in metadata));
+  const tree = calls.find((call) => call.path.endsWith("/git/trees") && call.method === "POST").data.tree;
+  assert.equal(tree.length, 2);
+  assert.ok(tree.some((file) => file.path === aboutPath));
+  assert.ok(tree.some((file) => file.path.startsWith("astro/public/assets/img/about/")));
+  assert.equal(calls.find((call) => call.path.endsWith("/git/refs/heads/main")).data.force, false);
+});
+
 test("logout invalidates the server session", async () => {
   const response = await request("/api/logout", { method: "POST" });
   assert.equal(response.status, 200);

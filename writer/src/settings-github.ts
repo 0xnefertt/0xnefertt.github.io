@@ -44,7 +44,7 @@ async function categoryUsage(env: Env, token: string, repo: Repository): Promise
     });
   }
   const drafts = await env.DB.prepare(
-    "SELECT json_extract(document, '$.category') AS category, count(*) AS total FROM drafts GROUP BY category LIMIT 2001"
+    "SELECT json_extract(document, '$.category') AS category, count(*) AS total FROM drafts WHERE COALESCE(json_extract(document, '$.collection'), 'blog') = 'blog' GROUP BY category LIMIT 2001"
   ).all<{ category: string; total: number }>();
   if (drafts.results.length > 2000) throw new HttpError(413, "초안 카테고리 목록이 너무 큽니다.");
   for (const row of drafts.results)

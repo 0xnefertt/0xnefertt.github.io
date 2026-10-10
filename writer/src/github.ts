@@ -1,4 +1,14 @@
-import { HttpError, isPostPath, parsePost, postPath, renderPost, type PostDocument } from "./model";
+import {
+  HttpError,
+  isContentPath,
+  documentCollection,
+  pathCollection,
+  parsePost,
+  postPath,
+  renderPost,
+  contentImages,
+  type PostDocument,
+} from "./model";
 import { format } from "prettier/standalone";
 import markdown from "prettier/plugins/markdown";
 import yaml from "prettier/plugins/yaml";
@@ -65,7 +75,7 @@ export async function repositoryTree(env: Env, token: string) {
 }
 
 export async function readPost(env: Env, token: string, path: string): Promise<PostDocument> {
-  if (!isPostPath(path)) throw new HttpError(400, "글 경로가 올바르지 않습니다.");
+  if (!isContentPath(path)) throw new HttpError(400, "콘텐츠 경로가 올바르지 않습니다.");
   const file = await github<{ content: string; sha: string; size: number }>(
     token,
     `/repos/${env.GITHUB_REPOSITORY}/contents/${path}?ref=${env.GITHUB_BRANCH}`
@@ -89,21 +99,29 @@ export async function publishPost(env: Env, token: string, doc: PostDocument, me
     throw new HttpError(409, "같은 주소의 글이 있거나 원본이 변경되었습니다. 새로 불러온 후 발행해 주세요.");
   if (!doc.sourcePath) {
     const route = path.split("/").at(-1)!;
-    if (repo.files.some((file) => file.path.startsWith("_posts/") && file.path.split("/").at(-1) === route)) {
+    if (
+      repo.files.some(
+        (file) => isContentPath(file.path) && pathCollection(file.path) === documentCollection(doc) && file.path.split("/").at(-1) === route
+      )
+    ) {
       throw new HttpError(409, "같은 날짜와 주소를 사용하는 글이 있습니다. 글 주소를 변경해 주세요.");
     }
   }
-  const mediaPaths = new Map(media.map((file) => [`/api/media/${file.id}`, `/assets/img/posts/${file.filename}`]));
+  const imageFolder = documentCollection(doc) === "blog" ? "posts" : documentCollection(doc);
+  const mediaPaths = new Map(media.map((file) => [`/api/media/${file.id}`, `/assets/img/${imageFolder}/${file.filename}`]));
   const content = await format(renderPost(doc, mediaPaths), { parser: "markdown", plugins: [markdown, yaml], printWidth: 150, trailingComma: "es5" });
   // Validate local references before writing anything to the public repository.
   const publicMedia = new Set(mediaPaths.values());
   const images = [
     ...Array.from(content.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g), (match) => match[1].trim().replace(/^<|>$/g, "").split(/\s/)[0]),
     ...Array.from(content.matchAll(/<img\b[^>]*\bsrc=["']([^"']+)["']/gi), (match) => match[1]),
+    ...contentImages(doc.metadata).map((image) => mediaPaths.get(image) ?? image),
   ];
-  for (const image of images) {
+  for (let image of images) {
     if (/^https?:\/\//i.test(image)) continue;
     if (/^(data:|blob:|\/api\/)/i.test(image)) throw new HttpError(422, "이미지는 첨부 버튼으로 추가해 주세요.");
+    if (image.startsWith("assets/")) image = "/" + image;
+    if (!image.includes("/")) image = "/assets/img/" + image;
     const imagePath = image.startsWith("/assets/")
       ? `astro/public${image}`
       : image.startsWith("/")
@@ -123,7 +141,7 @@ export async function publishPost(env: Env, token: string, doc: PostDocument, me
       method: "POST",
       body: JSON.stringify({ content: btoa(binary), encoding: "base64" }),
     });
-    entries.push({ path: `astro/public/assets/img/posts/${file.filename}`, mode: "100644", type: "blob", sha: blob.sha });
+    entries.push({ path: `astro/public/assets/img/${imageFolder}/${file.filename}`, mode: "100644", type: "blob", sha: blob.sha });
   }
   const blob = await github<{ sha: string }>(token, `${repo.root}/git/blobs`, {
     method: "POST",

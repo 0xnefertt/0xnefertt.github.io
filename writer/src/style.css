@@ -232,9 +232,48 @@ button[aria-pressed="true"] {
   flex-direction: column;
   gap: 0.4rem;
 }
+.settings-grid textarea {
+  min-height: 8rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 0.6rem 0.75rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
 .settings-grid small {
   color: var(--text-muted);
   font-size: 0.7rem;
+}
+
+#collection-fields {
+  border: 0;
+  margin: 0;
+  min-width: 0;
+}
+.workspace[data-collection="books"] .post-meta-row,
+.workspace[data-collection="projects"] .post-meta-row {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.workspace[data-collection="about"] {
+  display: block;
+  max-width: 1120px;
+  margin: auto;
+}
+.workspace[data-collection="about"] .library {
+  display: none;
+}
+.preview-cover.preview-avatar {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.preview-cover {
+  max-width: 100%;
+  max-height: 360px;
+  object-fit: contain;
 }
 .editor-toolbar {
   display: flex;

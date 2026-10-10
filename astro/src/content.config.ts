@@ -75,6 +75,9 @@ const pages = defineCollection({
         .optional(),
       profile: z
         .object({
+          name: z.string().optional(),
+          location: z.string().optional(),
+          bio: z.string().optional(),
           align: z.string().optional(),
           image: z.string().optional(),
           image_circular: z.coerce.boolean().optional(),

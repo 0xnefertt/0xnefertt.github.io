@@ -13,13 +13,15 @@ import {
   toBlogSummary,
 } from '../lib/blog';
 import { siteConfig } from '../lib/site';
+import { normalizeAssetPath } from '../lib/content';
 
 interface Props {
   post: CollectionEntry<'blog'>;
 }
 
 const { post } = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
+const outline = headings.filter((heading) => heading.depth === 2);
 const tags = normalizeTaxonomy(post.data.tags);
 const categories = getPostCategories(post);
 const categoryPaths = getPostCategoryPaths(post);
@@ -68,7 +70,11 @@ function toAbsoluteUrl(input: string): string {
 }
 
 const articleImageUrl = toAbsoluteUrl(post.data.thumbnail ?? siteConfig.defaultOgImage);
-const authorName = post.data.author ?? '0xnefertt';
+const aboutPage = (await getCollection('pages')).find((entry) => entry.id === 'about' || entry.filePath?.endsWith('/about.md'));
+const profile = aboutPage?.data.profile;
+const ownerPost = !post.data.author || post.data.author === '0xnefertt' || post.data.author === profile?.name;
+const authorName = ownerPost ? profile?.name ?? '0xnefertt' : post.data.author;
+const authorImage = normalizeAssetPath(profile?.image);
 const authorUrl = new URL('/', siteConfig.siteUrl).toString();
 const publishedIso = post.data.date?.toISOString();
 const modifiedIso = (post.data.last_updated ?? post.data.date)?.toISOString();
@@ -122,23 +128,33 @@ const showMultiplexAd = siteConfig.adsensePublisherId.length > 0 && !redirectTar
   <script slot="head" type="application/ld+json" set:html={articleJsonLd}></script>
 
   <article class="post-header">
+    <nav class="post-breadcrumbs" aria-label="글 카테고리">
+      <a href="/blog/" data-i18n-key="blog_all">전체 글</a>
+      {categoryPaths[0] && <>{' / '}<a href={categoryPaths[0].href}>{categoryPaths[0].label}</a></>}
+    </nav>
     <h1>{post.data.title}</h1>
-    <p>
-      {formatPostDate(post.data.date)}
-      {' · '}<a href="/" rel="author">{authorName}</a>
+    <p class="post-byline">
+      {ownerPost && authorImage && <img class="post-author-avatar" src={authorImage} alt="" width="28" height="28" />}
+      <a href="/#about" rel="author">{authorName}</a>
+      <time datetime={post.data.date?.toISOString()}>{formatPostDate(post.data.date)}</time>
       {post.data.external_source ? ` · ${post.data.external_source}` : ''}
     </p>
 
-    {(tags.length > 0 || categoryPaths.length > 0) && (
+    {tags.length > 0 && (
       <div class="tags">
         {tags.map((tag) => <span>#{tag}</span>)}
-        {categoryPaths.map((categoryPath) => <a href={categoryPath.href}>{categoryPath.label}</a>)}
       </div>
     )}
   </article>
 
   <div class="post-detail-layout">
     <div class="post-main">
+      {outline.length > 1 && (
+        <details class="post-outline">
+          <summary>목차 · {outline.length}개 항목</summary>
+          <ul>{outline.map((heading) => <li><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ul>
+        </details>
+      )}
       {redirectTarget && (
         <p class="notice">
           This post redirects to <a href={redirectTarget}>{redirectTarget}</a>.
@@ -147,6 +163,12 @@ const showMultiplexAd = siteConfig.adsensePublisherId.length > 0 && !redirectTar
 
       <div class="post-body markdown-body">
         <Content />
+      </div>
+
+      <div class="post-reader-actions">
+        <a href="/blog/">글 목록으로</a>
+        <button type="button" data-copy-post-link>링크 복사</button>
+        <span class="post-copy-status" data-copy-post-status role="status"></span>
       </div>
 
       {(previousPost || nextPost) && (
@@ -204,6 +226,20 @@ const showMultiplexAd = siteConfig.adsensePublisherId.length > 0 && !redirectTar
       </aside>
     )}
   </div>
+
+  <script>
+    const copyButton = document.querySelector<HTMLButtonElement>('[data-copy-post-link]');
+    const copyStatus = document.querySelector<HTMLElement>('[data-copy-post-status]');
+    copyButton?.addEventListener('click', async () => {
+      if (!copyStatus) return;
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        copyStatus.textContent = '링크를 복사했습니다.';
+      } catch {
+        copyStatus.textContent = '주소창의 링크를 복사해 주세요.';
+      }
+    });
+  </script>
 
   {showMultiplexAd && (
     <section class="post-ad-card post-ad-card--multiplex" aria-label="Advertisement">

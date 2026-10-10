@@ -1,6 +1,8 @@
 import DOMPurify from "dompurify";
 import { marked } from "marked";
-import type { Draft, PostDocument } from "./model";
+import { documentCollection, profileMetadata, renderPost, type Draft, type PostDocument, type ContentCollection } from "./model";
+import { collectionEditor } from "./collection-editor";
+import { safeImage } from "./rich-content";
 import { siteManager } from "./site-manager";
 import { richEditor } from "./rich-editor";
 import "../../astro/public/assets/styles/global.css";
@@ -41,6 +43,8 @@ let timer: ReturnType<typeof setTimeout>;
 let drafts: { id: string; title: string; sourcePath: string | null; updated: string }[] = [];
 let posts: { path: string; sha: string }[] | null = null;
 let showingPosts = false;
+let selectedCollection: ContentCollection = "blog";
+const contentLabels = { blog: "글", books: "책", projects: "프로젝트", about: "소개" };
 
 class ApiError extends Error {
   constructor(
@@ -62,7 +66,7 @@ async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (!result.ok) throw new ApiError(data.error ?? "요청을 처리하지 못했습니다.", result.status);
   return data as T;
 }
-const manager = siteManager(api, leave);
+const manager = siteManager(api, leave, selectCollection);
 const composer = richEditor({
   onChange: scheduleSave,
   onComposition: (active) => {
@@ -73,6 +77,95 @@ const composer = richEditor({
   imageSrc,
   report,
 });
+const details = collectionEditor(scheduleSave);
+
+function configureCollection(kind: ContentCollection) {
+  const label = contentLabels[kind];
+  const object = kind === "projects" || kind === "about" ? `${label}를` : `${label}을`;
+  element("workspace").dataset.collection = kind;
+  element("new-post").textContent = kind === "books" ? "＋ 새 책 기록" : kind === "projects" ? "＋ 새 프로젝트 작성" : "＋ 새 글 쓰기";
+  element<HTMLButtonElement>("new-post").disabled = kind === "blog" && !category.value;
+  element("library-search-label").textContent = `${label} 찾기`;
+  element("post-tab").textContent = `기존 ${label}`;
+  element("empty-kind").textContent = kind.toUpperCase();
+  element("empty-heading").textContent = `${object} 선택하세요`;
+  element("empty-description").textContent = `새 ${object} 작성하거나 목록에서 수정할 항목을 선택하세요.`;
+  element("title-label").textContent = kind === "books" ? "책 제목" : kind === "projects" ? "프로젝트 이름" : "게시글 제목";
+  element("blog-category-field").hidden = kind !== "blog";
+  element("blog-date-field").hidden = kind !== "blog";
+  element("title-row").hidden = kind === "about";
+  element("extra-settings").hidden = kind === "about";
+  element("description-label").textContent = kind === "about" ? "검색 결과에 표시할 소개" : "한 줄 요약";
+  element("cover-attach").textContent = kind === "about" ? "프로필 사진 첨부" : "표지 이미지 첨부";
+  element("extra-settings-heading").textContent = kind === "blog" ? "추가 정보 · 태그, 날짜, 주소" : "추가 정보 · 태그, 주소";
+  description.placeholder =
+    kind === "books"
+      ? "독서 기록을 짧게 요약하세요 (선택)"
+      : kind === "projects"
+        ? "프로젝트를 짧게 소개하세요"
+        : kind === "about"
+          ? "블로그와 작성자를 짧게 소개하세요"
+          : "글의 내용을 짧게 요약하세요";
+  element("collection-settings").hidden = kind === "blog";
+  element("collection-settings-heading").textContent =
+    kind === "books"
+      ? "도서 정보 · 저자, 표지, 독서 상태"
+      : kind === "about"
+        ? "프로필 · 이름, 소개, 사진"
+        : "프로젝트 정보 · 이미지, 분류 등 (선택)";
+  element<HTMLDetailsElement>("collection-settings").open = kind !== "projects";
+  element("publish-heading").textContent = kind === "about" ? "소개와 프로필을 반영할까요?" : `이 ${object} 발행할까요?`;
+  element("publish").textContent = kind === "about" ? "소개 반영하기" : "발행하기";
+  element("library-note").textContent = `초안은 자동으로 비공개 저장됩니다. 발행하면 ${
+    kind === "books" ? "책장" : kind === "projects" ? "프로젝트 페이지" : "블로그"
+  }에 공개됩니다.`;
+}
+async function selectCollection(kind: ContentCollection): Promise<boolean> {
+  if (switching) return false;
+  if (selectedCollection === kind) return true;
+  switching = true;
+  const menus = ["posts", "books", "projects", "about", "categories", "favorites"].map((item) => element<HTMLButtonElement>(`manage-${item}`));
+  menus.forEach((button) => {
+    button.disabled = true;
+  });
+  try {
+    const result = await api<{ drafts: typeof drafts }>(`/api/drafts?collection=${kind}`);
+    const existingAbout = result.drafts.find((draft) => draft.sourcePath === "_pages/about.md");
+    const aboutDraft =
+      kind === "about"
+        ? existingAbout
+          ? await api<Draft>(`/api/drafts/${existingAbout.id}`)
+          : await api<Draft>("/api/posts/open", { method: "POST", body: JSON.stringify({ path: "_pages/about.md" }) })
+        : null;
+    selectedCollection = kind;
+    current = null;
+    dirty = false;
+    conflict = false;
+    clearTimeout(timer);
+    drafts = result.drafts;
+    posts = null;
+    showingPosts = false;
+    element<HTMLInputElement>("search").value = "";
+    element("draft-tab").setAttribute("aria-pressed", "true");
+    element("post-tab").setAttribute("aria-pressed", "false");
+    element("editor").hidden = true;
+    element("empty").hidden = false;
+    configureCollection(kind);
+    details.load(kind, {});
+    if (aboutDraft) showDraft(aboutDraft);
+    renderList();
+    status(aboutDraft ? "모든 변경사항 저장됨" : "연결됨");
+    return true;
+  } catch (error) {
+    report(error);
+    return false;
+  } finally {
+    switching = false;
+    menus.forEach((button) => {
+      button.disabled = false;
+    });
+  }
+}
 async function imageSrc(source: string): Promise<string> {
   if (source.startsWith("/assets/")) return `https://0xnefertt.github.io${source}`;
   if (!source.startsWith("/api/media/")) return source;
@@ -101,16 +194,18 @@ function notice(message: string) {
 function report(error: unknown) {
   const message = error instanceof Error ? error.message : "요청을 처리하지 못했습니다.";
   if (error instanceof ApiError && error.status === 409) conflict = true;
-  status("저장 확인 필요");
+  status(element("editor").hidden ? message : "저장 확인 필요");
   notice(message);
 }
 function read(): PostDocument {
   return {
     ...current!.document,
+    collection: selectedCollection,
+    metadata: details.read(current!.document.metadata),
     title: title.value,
     description: description.value,
     body: composer.getBody(),
-    category: category.value,
+    category: selectedCollection === "blog" ? category.value : "",
     date: date.value,
     slug: slug.value,
     tags: tags.value
@@ -122,7 +217,9 @@ function read(): PostDocument {
 function setLocked(value: boolean) {
   locked = value;
   composer.setLocked(value);
-  for (const id of ["save", "publish", "attach", "source-attach", "new-post", "logout"]) element<HTMLButtonElement>(id).disabled = value;
+  details.setLocked(value);
+  for (const id of ["save", "publish", "attach", "source-attach", "cover-attach", "new-post", "logout"])
+    element<HTMLButtonElement>(id).disabled = value;
   for (const field of [title, description, body, category, tags, date, slug]) field.disabled = value;
   if (current?.document.sourcePath) slug.disabled = true;
   if (current?.document.sourcePath) {
@@ -135,13 +232,17 @@ function showDraft(value: Draft) {
   dirty = false;
   conflict = false;
   const doc = value.document;
+  selectedCollection = documentCollection(doc);
+  configureCollection(selectedCollection);
+  details.load(selectedCollection, doc.metadata);
   title.value = doc.title;
   description.value = doc.description;
   composer.load(doc.body);
   date.value = doc.date;
   tags.value = doc.tags.join(", ");
   slug.value = doc.slug;
-  if (![...category.options].some((item) => item.value === doc.category)) category.add(new Option(doc.category, doc.category));
+  if (selectedCollection === "blog" && ![...category.options].some((item) => item.value === doc.category))
+    category.add(new Option(doc.category, doc.category));
   category.value = doc.category;
   slug.disabled = Boolean(doc.sourcePath);
   date.disabled = Boolean(doc.sourcePath);
@@ -233,7 +334,8 @@ title.addEventListener("blur", () => {
         .replace(/[^a-z0-9\s-]/g, "")
         .trim()
         .replace(/\s+/g, "-")
-        .replace(/-+/g, "-") || `post-${current!.id.slice(0, 8)}`;
+        .replace(/-+/g, "-") ||
+      `${selectedCollection === "books" ? "book" : selectedCollection === "projects" ? "project" : "post"}-${current!.id.slice(0, 8)}`;
     scheduleSave();
   }
 });
@@ -254,7 +356,42 @@ function updatePreview() {
   element("word-count").textContent = `${composer.characters().toLocaleString()}자`;
   if (element("preview-panel").hidden) return;
   element("preview-title").textContent = title.value || "제목 없는 글";
-  element("preview-date").textContent = `${date.value} · 0xnefertt`;
+  const metadata = details.read(current.document.metadata);
+  const profile = profileMetadata(metadata);
+  if (selectedCollection === "about") element("preview-title").textContent = String(profile.name ?? "0xnefertt");
+  element("preview-date").textContent =
+    selectedCollection === "blog"
+      ? `${date.value} · 0xnefertt`
+      : selectedCollection === "books"
+        ? [metadata.author, metadata.status, metadata.stars !== undefined ? `${metadata.stars}/5` : ""].filter(Boolean).join(" · ")
+        : selectedCollection === "about"
+          ? String(profile.location ?? "Vancouver, Canada")
+          : [metadata.category, metadata.status, metadata.period, metadata.role].filter(Boolean).join(" · ");
+  const cover = element<HTMLImageElement>("preview-cover");
+  cover.alt = selectedCollection === "about" ? "프로필 사진 미리보기" : "표지 미리보기";
+  let image = String(selectedCollection === "about" ? profile.image ?? "" : metadata[selectedCollection === "books" ? "cover" : "img"] ?? "");
+  if (image.startsWith("assets/")) image = "/" + image;
+  if (image && !image.includes("/")) image = "/assets/img/" + image;
+  cover.hidden = selectedCollection === "blog" || !safeImage(image);
+  cover.classList.toggle("preview-avatar", selectedCollection === "about");
+  cover.dataset.source = image;
+  if (!cover.hidden)
+    void imageSrc(image)
+      .then((url) => {
+        if (cover.dataset.source === image) cover.src = url;
+      })
+      .catch(() => {
+        cover.hidden = true;
+      });
+  for (const [id, value] of [
+    ["preview-bio", profile.bio ?? "개발하며 배운 것, 캐나다에서의 일상, 관심 있는 것들을 기록합니다."],
+    ["preview-subtitle", metadata.subtitle ?? ""],
+  ]) {
+    element(id as string).hidden = selectedCollection !== "about";
+    element(id as string).textContent = String(value);
+  }
+  element("preview-profile-info").hidden = selectedCollection !== "about";
+  element("preview-profile-info").innerHTML = selectedCollection === "about" ? DOMPurify.sanitize(String(profile.more_info ?? "")) : "";
   element("preview-tags").replaceChildren(
     ...tags.value
       .split(",")
@@ -297,27 +434,18 @@ element("save").addEventListener("click", () => void save().catch(() => {}));
 element("download").addEventListener("click", () => {
   if (!current) return;
   const doc = read();
-  const content = `---\n${Object.entries({
-    title: doc.title,
-    date: doc.date,
-    description: doc.description,
-    categories: [doc.category],
-    tags: doc.tags,
-    draft: true,
-  })
-    .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
-    .join("\n")}\n---\n\n${doc.body}\n`;
+  const content = renderPost(doc, new Map(), true);
   const url = URL.createObjectURL(new Blob([content], { type: "text/markdown;charset=utf-8" }));
   const link = document.createElement("a");
   link.href = url;
-  link.download = `${doc.date}-${doc.slug || "draft"}.md`;
+  link.download = `${selectedCollection === "blog" ? doc.date + "-" : ""}${doc.slug || "draft"}.md`;
   link.click();
   URL.revokeObjectURL(url);
   notice("본문을 내려받았습니다. 첨부 이미지는 비공개 초안에 보관됩니다.");
 });
 
 async function refreshDrafts() {
-  drafts = (await api<{ drafts: typeof drafts }>("/api/drafts")).drafts;
+  drafts = (await api<{ drafts: typeof drafts }>(`/api/drafts?collection=${selectedCollection}`)).drafts;
   renderList();
 }
 function renderList() {
@@ -391,9 +519,9 @@ element("post-tab").addEventListener("click", () => {
   element("post-tab").setAttribute("aria-pressed", "true");
   void (async () => {
     if (!posts) {
-      status("기존 글 불러오는 중…");
-      posts = (await api<{ posts: NonNullable<typeof posts> }>("/api/posts")).posts;
-      status("기존 글을 불러왔습니다");
+      status(`기존 ${contentLabels[selectedCollection]} 불러오는 중…`);
+      posts = (await api<{ posts: NonNullable<typeof posts> }>(`/api/posts?collection=${selectedCollection}`)).posts;
+      status(`기존 ${selectedCollection === "projects" ? "프로젝트를" : contentLabels[selectedCollection] + "을"} 불러왔습니다`);
     }
     renderList();
   })().catch(report);
@@ -403,7 +531,7 @@ element("new-post").addEventListener(
   () =>
     void (async () => {
       if (switching) return;
-      if (!category.value) {
+      if (selectedCollection === "blog" && !category.value) {
         status("카테고리를 추가한 뒤 새 글을 작성해 주세요.");
         return;
       }
@@ -413,11 +541,12 @@ element("new-post").addEventListener(
         const today = new Date();
         const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
         const document: PostDocument = {
+          collection: selectedCollection,
           title: "",
           description: "",
           date,
           slug: "",
-          category: category.value,
+          category: selectedCollection === "blog" ? category.value : "",
           tags: [],
           body: "",
           metadata: {},
@@ -437,7 +566,7 @@ element("new-post").addEventListener(
     })().catch(report)
 );
 
-async function attach(file: File) {
+async function attach(file: File, target: "body" | "cover" | "img" | "profile.image" = "body") {
   if (!current || locked) return;
   if (!/^image\/(png|jpeg|webp|gif)$/.test(file.type) || file.size > 1024 * 1024)
     throw new Error("1MB 이하의 PNG, JPG, WebP, GIF 이미지를 선택해 주세요.");
@@ -451,7 +580,8 @@ async function attach(file: File) {
       body: file,
     });
     const alt = file.name.replace(/[\[\]\\\n]/g, "");
-    composer.insertImage(result.url, alt);
+    if (target === "body") composer.insertImage(result.url, alt);
+    else details.setImage(target, result.url);
     scheduleSave();
   } finally {
     setLocked(false);
@@ -459,6 +589,13 @@ async function attach(file: File) {
 }
 element("attach").addEventListener("click", () => element<HTMLInputElement>("image-file").click());
 element("source-attach").addEventListener("click", () => element<HTMLInputElement>("image-file").click());
+element("cover-attach").addEventListener("click", () => element<HTMLInputElement>("cover-image-file").click());
+element("cover-image-file").addEventListener("change", (event) => {
+  const input = event.target as HTMLInputElement;
+  if (input.files?.[0])
+    void attach(input.files[0], selectedCollection === "books" ? "cover" : selectedCollection === "about" ? "profile.image" : "img").catch(report);
+  input.value = "";
+});
 element("image-file").addEventListener("change", (event) => {
   const input = event.target as HTMLInputElement;
   if (input.files?.[0]) void attach(input.files[0]).catch(report);
@@ -496,7 +633,11 @@ dialog.addEventListener("close", () => {
       });
       showDraft(result.draft);
       posts = null;
-      notice("글을 발행했습니다. 블로그에 반영되는 중입니다. ");
+      notice(
+        selectedCollection === "about"
+          ? "소개와 프로필을 발행했습니다. 블로그에 반영되는 중입니다. "
+          : "글을 발행했습니다. 블로그에 반영되는 중입니다. "
+      );
       const link = document.createElement("a");
       link.href = result.workflowUrl;
       link.target = "_blank";

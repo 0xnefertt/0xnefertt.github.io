@@ -83,12 +83,11 @@
 
   function createPostItem(post) {
     const item = document.createElement('li');
-    const previewImages = Array.isArray(post.gallery) ? post.gallery.slice(0, 6) : post.thumbnail ? [post.thumbnail] : [];
+    const previewImages = Array.isArray(post.gallery) ? post.gallery.slice(0, 1) : post.thumbnail ? [post.thumbnail] : [];
     item.className = previewImages.length > 0 ? 'post-item post-item--with-media' : 'post-item';
 
     if (previewImages.length > 0) {
-      const visibleImages = previewImages.slice(0, 2);
-      const hoverImages = previewImages.slice(2, 5);
+      const visibleImages = previewImages;
       const mediaLink = document.createElement('a');
       mediaLink.className = 'post-card-media';
       mediaLink.href = post.href;
@@ -112,22 +111,6 @@
 
       mediaLink.appendChild(preview);
 
-      if (hoverImages.length > 0) {
-        const gallery = document.createElement('span');
-        gallery.className = 'post-card-gallery';
-        gallery.setAttribute('aria-hidden', 'true');
-
-        for (const image of hoverImages) {
-          const galleryImage = document.createElement('img');
-          galleryImage.src = image;
-          galleryImage.alt = '';
-          galleryImage.loading = 'lazy';
-          gallery.appendChild(galleryImage);
-        }
-
-        mediaLink.appendChild(gallery);
-      }
-
       item.appendChild(mediaLink);
     }
 
@@ -149,44 +132,26 @@
     const meta = document.createElement('p');
     meta.className = 'post-meta';
     meta.textContent = `${post.dateLabel} · ${post.readMinutes} min read${post.externalSource ? ` · ${post.externalSource}` : ''}`;
-    content.appendChild(meta);
 
     if (post.description) {
       const description = document.createElement('p');
+      description.className = 'post-excerpt';
       description.textContent = post.description;
       content.appendChild(description);
     }
 
-    const tags = Array.isArray(post.tags) ? post.tags : [];
+    content.appendChild(meta);
     const categoryPaths = Array.isArray(post.categoryPaths) ? post.categoryPaths : [];
-    const categories = Array.isArray(post.categories) ? post.categories : [];
-
-    if (tags.length > 0 || categoryPaths.length > 0 || categories.length > 0) {
-      const tagContainer = document.createElement('div');
-      tagContainer.className = 'tags';
-
-      for (const tag of tags) {
-        const tagNode = document.createElement('span');
-        tagNode.textContent = `#${tag}`;
-        tagContainer.appendChild(tagNode);
+    if (categoryPaths.length > 0) {
+      const categoryContainer = document.createElement('div');
+      categoryContainer.className = 'post-card-categories';
+      for (const categoryPath of categoryPaths) {
+        const categoryNode = document.createElement('a');
+        categoryNode.href = categoryPath.href;
+        categoryNode.textContent = categoryPath.label;
+        categoryContainer.appendChild(categoryNode);
       }
-
-      if (categoryPaths.length > 0) {
-        for (const categoryPath of categoryPaths) {
-          const categoryNode = document.createElement('a');
-          categoryNode.href = categoryPath.href;
-          categoryNode.textContent = categoryPath.label;
-          tagContainer.appendChild(categoryNode);
-        }
-      } else {
-        for (const category of categories) {
-          const categoryNode = document.createElement('span');
-          categoryNode.textContent = category;
-          tagContainer.appendChild(categoryNode);
-        }
-      }
-
-      content.appendChild(tagContainer);
+      content.appendChild(categoryContainer);
     }
 
     item.appendChild(content);
