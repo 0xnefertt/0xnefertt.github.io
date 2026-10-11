@@ -27,7 +27,7 @@ const recommendations = getBookRecommendations(entry, books, posts, locale);
 const otherReviews = recommendations.length === 0 ? getOtherBookReviews(entry, books, locale) : [];
 const sidebarReviews = recommendations.length > 0 ? recommendations : otherReviews;
 const profile = pages.find((page) => page.filePath?.endsWith('/about.md') && contentLocale(page) === locale)?.data.profile;
-const reviewer = profile?.name ?? '0xnefertt';
+const reviewer = profile?.name ?? siteConfig.title;
 const avatar = normalizeAssetPath(profile?.image);
 const canonicalUrl = new URL(getBookRoute(entry).href, siteConfig.siteUrl).toString();
 const hasSidebar = outline.length > 0 || sidebarReviews.length > 0;

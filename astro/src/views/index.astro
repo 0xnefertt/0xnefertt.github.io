@@ -10,6 +10,7 @@ import BlogCategoryFilter from '../components/BlogCategoryFilter.astro';
 import { getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from '../lib/blog';
 import { normalizeAssetPath } from '../lib/content';
 import { siteConfig } from '../lib/site';
+import { siteSettings } from '../lib/settings';
 
 const pages = await getCollection('pages');
 const aboutPage = pages.find((entry) => entry.filePath?.endsWith('/about.md') && contentLocale(entry) === locale);
@@ -19,14 +20,14 @@ if (!aboutPage) {
 }
 
 const allPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')), locale);
-const latestLimit = aboutPage.data.latest_posts?.limit ?? 5;
+const latestLimit = siteSettings.latestPostsLimit;
 const latestPosts = allPosts.slice(0, latestLimit).map(toBlogSummary);
-const categoryTree = listBlogCategoryTree(allPosts);
+const categoryTree = listBlogCategoryTree(allPosts, locale);
 const profile = aboutPage.data.profile;
 const profileImage = normalizeAssetPath(profile?.image);
 ---
 
-<Layout title={localeText(locale, 'Blog', '블로그')} description={aboutPage.data.description ?? siteConfig.description} currentPath={l('/')} mainClass="home-content">
+<Layout title={localeText(locale, 'Blog', '블로그')} description={localeText(locale, siteConfig.blogDescription, siteConfig.blogDescriptionKo)} currentPath={l('/')} mainClass="home-content">
   <header class="blog-masthead">
     <p class="blog-masthead-label">{localeText(locale, 'A space to write, learn, and share', '기록하고, 배우고, 나누는 공간')}</p>
     <h1>{siteConfig.blogName}</h1>
@@ -50,13 +51,13 @@ const profileImage = normalizeAssetPath(profile?.image);
   <div class="home-intro">
     <section class="home-profile" id="about" aria-labelledby="profile-name">
       <div class="home-profile-heading">
-        {profileImage && <img class="profile-avatar" src={profileImage} alt={`${profile?.name ?? '0xnefertt'} 프로필`} loading="lazy" width="64" height="64" />}
+        {profileImage && <img class="profile-avatar" src={profileImage} alt={`${profile?.name ?? siteConfig.title} 프로필`} loading="lazy" width="64" height="64" />}
         <div>
-          <h2 id="profile-name">{profile?.name ?? '0xnefertt'}</h2>
-          <p>{profile?.location ?? 'Vancouver, Canada'}</p>
+          <h2 id="profile-name">{profile?.name ?? siteConfig.title}</h2>
+          {profile?.location && <p>{profile.location}</p>}
         </div>
       </div>
-      <p class="home-profile-bio">{profile?.bio ?? localeText(locale, 'Notes on development, life in Canada, and things I am learning.', '개발하며 배운 것, 캐나다에서의 일상, 관심 있는 것들을 기록합니다.')}</p>
+      {profile?.bio && <p class="home-profile-bio">{profile.bio}</p>}
       <a class="profile-description" href={l('/about/')}>{localeText(locale, 'More about me', '소개 더보기')} &rarr;</a>
     </section>
   </div>

@@ -473,14 +473,14 @@ function updatePreview() {
   element("preview-title").textContent = title.value || `제목 없는 ${contentLabels[selectedCollection]}`;
   const metadata = details.read(current.document.metadata);
   const profile = profileMetadata(metadata);
-  if (selectedCollection === "about") element("preview-title").textContent = String(profile.name ?? "0xnefertt");
+  if (selectedCollection === "about") element("preview-title").textContent = String(profile.name ?? manager.siteTitle());
   element("preview-date").textContent =
     selectedCollection === "blog"
-      ? `${date.value} · 0xnefertt`
+      ? date.value
       : selectedCollection === "books"
-        ? `${metadata.date || "발행 시 날짜가 저장됩니다."} · 0xnefertt`
+        ? String(metadata.date || "발행 시 날짜가 저장됩니다.")
         : selectedCollection === "about"
-          ? String(profile.location ?? "Vancouver, Canada")
+          ? String(profile.location ?? "")
           : [metadata.category, metadata.status, metadata.period, metadata.role].filter(Boolean).join(" · ");
   const cover = element<HTMLImageElement>("preview-cover");
   cover.alt = selectedCollection === "about" ? "프로필 사진 미리보기" : "표지 미리보기";
@@ -489,6 +489,7 @@ function updatePreview() {
   if (image && !image.includes("/")) image = "/assets/img/" + image;
   cover.hidden = selectedCollection === "blog" || !safeImage(image);
   cover.classList.toggle("preview-avatar", selectedCollection === "about");
+  cover.classList.toggle("preview-avatar--square", selectedCollection === "about" && profile.image_circular !== true);
   cover.dataset.source = image;
   if (!cover.hidden)
     void imageSrc(image)
@@ -957,7 +958,7 @@ async function start() {
     const login = new URLSearchParams(location.search).get("login");
     const message = element("login-message");
     if (login) {
-      message.textContent = login === "owner-only" ? "0xnefertt 본인 계정으로 로그인해 주세요." : "로그인을 완료하지 못했습니다. 다시 시도해 주세요.";
+      message.textContent = login === "owner-only" ? "사이트 소유자 계정으로 로그인해 주세요." : "로그인을 완료하지 못했습니다. 다시 시도해 주세요.";
       history.replaceState(null, "", location.pathname);
     }
     if (!(error instanceof ApiError) || error.status !== 401) {

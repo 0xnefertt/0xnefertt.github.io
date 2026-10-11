@@ -3,6 +3,7 @@ import { getCollection, render } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
 import { contentLocale, localeFromPath, localizedPath, localeText } from '../lib/locale';
 import { normalizeAssetPath } from '../lib/content';
+import { siteConfig } from '../lib/site';
 
 const locale = localeFromPath(Astro.url.pathname);
 const about = (await getCollection('pages')).find((entry) => entry.filePath?.endsWith('/about.md') && contentLocale(entry) === locale);
@@ -10,7 +11,7 @@ if (!about) throw new Error(`Missing ${locale} About document`);
 const { Content } = await render(about);
 const profile = about.data.profile;
 const image = normalizeAssetPath(profile?.image);
-const name = profile?.name ?? '0xnefertt';
+const name = profile?.name ?? siteConfig.title;
 ---
 
 <Layout title={localeText(locale, 'About', '소개')} description={about.data.description} currentPath={localizedPath('/about/', locale)} mainClass="about-content" disableAds>

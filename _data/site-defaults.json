@@ -1,0 +1,26 @@
+{
+  "blogDescription": "Learning notes and practical research on software development, life in Canada, careers, and finance.",
+  "blogDescriptionKo": "소프트웨어 개발, 캐나다 생활, 커리어와 금융에 관한 학습 기록과 실용적인 리서치",
+  "blogName": "0xnefertt's Blog",
+  "defaultOgImage": "/assets/img/prof_pic.jpg",
+  "email": "adrwss2@gmail.com",
+  "githubUrl": "https://github.com/0xnefertt",
+  "latestPostsLimit": 5,
+  "privacy": {
+    "body": "This is 0xnefertt's personal blog. Here is how browsing data and cookies may be used.\n\n## Cookies, analytics, and ads\n\nThis site saves your theme preference in your browser. When enabled, Google Analytics measures page visits and interactions, including browser, device, and approximate location information. Google AdSense and other advertising providers may use cookies to show ads based on visits to this and other websites. See [Google's privacy policy](https://policies.google.com/privacy) and [Google's advertising partners](https://support.google.com/adsense/answer/9012903) for details.\n\nYou can manage or delete cookies through your browser, opt out of personalized ads through [Google Ads Settings](https://adssettings.google.com/) or [AboutAds](https://optout.aboutads.info/), and use the [Google Analytics opt-out add-on](https://tools.google.com/dlpage/gaoptout). Where a consent message is shown, you can manage your choices there.\n\n## External services\n\nGitHub Pages hosts the blog. GitHub/Giscus handles comments when enabled, and Open-Meteo and Frankfurter supply weather and exchange rates. Your browser may send these services technical information, such as your IP address, when making requests. Their own privacy policies apply. The owner's writing area uses GitHub sign-in and Cloudflare to store private drafts and login sessions; drafts become public when published.\n\n## Questions\n\nIf you email me, I use your address and message to respond.",
+    "bodyKo": "0xnefertt의 개인 블로그에서 방문 정보와 쿠키를 사용하는 방법을 안내합니다.\n\n## 쿠키, 방문 통계와 광고\n\n이 사이트는 브라우저에 화면 테마 설정을 저장합니다. 활성화된 경우 Google Analytics로 페이지 방문과 상호작용을 측정하며, 브라우저·기기·대략적인 위치 정보가 포함될 수 있습니다. Google AdSense와 광고 제공업체는 이 사이트와 다른 사이트의 방문 기록에 따라 광고를 표시하기 위해 쿠키를 사용할 수 있습니다. 자세한 내용은 [Google 개인정보처리방침](https://policies.google.com/privacy)과 [Google 광고 파트너 안내](https://support.google.com/adsense/answer/9012903)를 확인하세요.\n\n브라우저에서 쿠키를 관리하거나 삭제할 수 있습니다. [Google 광고 설정](https://adssettings.google.com/), [AboutAds](https://optout.aboutads.info/), [Google Analytics 차단 부가기능](https://tools.google.com/dlpage/gaoptout)에서도 관련 설정을 관리할 수 있습니다. 동의 안내가 표시되는 경우 해당 안내에서 선택을 변경할 수 있습니다.\n\n## 외부 서비스\n\nGitHub Pages가 블로그를 호스팅합니다. 댓글 기능이 활성화된 경우 GitHub와 Giscus를 사용하며, 날씨와 환율은 Open-Meteo와 Frankfurter에서 제공합니다. 요청 과정에서 IP 주소 등의 기술 정보가 해당 서비스에 전달될 수 있으며 각 서비스의 개인정보처리방침이 적용됩니다. 관리자 작성 공간은 GitHub 로그인과 Cloudflare를 사용해 비공개 초안과 로그인 세션을 저장합니다. 초안은 발행할 때 공개됩니다.\n\n## 문의\n\n이메일을 보내주시면 답변을 위해 이메일 주소와 메시지를 사용합니다.",
+    "updated": "2026-10-09"
+  },
+  "resourcesDescription": "Favorite links, Vancouver weather, and exchange rates in one place.",
+  "resourcesDescriptionKo": "자주 찾는 링크와 밴쿠버 날씨, 환율을 한곳에 모았습니다.",
+  "siteTitle": "0xnefertt's thoughts",
+  "usefulInfo": {
+    "baseCurrency": "USD",
+    "enabled": true,
+    "latitude": 49.2827,
+    "location": "Vancouver, BC",
+    "longitude": -123.1207,
+    "targetCurrencies": ["KRW", "CAD"]
+  },
+  "xUrl": "https://x.com/0xnefertt"
+}

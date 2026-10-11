@@ -1,7 +1,6 @@
 ---
 import { getNavItems, siteConfig } from '../lib/site';
-import { getSocialLinks } from '../lib/data';
-import { localeFromPath, localizedPath, unlocalizedPath } from '../lib/locale';
+import { localeFromPath, localizedPath, localeText, unlocalizedPath } from '../lib/locale';
 import { getLanguageLinks } from '../lib/routes';
 import { t } from '../lib/messages';
 import Favicon from '../components/Favicon.astro';
@@ -30,10 +29,11 @@ function toAbsoluteCanonicalUrl(input: string): string {
   return new URL(normalized, siteConfig.siteUrl).toString();
 }
 
+const locale = localeFromPath(Astro.url.pathname);
 const {
   mainClass,
   title,
-  description = siteConfig.description,
+  description = localeText(locale, siteConfig.blogDescription, siteConfig.blogDescriptionKo),
   currentPath = '/',
   canonicalHref,
   ogType = 'website',
@@ -44,7 +44,6 @@ const {
   disableAds = false,
   lang = localeFromPath(Astro.url.pathname),
 } = Astro.props;
-const locale = localeFromPath(Astro.url.pathname);
 const l = (path: string) => localizedPath(path, locale);
 const languageLinks = await getLanguageLinks(Astro.url.pathname);
 const pageTitle = title ? `${title} | ${siteConfig.title}` : siteConfig.title;
@@ -53,7 +52,7 @@ const isBlogPaginationPage = /^\/blog\/(?:page-\d+|category\/[^/]+(?:\/[^/]+)?\/
 const shouldNoindex = noindex || unlocalizedPath(Astro.url.pathname) === '/blog/search/' || isBlogPaginationPage;
 const currentYear = new Date().getFullYear();
 const navItems = await getNavItems(locale);
-const socialLinks = (await getSocialLinks()).filter((item) => item.label !== 'rss');
+const socialLinks = siteConfig.socialLinks;
 const socialLabels: Record<string, string> = { email: 'Email', github: 'GitHub', x: 'X' };
 const gaMeasurementId = siteConfig.gaMeasurementId?.trim() ?? '';
 const hasGaMeasurementId = gaMeasurementId.length > 0;
@@ -89,16 +88,6 @@ function isActive(href: string, path: string): boolean {
   return path === href || path.startsWith(href);
 }
 
-function getNavI18nKey(href: string): string | undefined {
-  const map: Record<string, string> = {
-    '/about/': 'nav_about',
-    '/blog/': 'nav_blog',
-    '/books/': 'nav_bookshelf',
-    '/projects/': 'nav_projects',
-  };
-
-  return map[unlocalizedPath(href)];
-}
 ---
 
 <!doctype html>
@@ -126,8 +115,8 @@ function getNavI18nKey(href: string): string | undefined {
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={socialImage} />
-    <meta name="twitter:site" content={siteConfig.xHandle} />
-    <meta name="twitter:creator" content={siteConfig.xHandle} />
+    {siteConfig.xHandle && <meta name="twitter:site" content={`@${siteConfig.xHandle}`} />}
+    {siteConfig.xHandle && <meta name="twitter:creator" content={`@${siteConfig.xHandle}`} />}
     <script is:inline>
       (() => {
         window.dataLayer = window.dataLayer || [];
@@ -218,8 +207,8 @@ function getNavI18nKey(href: string): string | undefined {
               {
                 navItems.map((item) => (
                   <li class={item.children && item.children.length > 0 ? 'nav-item nav-item--dropdown' : 'nav-item'}>
-                    <a class={isActive(item.href, currentPath) ? 'active' : undefined} href={item.href} data-i18n-key={getNavI18nKey(item.href)}>
-                      {getNavI18nKey(item.href) ? t(locale, getNavI18nKey(item.href)!) : item.label}
+                    <a class={isActive(item.href, currentPath) ? 'active' : undefined} href={item.href}>
+                      {item.label}
                     </a>
                     {item.children && item.children.length > 0 && (
                       <ul class="nav-dropdown">
@@ -269,7 +258,7 @@ function getNavI18nKey(href: string): string | undefined {
     <footer class="site-footer">
       <div class="container footer-inner">
         <p>
-          © {currentYear} 0xnefertt's thoughts
+          © {currentYear} {siteConfig.title}
         </p>
         <div class="footer-links">
           <nav aria-label="Site links">

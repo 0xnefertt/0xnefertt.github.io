@@ -273,6 +273,16 @@ button[aria-pressed="true"] {
   color: var(--text-muted);
   font-size: 0.7rem;
 }
+.settings-grid input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+}
+#privacy-fields textarea {
+  min-height: 24rem;
+}
+.preview-cover.preview-avatar--square {
+  border-radius: 0;
+}
 
 #collection-fields {
   border: 0;

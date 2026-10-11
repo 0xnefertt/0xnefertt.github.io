@@ -1,12 +1,25 @@
 {
   "blogDescription": "1, 2, 3, Let's go!",
   "blogDescriptionKo": "1, 2, 3, Let's go!",
+  "blogName": "0xnefertt's Blog",
   "categories": [
     {
       "children": [
-        { "name": "dev", "name_ko": "개발", "slug": "dev" },
-        { "name": "english", "name_ko": "영어", "slug": "english" },
-        { "name": "career", "name_ko": "커리어", "slug": "career" }
+        {
+          "name": "dev",
+          "name_ko": "개발",
+          "slug": "dev"
+        },
+        {
+          "name": "english",
+          "name_ko": "영어",
+          "slug": "english"
+        },
+        {
+          "name": "career",
+          "name_ko": "커리어",
+          "slug": "career"
+        }
       ],
       "name": "study log",
       "name_ko": "공부 기록",
@@ -14,9 +27,21 @@
     },
     {
       "children": [
-        { "name": "finance", "name_ko": "금융", "slug": "finance" },
-        { "name": "stock", "name_ko": "주식", "slug": "stock" },
-        { "name": "property", "name_ko": "부동산", "slug": "property" }
+        {
+          "name": "finance",
+          "name_ko": "금융",
+          "slug": "finance"
+        },
+        {
+          "name": "stock",
+          "name_ko": "주식",
+          "slug": "stock"
+        },
+        {
+          "name": "property",
+          "name_ko": "부동산",
+          "slug": "property"
+        }
       ],
       "name": "money talk",
       "name_ko": "돈 이야기",
@@ -24,8 +49,16 @@
     },
     {
       "children": [
-        { "name": "opinions is my own", "name_ko": "개인적인 생각", "slug": "opinions-is-my-own" },
-        { "name": "retrospect", "name_ko": "회고", "slug": "retrospect" }
+        {
+          "name": "opinions is my own",
+          "name_ko": "개인적인 생각",
+          "slug": "opinions-is-my-own"
+        },
+        {
+          "name": "retrospect",
+          "name_ko": "회고",
+          "slug": "retrospect"
+        }
       ],
       "name": "life · thoughts",
       "name_ko": "일상 · 생각",
@@ -33,110 +66,337 @@
     },
     {
       "children": [
-        { "name": "general", "name_ko": "일반", "slug": "general" },
-        { "name": "in canada", "name_ko": "캐나다 생활", "slug": "in-canada" }
+        {
+          "name": "general",
+          "name_ko": "일반",
+          "slug": "general"
+        },
+        {
+          "name": "in canada",
+          "name_ko": "캐나다 생활",
+          "slug": "in-canada"
+        }
       ],
       "name": "useful tips",
       "name_ko": "정보 공유",
       "slug": "useful-tips"
     }
   ],
+  "defaultOgImage": "/assets/img/prof_pic.jpg",
+  "email": "adrwss2@gmail.com",
   "favorites": [
     {
       "items": [
-        { "href": "https://programbench.com/", "title": "Programbench" },
-        { "href": "https://robostrategy.co/", "title": "Robostrategy" }
+        {
+          "href": "https://programbench.com/",
+          "title": "Programbench"
+        },
+        {
+          "href": "https://robostrategy.co/",
+          "title": "Robostrategy"
+        }
       ],
       "name": "AI"
     },
     {
       "items": [
-        { "href": "https://polymarket.com/", "title": "Polymarket" },
-        { "href": "https://defillama.com/", "title": "Defillama" },
-        { "href": "https://www.coindesk.com/", "title": "Coindesk" },
-        { "href": "https://research.4pillars.io/en/", "title": "4pillars Research" },
-        { "href": "https://jumpcrypto.com/insights", "title": "Jump Crypto Insights" },
-        { "href": "https://www.paradigm.xyz/writing", "title": "Paradigm Writing" },
-        { "href": "https://a16zcrypto.com/", "title": "a16z Crypto" },
-        { "href": "https://www.galaxy.com/", "title": "Galaxy" },
-        { "href": "https://www.coinbase.com/en-ca/institutional/research-insights/research", "title": "Coinbase Institutional Research" },
-        { "href": "https://www.binance.com/en/research", "title": "Binance Research" },
-        { "href": "https://blog.ethereum.org/", "title": "Ethereum Blog" },
-        { "href": "https://l2beat.com/scaling/summary", "title": "L2BEAT" },
-        { "href": "https://www.coingecko.com/", "title": "CoinGecko" },
-        { "href": "https://cryptorank.io/", "title": "CryptoRank" },
-        { "href": "https://panteracapital.com/insights/", "title": "Pantera Capital" }
+        {
+          "href": "https://polymarket.com/",
+          "title": "Polymarket"
+        },
+        {
+          "href": "https://defillama.com/",
+          "title": "Defillama"
+        },
+        {
+          "href": "https://www.coindesk.com/",
+          "title": "Coindesk"
+        },
+        {
+          "href": "https://research.4pillars.io/en/",
+          "title": "4pillars Research"
+        },
+        {
+          "href": "https://jumpcrypto.com/insights",
+          "title": "Jump Crypto Insights"
+        },
+        {
+          "href": "https://www.paradigm.xyz/writing",
+          "title": "Paradigm Writing"
+        },
+        {
+          "href": "https://a16zcrypto.com/",
+          "title": "a16z Crypto"
+        },
+        {
+          "href": "https://www.galaxy.com/",
+          "title": "Galaxy"
+        },
+        {
+          "href": "https://www.coinbase.com/en-ca/institutional/research-insights/research",
+          "title": "Coinbase Institutional Research"
+        },
+        {
+          "href": "https://www.binance.com/en/research",
+          "title": "Binance Research"
+        },
+        {
+          "href": "https://blog.ethereum.org/",
+          "title": "Ethereum Blog"
+        },
+        {
+          "href": "https://l2beat.com/scaling/summary",
+          "title": "L2BEAT"
+        },
+        {
+          "href": "https://www.coingecko.com/",
+          "title": "CoinGecko"
+        },
+        {
+          "href": "https://cryptorank.io/",
+          "title": "CryptoRank"
+        },
+        {
+          "href": "https://panteracapital.com/insights/",
+          "title": "Pantera Capital"
+        }
       ],
       "name": "Blockchain"
     },
     {
       "items": [
-        { "href": "https://www.thetimes.com/us", "title": "The Times" },
-        { "href": "https://substack.com/", "title": "Substack" },
-        { "href": "https://www.lindahall.org/", "title": "Linda Hall Library" },
-        { "href": "https://www.reddit.com/", "title": "Reddit" },
-        { "href": "https://news.hada.io/", "title": "GeekNews" },
-        { "href": "https://rekt.news/", "title": "rekt" },
-        { "href": "https://tradingeconomics.com/", "title": "Trading economics" },
-        { "href": "https://companiesmarketcap.com/", "title": "Marketcap" },
-        { "href": "https://www.bis.org/", "title": "BIS" },
-        { "href": "https://www.imf.org/en/home", "title": "IMF" },
-        { "href": "https://www.fsb.org/", "title": "FSB" }
+        {
+          "href": "https://www.thetimes.com/us",
+          "title": "The Times"
+        },
+        {
+          "href": "https://substack.com/",
+          "title": "Substack"
+        },
+        {
+          "href": "https://www.lindahall.org/",
+          "title": "Linda Hall Library"
+        },
+        {
+          "href": "https://www.reddit.com/",
+          "title": "Reddit"
+        },
+        {
+          "href": "https://news.hada.io/",
+          "title": "GeekNews"
+        },
+        {
+          "href": "https://rekt.news/",
+          "title": "rekt"
+        },
+        {
+          "href": "https://tradingeconomics.com/",
+          "title": "Trading economics"
+        },
+        {
+          "href": "https://companiesmarketcap.com/",
+          "title": "Marketcap"
+        },
+        {
+          "href": "https://www.bis.org/",
+          "title": "BIS"
+        },
+        {
+          "href": "https://www.imf.org/en/home",
+          "title": "IMF"
+        },
+        {
+          "href": "https://www.fsb.org/",
+          "title": "FSB"
+        }
       ],
       "name": "Reading"
     },
     {
       "items": [
-        { "href": "https://trailofbits.com/", "title": "Trail of Bits" },
-        { "href": "https://www.nccgroup.com/", "title": "NCC Group" },
-        { "href": "https://cure53.de/", "title": "Cure53" },
-        { "href": "https://bishopfox.com/", "title": "Bishop Fox" },
-        { "href": "https://www.openzeppelin.com/security-audits", "title": "OpenZeppelin" },
-        { "href": "https://spearbit.com/", "title": "Spearbit" },
-        { "href": "https://cantina.xyz/", "title": "Cantina" },
-        { "href": "https://www.zellic.io/", "title": "Zellic" },
-        { "href": "https://sigmaprime.io/", "title": "Sigma Prime" },
-        { "href": "https://consensys.io/diligence", "title": "Consensys Diligence" },
-        { "href": "https://chainsecurity.com/", "title": "ChainSecurity" },
-        { "href": "https://www.certora.com/", "title": "Certora" },
-        { "href": "https://runtimeverification.com/", "title": "Runtime Verification" },
-        { "href": "https://galois.com/", "title": "Galois" },
-        { "href": "https://www.halborn.com/", "title": "Halborn" },
-        { "href": "https://quantstamp.com/", "title": "Quantstamp" },
-        { "href": "https://www.certik.com/", "title": "CertiK" },
-        { "href": "https://hacken.io/", "title": "Hacken" },
-        { "href": "https://sherlock.xyz/", "title": "Sherlock" },
-        { "href": "https://www.latacora.com/", "title": "Latacora" },
-        { "href": "https://includesecurity.com/", "title": "Include Security" },
-        { "href": "https://www.praetorian.com/", "title": "Praetorian" },
-        { "href": "https://www.ioactive.com/", "title": "IOActive" },
-        { "href": "https://www.quarkslab.com/", "title": "Quarkslab" },
-        { "href": "https://www.synacktiv.com/", "title": "Synacktiv" },
-        { "href": "https://ret2.io/", "title": "RET2 Systems" },
-        { "href": "https://www.grimm-co.com/", "title": "GRIMM" },
-        { "href": "https://www.mandiant.com/", "title": "Mandiant" },
-        { "href": "https://www.netspi.com/", "title": "NetSPI" },
-        { "href": "https://www.cobalt.io/", "title": "Cobalt" }
+        {
+          "href": "https://trailofbits.com/",
+          "title": "Trail of Bits"
+        },
+        {
+          "href": "https://www.nccgroup.com/",
+          "title": "NCC Group"
+        },
+        {
+          "href": "https://cure53.de/",
+          "title": "Cure53"
+        },
+        {
+          "href": "https://bishopfox.com/",
+          "title": "Bishop Fox"
+        },
+        {
+          "href": "https://www.openzeppelin.com/security-audits",
+          "title": "OpenZeppelin"
+        },
+        {
+          "href": "https://spearbit.com/",
+          "title": "Spearbit"
+        },
+        {
+          "href": "https://cantina.xyz/",
+          "title": "Cantina"
+        },
+        {
+          "href": "https://www.zellic.io/",
+          "title": "Zellic"
+        },
+        {
+          "href": "https://sigmaprime.io/",
+          "title": "Sigma Prime"
+        },
+        {
+          "href": "https://consensys.io/diligence",
+          "title": "Consensys Diligence"
+        },
+        {
+          "href": "https://chainsecurity.com/",
+          "title": "ChainSecurity"
+        },
+        {
+          "href": "https://www.certora.com/",
+          "title": "Certora"
+        },
+        {
+          "href": "https://runtimeverification.com/",
+          "title": "Runtime Verification"
+        },
+        {
+          "href": "https://galois.com/",
+          "title": "Galois"
+        },
+        {
+          "href": "https://www.halborn.com/",
+          "title": "Halborn"
+        },
+        {
+          "href": "https://quantstamp.com/",
+          "title": "Quantstamp"
+        },
+        {
+          "href": "https://www.certik.com/",
+          "title": "CertiK"
+        },
+        {
+          "href": "https://hacken.io/",
+          "title": "Hacken"
+        },
+        {
+          "href": "https://sherlock.xyz/",
+          "title": "Sherlock"
+        },
+        {
+          "href": "https://www.latacora.com/",
+          "title": "Latacora"
+        },
+        {
+          "href": "https://includesecurity.com/",
+          "title": "Include Security"
+        },
+        {
+          "href": "https://www.praetorian.com/",
+          "title": "Praetorian"
+        },
+        {
+          "href": "https://www.ioactive.com/",
+          "title": "IOActive"
+        },
+        {
+          "href": "https://www.quarkslab.com/",
+          "title": "Quarkslab"
+        },
+        {
+          "href": "https://www.synacktiv.com/",
+          "title": "Synacktiv"
+        },
+        {
+          "href": "https://ret2.io/",
+          "title": "RET2 Systems"
+        },
+        {
+          "href": "https://www.grimm-co.com/",
+          "title": "GRIMM"
+        },
+        {
+          "href": "https://www.mandiant.com/",
+          "title": "Mandiant"
+        },
+        {
+          "href": "https://www.netspi.com/",
+          "title": "NetSPI"
+        },
+        {
+          "href": "https://www.cobalt.io/",
+          "title": "Cobalt"
+        }
       ],
       "name": "Security"
     },
     {
       "items": [
-        { "href": "https://www.spacex.com/", "title": "SpaceX" },
-        { "href": "https://www.blueorigin.com/", "title": "Blue Origin" },
-        { "href": "https://ast-science.com/", "title": "Space Mobile" }
+        {
+          "href": "https://www.spacex.com/",
+          "title": "SpaceX"
+        },
+        {
+          "href": "https://www.blueorigin.com/",
+          "title": "Blue Origin"
+        },
+        {
+          "href": "https://ast-science.com/",
+          "title": "Space Mobile"
+        }
       ],
       "name": "Space"
     },
     {
       "items": [
-        { "href": "https://www.calicolabs.com/", "title": "Calio" },
-        { "href": "https://www.altoslabs.com/", "title": "Altos Labs" },
-        { "href": "https://crisprtx.com/", "title": "CRISPR Therapeutics" },
-        { "href": "https://www.intelliatx.com/", "title": "Intellia Therapeutics" }
+        {
+          "href": "https://www.calicolabs.com/",
+          "title": "Calio"
+        },
+        {
+          "href": "https://www.altoslabs.com/",
+          "title": "Altos Labs"
+        },
+        {
+          "href": "https://crisprtx.com/",
+          "title": "CRISPR Therapeutics"
+        },
+        {
+          "href": "https://www.intelliatx.com/",
+          "title": "Intellia Therapeutics"
+        }
       ],
       "name": "Health / Bio"
     },
-    { "items": [], "name": "Quantum" }
-  ]
+    {
+      "items": [],
+      "name": "Quantum"
+    }
+  ],
+  "githubUrl": "https://github.com/0xnefertt",
+  "latestPostsLimit": 5,
+  "privacy": {
+    "body": "This is 0xnefertt's personal blog. Here is how browsing data and cookies may be used.\n\n## Cookies, analytics, and ads\n\nThis site saves your theme preference in your browser. When enabled, Google Analytics measures page visits and interactions, including browser, device, and approximate location information. Google AdSense and other advertising providers may use cookies to show ads based on visits to this and other websites. See [Google's privacy policy](https://policies.google.com/privacy) and [Google's advertising partners](https://support.google.com/adsense/answer/9012903) for details.\n\nYou can manage or delete cookies through your browser, opt out of personalized ads through [Google Ads Settings](https://adssettings.google.com/) or [AboutAds](https://optout.aboutads.info/), and use the [Google Analytics opt-out add-on](https://tools.google.com/dlpage/gaoptout). Where a consent message is shown, you can manage your choices there.\n\n## External services\n\nGitHub Pages hosts the blog. GitHub/Giscus handles comments when enabled, and Open-Meteo and Frankfurter supply weather and exchange rates. Your browser may send these services technical information, such as your IP address, when making requests. Their own privacy policies apply. The owner's writing area uses GitHub sign-in and Cloudflare to store private drafts and login sessions; drafts become public when published.\n\n## Questions\n\nIf you email me, I use your address and message to respond.",
+    "bodyKo": "0xnefertt의 개인 블로그에서 방문 정보와 쿠키를 사용하는 방법을 안내합니다.\n\n## 쿠키, 방문 통계와 광고\n\n이 사이트는 브라우저에 화면 테마 설정을 저장합니다. 활성화된 경우 Google Analytics로 페이지 방문과 상호작용을 측정하며, 브라우저·기기·대략적인 위치 정보가 포함될 수 있습니다. Google AdSense와 광고 제공업체는 이 사이트와 다른 사이트의 방문 기록에 따라 광고를 표시하기 위해 쿠키를 사용할 수 있습니다. 자세한 내용은 [Google 개인정보처리방침](https://policies.google.com/privacy)과 [Google 광고 파트너 안내](https://support.google.com/adsense/answer/9012903)를 확인하세요.\n\n브라우저에서 쿠키를 관리하거나 삭제할 수 있습니다. [Google 광고 설정](https://adssettings.google.com/), [AboutAds](https://optout.aboutads.info/), [Google Analytics 차단 부가기능](https://tools.google.com/dlpage/gaoptout)에서도 관련 설정을 관리할 수 있습니다. 동의 안내가 표시되는 경우 해당 안내에서 선택을 변경할 수 있습니다.\n\n## 외부 서비스\n\nGitHub Pages가 블로그를 호스팅합니다. 댓글 기능이 활성화된 경우 GitHub와 Giscus를 사용하며, 날씨와 환율은 Open-Meteo와 Frankfurter에서 제공합니다. 요청 과정에서 IP 주소 등의 기술 정보가 해당 서비스에 전달될 수 있으며 각 서비스의 개인정보처리방침이 적용됩니다. 관리자 작성 공간은 GitHub 로그인과 Cloudflare를 사용해 비공개 초안과 로그인 세션을 저장합니다. 초안은 발행할 때 공개됩니다.\n\n## 문의\n\n이메일을 보내주시면 답변을 위해 이메일 주소와 메시지를 사용합니다.",
+    "updated": "2026-10-09"
+  },
+  "resourcesDescription": "Favorite links, Vancouver weather, and exchange rates in one place.",
+  "resourcesDescriptionKo": "자주 찾는 링크와 밴쿠버 날씨, 환율을 한곳에 모았습니다.",
+  "siteTitle": "0xnefertt's thoughts",
+  "usefulInfo": {
+    "baseCurrency": "USD",
+    "enabled": true,
+    "latitude": 49.2827,
+    "location": "Vancouver, BC",
+    "longitude": -123.1207,
+    "targetCurrencies": ["KRW", "CAD"]
+  },
+  "xUrl": "https://x.com/0xnefertt"
 }

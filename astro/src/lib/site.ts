@@ -8,15 +8,18 @@ const gaMeasurementId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID?.trim() ?? '';
 const adsensePublisherId = import.meta.env.PUBLIC_ADSENSE_PUBLISHER_ID?.trim() ?? '';
 
 export const siteConfig = {
-  title: "0xnefertt's thoughts",
-  description: 'Personal notes on software development, life in Canada, careers, and financial research.',
-  lang: 'en',
+  title: siteSettings.siteTitle,
   siteUrl: 'https://0xnefertt.github.io',
-  blogName: "0xnefertt's Blog",
+  blogName: siteSettings.blogName,
   blogDescriptionKo: siteSettings.blogDescriptionKo,
   blogDescription: siteSettings.blogDescription,
-  defaultOgImage: '/assets/img/prof_pic.jpg',
-  xHandle: '@0xnefertt',
+  defaultOgImage: siteSettings.defaultOgImage || '/favicon.svg',
+  xHandle: siteSettings.xUrl.match(/^https?:\/\/(?:www\.)?(?:x\.com|twitter\.com)\/([\w]+)\/?$/)?.[1],
+  socialLinks: [
+    ...(siteSettings.email ? [{ label: 'email', href: `mailto:${siteSettings.email}` }] : []),
+    ...(siteSettings.githubUrl ? [{ label: 'github', href: siteSettings.githubUrl }] : []),
+    ...(siteSettings.xUrl ? [{ label: 'x', href: siteSettings.xUrl }] : []),
+  ],
   adsensePublisherId,
   gaMeasurementId,
   giscus: {

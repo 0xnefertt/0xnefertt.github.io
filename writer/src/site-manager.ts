@@ -10,6 +10,41 @@ import {
 import type { ContentCollection } from "./model";
 
 type Api = <T>(path: string, init?: RequestInit) => Promise<T>;
+const sections = ["posts", "books", "projects", "about", "site", "description", "resources", "privacy", "categories", "favorites"] as const;
+type SettingField = {
+  path: string;
+  label: string;
+  type?: "textarea" | "number" | "checkbox" | "list";
+  max?: number;
+  min?: number;
+  limit?: number;
+  note?: string;
+};
+const settingFields: Record<"site" | "resources" | "privacy", SettingField[]> = {
+  site: [
+    { path: "siteTitle", label: "사이트 이름 · 로고 텍스트, Footer", max: 100 },
+    { path: "blogName", label: "블로그 제목", max: 100 },
+    { path: "email", label: "이메일", max: 254, note: "비워 두면 Footer와 Privacy의 이메일 링크를 숨깁니다." },
+    { path: "githubUrl", label: "GitHub 링크", max: 2000 },
+    { path: "xUrl", label: "X 링크", max: 2000 },
+    { path: "defaultOgImage", label: "공유 기본 이미지 주소", max: 2000, note: "이미지 주소 또는 /assets/ 경로. 비워 두면 파비콘을 사용합니다." },
+    { path: "latestPostsLimit", label: "홈 화면 최근 글 수", type: "number", min: 1, limit: 20 },
+  ],
+  resources: [
+    { path: "resourcesDescription", label: "Resources 영어 소개", type: "textarea", max: 500 },
+    { path: "resourcesDescriptionKo", label: "Resources 한국어 소개", type: "textarea", max: 500 },
+    { path: "usefulInfo.enabled", label: "Useful Info 표시", type: "checkbox" },
+    { path: "usefulInfo.location", label: "날씨 지역 이름", max: 100 },
+    { path: "usefulInfo.latitude", label: "위도", type: "number", min: -90, limit: 90 },
+    { path: "usefulInfo.longitude", label: "경도", type: "number", min: -180, limit: 180 },
+    { path: "usefulInfo.baseCurrency", label: "기준 통화", max: 3, note: "USD, CAD, KRW 같은 3자리 통화 코드" },
+    { path: "usefulInfo.targetCurrencies", label: "비교 통화", type: "list", max: 100, note: "쉼표로 구분하세요. 예: KRW, CAD" },
+  ],
+  privacy: [
+    { path: "privacy.body", label: "Privacy 영어 본문", type: "textarea", max: 30000 },
+    { path: "privacy.bodyKo", label: "Privacy 한국어 본문", type: "textarea", max: 30000 },
+  ],
+};
 export function siteManager(api: Api, leave: () => Promise<boolean>, selectContent: (kind: ContentCollection) => Promise<boolean>) {
   const el = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
   let settings: SiteSettings | null = null;
@@ -18,7 +53,7 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
   let changed = false;
   let busy = false;
   let savedPaths = new Set<string>();
-  let section: "posts" | "books" | "projects" | "about" | "description" | "categories" | "favorites" = "posts";
+  let section: (typeof sections)[number] = "posts";
   const expanded = new WeakSet<object>();
   const message = (value: string) => {
     el("settings-status").textContent = value;
@@ -255,11 +290,67 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
       container.append(card);
     });
   }
+  function renderSettingsFields() {
+    if (!settings) return;
+    for (const [panel, fields] of Object.entries(settingFields)) {
+      const container = el(`${panel}-fields`);
+      container.replaceChildren();
+      for (const field of fields) {
+        const keys = field.path.split(".");
+        const key = keys.pop()!;
+        const parent = keys.reduce((value, key) => value[key] as Record<string, unknown>, settings as unknown as Record<string, unknown>);
+        const label = document.createElement("label");
+        label.textContent = field.label;
+        const control = field.type === "textarea" ? document.createElement("textarea") : document.createElement("input");
+        control.id = `setting-${field.path.replaceAll(".", "-")}`;
+        if (control.tagName === "TEXTAREA") {
+          const textarea = control as HTMLTextAreaElement;
+          textarea.rows = panel === "privacy" ? 16 : 3;
+          textarea.maxLength = field.max ?? 500;
+        } else {
+          const input = control as HTMLInputElement;
+          input.type = field.type === "checkbox" ? "checkbox" : field.type === "number" ? "number" : "text";
+          input.maxLength = field.max ?? 500;
+          if (field.type === "checkbox") input.checked = parent[key] === true;
+          if (field.type === "number") {
+            input.min = String(field.min);
+            input.max = String(field.limit);
+            input.step = field.path === "latestPostsLimit" ? "1" : "any";
+          }
+        }
+        control.value = Array.isArray(parent[key]) ? (parent[key] as string[]).join(", ") : String(parent[key]);
+        control.addEventListener("input", () => {
+          parent[key] =
+            field.type === "checkbox"
+              ? (control as HTMLInputElement).checked
+              : field.type === "number"
+                ? control.value.trim()
+                  ? Number(control.value)
+                  : NaN
+                : field.type === "list"
+                  ? control.value.split(/[,\s]+/).filter(Boolean)
+                  : control.value;
+          dirty();
+        });
+        label.append(control);
+        if (field.note) {
+          const note = document.createElement("small");
+          note.textContent = field.note;
+          label.append(note);
+        }
+        container.append(label);
+      }
+    }
+    el("privacy-updated").textContent = settings.privacy.updated;
+    el("admin-site-title").textContent = settings.siteTitle;
+    document.title = `Admin · ${settings.siteTitle}`;
+  }
   function render() {
     if (settings) {
       el<HTMLTextAreaElement>("blog-description-en").value = settings.blogDescription;
       el<HTMLTextAreaElement>("blog-description-ko").value = settings.blogDescriptionKo;
     }
+    renderSettingsFields();
     renderCategories();
     renderFavorites();
   }
@@ -273,18 +364,31 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
     el("category-manager").hidden = next !== "categories";
     el("favorites-manager").hidden = next !== "favorites";
     el("blog-description-manager").hidden = next !== "description";
-    for (const item of ["posts", "books", "projects", "about", "description", "categories", "favorites"])
-      el(`manage-${item}`).setAttribute("aria-pressed", String(item === next));
-    el("manager-heading").textContent = next === "description" ? "블로그 소개" : next === "categories" ? "카테고리" : "즐겨찾기";
+    for (const panel of ["site", "resources", "privacy"]) el(`${panel}-manager`).hidden = next !== panel;
+    for (const item of sections) el(`manage-${item}`).setAttribute("aria-pressed", String(item === next));
+    const titles: Record<string, string> = {
+      site: "사이트 설정",
+      description: "블로그 소개",
+      resources: "Resources",
+      privacy: "Privacy",
+      categories: "카테고리",
+      favorites: "즐겨찾기",
+    };
+    el("manager-heading").textContent = titles[next] ?? "";
     el("manager-description").textContent =
-      next === "description"
-        ? "랜딩 페이지와 블로그 상단의 소개 문구를 영어·한국어별로 설정하세요. 소개·프로필의 자기소개 글과는 별개입니다. 저장하고 반영하면 사이트에 적용됩니다."
-        : next === "categories"
-          ? "영어·한국어 이름과 순서를 따로 설정하세요. 이름을 바꿔도 주소는 유지됩니다. 글이 있는 카테고리는 삭제할 수 없으며, 새 카테고리는 글을 발행하면 블로그에 표시됩니다."
-          : "홈 화면에 표시할 그룹과 링크를 관리하세요. 순서는 위·아래 버튼으로 변경합니다. 빈 그룹은 홈 화면에 표시되지 않습니다.";
+      next === "site"
+        ? "사이트 이름과 연락처, 공유 이미지, 홈 화면을 설정하세요. 저장하면 사이트 전체에 함께 적용됩니다."
+        : next === "resources"
+          ? "Resources 소개와 날씨 지역, 환율 표시를 관리하세요. 즐겨찾기 링크는 즐겨찾기 메뉴에서 수정합니다."
+          : next === "privacy"
+            ? "개인정보 안내 본문을 영어·한국어별로 수정하세요. Markdown으로 제목과 링크를 작성할 수 있습니다. 이메일은 사이트 설정을 사용하고, 본문을 변경하면 수정일이 갱신됩니다."
+            : next === "description"
+              ? "랜딩 페이지와 블로그 상단의 소개 문구를 영어·한국어별로 설정하세요. 소개·프로필의 자기소개 글과는 별개입니다. 저장하고 반영하면 사이트에 적용됩니다."
+              : next === "categories"
+                ? "영어·한국어 이름과 순서를 따로 설정하세요. 이름을 바꿔도 주소는 유지됩니다. 글이 있는 카테고리는 삭제할 수 없으며, 새 카테고리는 글을 발행하면 블로그에 표시됩니다."
+                : "Resources에 표시할 그룹과 링크를 관리하세요. 순서는 위·아래 버튼으로 변경합니다. 빈 그룹은 Resources에 표시되지 않습니다.";
   }
-  for (const item of ["posts", "books", "projects", "about", "description", "categories", "favorites"] as const)
-    el(`manage-${item}`).addEventListener("click", () => void show(item));
+  for (const item of sections) el(`manage-${item}`).addEventListener("click", () => void show(item));
   for (const [id, field] of [
     ["blog-description-en", "blogDescription"],
     ["blog-description-ko", "blogDescriptionKo"],
@@ -359,6 +463,7 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
   return {
     load,
     refreshCategories: refreshOptions,
+    siteTitle: () => settings?.siteTitle ?? "",
     isDirty: () => changed || busy,
     canLogout: () => !busy && (!changed || window.confirm("저장하지 않은 설정이 있습니다. 로그아웃할까요?")),
   };

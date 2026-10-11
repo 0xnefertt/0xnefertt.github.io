@@ -499,18 +499,50 @@ test("older settings clients retain saved descriptions when updating other setti
   try {
     configuredSettings.blogDescription = "Published custom English";
     configuredSettings.blogDescriptionKo = "이미 반영한 한국어 소개";
-    const legacy = structuredClone(configuredSettings);
-    delete legacy.blogDescription;
-    delete legacy.blogDescriptionKo;
+    configuredSettings.siteTitle = "Published custom title";
+    configuredSettings.usefulInfo.enabled = false;
+    configuredSettings.privacy.body = "Existing custom Privacy content";
+    const legacy = { categories: configuredSettings.categories, favorites: configuredSettings.favorites };
     calls = [];
     const response = await request("/api/site-settings", { method: "PUT", data: { settings: legacy, sha: settingsSha } });
     assert.equal(response.status, 200, await response.clone().text());
     const content = JSON.parse(calls.find((call) => call.path.endsWith("/git/blobs") && call.method === "POST").data.content);
     assert.equal(content.blogDescription, configuredSettings.blogDescription);
     assert.equal(content.blogDescriptionKo, configuredSettings.blogDescriptionKo);
+    assert.equal(content.siteTitle, configuredSettings.siteTitle);
+    assert.equal(content.usefulInfo.enabled, false);
+    assert.deepEqual(content.privacy, configuredSettings.privacy);
   } finally {
     configuredSettings = original;
   }
+});
+test("Privacy changes stamp their own modification date without changing unrelated site content", async () => {
+  const settings = structuredClone(configuredSettings);
+  settings.privacy.body += "\n\nNew Privacy paragraph.";
+  calls = [];
+  const result = await request("/api/site-settings", { method: "PUT", data: { settings, sha: settingsSha } });
+  assert.equal(result.status, 200, await result.clone().text());
+  const saved = (await result.json()).settings;
+  assert.equal(saved.privacy.body, settings.privacy.body);
+  assert.match(saved.privacy.updated, /^\d{4}-\d{2}-\d{2}$/);
+  assert.notEqual(saved.privacy.updated, configuredSettings.privacy.updated);
+  assert.equal(saved.privacy.bodyKo, configuredSettings.privacy.bodyKo);
+  assert.equal(saved.siteTitle, configuredSettings.siteTitle);
+  assert.deepEqual(saved.usefulInfo, configuredSettings.usefulInfo);
+});
+test("settings reject formatted files beyond the readable size limit before creating GitHub blobs", async () => {
+  const settings = {
+    ...structuredClone(configuredSettings),
+    favorites: [200, 200, 100].map((count, group) => ({
+      name: `Large group ${group}`,
+      items: Array.from({ length: count }, (_, index) => ({ title: `Link ${index}`, href: `https://example.com/${"a".repeat(1200)}` })),
+    })),
+  };
+  assert.ok(Buffer.byteLength(JSON.stringify({ settings, sha: settingsSha })) < 650_000);
+  calls = [];
+  const response = await request("/api/site-settings", { method: "PUT", data: { settings, sha: settingsSha } });
+  assert.equal(response.status, 413, await response.clone().text());
+  assert.ok(!calls.some((call) => call.path.endsWith("/git/blobs") && call.method === "POST"));
 });
 test("settings reject unsafe links, duplicate slugs, deleted used categories, and CSRF", async () => {
   const invalidLink = structuredClone(configuredSettings);

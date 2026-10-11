@@ -5,6 +5,7 @@ import { siteConfig } from '../lib/site';
 import { contentLocale, inLocale } from '../lib/locale';
 import { getPublishedBlogPosts } from '../lib/blog';
 import { createLastmodResolver, latestLastmod, renderSitemap } from '../lib/sitemap';
+import { siteSettings } from '../lib/settings';
 
 export const GET: APIRoute = async ({ site }) => {
   const base = site?.toString() ?? siteConfig.siteUrl;
@@ -23,6 +24,7 @@ export const GET: APIRoute = async ({ site }) => {
     const about = pages.find((page) => page.filePath?.endsWith('/about.md') && contentLocale(page) === route.locale);
     const published = getPublishedBlogPosts(posts, route.locale).filter((post) => !post.data.redirect);
     let lastmod = content ? modified(content) : undefined;
+    if (route.view === 'privacy') lastmod = new Date(`${siteSettings.privacy.updated}T00:00:00Z`).toISOString();
     if (route.view === 'about') lastmod = about && modified(about);
     if (route.view === 'index') lastmod = latestLastmod([...(about ? [modified(about)] : []), ...published.map(modified)]);
     if (route.view === 'blog/index') lastmod = latestLastmod(published.map(modified));

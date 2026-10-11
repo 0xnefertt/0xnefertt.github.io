@@ -1,12 +1,13 @@
 import { list, profileMetadata, type ContentCollection } from "./model";
 
-type Field = { key: string; label: string; type?: "number" | "date" | "list"; placeholder?: string; fallback?: string; note?: string };
+type Field = { key: string; label: string; type?: "number" | "date" | "list" | "checkbox"; placeholder?: string; fallback?: string; note?: string };
 const fields: Record<Exclude<ContentCollection, "blog">, Field[]> = {
   about: [
-    { key: "profile.name", label: "프로필 이름", fallback: "0xnefertt" },
-    { key: "profile.location", label: "활동 지역", fallback: "Vancouver, Canada" },
-    { key: "profile.bio", label: "짧은 소개", fallback: "개발하며 배운 것, 캐나다에서의 일상, 관심 있는 것들을 기록합니다." },
+    { key: "profile.name", label: "프로필 이름" },
+    { key: "profile.location", label: "활동 지역" },
+    { key: "profile.bio", label: "짧은 소개" },
     { key: "profile.image", label: "프로필 사진", placeholder: "사진 주소 또는 아래 첨부 버튼" },
+    { key: "profile.image_circular", label: "소개 페이지 사진 원형 표시", type: "checkbox" },
   ],
   books: [
     { key: "date", label: "발행일", type: "date", note: "비워 두면 처음 발행하는 날로 저장됩니다." },
@@ -29,7 +30,11 @@ export function collectionEditor(change: () => void) {
   let collection: ContentCollection = "blog";
   function displayValue(field: Field, metadata: Record<string, unknown>): string {
     const value = field.key.startsWith("profile.") ? profileMetadata(metadata)[field.key.slice(8)] : metadata[field.key];
-    return field.type === "list" ? list(value).join(", ") : String(value ?? field.fallback ?? "");
+    return field.type === "list"
+      ? list(value).join(", ")
+      : field.type === "checkbox"
+        ? String(value === true)
+        : String(value ?? field.fallback ?? "");
   }
   function load(kind: ContentCollection, metadata: Record<string, unknown>) {
     collection = kind;
@@ -43,13 +48,13 @@ export function collectionEditor(change: () => void) {
       input.id = `metadata-${field.key.replaceAll(".", "-")}`;
       input.setAttribute("aria-label", field.label);
       input.placeholder = field.placeholder ?? "";
-      input.type = field.type === "number" || field.type === "date" ? field.type : "text";
+      input.type = field.type === "number" || field.type === "date" || field.type === "checkbox" ? field.type : "text";
       if (field.type === "number") {
         input.min = "0";
-        input.step = field.key === "stars" ? "0.5" : "1";
-        if (field.key === "stars") input.max = "5";
+        input.step = "1";
       }
       input.value = displayValue(field, metadata);
+      if (field.type === "checkbox") input.checked = input.value === "true";
       controls.push({ field, input, original: input.value });
       input.addEventListener("input", change);
       wrapper.append(input);
@@ -65,22 +70,24 @@ export function collectionEditor(change: () => void) {
     const metadata = { ...base };
     if (collection === "about") metadata.profile = { ...profileMetadata(base) };
     for (const { field, input, original } of controls) {
-      if (input.value === original) continue;
-      const value = input.value.trim();
+      const value = field.type === "checkbox" ? String(input.checked) : input.value.trim();
+      if (value === original) continue;
       const nested = field.key.startsWith("profile.");
       const target = nested ? profileMetadata(metadata) : metadata;
       const key = nested ? field.key.slice(8) : field.key;
       if (!value && !field.fallback) delete target[key];
       else
         target[key] =
-          field.type === "number"
-            ? Number(value)
-            : field.type === "list"
-              ? value
-                  .split(",")
-                  .map((item) => item.trim())
-                  .filter(Boolean)
-              : value;
+          field.type === "checkbox"
+            ? input.checked
+            : field.type === "number"
+              ? Number(value)
+              : field.type === "list"
+                ? value
+                    .split(",")
+                    .map((item) => item.trim())
+                    .filter(Boolean)
+                : value;
     }
 
     return metadata;

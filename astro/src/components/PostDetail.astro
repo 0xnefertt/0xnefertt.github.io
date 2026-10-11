@@ -68,7 +68,7 @@ const articleImageUrl = toAbsoluteUrl(post.data.thumbnail ?? siteConfig.defaultO
 const aboutPage = (await getCollection('pages')).find((entry) => entry.filePath?.endsWith('/about.md') && contentLocale(entry) === locale);
 const profile = aboutPage?.data.profile;
 const ownerPost = !post.data.author || post.data.author === '0xnefertt' || post.data.author === profile?.name;
-const authorName = ownerPost ? profile?.name ?? '0xnefertt' : post.data.author;
+const authorName = ownerPost ? profile?.name ?? siteConfig.title : post.data.author;
 const authorImage = normalizeAssetPath(profile?.image);
 const authorUrl = new URL(l('/'), siteConfig.siteUrl).toString();
 const publishedIso = post.data.date?.toISOString();
@@ -84,11 +84,11 @@ const articleJsonLd = JSON.stringify({
     '@type': 'Person',
     name: authorName,
     url: authorUrl,
-    sameAs: ['https://github.com/0xnefertt', 'https://x.com/0xnefertt'],
+    ...(ownerPost ? { sameAs: siteConfig.socialLinks.filter((link) => link.label !== 'email').map((link) => link.href) } : {}),
   },
   publisher: {
     '@type': 'Person',
-    name: '0xnefertt',
+    name: profile?.name ?? siteConfig.title,
     url: authorUrl,
   },
   mainEntityOfPage: canonicalPostUrl,

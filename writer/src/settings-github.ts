@@ -1,16 +1,17 @@
 import { github, repositoryTree } from "./github";
 import { HttpError, isPostPath, parsePost } from "./model";
-import { assertCategoryRemoval, postCategoryKeys, SETTINGS_PATH, validateSettings, type SiteSettings } from "./site-settings";
+import { assertCategoryRemoval, DEFAULT_SITE_CONTENT, postCategoryKeys, SETTINGS_PATH, validateSettings, type SiteSettings } from "./site-settings";
 import { format } from "prettier/standalone";
 import babel from "prettier/plugins/babel";
 import estree from "prettier/plugins/estree";
 
 type Repository = Awaited<ReturnType<typeof repositoryTree>>;
+const SETTINGS_MAX_BYTES = 650_000;
 async function readSettings(token: string, repo: Repository) {
   const file = repo.files.find((item) => item.path === SETTINGS_PATH && item.type === "blob");
   if (!file) throw new HttpError(503, "사이트 설정을 준비 중입니다. 잠시 후 다시 열어 주세요.");
   const blob = await github<{ content: string; size: number }>(token, `${repo.root}/git/blobs/${file.sha}`);
-  if (blob.size > 650_000) throw new HttpError(413, "설정 파일이 너무 큽니다.");
+  if (blob.size > SETTINGS_MAX_BYTES) throw new HttpError(413, "설정 파일이 너무 큽니다.");
   const content = new TextDecoder().decode(Uint8Array.from(atob(blob.content.replace(/\s/g, "")), (c) => c.charCodeAt(0)));
   return { settings: validateSettings(JSON.parse(content)), sha: file.sha };
 }
@@ -63,11 +64,20 @@ export async function saveSiteSettings(env: Env, token: string, value: unknown, 
   const previous = await readSettings(token, repo);
   if (previous.sha !== expected) throw new HttpError(409, "다른 곳에서 설정이 변경되었습니다. 내용을 내려받고 다시 불러와 주세요.");
   // Older editor tabs omit these fields when saving categories or favorites.
-  for (const field of ["blogDescription", "blogDescriptionKo"] as const)
-    if (!Object.hasOwn(value as object, field)) settings[field] = previous.settings[field];
+  for (const field of Object.keys(DEFAULT_SITE_CONTENT) as (keyof typeof DEFAULT_SITE_CONTENT)[])
+    if (!Object.hasOwn(value as object, field)) Object.assign(settings, { [field]: previous.settings[field] });
+  if (settings.privacy.body !== previous.settings.privacy.body || settings.privacy.bodyKo !== previous.settings.privacy.bodyKo)
+    settings.privacy.updated = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Vancouver",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
   const usage = await categoryUsage(env, token, repo);
   assertCategoryRemoval(previous.settings, settings, usage);
   const content = await format(JSON.stringify(settings), { parser: "json", plugins: [babel, estree], printWidth: 150, trailingComma: "es5" });
+  if (new TextEncoder().encode(content).byteLength > SETTINGS_MAX_BYTES)
+    throw new HttpError(413, "설정 파일이 너무 큽니다. 즐겨찾기 항목이나 본문 길이를 줄여 주세요.");
   const blob = await github<{ sha: string }>(token, `${repo.root}/git/blobs`, {
     method: "POST",
     body: JSON.stringify({ content, encoding: "utf-8" }),

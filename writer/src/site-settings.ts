@@ -1,4 +1,5 @@
 import { HttpError, list, type PostDocument } from "./model";
+import defaults from "../../_data/site-defaults.json";
 
 export interface CategoryChild {
   name: string;
@@ -17,9 +18,29 @@ export interface FavoriteGroup {
   name: string;
   items: FavoriteLink[];
 }
-export interface SiteSettings {
+export interface SiteContentSettings {
   blogDescription: string;
   blogDescriptionKo: string;
+  siteTitle: string;
+  blogName: string;
+  email: string;
+  githubUrl: string;
+  xUrl: string;
+  defaultOgImage: string;
+  latestPostsLimit: number;
+  resourcesDescription: string;
+  resourcesDescriptionKo: string;
+  usefulInfo: {
+    enabled: boolean;
+    location: string;
+    latitude: number;
+    longitude: number;
+    baseCurrency: string;
+    targetCurrencies: string[];
+  };
+  privacy: { body: string; bodyKo: string; updated: string };
+}
+export interface SiteSettings extends SiteContentSettings {
   categories: CategoryGroup[];
   favorites: FavoriteGroup[];
 }
@@ -29,10 +50,7 @@ export interface SettingsSnapshot {
   usage: Record<string, number>;
 }
 export const SETTINGS_PATH = "_data/site-settings.json";
-export const DEFAULT_BLOG_DESCRIPTIONS = {
-  blogDescription: "Learning notes and practical research on software development, life in Canada, careers, and finance.",
-  blogDescriptionKo: "소프트웨어 개발, 캐나다 생활, 커리어와 금융에 관한 학습 기록과 실용적인 리서치",
-};
+export const DEFAULT_SITE_CONTENT: SiteContentSettings = defaults;
 
 const aliases: Record<string, string> = {
   study: "study-log",
@@ -120,6 +138,73 @@ function category(value: unknown): CategoryChild {
 function unique(values: string[], message: string) {
   if (new Set(values).size !== values.length) throw new HttpError(422, message);
 }
+function optionalText(value: unknown, max: number, field: string): string {
+  if (typeof value !== "string" || value.length > max) throw new HttpError(422, `${field}을 확인해 주세요.`);
+  return value.trim();
+}
+function number(value: unknown, min: number, max: number, field: string): number {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < min || value > max) throw new HttpError(422, `${field}을 확인해 주세요.`);
+  return value;
+}
+function publicUrl(value: unknown, field: string, image = false): string {
+  const result = optionalText(value, 2000, field);
+  if (image && /^\/api\/media\//.test(result)) throw new HttpError(422, "공유 이미지에는 먼저 발행한 공개 이미지 주소를 사용하세요.");
+  if (!result || (image && /^\/(?!\/)/.test(result))) return result;
+  try {
+    const url = new URL(result);
+    if (image && url.pathname.startsWith("/api/media/")) throw new HttpError(422, "공유 이미지에는 먼저 발행한 공개 이미지 주소를 사용하세요.");
+    if (["http:", "https:"].includes(url.protocol) && !url.username && !url.password) return result;
+  } catch (error) {
+    if (error instanceof HttpError) throw error;
+    /* Report the field instead of URL parser details. */
+  }
+  throw new HttpError(422, `${field}에는 올바른 http 또는 https 주소를 입력하세요.`);
+}
+function contentSettings(input: Record<string, unknown>): SiteContentSettings {
+  const value = { ...DEFAULT_SITE_CONTENT, ...input };
+  const email = optionalText(value.email, 254, "이메일");
+  if (email && !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email)) throw new HttpError(422, "이메일 주소를 확인해 주세요.");
+  const latestPostsLimit = number(value.latestPostsLimit, 1, 20, "최근 글 수");
+  if (!Number.isInteger(latestPostsLimit)) throw new HttpError(422, "최근 글 수는 1~20 사이의 정수로 입력하세요.");
+  const info = object(value.usefulInfo);
+  if (typeof info.enabled !== "boolean") throw new HttpError(422, "Useful Info 표시 설정을 확인해 주세요.");
+  const baseCurrency = text(info.baseCurrency, 3, "기준 통화").toUpperCase();
+  const targetCurrencies = array(info.targetCurrencies, 8).map((currency) => text(currency, 3, "비교 통화").toUpperCase());
+  if (
+    !/^[A-Z]{3}$/.test(baseCurrency) ||
+    !targetCurrencies.length ||
+    targetCurrencies.some((currency) => !/^[A-Z]{3}$/.test(currency) || currency === baseCurrency)
+  )
+    throw new HttpError(422, "통화는 USD, CAD, KRW 같은 3자리 코드로 입력하고 기준 통화는 비교 통화에서 제외하세요.");
+  unique(targetCurrencies, "비교 통화가 중복됩니다.");
+  const privacy = object(value.privacy);
+  const updated = text(privacy.updated, 10, "Privacy 수정일");
+  const date = new Date(updated);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(updated) || Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== updated)
+    throw new HttpError(422, "Privacy 수정일을 확인해 주세요.");
+  return {
+    blogDescription: text(value.blogDescription, 500, "영어 소개 문구"),
+    blogDescriptionKo: text(value.blogDescriptionKo, 500, "한국어 소개 문구"),
+    siteTitle: text(value.siteTitle, 100, "사이트 이름"),
+    blogName: text(value.blogName, 100, "블로그 제목"),
+    email,
+    githubUrl: publicUrl(value.githubUrl, "GitHub 링크"),
+    xUrl: publicUrl(value.xUrl, "X 링크"),
+    defaultOgImage: publicUrl(value.defaultOgImage, "공유 기본 이미지", true),
+    latestPostsLimit,
+    resourcesDescription: text(value.resourcesDescription, 500, "Resources 영어 소개"),
+    resourcesDescriptionKo: text(value.resourcesDescriptionKo, 500, "Resources 한국어 소개"),
+    usefulInfo: {
+      enabled: info.enabled,
+      location: text(info.location, 100, "날씨 지역 이름"),
+      latitude: number(info.latitude, -90, 90, "위도"),
+      longitude: number(info.longitude, -180, 180, "경도"),
+      baseCurrency,
+      targetCurrencies,
+    },
+    privacy: { body: text(privacy.body, 30000, "Privacy 영어 본문"), bodyKo: text(privacy.bodyKo, 30000, "Privacy 한국어 본문"), updated },
+  };
+}
 export function validateSettings(value: unknown): SiteSettings {
   const input = object(value);
   const categories = array(input.categories, 40).map((value) => {
@@ -164,20 +249,7 @@ export function validateSettings(value: unknown): SiteSettings {
     favorites.map((group) => group.name.toLowerCase()),
     "즐겨찾기 그룹 이름이 중복됩니다."
   );
-  return {
-    blogDescription: text(
-      input.blogDescription === undefined ? DEFAULT_BLOG_DESCRIPTIONS.blogDescription : input.blogDescription,
-      500,
-      "영어 소개 문구"
-    ),
-    blogDescriptionKo: text(
-      input.blogDescriptionKo === undefined ? DEFAULT_BLOG_DESCRIPTIONS.blogDescriptionKo : input.blogDescriptionKo,
-      500,
-      "한국어 소개 문구"
-    ),
-    categories,
-    favorites,
-  };
+  return { ...contentSettings(input), categories, favorites };
 }
 export function categoryName(category: CategoryChild, locale: "en" | "ko"): string {
   return locale === "ko" ? category.name_ko || category.name : category.name;

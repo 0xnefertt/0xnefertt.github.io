@@ -93,25 +93,34 @@ test("project forms keep optional details without imposing tasks, lessons or lin
 test("about fields edit nested profile data without losing home settings or altering the source object", () => {
   const { editor } = setup();
   const original = {
-    profile: { image: "prof_pic.jpg", align: "right", image_circular: false, more_info: "<p>Developer</p><p>Canada</p>" },
+    profile: {
+      image: "prof_pic.jpg",
+      align: "right",
+      image_circular: false,
+      location: "Existing region",
+      more_info: "<p>Developer</p><p>Canada</p>",
+    },
     subtitle: "Original subtitle",
     latest_posts: { limit: 5 },
     useful_info: { location: "Vancouver, BC" },
   };
   const copy = structuredClone(original);
   editor.load("about", original);
-  assert.equal(document.getElementById("metadata-profile-name").value, "0xnefertt");
+  assert.equal(document.getElementById("metadata-profile-name").value, "");
+  assert.equal(document.getElementById("metadata-profile-image_circular").checked, false);
   assert.equal(document.getElementById("metadata-profile-more_info"), null);
   assert.equal(document.getElementById("metadata-subtitle"), null);
   assert.deepEqual(editor.read(original), original);
   document.getElementById("metadata-profile-name").value = "새 이름";
   document.getElementById("metadata-profile-bio").value = "새 소개";
   document.getElementById("metadata-profile-location").value = "";
+  document.getElementById("metadata-profile-image_circular").checked = true;
   editor.setImage("profile.image", "/api/media/private-avatar");
   const changed = editor.read(original);
   assert.equal(changed.profile.name, "새 이름");
   assert.equal(changed.profile.bio, "새 소개");
-  assert.equal(changed.profile.location, "");
+  assert.equal(changed.profile.location, undefined);
+  assert.equal(changed.profile.image_circular, true);
   assert.equal(changed.profile.image, "/api/media/private-avatar");
   assert.equal(changed.profile.more_info, original.profile.more_info);
   assert.equal(changed.subtitle, original.subtitle);

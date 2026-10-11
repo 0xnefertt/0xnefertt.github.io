@@ -1,15 +1,12 @@
 ---
-import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
 import UsefulInfo from '../components/UsefulInfo.astro';
-import { contentLocale, localeFromPath, localizedPath, localeText } from '../lib/locale';
+import { localeFromPath, localizedPath, localeText } from '../lib/locale';
 import { siteSettings } from '../lib/settings';
 
 const locale = localeFromPath(Astro.url.pathname);
-const about = (await getCollection('pages')).find((entry) => entry.filePath?.endsWith('/about.md') && contentLocale(entry) === locale);
-if (!about) throw new Error(`Missing ${locale} About settings`);
 const favorites = siteSettings.favorites.filter((group) => group.items.length > 0);
-const description = localeText(locale, 'Favorite links, Vancouver weather, and exchange rates in one place.', '자주 찾는 링크와 밴쿠버 날씨, 환율을 한곳에 모았습니다.');
+const description = localeText(locale, siteSettings.resourcesDescription, siteSettings.resourcesDescriptionKo);
 ---
 
 <Layout title="Resources" description={description} currentPath={localizedPath('/resources/', locale)} mainClass="resources-content" disableAds>
@@ -18,7 +15,7 @@ const description = localeText(locale, 'Favorite links, Vancouver weather, and e
     <p>{description}</p>
   </header>
   <div class="resources-layout">
-    <UsefulInfo config={about.data.useful_info} />
+    <UsefulInfo config={siteSettings.usefulInfo} />
     <section class="resources-favorites" aria-labelledby="resources-favorites-title">
       <h2 id="resources-favorites-title">Favorite</h2>
       {favorites.length === 0 && <p>{localeText(locale, 'No favorite links yet.', '아직 등록된 즐겨찾기가 없습니다.')}</p>}

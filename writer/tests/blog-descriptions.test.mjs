@@ -31,6 +31,11 @@ before(async () => {
               ...JSON.parse(await readFile(path, "utf8")),
               blogDescription: "Custom English introduction",
               blogDescriptionKo: "직접 작성한 한국어 소개",
+              siteTitle: "Configured site name",
+              blogName: "Configured blog name",
+              email: "custom@example.com",
+              githubUrl: "https://github.com/custom",
+              xUrl: "https://x.com/custom",
             }),
             loader: "json",
           }));
@@ -48,7 +53,7 @@ test("blog descriptions retain legacy defaults and validate each language indepe
   const legacy = { categories: [], favorites: [] };
   const defaults = settingsModule.validateSettings(legacy);
   for (const field of ["blogDescription", "blogDescriptionKo"]) {
-    assert.equal(defaults[field], settingsModule.DEFAULT_BLOG_DESCRIPTIONS[field]);
+    assert.equal(defaults[field], settingsModule.DEFAULT_SITE_CONTENT[field]);
     const custom = settingsModule.validateSettings({ ...legacy, [field]: "  New introduction  " });
     assert.equal(custom[field], "New introduction");
     const other = field === "blogDescription" ? "blogDescriptionKo" : "blogDescription";
@@ -62,6 +67,103 @@ test("blog descriptions retain legacy defaults and validate each language indepe
 test("public site reads custom English and Korean descriptions from the saved settings", () => {
   assert.equal(siteModule.siteConfig.blogDescription, "Custom English introduction");
   assert.equal(siteModule.siteConfig.blogDescriptionKo, "직접 작성한 한국어 소개");
+  assert.equal(siteModule.siteConfig.title, "Configured site name");
+  assert.equal(siteModule.siteConfig.blogName, "Configured blog name");
+  assert.deepEqual(
+    siteModule.siteConfig.socialLinks.map((link) => link.href),
+    ["mailto:custom@example.com", "https://github.com/custom", "https://x.com/custom"]
+  );
+});
+
+test("site content validates contact URLs, coordinates, currencies, dates and preserves migration defaults", () => {
+  const valid = settingsModule.validateSettings({ categories: [], favorites: [] });
+  assert.equal(valid.siteTitle, settingsModule.DEFAULT_SITE_CONTENT.siteTitle);
+  assert.equal(settingsModule.validateSettings({ ...valid, email: "", githubUrl: "", xUrl: "" }).email, "");
+  const invalid = [
+    { email: "unsafe\r\n@example.com" },
+    { githubUrl: "javascript:alert(1)" },
+    { xUrl: "https://user:password@example.com" },
+    { defaultOgImage: "//example.com/image.png" },
+    { defaultOgImage: "/api/media/private-image" },
+    { defaultOgImage: "https://writer.example.com/api/media/private-image" },
+    { latestPostsLimit: 21 },
+    { latestPostsLimit: 1.5 },
+    { usefulInfo: { ...valid.usefulInfo, latitude: 91 } },
+    { usefulInfo: { ...valid.usefulInfo, longitude: -181 } },
+    { usefulInfo: { ...valid.usefulInfo, enabled: "false" } },
+    { usefulInfo: { ...valid.usefulInfo, targetCurrencies: ["CAD", "CAD"] } },
+    { usefulInfo: { ...valid.usefulInfo, targetCurrencies: ["USD"] } },
+    { privacy: { ...valid.privacy, updated: "2026-99-99" } },
+  ];
+  for (const change of invalid)
+    assert.throws(
+      () => settingsModule.validateSettings({ ...valid, ...change }),
+      (error) => error.status === 422
+    );
+});
+
+test("site, Resources and Privacy edits share a working copy and survive save and reload", async () => {
+  const dom = new JSDOM(markup);
+  globalThis.document = dom.window.document;
+  globalThis.Option = dom.window.Option;
+  const initial = settingsModule.validateSettings({ categories: [], favorites: [] });
+  let snapshot = { settings: initial, sha: "revision", usage: {} },
+    saved;
+  const manager = managerModule.siteManager(
+    async (_, init) => {
+      if (init?.method === "PUT") {
+        saved = JSON.parse(init.body);
+        snapshot = { ...snapshot, settings: saved.settings };
+      }
+      return { ...snapshot, workflowUrl: "https://example.com/deploy" };
+    },
+    async () => true,
+    async () => true
+  );
+  const flush = () => new Promise(setImmediate);
+  const fill = (id, value) => {
+    const field = document.getElementById(id);
+    field.value = value;
+    field.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+  };
+  try {
+    await manager.load();
+    document.getElementById("manage-site").click();
+    await flush();
+    fill("setting-siteTitle", "My custom site");
+    fill("setting-email", "owner@example.com");
+    fill("setting-latestPostsLimit", "3");
+    document.getElementById("manage-resources").click();
+    await flush();
+    fill("setting-usefulInfo-location", "Toronto");
+    fill("setting-usefulInfo-latitude", "43.65");
+    fill("setting-usefulInfo-longitude", "-79.38");
+    fill("setting-usefulInfo-targetCurrencies", "cad, krw");
+    const enabled = document.getElementById("setting-usefulInfo-enabled");
+    enabled.checked = false;
+    enabled.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+    document.getElementById("manage-privacy").click();
+    await flush();
+    fill("setting-privacy-body", "## Updated English\n\nMy privacy information.");
+    document.getElementById("settings-save").click();
+    await flush();
+    assert.equal(saved.sha, "revision");
+    assert.equal(saved.settings.siteTitle, "My custom site");
+    assert.equal(saved.settings.latestPostsLimit, 3);
+    assert.equal(saved.settings.usefulInfo.location, "Toronto");
+    assert.equal(saved.settings.usefulInfo.enabled, false);
+    assert.deepEqual(saved.settings.usefulInfo.targetCurrencies, ["CAD", "KRW"]);
+    assert.equal(saved.settings.privacy.bodyKo, initial.privacy.bodyKo);
+    assert.deepEqual(saved.settings.categories, initial.categories);
+    assert.deepEqual(saved.settings.favorites, initial.favorites);
+    assert.equal(initial.siteTitle, settingsModule.DEFAULT_SITE_CONTENT.siteTitle);
+    await manager.load();
+    assert.equal(document.getElementById("setting-siteTitle").value, "My custom site");
+    assert.equal(document.getElementById("setting-usefulInfo-enabled").checked, false);
+    assert.equal(document.getElementById("setting-privacy-body").value, saved.settings.privacy.body);
+  } finally {
+    dom.window.close();
+  }
 });
 
 test("admin description edits survive section changes, save with the revision and reload without changing categories or favorites", async () => {
