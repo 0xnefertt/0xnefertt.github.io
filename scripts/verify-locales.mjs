@@ -24,6 +24,11 @@ for (const locale of ["en", "ko"]) {
     assert.ok(html.includes(`href="/${prefix}about/"`), "About navigation must open the localized introduction page");
     const navigation = html.match(/<nav[^>]+id="primary-nav"[^>]*>([\s\S]*?)<\/nav>/)?.[1];
     assert.ok(navigation && !navigation.includes("resources/"), "Resources must not appear in the primary navigation");
+    for (const match of navigation.matchAll(/<a\b[^>]*href="([^"]+)"/g)) {
+      const href = new URL(match[1], "https://0xnefertt.github.io");
+      if (href.pathname.includes("/blog/category/"))
+        await fs.access(path.join(root, decodeURIComponent(href.pathname).replace(/^\//, ""), "index.html"));
+    }
     const footer = html.match(/<footer\b[^>]*>([\s\S]*?)<\/footer>/)?.[1];
     assert.ok(footer?.includes(`href="/${prefix}resources/"`), "Footer Resources must use the current language");
     assert.ok(footer?.includes('href="/sitemap.xml"'), "Both languages must link to the shared XML sitemap");

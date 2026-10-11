@@ -1,5 +1,5 @@
 import { getCollection } from 'astro:content';
-import { localizedPath, type Locale } from './locale';
+import { localizedPath, localeText, type Locale } from './locale';
 import { t } from './messages';
 import { getPublishedBlogPosts, listBlogCategoryTree } from './blog';
 
@@ -31,6 +31,7 @@ export interface NavItem {
   label: string;
   href: string;
   children?: NavItem[];
+  disabled?: boolean;
 }
 
 export async function getNavItems(locale: Locale = 'en'): Promise<NavItem[]> {
@@ -38,7 +39,9 @@ export async function getNavItems(locale: Locale = 'en'): Promise<NavItem[]> {
   return [
     { label: t(locale, 'nav_about'), href: localizedPath('/about/', locale) },
     { label: t(locale, 'nav_blog'), href: localizedPath('/blog/', locale), children: blogCategoryTree.map((parent) => ({
-      label: parent.name, href: parent.href, children: parent.children.map((child) => ({label: child.name, href: child.href})),
+      label: `${parent.name} ${localeText(locale, 'All', '전체')}${parent.count === 0 ? ' (0)' : ''}`,
+      href: parent.href, disabled: parent.count === 0,
+      children: parent.children.map((child) => ({label: `${child.name}${child.count === 0 ? ' (0)' : ''}`, href: child.href, disabled: child.count === 0})),
     })) },
     { label: t(locale, 'nav_bookshelf'), href: localizedPath('/books/', locale) },
     { label: t(locale, 'nav_projects'), href: localizedPath('/projects/', locale) },
