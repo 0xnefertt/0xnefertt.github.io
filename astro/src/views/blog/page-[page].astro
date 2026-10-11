@@ -19,7 +19,7 @@ const postsPerPage = 8;
 
 const rawPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')), locale);
 const allPosts = rawPosts.map(toBlogSummary);
-const categoryTree = listBlogCategoryTree(rawPosts);
+const categoryTree = listBlogCategoryTree(rawPosts, locale);
 const totalPages = Math.max(1, Math.ceil(allPosts.length / postsPerPage));
 const pageIndex = Math.max(1, Math.min(currentPage, totalPages));
 const pageStart = (pageIndex - 1) * postsPerPage;

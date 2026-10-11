@@ -1,4 +1,12 @@
-import { categoryName, categoryOptions, validateSettings, type CategoryChild, type SettingsSnapshot, type SiteSettings } from "./site-settings";
+import {
+  categoryName,
+  categoryOptions,
+  writableCategoryOptions,
+  validateSettings,
+  type CategoryChild,
+  type SettingsSnapshot,
+  type SiteSettings,
+} from "./site-settings";
 import type { ContentCollection } from "./model";
 
 type Api = <T>(path: string, init?: RequestInit) => Promise<T>;
@@ -20,18 +28,43 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
     message("변경사항이 있습니다. 저장하면 블로그에 반영됩니다.");
     el<HTMLButtonElement>("settings-save").disabled = busy;
   }
-  function refreshOptions() {
+  function refreshOptions(allowDefault = true) {
     if (!settings) return;
     const select = el<HTMLSelectElement>("category");
+    const parent = el<HTMLSelectElement>("category-parent");
     const value = select.value;
-    const options = categoryOptions(settings, el<HTMLSelectElement>("content-language").value === "ko" ? "ko" : "en");
-    for (const path of Object.keys(usage))
-      if (!options.some((item) => item.value === path)) options.push({ value: path, label: path.replaceAll("/", " / ") });
-    if (value && !options.some((item) => item.value === value)) options.push({ value, label: value.replaceAll("/", " / ") });
-    select.replaceChildren(...options.map((item) => new Option(item.label, item.value)));
-    if (value && options.some((item) => item.value === value)) select.value = value;
-    el<HTMLButtonElement>("new-post").disabled = el("workspace").dataset.collection === "blog" && !select.value;
+    const locale = el<HTMLSelectElement>("content-language").value === "ko" ? "ko" : "en";
+    const wasEmpty = allowDefault && !value && (!parent.value || el("editor").hidden);
+    const parentSlug = value.split("/")[0] || parent.value || settings.categories[0]?.slug || "";
+    parent.replaceChildren(...settings.categories.map((group) => new Option(categoryName(group, locale), group.slug)));
+    if (parentSlug && !settings.categories.some((group) => group.slug === parentSlug)) {
+      const legacy = new Option(`${parentSlug} · 기존 분류`, parentSlug);
+      legacy.disabled = true;
+      parent.add(legacy);
+    }
+    parent.value = parentSlug;
+    const options = writableCategoryOptions(settings, locale).filter((option) => option.value.startsWith(`${parentSlug}/`));
+    select.replaceChildren(new Option("하위 분류를 선택하세요", ""), ...options.map((item) => new Option(item.label, item.value)));
+    if (value && !options.some((item) => item.value === value)) {
+      const legacy = new Option(`${value} · 하위 분류 선택 필요`, value);
+      legacy.disabled = true;
+      select.add(legacy);
+    }
+    select.value = value || (wasEmpty ? options[0]?.value ?? "" : "");
+    updateNewButton();
   }
+  function updateNewButton() {
+    el<HTMLButtonElement>("new-post").disabled =
+      el("workspace").dataset.collection === "blog" &&
+      (!settings || !writableCategoryOptions(settings).some((option) => option.value === el<HTMLSelectElement>("category").value));
+  }
+  el("category-parent").addEventListener("change", () => {
+    const select = el<HTMLSelectElement>("category");
+    select.value = "";
+    refreshOptions(false);
+    select.dispatchEvent(new select.ownerDocument.defaultView!.Event("input", { bubbles: true }));
+  });
+  el("category").addEventListener("change", updateNewButton);
   function apply(snapshot: SettingsSnapshot) {
     settings = structuredClone(snapshot.settings);
     sha = snapshot.sha;

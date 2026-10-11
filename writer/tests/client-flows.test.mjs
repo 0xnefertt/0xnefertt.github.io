@@ -101,7 +101,21 @@ async function setup() {
     if (url.pathname === "/api/session") return response({ csrf: "fixture" });
     if (url.pathname === "/api/site-settings")
       return response({
-        settings: { categories: [{ name: "Notes", name_ko: "기록", slug: "study-log", children: [] }], favorites: [] },
+        settings: {
+          categories: [
+            {
+              name: "Notes",
+              name_ko: "기록",
+              slug: "study-log",
+              children: [
+                { name: "Development", name_ko: "개발", slug: "dev" },
+                { name: "English", name_ko: "영어", slug: "english" },
+                { name: "Career", name_ko: "커리어", slug: "career" },
+              ],
+            },
+          ],
+          favorites: [],
+        },
         sha: "fixture",
         usage: {},
       });
@@ -420,4 +434,24 @@ test("about editing and preview omit removed fields while saves retain legacy me
   await ui.click("preview-tab");
   assert.match(document.getElementById("preview-panel").textContent, /Updated name.*Short bio.*The main introduction stays editable/s);
   assert.doesNotMatch(document.getElementById("preview-panel").textContent, /Legacy subtitle|Legacy extra information/);
+});
+
+test("blog drafts save one child category path and keep its parent selection through language changes and reopening", async () => {
+  const ui = await setup();
+  await ui.click("new-post");
+  assert.equal(ui.drafts.get("draft-1").document.category, "study-log/dev");
+  const child = document.getElementById("category");
+  assert.equal(document.getElementById("category-parent").value, "study-log");
+  assert.ok(![...child.options].some((option) => option.value === "study-log"));
+  ui.edit("category", "study-log/career");
+  await ui.click("save");
+  assert.equal(ui.drafts.get("draft-1").document.category, "study-log/career");
+  ui.edit("content-language", "ko");
+  document.getElementById("content-language").dispatchEvent(new dom.window.Event("change"));
+  await ui.click("save");
+  assert.equal(child.selectedOptions[0].textContent, "커리어");
+  assert.equal(document.getElementById("category-parent").value, "study-log");
+  document.querySelector("#post-list .post-item").click();
+  await settle();
+  assert.equal(child.value, "study-log/career");
 });

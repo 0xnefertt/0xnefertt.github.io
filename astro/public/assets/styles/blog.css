@@ -645,6 +645,11 @@ body {
   height: auto;
   margin: 1rem auto;
 }
+.category-disabled {
+  display: inline-block;
+  color: var(--text-muted);
+  padding: 0.4rem 0.6rem;
+}
 
 .book-detail-layout--single {
   grid-template-columns: minmax(0, 760px);

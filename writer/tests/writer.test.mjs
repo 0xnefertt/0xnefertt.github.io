@@ -990,6 +990,18 @@ test("trashing a published working copy keeps GitHub content and refuses restora
   assert.equal((await request(`/api/drafts/${opened.id}/restore`, { method: "POST", data: { version: archived.version } })).status, 409);
 });
 
+test("publication rejects parent-only and unconfigured categories without modifying the draft or writing GitHub content", async () => {
+  for (const category of ["study-log", "study-log/missing", "unknown/child"]) {
+    const value = await create(document({ category }));
+    calls = [];
+    const response = await request(`/api/drafts/${value.id}/publish`, { method: "POST", data: { version: value.version } });
+    assert.equal(response.status, 422);
+    assert.match((await response.json()).error, /하위 카테고리/);
+    assert.ok(!calls.some((call) => call.method === "POST" && call.path.endsWith("/git/blobs")));
+    assert.equal((await (await request(`/api/drafts/${value.id}`)).json()).document.category, category);
+  }
+});
+
 test("logout invalidates the server session", async () => {
   const response = await request("/api/logout", { method: "POST" });
   assert.equal(response.status, 200);

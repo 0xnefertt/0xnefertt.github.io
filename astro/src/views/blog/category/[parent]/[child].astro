@@ -25,7 +25,7 @@ interface Props {
 
 const { parentCategory, childCategory } = Astro.props;
 const rawPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')), locale);
-const categoryTree = listBlogCategoryTree(rawPosts);
+const categoryTree = listBlogCategoryTree(rawPosts, locale);
 const allPosts = rawPosts
   .map(toBlogSummary)
   .filter((post) => post.categoryPaths.some((item) => item.parentSlug === parentCategory.slug && item.childSlug === childCategory.slug));

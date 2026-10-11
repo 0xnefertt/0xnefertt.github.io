@@ -123,6 +123,9 @@ Only these two About paths are editable; other `_pages/` files and new About pag
 Deploy both the Worker backend and the Astro site to enable the new admin sections in production. Building only the editor does not update the API.
 
 Category names and ordering are independent of their stable URL slugs. Each parent and child has separate English and Korean names; the public site and post editor use the selected language.
+Post writing selects a parent group and then a child category. Only configured child paths can be published; parent groups are aggregate views.
+Legacy parent-only or removed assignments remain visible as disabled choices until explicitly reclassified. Usage counts do not add parent groups back as writable categories.
+Public menus show configured empty categories with a zero count and no link until a post is published. Empty category routes stay out of the sitemap.
 Add parents or children, rename display names, reorder entries, or remove an
 unused category. Categories referenced by published blog posts or private blog drafts cannot be removed until those posts are reassigned.
 

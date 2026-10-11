@@ -278,6 +278,7 @@ function setLocked(value: boolean) {
     element<HTMLButtonElement>(id).disabled = value;
   element<HTMLButtonElement>("add-translation").disabled = value || !current?.document.sourcePath;
   for (const field of [title, description, body, category, tags, date, slug, language, translation]) field.disabled = value;
+  element<HTMLSelectElement>("category-parent").disabled = value;
   if (current?.document.sourcePath) {
     slug.disabled = true;
     language.disabled = true;
@@ -310,6 +311,7 @@ function showDraft(value: Draft) {
   if (selectedCollection === "blog" && ![...category.options].some((item) => item.value === doc.category))
     category.add(new Option(doc.category, doc.category));
   category.value = doc.category;
+  element("editor").hidden = false;
   manager.refreshCategories();
   slug.disabled = Boolean(doc.sourcePath);
   date.disabled = Boolean(doc.sourcePath);

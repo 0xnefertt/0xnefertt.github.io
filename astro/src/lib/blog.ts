@@ -345,7 +345,7 @@ export function getPostCategoryPaths(post: CollectionEntry<'blog'>): BlogCategor
     }
   }
 
-  return [...uniqueByKey.values()].map((path) => {
+  return [...uniqueByKey.values()].filter((path) => path.childSlug || ![...uniqueByKey.values()].some((other) => other.parentSlug === path.parentSlug && other.childSlug)).map((path) => {
     const locale = contentLocale(post);
     const parent = categoryLabel(path.parentSlug, undefined, locale, path.parentName);
     const child = path.childSlug ? categoryLabel(path.parentSlug, path.childSlug, locale, path.childName!) : undefined;
@@ -560,14 +560,12 @@ export function listBlogCategoryTree(posts: CollectionEntry<'blog'>[], locale: L
   }
 
   return [...categoryMap.values()]
-    .filter((parent) => parent.count > 0)
     .map((parent) => ({
       name: categoryLabel(parent.slug, undefined, locale, parent.name),
       slug: parent.slug,
       count: parent.count,
       href: localizedPath(`/blog/category/${parent.slug}/`, locale),
       children: [...parent.children.values()]
-        .filter((child) => child.count > 0)
         .map((child) => ({ ...child, name: categoryLabel(parent.slug, child.slug, locale, child.name) }))
         .sort((a, b) => {
           const aOrder = CHILD_CATEGORY_ORDER.get(`${parent.slug}/${a.slug}`) ?? Number.MAX_SAFE_INTEGER;

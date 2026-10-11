@@ -130,11 +130,79 @@ test("administrator saves English and Korean names independently and changes sel
   select.value = "study-log/dev";
   document.getElementById("content-language").value = "ko";
   manager.refreshCategories();
-  assert.equal(select.selectedOptions[0].textContent, "한국어 변경 / 코드");
+  assert.equal(select.selectedOptions[0].textContent, "코드");
+  assert.equal(document.getElementById("category-parent").selectedOptions[0].textContent, "한국어 변경");
   assert.equal(select.value, "study-log/dev");
   document.getElementById("content-language").value = "en";
   manager.refreshCategories();
-  assert.equal(select.selectedOptions[0].textContent, "Engineering / English edit");
+  assert.equal(select.selectedOptions[0].textContent, "English edit");
+  assert.equal(document.getElementById("category-parent").selectedOptions[0].textContent, "Engineering");
   assert.equal(select.value, "study-log/dev");
   assert.deepEqual(initial, settings());
+});
+
+test("writing selects only configured children and changing parents clears the old child without reintroducing aggregate usage", async () => {
+  const dom = new JSDOM(editorHtml);
+  globalThis.document = dom.window.document;
+  globalThis.Option = dom.window.Option;
+  const initial = settings();
+  initial.categories.push({
+    name: "Money",
+    name_ko: "돈 이야기",
+    slug: "money-talk",
+    children: [{ name: "Finance", name_ko: "금융", slug: "finance" }],
+  });
+  const manager = managerModule.siteManager(
+    async () => ({ settings: initial, sha: "original", usage: { "study-log": 9, "study-log/dev": 8, retired: 3 } }),
+    async () => true,
+    async () => true
+  );
+  document.getElementById("workspace").dataset.collection = "blog";
+  await manager.load();
+  const parent = document.getElementById("category-parent"),
+    child = document.getElementById("category");
+  assert.equal(child.value, "study-log/dev");
+  assert.ok(![...child.options].some((option) => option.value === "study-log" || option.value === "retired"));
+  document.getElementById("editor").hidden = false;
+  parent.value = "money-talk";
+  parent.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
+  assert.equal(child.value, "");
+  assert.deepEqual(
+    [...child.options].map((option) => option.value),
+    ["", "money-talk/finance"]
+  );
+  assert.equal(document.getElementById("new-post").disabled, true);
+  child.value = "money-talk/finance";
+  child.dispatchEvent(new dom.window.Event("change"));
+  assert.equal(document.getElementById("new-post").disabled, false);
+  child.add(new dom.window.Option("Legacy parent", "study-log"));
+  child.value = "study-log";
+  manager.refreshCategories();
+  assert.equal(child.value, "study-log");
+  assert.equal(child.selectedOptions[0].disabled, true);
+  assert.equal(parent.value, "study-log");
+  assert.equal(document.getElementById("new-post").disabled, true);
+  for (const value of ["study-log", "", "study-log/missing"]) assert.throws(() => settingsModule.assertWritableCategory(initial, value));
+  assert.doesNotThrow(() => settingsModule.assertWritableCategory(initial, "study-log/dev"));
+  dom.window.close();
+});
+
+test("public groups aggregate child posts once, remove redundant parent assignments and retain zero-count configured children", () => {
+  const post = {
+    id: "post",
+    collection: "blog",
+    filePath: "_posts/ko/study-log/dev/2026-01-01-post.md",
+    body: "Body",
+    data: { lang: "ko", title: "Post", categories: ["study-log", "study-log/dev"], date: new Date("2026-01-01") },
+  };
+  const paths = blogModule.getPostCategoryPaths(post);
+  assert.deepEqual(
+    paths.map((item) => item.key),
+    ["study-log/dev"]
+  );
+  const group = blogModule.listBlogCategoryTree([post], "ko").find((group) => group.slug === "study-log");
+  assert.equal(group.count, 1);
+  assert.equal(group.children.find((child) => child.slug === "dev").count, 1);
+  assert.equal(group.children.find((child) => child.slug === "english").count, 0);
+  assert.equal(group.children.find((child) => child.slug === "career").count, 0);
 });

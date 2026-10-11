@@ -15,7 +15,7 @@ import blogSearchScriptUrl from '../../scripts/blog-search.js?url';
 const POSTS_PER_PAGE = 8;
 const rawPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')), locale);
 const allPosts = rawPosts.map(toBlogSummary);
-const categoryTree = listBlogCategoryTree(rawPosts);
+const categoryTree = listBlogCategoryTree(rawPosts, locale);
 const currentPage = 1;
 const totalPages = Math.max(1, Math.ceil(allPosts.length / POSTS_PER_PAGE));
 const posts = allPosts.slice(0, POSTS_PER_PAGE);

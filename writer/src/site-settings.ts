@@ -172,6 +172,15 @@ export function categoryOptions(settings: SiteSettings, locale: "en" | "ko" = "e
     })),
   ]);
 }
+export function writableCategoryOptions(settings: SiteSettings, locale: "en" | "ko" = "en") {
+  return settings.categories.flatMap((group) =>
+    group.children.map((child) => ({ value: `${group.slug}/${child.slug}`, label: categoryName(child, locale) }))
+  );
+}
+export function assertWritableCategory(settings: SiteSettings, value: string) {
+  if (!writableCategoryOptions(settings).some((option) => option.value === value))
+    throw new HttpError(422, "상위 분류의 하위 카테고리까지 선택해 주세요. 기존 분류가 없다면 관리자에서 먼저 추가해 주세요.");
+}
 export function assertCategoryRemoval(previous: SiteSettings, next: SiteSettings, usage: Record<string, number>) {
   const retained = new Set(categoryOptions(next).map((item) => item.value));
   for (const item of categoryOptions(previous))

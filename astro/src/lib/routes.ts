@@ -32,12 +32,12 @@ async function buildRoutes(): Promise<SiteRoute[]> {
     }
     const published = getPublishedBlogPosts(sortPostsDesc(posts), locale);
     for (let page = 2; page <= Math.ceil(published.length / 8); page++) add(`/blog/page-${page}/`, 'blog/page-[page]', locale, { currentPage: page }, undefined, true);
-    for (const parent of listBlogCategoryTree(published, locale)) {
+    for (const parent of listBlogCategoryTree(published, locale).filter((parent) => parent.count > 0)) {
       const parentPath = `/blog/category/${parent.slug}/`;
       add(parentPath, 'blog/category/[category]', locale, { category: parent }, parentPath);
       const parentPosts = published.filter((post) => getPostCategoryPaths(post).some((path) => path.parentSlug === parent.slug));
       for (let page = 2; page <= Math.ceil(parentPosts.length / 8); page++) add(`${parentPath}page-${page}/`, 'blog/category/[category]/page-[page]', locale, { category: parent, currentPage: page }, undefined, true);
-      for (const child of parent.children) {
+      for (const child of parent.children.filter((child) => child.count > 0)) {
         const childPath = `${parentPath}${child.slug}/`;
         const props = { parentCategory: parent, childCategory: child };
         add(childPath, 'blog/category/[parent]/[child]', locale, props, childPath);

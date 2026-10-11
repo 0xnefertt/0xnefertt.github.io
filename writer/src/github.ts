@@ -16,6 +16,7 @@ import { format } from "prettier/standalone";
 import markdown from "prettier/plugins/markdown";
 import yaml from "prettier/plugins/yaml";
 import { readMedia } from "./media-storage";
+import { assertWritableCategory, SETTINGS_PATH, validateSettings } from "./site-settings";
 
 export async function boundedBody(response: Response | Request, max = 1_000_000): Promise<Uint8Array> {
   const reader = response.body?.getReader();
@@ -129,6 +130,14 @@ export interface MediaFile {
 
 export async function publishPost(env: Env, token: string, doc: PostDocument, media: MediaFile[]) {
   const repo = await repositoryTree(env, token);
+  if (documentCollection(doc) === "blog") {
+    const settingsFile = repo.files.find((file) => file.path === SETTINGS_PATH && file.type === "blob");
+    if (!settingsFile) throw new HttpError(503, "사이트 분류 설정을 불러오지 못했습니다.");
+    const blob = await github<{ content: string; size: number }>(token, `${repo.root}/git/blobs/${settingsFile.sha}`);
+    if (blob.size > 650_000) throw new HttpError(413, "설정 파일이 너무 큽니다.");
+    const settings = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(blob.content.replace(/\s/g, "")), (c) => c.charCodeAt(0))));
+    assertWritableCategory(validateSettings(settings), doc.category);
+  }
   const path = postPath(doc);
   const current = repo.files.find((file) => file.path === path);
   if (doc.sourcePath && current && current.sha !== doc.sourceSha && documentCollection(doc) === "books") {
