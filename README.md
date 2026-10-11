@@ -126,6 +126,8 @@ Generated at build time:
 
 - `/sitemap.xml`
   - Generated as readable UTF-8 XML on every site build, including publication and content-edit deployments. Footer order starts with Privacy, Sitemap, RSS.
+  - Uses only the sitemap namespace, with no HTML elements or stylesheet, so browsers can display their native XML tree.
+    Both English and Korean URLs remain listed; translation alternatives are declared with `hreflang` in each page's HTML head.
   - Content URLs include `lastmod` from recorded updates and source-file Git history; builds do not stamp unchanged articles with the build time.
     Listing pages reflect their newest published content. Deployment checks out full Git history to retain accurate per-file dates.
 - `/rss.xml`

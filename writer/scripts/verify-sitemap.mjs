@@ -9,6 +9,10 @@ const document = dom.window.document;
 const namespace = "http://www.sitemaps.org/schemas/sitemap/0.9";
 assert.equal(document.documentElement.localName, "urlset");
 assert.equal(document.documentElement.namespaceURI, namespace);
+assert.doesNotMatch(source, /<\?xml-stylesheet\b/, "Sitemap must use the browser's native XML viewer");
+for (const element of document.getElementsByTagName("*")) {
+  assert.equal(element.namespaceURI, namespace, "HTML or other rendering namespaces disable the native XML viewer");
+}
 const urls = [...document.getElementsByTagNameNS(namespace, "url")];
 assert.ok(urls.length > 0);
 const locations = new Set();
@@ -26,11 +30,15 @@ for (const entry of urls) {
     dates++;
   }
   if (/^\/(?:ko\/)?(?:books|projects)\/[^/]+\/$/.test(url.pathname)) assert.ok(modified, "Content URLs must record their modification date");
-  for (const link of entry.getElementsByTagNameNS("http://www.w3.org/1999/xhtml", "link")) {
-    assert.ok(["en", "ko"].includes(link.getAttribute("hreflang")));
-    assert.equal(new URL(link.getAttribute("href")).origin, url.origin);
-  }
 }
+assert.ok(
+  [...locations].some((location) => new URL(location).pathname.startsWith("/ko/")),
+  "Sitemap must retain Korean URLs"
+);
+assert.ok(
+  [...locations].some((location) => !new URL(location).pathname.startsWith("/ko/")),
+  "Sitemap must retain English URLs"
+);
 assert.ok(dates > 0, "Sitemap must include content modification dates");
 dom.window.close();
-console.log(`[verify-sitemap] Valid UTF-8 XML: ${urls.length} canonical URLs, ${dates} modification dates, localized alternatives OK`);
+console.log(`[verify-sitemap] Native-viewer-compatible UTF-8 XML: ${urls.length} canonical URLs, ${dates} modification dates; EN/KO URLs retained`);

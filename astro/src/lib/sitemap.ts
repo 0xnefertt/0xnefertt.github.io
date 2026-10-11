@@ -5,7 +5,6 @@ import { resolve } from 'node:path';
 export interface SitemapEntry {
   location: string;
   lastmod?: string;
-  alternatives: { locale: string; href: string }[];
 }
 
 function isoDate(value: unknown): string | undefined {
@@ -49,12 +48,12 @@ const xml = (value: string) =>
 export function renderSitemap(entries: SitemapEntry[]): string {
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
-    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
+    // XHTML elements disable browsers' native XML tree viewer. Hreflang stays in page HTML.
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
     ...entries.flatMap((entry) => [
       '  <url>',
       `    <loc>${xml(entry.location)}</loc>`,
       ...(entry.lastmod ? [`    <lastmod>${xml(entry.lastmod)}</lastmod>`] : []),
-      ...entry.alternatives.map((link) => `    <xhtml:link rel="alternate" hreflang="${xml(link.locale)}" href="${xml(link.href)}" />`),
       '  </url>',
     ]),
     '</urlset>',
