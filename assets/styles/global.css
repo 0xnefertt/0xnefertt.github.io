@@ -859,21 +859,6 @@ main {
   display: block;
 }
 
-.profile-meta {
-  margin-top: 0.75rem;
-  color: var(--text-muted);
-  font-size: 0.94rem;
-  line-height: 1.45;
-}
-
-.profile-meta p {
-  margin: 0.28rem 0 0;
-}
-
-.profile-meta p:first-child {
-  margin-top: 0;
-}
-
 .section-title {
   margin: 2rem 0 0.65rem;
   font-family: "IBM Plex Mono", "SFMono-Regular", Menlo, monospace;
