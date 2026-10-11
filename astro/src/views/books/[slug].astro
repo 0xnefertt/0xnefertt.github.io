@@ -6,7 +6,7 @@ import { contentLocale, localeFromPath, localizedPath, localeText } from '../../
 import { t } from '../../lib/messages';
 import { formatPostDate, normalizeTaxonomy } from '../../lib/blog';
 import { getBookRoute, normalizeAssetPath } from '../../lib/content';
-import { getBookNeighbors, getBookRecommendations } from '../../lib/books';
+import { getBookNeighbors, getBookRecommendations, getOtherBookReviews } from '../../lib/books';
 import { siteConfig } from '../../lib/site';
 
 interface Props {
@@ -24,11 +24,13 @@ const tags = normalizeTaxonomy(entry.data.tags);
 const [books, posts, pages] = await Promise.all([getCollection('books'), getCollection('blog'), getCollection('pages')]);
 const { previous, next } = getBookNeighbors(entry, books, locale);
 const recommendations = getBookRecommendations(entry, books, posts, locale);
+const otherReviews = recommendations.length === 0 ? getOtherBookReviews(entry, books, locale) : [];
+const sidebarReviews = recommendations.length > 0 ? recommendations : otherReviews;
 const profile = pages.find((page) => page.filePath?.endsWith('/about.md') && contentLocale(page) === locale)?.data.profile;
 const reviewer = profile?.name ?? '0xnefertt';
 const avatar = normalizeAssetPath(profile?.image);
 const canonicalUrl = new URL(getBookRoute(entry).href, siteConfig.siteUrl).toString();
-const hasSidebar = outline.length > 0 || recommendations.length > 0;
+const hasSidebar = outline.length > 0 || sidebarReviews.length > 0;
 const articleJsonLd = JSON.stringify({
   '@context': 'https://schema.org',
   '@type': 'Article',
@@ -38,7 +40,7 @@ const articleJsonLd = JSON.stringify({
   datePublished: entry.data.date?.toISOString(),
   dateModified: (entry.data.last_updated ?? entry.data.date)?.toISOString(),
   mainEntityOfPage: canonicalUrl,
-  about: { '@type': 'Book', name: entry.data.title, ...(entry.data.author ? { author: { '@type': 'Person', name: entry.data.author } } : {}) },
+  about: { '@type': 'Book', name: entry.data.title },
 }).replace(/</g, '\\u003c');
 ---
 
@@ -67,7 +69,6 @@ const articleJsonLd = JSON.stringify({
         <span>{localeText(locale, 'Updated', '수정')} <time datetime={entry.data.last_updated.toISOString()}>{formatPostDate(entry.data.last_updated)}</time></span>
       )}
     </p>
-    {entry.data.author && <p class="book-meta">{localeText(locale, 'Book author', '책 저자')}: {entry.data.author}</p>}
     {(categories.length > 0 || tags.length > 0) && (
       <div class="tags">
         {categories.map((category) => <span>{category}</span>)}
@@ -117,15 +118,16 @@ const articleJsonLd = JSON.stringify({
             <ul class="book-outline-list">{outline.map((heading) => <li class:list={{ 'book-outline-subheading': heading.depth === 3 }}><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ul>
           </nav>
         )}
-        {recommendations.length > 0 && (
+        {sidebarReviews.length > 0 && (
           <section>
-            <h2>{t(locale, 'post_more_to_read')}</h2>
+            <h2>{otherReviews.length > 0 ? localeText(locale, 'Other book reviews', '다른 독서 기록') : t(locale, 'post_more_to_read')}</h2>
             <ul class="post-related-list">
-              {recommendations.map((item) => (
+              {sidebarReviews.map((item) => (
                 <li class="post-related-item">
                   <a href={item.href}>{item.title}</a>
                   <p class="post-related-meta">
                     {localeText(locale, item.kind === 'books' ? 'Book review' : 'Blog', item.kind === 'books' ? '독서 기록' : '블로그')}
+                    {'locale' in item && ` · ${item.locale === 'ko' ? '한국어' : 'English'}`}
                     {item.date && ` · ${formatPostDate(item.date)}`}
                   </p>
                 </li>

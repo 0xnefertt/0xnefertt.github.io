@@ -89,6 +89,21 @@ test("different Korean tags are not mistaken for the same recommendation topic",
   );
 });
 
+test("other-language bookshelf fallback labels its language and excludes the current translation, drafts and duplicate reviews", () => {
+  const current = { ...book("english-original", "2026-01-01", "en"), data: { lang: "en", title: "English original", translation_key: "paired" } };
+  const original = { ...book("korean-original", "2026-01-01"), data: { lang: "ko", title: "한국어 원문", translation_key: "paired" } };
+  const related = { ...book("other-review", "2026-01-03"), data: { lang: "ko", title: "다른 책", translation_key: "other" } };
+  const duplicate = { ...related, id: "duplicate", data: { ...related.data, date: new Date("2026-01-02") } };
+  const catalogue = [current, original, related, duplicate, book("private", "2026-01-04", "ko", true), book("english-other", "2026-01-02", "en")];
+  const results = books.getOtherBookReviews(current, catalogue, "en");
+  assert.deepEqual(
+    results.map((item) => [item.title, item.locale]),
+    [["다른 책", "ko"]]
+  );
+  assert.ok(results[0].href.startsWith("/ko/books/"));
+  assert.deepEqual(books.getOtherBookReviews(current, [current, original], "en"), []);
+});
+
 test("book publication dates survive edits while drafts and translations do not inherit an artificial publication date", () => {
   const source = model.parsePost(
     "---\ntitle: Review\nlang: ko\nauthor: Book author\ndate: 2026-01-07\n---\n\nReview",

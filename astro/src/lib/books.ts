@@ -1,7 +1,7 @@
 import type { CollectionEntry } from 'astro:content';
 import { getPostCategories, normalizeTaxonomy, toBlogSummary } from './blog';
 import { getBookRoute } from './content';
-import { inLocale, type Locale } from './locale';
+import { contentLocale, inLocale, translationKey, type Locale } from './locale';
 
 export function sortBooks(books: CollectionEntry<'books'>[]): CollectionEntry<'books'>[] {
   return [...books].sort((a, b) => (b.data.date?.getTime() ?? 0) - (a.data.date?.getTime() ?? 0) || a.id.localeCompare(b.id));
@@ -60,4 +60,24 @@ export function getBookRecommendations(
         a.href.localeCompare(b.href)
     )
     .slice(0, 4);
+}
+
+export function getOtherBookReviews(book: CollectionEntry<'books'>, books: CollectionEntry<'books'>[], locale: Locale) {
+  const currentKey = translationKey(book);
+  const seen = new Set<string>();
+  return sortBooks(books)
+    .filter((entry) => {
+      const key = translationKey(entry);
+      if (entry.id === book.id || entry.data.draft === true || contentLocale(entry) === locale || key === currentKey || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 4)
+    .map((entry) => ({
+      title: entry.data.title,
+      ...getBookRoute(entry),
+      date: entry.data.date,
+      kind: 'books' as const,
+      locale: contentLocale(entry),
+    }));
 }
