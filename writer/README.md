@@ -131,4 +131,8 @@ unused category. Categories referenced by published blog posts or private blog d
 
 Favorites supports group and link names, URLs, optional notes, ordering, addition, and removal. Groups and links appear on `/resources/` and `/ko/resources/`; empty groups are retained in admin but hidden on Resources. The initial migration preserves every link from `_pages/about.md`.
 
-Both settings sections share a working copy. “저장하고 반영” commits `_data/site-settings.json` to the configured repository and starts the existing site deployment. Settings are explicit-save, while post drafts continue to autosave. Export unsaved settings before reloading after a conflict. Authentication, owner checks, CSRF, bounded requests, and non-forced Git ref updates apply to settings as well as posts. The API uses batched GraphQL reads pinned to the repository head to check category usage.
+“블로그 소개” manages independent English (`blogDescription`) and Korean (`blogDescriptionKo`) text for the homepage and blog headers.
+Each field accepts up to 500 characters. Existing text is retained on migration, and older editor tabs cannot overwrite these values by omitting them when saving other settings.
+About/Profile uses its separate introduction and profile fields.
+
+All settings sections share a working copy. “저장하고 반영” commits `_data/site-settings.json` to the configured repository and starts the existing site deployment. Settings are explicit-save, while post drafts continue to autosave. Export unsaved settings before reloading after a conflict. Authentication, owner checks, CSRF, bounded requests, and non-forced Git ref updates apply to settings as well as posts. The API uses batched GraphQL reads pinned to the repository head to check category usage.

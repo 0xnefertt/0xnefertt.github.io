@@ -62,6 +62,9 @@ export async function saveSiteSettings(env: Env, token: string, value: unknown, 
   const repo = await repositoryTree(env, token);
   const previous = await readSettings(token, repo);
   if (previous.sha !== expected) throw new HttpError(409, "다른 곳에서 설정이 변경되었습니다. 내용을 내려받고 다시 불러와 주세요.");
+  // Older editor tabs omit these fields when saving categories or favorites.
+  for (const field of ["blogDescription", "blogDescriptionKo"] as const)
+    if (!Object.hasOwn(value as object, field)) settings[field] = previous.settings[field];
   const usage = await categoryUsage(env, token, repo);
   assertCategoryRemoval(previous.settings, settings, usage);
   const content = await format(JSON.stringify(settings), { parser: "json", plugins: [babel, estree], printWidth: 150, trailingComma: "es5" });
@@ -75,7 +78,7 @@ export async function saveSiteSettings(env: Env, token: string, value: unknown, 
   });
   const commit = await github<{ sha: string }>(token, `${repo.root}/git/commits`, {
     method: "POST",
-    body: JSON.stringify({ message: "Update categories and homepage favorites", tree: tree.sha, parents: [repo.head] }),
+    body: JSON.stringify({ message: "Update site settings", tree: tree.sha, parents: [repo.head] }),
   });
   await github(token, `${repo.root}/git/refs/heads/${env.GITHUB_BRANCH}`, {
     method: "PATCH",

@@ -2,6 +2,7 @@ import { getCollection } from 'astro:content';
 import { localizedPath, type Locale } from './locale';
 import { t } from './messages';
 import { getPublishedBlogPosts, listBlogCategoryTree } from './blog';
+import { siteSettings } from './settings';
 
 const gaMeasurementId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID?.trim() ?? '';
 const adsensePublisherId = import.meta.env.PUBLIC_ADSENSE_PUBLISHER_ID?.trim() ?? '';
@@ -12,8 +13,8 @@ export const siteConfig = {
   lang: 'en',
   siteUrl: 'https://0xnefertt.github.io',
   blogName: "0xnefertt's Blog",
-  blogDescriptionKo: '소프트웨어 개발, 캐나다 생활, 커리어와 금융에 관한 학습 기록과 실용적인 리서치',
-  blogDescription: 'Learning notes and practical research on software development, life in Canada, careers, and finance.',
+  blogDescriptionKo: siteSettings.blogDescriptionKo,
+  blogDescription: siteSettings.blogDescription,
   defaultOgImage: '/assets/img/prof_pic.jpg',
   xHandle: '@0xnefertt',
   adsensePublisherId,
@@ -38,11 +39,20 @@ export async function getNavItems(locale: Locale = 'en'): Promise<NavItem[]> {
   const blogCategoryTree = listBlogCategoryTree(getPublishedBlogPosts(await getCollection('blog'), locale), locale);
   return [
     { label: t(locale, 'nav_about'), href: localizedPath('/about/', locale) },
-    { label: t(locale, 'nav_blog'), href: localizedPath('/blog/', locale), children: blogCategoryTree.map((parent) => ({
-      label: `${parent.name}${parent.count === 0 ? ' (0)' : ''}`,
-      href: parent.href, disabled: parent.count === 0,
-      children: parent.children.map((child) => ({label: `${child.name}${child.count === 0 ? ' (0)' : ''}`, href: child.href, disabled: child.count === 0})),
-    })) },
+    {
+      label: t(locale, 'nav_blog'),
+      href: localizedPath('/blog/', locale),
+      children: blogCategoryTree.map((parent) => ({
+        label: `${parent.name}${parent.count === 0 ? ' (0)' : ''}`,
+        href: parent.href,
+        disabled: parent.count === 0,
+        children: parent.children.map((child) => ({
+          label: `${child.name}${child.count === 0 ? ' (0)' : ''}`,
+          href: child.href,
+          disabled: child.count === 0,
+        })),
+      })),
+    },
     { label: t(locale, 'nav_bookshelf'), href: localizedPath('/books/', locale) },
     { label: t(locale, 'nav_projects'), href: localizedPath('/projects/', locale) },
   ];

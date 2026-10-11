@@ -18,7 +18,7 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
   let changed = false;
   let busy = false;
   let savedPaths = new Set<string>();
-  let section: "posts" | "books" | "projects" | "about" | "categories" | "favorites" = "posts";
+  let section: "posts" | "books" | "projects" | "about" | "description" | "categories" | "favorites" = "posts";
   const expanded = new WeakSet<object>();
   const message = (value: string) => {
     el("settings-status").textContent = value;
@@ -66,7 +66,7 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
   });
   el("category").addEventListener("change", updateNewButton);
   function apply(snapshot: SettingsSnapshot) {
-    settings = structuredClone(snapshot.settings);
+    settings = validateSettings(snapshot.settings);
     sha = snapshot.sha;
     usage = snapshot.usage;
     savedPaths = new Set(categoryOptions(settings).map((item) => item.value));
@@ -256,6 +256,10 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
     });
   }
   function render() {
+    if (settings) {
+      el<HTMLTextAreaElement>("blog-description-en").value = settings.blogDescription;
+      el<HTMLTextAreaElement>("blog-description-ko").value = settings.blogDescriptionKo;
+    }
     renderCategories();
     renderFavorites();
   }
@@ -268,16 +272,29 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
     el("settings-panel").hidden = content;
     el("category-manager").hidden = next !== "categories";
     el("favorites-manager").hidden = next !== "favorites";
-    for (const item of ["posts", "books", "projects", "about", "categories", "favorites"])
+    el("blog-description-manager").hidden = next !== "description";
+    for (const item of ["posts", "books", "projects", "about", "description", "categories", "favorites"])
       el(`manage-${item}`).setAttribute("aria-pressed", String(item === next));
-    el("manager-heading").textContent = next === "categories" ? "카테고리" : "즐겨찾기";
+    el("manager-heading").textContent = next === "description" ? "블로그 소개" : next === "categories" ? "카테고리" : "즐겨찾기";
     el("manager-description").textContent =
-      next === "categories"
-        ? "영어·한국어 이름과 순서를 따로 설정하세요. 이름을 바꿔도 주소는 유지됩니다. 글이 있는 카테고리는 삭제할 수 없으며, 새 카테고리는 글을 발행하면 블로그에 표시됩니다."
-        : "홈 화면에 표시할 그룹과 링크를 관리하세요. 순서는 위·아래 버튼으로 변경합니다. 빈 그룹은 홈 화면에 표시되지 않습니다.";
+      next === "description"
+        ? "랜딩 페이지와 블로그 상단의 소개 문구를 영어·한국어별로 설정하세요. 소개·프로필의 자기소개 글과는 별개입니다. 저장하고 반영하면 사이트에 적용됩니다."
+        : next === "categories"
+          ? "영어·한국어 이름과 순서를 따로 설정하세요. 이름을 바꿔도 주소는 유지됩니다. 글이 있는 카테고리는 삭제할 수 없으며, 새 카테고리는 글을 발행하면 블로그에 표시됩니다."
+          : "홈 화면에 표시할 그룹과 링크를 관리하세요. 순서는 위·아래 버튼으로 변경합니다. 빈 그룹은 홈 화면에 표시되지 않습니다.";
   }
-  for (const item of ["posts", "books", "projects", "about", "categories", "favorites"] as const)
+  for (const item of ["posts", "books", "projects", "about", "description", "categories", "favorites"] as const)
     el(`manage-${item}`).addEventListener("click", () => void show(item));
+  for (const [id, field] of [
+    ["blog-description-en", "blogDescription"],
+    ["blog-description-ko", "blogDescriptionKo"],
+  ] as const) {
+    el<HTMLTextAreaElement>(id).addEventListener("input", () => {
+      if (!settings) return;
+      settings[field] = el<HTMLTextAreaElement>(id).value;
+      dirty();
+    });
+  }
   el("add-category").addEventListener("click", () => {
     if (!settings) return;
     const group = { children: [], name: "", slug: "" };

@@ -467,6 +467,8 @@ test("settings save writes only configuration atomically and refuses stale revis
   settings.categories[0].name = "Development notes";
   settings.categories[0].name_ko = "개발 기록";
   settings.categories[0].children[0].name_ko = "개발 이야기";
+  settings.blogDescription = "New English blog introduction";
+  settings.blogDescriptionKo = "새 한국어 블로그 소개";
   settings.favorites.reverse();
   settings.favorites.push({ name: "New group", items: [{ title: "Example", href: "https://example.com", note: "A note" }] });
   calls = [];
@@ -480,6 +482,8 @@ test("settings save writes only configuration atomically and refuses stale revis
   const content = calls.find((call) => call.path.endsWith("/git/blobs") && call.method === "POST").data.content;
   assert.equal(await prettier.check(content, { parser: "json", printWidth: 150, trailingComma: "es5" }), true);
   const parsed = JSON.parse(content);
+  assert.equal(parsed.blogDescription, settings.blogDescription);
+  assert.equal(parsed.blogDescriptionKo, settings.blogDescriptionKo);
   assert.equal(parsed.categories[0].name, "Development notes");
   assert.equal(parsed.categories[0].name_ko, "개발 기록");
   assert.equal(parsed.categories[0].children[0].name_ko, "개발 이야기");
@@ -490,6 +494,24 @@ test("settings save writes only configuration atomically and refuses stale revis
   assert.equal((await request("/api/site-settings", { method: "PUT", data: { settings, sha: "0".repeat(40) } })).status, 409);
   assert.ok(!calls.some((call) => call.path.endsWith("/git/blobs") && call.method === "POST"));
 });
+test("older settings clients retain saved descriptions when updating other settings", async () => {
+  const original = structuredClone(configuredSettings);
+  try {
+    configuredSettings.blogDescription = "Published custom English";
+    configuredSettings.blogDescriptionKo = "이미 반영한 한국어 소개";
+    const legacy = structuredClone(configuredSettings);
+    delete legacy.blogDescription;
+    delete legacy.blogDescriptionKo;
+    calls = [];
+    const response = await request("/api/site-settings", { method: "PUT", data: { settings: legacy, sha: settingsSha } });
+    assert.equal(response.status, 200, await response.clone().text());
+    const content = JSON.parse(calls.find((call) => call.path.endsWith("/git/blobs") && call.method === "POST").data.content);
+    assert.equal(content.blogDescription, configuredSettings.blogDescription);
+    assert.equal(content.blogDescriptionKo, configuredSettings.blogDescriptionKo);
+  } finally {
+    configuredSettings = original;
+  }
+});
 test("settings reject unsafe links, duplicate slugs, deleted used categories, and CSRF", async () => {
   const invalidLink = structuredClone(configuredSettings);
   invalidLink.favorites[0].items[0].href = "javascript:alert(1)";
@@ -497,7 +519,8 @@ test("settings reject unsafe links, duplicate slugs, deleted used categories, an
   duplicate.categories.push(duplicate.categories[0]);
   const removed = structuredClone(configuredSettings);
   removed.categories[0].children = removed.categories[0].children.filter((child) => child.slug !== "dev");
-  for (const settings of [invalidLink, duplicate, removed]) {
+  const invalidDescription = { ...configuredSettings, blogDescriptionKo: "x".repeat(501) };
+  for (const settings of [invalidLink, duplicate, removed, invalidDescription]) {
     calls = [];
     const response = await request("/api/site-settings", { method: "PUT", data: { settings, sha: settingsSha } });
     assert.equal(response.status, 422, await response.clone().text());

@@ -18,6 +18,8 @@ export interface FavoriteGroup {
   items: FavoriteLink[];
 }
 export interface SiteSettings {
+  blogDescription: string;
+  blogDescriptionKo: string;
   categories: CategoryGroup[];
   favorites: FavoriteGroup[];
 }
@@ -27,6 +29,10 @@ export interface SettingsSnapshot {
   usage: Record<string, number>;
 }
 export const SETTINGS_PATH = "_data/site-settings.json";
+export const DEFAULT_BLOG_DESCRIPTIONS = {
+  blogDescription: "Learning notes and practical research on software development, life in Canada, careers, and finance.",
+  blogDescriptionKo: "소프트웨어 개발, 캐나다 생활, 커리어와 금융에 관한 학습 기록과 실용적인 리서치",
+};
 
 const aliases: Record<string, string> = {
   study: "study-log",
@@ -158,7 +164,20 @@ export function validateSettings(value: unknown): SiteSettings {
     favorites.map((group) => group.name.toLowerCase()),
     "즐겨찾기 그룹 이름이 중복됩니다."
   );
-  return { categories, favorites };
+  return {
+    blogDescription: text(
+      input.blogDescription === undefined ? DEFAULT_BLOG_DESCRIPTIONS.blogDescription : input.blogDescription,
+      500,
+      "영어 소개 문구"
+    ),
+    blogDescriptionKo: text(
+      input.blogDescriptionKo === undefined ? DEFAULT_BLOG_DESCRIPTIONS.blogDescriptionKo : input.blogDescriptionKo,
+      500,
+      "한국어 소개 문구"
+    ),
+    categories,
+    favorites,
+  };
 }
 export function categoryName(category: CategoryChild, locale: "en" | "ko"): string {
   return locale === "ko" ? category.name_ko || category.name : category.name;
