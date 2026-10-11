@@ -1,5 +1,5 @@
 ---
-import { localeFromPath, localizedPath, localeText } from '../lib/locale';
+import { localeFromPath, localizedPath } from '../lib/locale';
 import { t } from '../lib/messages';
 const locale = localeFromPath(Astro.url.pathname);
 const l = (path: string) => localizedPath(path, locale);
@@ -25,8 +25,8 @@ const { activeChildSlug, activeParentSlug, categoryTree, isAllActive = false, to
         </a>
         {categoryTree.map((parent) => (
           parent.count > 0 ? <a href={parent.href} class={parent.slug === activeParentSlug ? 'active' : undefined} aria-current={parent.slug === activeParentSlug && !activeChildSlug ? 'page' : undefined}>
-            <span>{`${parent.name} ${localeText(locale, 'All', '전체')}`}</span>
-          </a> : <span class="category-disabled" aria-disabled="true">{`${parent.name} ${localeText(locale, 'All', '전체')} (0)`}</span>
+            <span>{parent.name}</span>
+          </a> : <span class="category-disabled" aria-disabled="true">{parent.name} (0)</span>
         ))}
       </nav>
       <details class="category-disclosure">
@@ -41,9 +41,9 @@ const { activeChildSlug, activeParentSlug, categoryTree, isAllActive = false, to
             {categoryTree.map((parent) => (
               <li class="blog-category-parent-item">
                 {parent.count > 0 ? <a href={parent.href} class={parent.slug === activeParentSlug && !activeChildSlug ? 'active' : undefined}>
-                  <span>{`${parent.name} ${localeText(locale, 'All', '전체')}`}</span>{' '}
+                  <span>{parent.name}</span>{' '}
                   <span class="category-count">({parent.count})</span>
-                </a> : <span class="category-disabled" aria-disabled="true">{`${parent.name} ${localeText(locale, 'All', '전체')} (0)`}</span>}
+                </a> : <span class="category-disabled" aria-disabled="true">{parent.name} (0)</span>}
                 {parent.children.length > 0 && (
                   <ul class="blog-category-child-list">
                     {parent.children.map((child) => (

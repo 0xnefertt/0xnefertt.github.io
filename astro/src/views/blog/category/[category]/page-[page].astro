@@ -38,7 +38,7 @@ function getPageHref(page: number): string {
   <section class="blog-header">
     <h1>{siteConfig.blogName}</h1>
     <p>
-      {localeText(locale, 'Group', '상위 분류')}: <strong>{category.name} {localeText(locale, 'All', '전체')}</strong> ({allPosts.length}) · {localeText(locale, `Page ${pageIndex} of ${totalPages}`, `${totalPages}페이지 중 ${pageIndex}페이지`)}
+      {localeText(locale, 'Group', '상위 분류')}: <strong>{category.name}</strong> ({allPosts.length}) · {localeText(locale, `Page ${pageIndex} of ${totalPages}`, `${totalPages}페이지 중 ${pageIndex}페이지`)}
     </p>
     <form class="blog-search-form" action={l('/blog/search/')} method="get">
       <input class="blog-search-input" type="search" name="q" placeholder={t(locale, 'search_placeholder')} data-i18n-placeholder="search_placeholder" />
