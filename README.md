@@ -125,6 +125,9 @@ npm run post:image -- --post _posts/<category-path>/YYYY-MM-DD-slug.md --src ~/D
 Generated at build time:
 
 - `/sitemap.xml`
+  - Generated as readable UTF-8 XML on every site build, including publication and content-edit deployments. Footer order starts with Privacy, Sitemap, RSS.
+  - Content URLs include `lastmod` from recorded updates and source-file Git history; builds do not stamp unchanged articles with the build time.
+    Listing pages reflect their newest published content. Deployment checks out full Git history to retain accurate per-file dates.
 - `/rss.xml`
 - `/feed.xml` (alias of RSS for compatibility)
 - `/robots.txt`

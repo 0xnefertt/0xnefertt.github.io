@@ -26,10 +26,11 @@ for (const locale of ["en", "ko"]) {
     assert.ok(navigation && !navigation.includes("resources/"), "Resources must not appear in the primary navigation");
     const footer = html.match(/<footer\b[^>]*>([\s\S]*?)<\/footer>/)?.[1];
     assert.ok(footer?.includes(`href="/${prefix}resources/"`), "Footer Resources must use the current language");
+    assert.ok(footer?.includes('href="/sitemap.xml"'), "Both languages must link to the shared XML sitemap");
     const footerLabels = [...footer.matchAll(/<a\b[^>]*>([\s\S]*?)<\/a>/g)].map((match) => match[1].replace(/<[^>]*>/g, "").trim());
     assert.deepEqual(
       footerLabels,
-      ["Privacy", "RSS", "Email", "GitHub", "X", "Resources", "Login", "EN", "KR"].filter((label) => footerLabels.includes(label)),
+      ["Privacy", "Sitemap", "RSS", "Email", "GitHub", "X", "Resources", "Login", "EN", "KR"].filter((label) => footerLabels.includes(label)),
       "Footer links must keep the requested order"
     );
     if (page === "") {
