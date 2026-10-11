@@ -647,7 +647,7 @@ body {
   width: 160px;
   max-width: 100%;
   height: auto;
-  margin: 1rem 0;
+  margin: 1rem auto;
 }
 
 .book-detail-layout--single {
