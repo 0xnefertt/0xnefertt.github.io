@@ -24,9 +24,7 @@ const name = profile?.name ?? '0xnefertt';
     <div class="about-details">
       {image && <img class:list={['about-photo', { 'about-photo--circular': profile?.image_circular }]} src={image} alt={localeText(locale, `${name}'s profile photo`, `${name} 프로필 사진`)} width="240" height="240" />}
       <div class="markdown-body about-body">
-        {about.data.subtitle && <p class="about-subtitle">{about.data.subtitle}</p>}
         <Content />
-        {profile?.more_info && <div class="profile-meta" set:html={profile.more_info} />}
       </div>
     </div>
   </article>

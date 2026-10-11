@@ -496,15 +496,8 @@ function updatePreview() {
       .catch(() => {
         cover.hidden = true;
       });
-  for (const [id, value] of [
-    ["preview-bio", profile.bio ?? "개발하며 배운 것, 캐나다에서의 일상, 관심 있는 것들을 기록합니다."],
-    ["preview-subtitle", metadata.subtitle ?? ""],
-  ]) {
-    element(id as string).hidden = selectedCollection !== "about";
-    element(id as string).textContent = String(value);
-  }
-  element("preview-profile-info").hidden = selectedCollection !== "about";
-  element("preview-profile-info").innerHTML = selectedCollection === "about" ? DOMPurify.sanitize(String(profile.more_info ?? "")) : "";
+  element("preview-bio").hidden = selectedCollection !== "about";
+  element("preview-bio").textContent = String(profile.bio ?? "개발하며 배운 것, 캐나다에서의 일상, 관심 있는 것들을 기록합니다.");
   element("preview-tags").replaceChildren(
     ...tags.value
       .split(",")

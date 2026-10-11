@@ -105,6 +105,32 @@ async function setup() {
         sha: "fixture",
         usage: {},
       });
+    if (url.pathname === "/api/posts/open" && payload.path.includes("about.md")) {
+      const draft = {
+        id: `draft-${++id}`,
+        version: 1,
+        updated: new Date().toISOString(),
+        document: {
+          collection: "about",
+          title: "About",
+          description: "About profile",
+          date: "",
+          slug: "about",
+          category: "",
+          tags: [],
+          body: "## Introduction\n\nThe main introduction stays editable.",
+          sourcePath: payload.path,
+          sourceSha: "fixture",
+          metadata: {
+            lang: "en",
+            subtitle: "Legacy subtitle",
+            profile: { name: "Original name", bio: "Short bio", location: "Vancouver", more_info: "<p>Legacy extra information</p>" },
+          },
+        },
+      };
+      drafts.set(draft.id, draft);
+      return response(draft);
+    }
     if (url.pathname === "/api/posts") {
       const kind = url.searchParams.get("collection");
       if (pendingList?.kind === kind) await pendingList.promise;
@@ -377,4 +403,21 @@ test("adding another language retains the original book body, image positions an
   assert.deepEqual(images, ["https://0xnefertt.github.io/assets/img/photo.png", "https://example.com/second.png"]);
   assert.equal(document.getElementById("preview-cover").dataset.source, "/assets/img/cover.png");
   assert.match(document.body.textContent, /원문 본문과 이미지를 가져왔습니다/);
+});
+
+test("about editing and preview omit removed fields while saves retain legacy metadata and the main introduction", async () => {
+  const ui = await setup();
+  await ui.click("manage-about");
+  assert.equal(document.getElementById("metadata-subtitle"), null);
+  assert.equal(document.getElementById("metadata-profile-more_info"), null);
+  ui.edit("metadata-profile-name", "Updated name");
+  await ui.click("save");
+  const saved = ui.drafts.get("draft-1").document;
+  assert.equal(saved.metadata.profile.name, "Updated name");
+  assert.equal(saved.metadata.subtitle, "Legacy subtitle");
+  assert.equal(saved.metadata.profile.more_info, "<p>Legacy extra information</p>");
+  assert.equal(saved.body, "## Introduction\n\nThe main introduction stays editable.");
+  await ui.click("preview-tab");
+  assert.match(document.getElementById("preview-panel").textContent, /Updated name.*Short bio.*The main introduction stays editable/s);
+  assert.doesNotMatch(document.getElementById("preview-panel").textContent, /Legacy subtitle|Legacy extra information/);
 });

@@ -114,8 +114,9 @@ New books are written to `_books/<lang>/<slug>.md`, and new projects to `_projec
 including Unicode book filenames and numeric legacy fields. Books and projects do not require blog dates, tags, or blog categories, and are excluded
 from the blog category-usage checks. No D1 migration is needed because the content kind is stored in the draft JSON; old drafts default to blog posts.
 
-About/Profile opens `_pages/about.md` for English or `_pages/ko/about.md` for Korean as separate private working copies. It edits the profile name, location, short bio, photo, subtitle, additional
-profile lines, search description, and introduction body. Photos use the same private attachment workflow and publish atomically with the page. The
+About/Profile opens `_pages/about.md` for English or `_pages/ko/about.md` for Korean as separate private working copies. It edits the profile name, location, short bio, photo,
+search description, and introduction body. Subtitle and additional profile-info inputs and displays have been removed; legacy values remain preserved during edits.
+Photos use the same private attachment workflow and publish atomically with the page. The
 homepage and owner byline use the saved profile. Other page settings (latest posts, weather/exchange configuration, layout and permalink) are retained.
 Only these two About paths are editable; other `_pages/` files and new About pages are rejected. No database migration is required.
 
