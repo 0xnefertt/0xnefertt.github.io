@@ -232,7 +232,7 @@ export function translationDraft(source: PostDocument): PostDocument {
     metadata,
     title: "",
     description: "",
-    body: "",
+    body: source.body,
     sourcePath: null,
     sourceSha: null,
     slug: /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(source.slug) ? source.slug : "",

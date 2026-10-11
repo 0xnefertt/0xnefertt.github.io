@@ -69,7 +69,7 @@ Never put the GitHub Client Secret or the session secret in a `PUBLIC_` variable
   cookies. This supports browsers that block third-party cookies. A strict Content Security Policy is used on the editor, with no analytics or ads.
 - Draft versions use optimistic concurrency. A stale edit is rejected instead of overwriting another device's work. If there is a conflict, download the local text before reopening the latest draft.
 - Markdown previews are sanitized. Raw HTML scripts and event handlers cannot execute. The preview shares the site's CSS, but it is not a full Astro build: legacy template syntax and custom Markdown processing may render differently.
-- Images accept PNG, JPEG, GIF, or WebP up to 1 MiB each, with up to 20 private attachments per working copy. Images share D1 storage; large image libraries should move to object storage. Downloading a draft exports text only; images remain in its private working copy.
+- Images accept PNG, JPEG, GIF, or WebP up to 5 MiB each, with up to 20 private attachments per working copy. Images share D1 storage; large image libraries should move to object storage. Downloading a draft exports text only; images remain in its private working copy.
 - Publication validates required fields, image references, and source revisions; formats Markdown with the repository's Prettier version; creates one Git commit containing the post and only its referenced images; and advances `main` without force. Removed or unused attachments stay private.
 - Existing posts retain their filename and unrelated front matter. Category changes write `category_override` and `legacy_categories` metadata;
   Astro lists the post in its new category and keeps its previous category URLs available with the new canonical URL. Changing the date or slug, or
@@ -85,6 +85,10 @@ Trash requires migration `0002_draft_trash.sql` before deploying the updated Wor
 Published copies are labeled **발행된 글의 작업본** because saving a private change and publishing it are separate actions.
 
 ## Post editor
+
+After publishing the original, **다른 언어 버전 추가** creates a separate translation draft with the original body, image positions, and cover references intact.
+Translate the title, summary, body, tags, and image captions before publishing. Shared public images need no additional upload; unpublished attachments must
+be published in the original first. Existing translation drafts are left untouched.
 
 The visual editor supports headings, fonts, sizes, line spacing, bold, italic, underline, strikethrough, colors, highlighting, alignment, lists, quotes, code, links, images, and tables. Images can also be pasted or dropped into the body. Table controls add or remove rows and columns, toggle header rows, and merge or split cells. Undo history is isolated to the open post.
 

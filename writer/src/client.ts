@@ -684,7 +684,11 @@ element("add-translation").addEventListener(
         element("draft-tab").setAttribute("aria-pressed", "true");
         element("post-tab").setAttribute("aria-pressed", "false");
         await refreshDrafts();
-        notice(`${target === "ko" ? "한국어" : "English"} 번역 초안을 만들었습니다. 제목·요약·본문을 작성한 뒤 별도로 발행하세요.`);
+        notice(
+          `${
+            target === "ko" ? "한국어" : "English"
+          } 번역 초안을 만들었습니다. 원문 본문과 이미지를 가져왔습니다. 제목·요약·본문을 번역한 뒤 별도로 발행하세요.`
+        );
         title.focus();
       } finally {
         switching = false;

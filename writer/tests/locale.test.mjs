@@ -82,16 +82,17 @@ test("language switches find linked translations with different slugs and leave 
     ["/books/book/", "/ko/books/book/"]
   );
 });
-test("translation drafts start blank, preserve shared media, and cannot inherit private images or canonical URLs", () => {
+test("translation drafts retain the original body and shared images without inheriting private media or canonical URLs", () => {
   const source = model.parsePost(
-    "---\ntitle: 원문\nlang: ko\ndate: 2026-01-01\ntags: [astro]\ncanonical: https://example.com/original\nthumbnail: /assets/img/cover.png\n---\n\n원문 본문",
+    '---\ntitle: 원문\nlang: ko\ndate: 2026-01-01\ntags: [astro]\ncanonical: https://example.com/original\nthumbnail: /assets/img/cover.png\n---\n\n## 원문\n\n![사진](/assets/img/photo.png)\n\n<table><tr><td><img src="https://example.com/photo.jpg" alt="표 안의 사진"></td></tr></table>',
     "_posts/study-log/dev/2026-01-01-original.md",
     "a".repeat(40)
   );
   const draft = model.translationDraft(source);
   assert.equal(model.documentLanguage(draft), "en");
   assert.equal(model.documentTranslationKey(draft), model.documentTranslationKey(source));
-  assert.deepEqual([draft.title, draft.description, draft.body, draft.sourcePath, draft.sourceSha], ["", "", "", null, null]);
+  assert.deepEqual([draft.title, draft.description, draft.sourcePath, draft.sourceSha], ["", "", null, null]);
+  assert.equal(draft.body, source.body);
   assert.equal(draft.metadata.thumbnail, "/assets/img/cover.png");
   assert.ok(!("canonical" in draft.metadata));
   assert.throws(() => model.validateDocument(draft, true));

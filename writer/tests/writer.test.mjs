@@ -21,6 +21,7 @@ const bookContent =
 const projectContent =
   "---\ntitle: Existing project\ndescription: Project summary\nimg: assets/img/prof_pic.jpg\nimportance: 1\ncategory: website\nstatus: In progress\nperiod: 2026\nrole: Personal project\nstack: [Astro, TypeScript]\nhighlights: [Original highlight]\nlessons: [Original lesson]\nlinks: [{label: Repository, url: 'https://github.com/0xnefertt/0xnefertt.github.io'}]\nrelated_publications: false\n---\n\nOriginal project body.\n";
 let mf;
+let model;
 let ownerId = 170924802;
 let failBranch = false;
 let calls = [];
@@ -29,6 +30,15 @@ let configuredSettings;
 let auth;
 
 before(async () => {
+  await build({
+    entryPoints: ["src/model.ts"],
+    outfile: ".test-build/translation-publish-model.mjs",
+    bundle: true,
+    format: "esm",
+    platform: "node",
+    banner: { js: 'import {createRequire} from "node:module"; const require=createRequire(import.meta.url);' },
+  });
+  model = await import("../.test-build/translation-publish-model.mjs");
   aboutContent = await readFile("../_pages/about.md", "utf8");
   aboutKoContent = await readFile("../_pages/ko/about.md", "utf8");
   configuredSettings = JSON.parse(await readFile("../_data/site-settings.json", "utf8"));
@@ -844,6 +854,31 @@ test("about editing keeps one working copy, preserves home settings and publishe
   assert.ok(tree.some((file) => file.path === aboutPath));
   assert.ok(tree.some((file) => file.path.startsWith("astro/public/assets/img/about/")));
   assert.equal(calls.find((call) => call.path.endsWith("/git/refs/heads/main")).data.force, false);
+});
+
+test("translated book publication reuses the original cover and Markdown and HTML images without new image blobs", async () => {
+  const opened = await (await request("/api/posts/open", { method: "POST", data: { path: bookPath } })).json();
+  const original = {
+    ...opened.document,
+    metadata: { ...opened.document.metadata, lang: "ko", translation_key: "translation-image-test" },
+    body: '## 원문\n\n![사진](/assets/img/prof_pic.jpg)\n\n문단\n\n<table><tr><td><img src="/assets/img/prof_pic.jpg" alt="사진"></td></tr></table>',
+  };
+  const translated = model.translationDraft(original);
+  assert.equal(translated.body, original.body);
+  assert.equal(translated.metadata.cover, original.metadata.cover);
+  const value = await create({ ...translated, title: "English review", slug: "translated-review" });
+  calls = [];
+  const published = await request(`/api/drafts/${value.id}/publish`, { method: "POST", data: { version: value.version } });
+  assert.equal(published.status, 200, await published.clone().text());
+  const result = await published.json();
+  assert.equal(result.path, "_books/en/translated-review.md");
+  const blobs = calls.filter((call) => call.path.endsWith("/git/blobs"));
+  assert.equal(blobs.length, 1);
+  assert.equal(blobs[0].data.encoding, "utf-8");
+  assert.match(blobs[0].data.content, /cover: assets\/img\/book_covers\//);
+  assert.match(blobs[0].data.content, /!\[사진\]\(\/assets\/img\/prof_pic.jpg\)/);
+  assert.match(blobs[0].data.content, /<img src="\/assets\/img\/prof_pic.jpg"/);
+  assert.equal(calls.find((call) => call.path.endsWith("/git/trees") && call.method === "POST").data.tree.length, 1);
 });
 
 test("English translations may share a Korean slug, while duplicate translation groups and language changes are rejected", async () => {

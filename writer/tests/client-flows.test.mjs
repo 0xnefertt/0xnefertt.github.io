@@ -343,3 +343,38 @@ test("book cover uploads accept 5 MiB, save the preview reference, and reject la
   assert.equal(ui.calls.filter((call) => call.path.endsWith("/media")).length, 1);
   assert.match(document.body.textContent, /5MB 이하/);
 });
+
+test("adding another language retains the original book body, image positions and cover in the saved draft and preview", async () => {
+  const ui = await setup();
+  await ui.click("manage-books");
+  await ui.click("new-post");
+  const original = ui.drafts.get("draft-1");
+  const originalBody =
+    '## 한국어 기록\n\n![첫 사진](/assets/img/photo.png)\n\n중간 문단\n\n<img src="https://example.com/second.png" alt="두 번째 사진">';
+  original.document = {
+    ...original.document,
+    title: "원문",
+    slug: "original",
+    body: originalBody,
+    metadata: { lang: "ko", cover: "/assets/img/cover.png" },
+    sourcePath: "_books/ko/original.md",
+    sourceSha: "fixture",
+  };
+  document.querySelector("#post-list .post-item").click();
+  await settle();
+  await ui.click("add-translation");
+  const translated = ui.drafts.get("draft-2").document;
+  assert.equal(translated.body, originalBody);
+  assert.equal(translated.metadata.cover, original.document.metadata.cover);
+  assert.equal(translated.metadata.lang, "en");
+  assert.equal(translated.metadata.translation_key, "original");
+  assert.equal(translated.sourcePath, null);
+  assert.equal(translated.title, "");
+  assert.equal(original.document.body, originalBody);
+  assert.equal(ui.calls.filter((call) => call.path.endsWith("/media")).length, 0);
+  await ui.click("preview-tab");
+  const images = [...document.querySelectorAll("#preview-body img")].map((img) => img.getAttribute("src"));
+  assert.deepEqual(images, ["https://0xnefertt.github.io/assets/img/photo.png", "https://example.com/second.png"]);
+  assert.equal(document.getElementById("preview-cover").dataset.source, "/assets/img/cover.png");
+  assert.match(document.body.textContent, /원문 본문과 이미지를 가져왔습니다/);
+});
