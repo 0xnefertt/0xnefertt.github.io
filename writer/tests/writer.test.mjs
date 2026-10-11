@@ -137,7 +137,10 @@ before(async () => {
     })
   );
   const db = await mf.getD1Database("DB");
-  const migration = (await readFile("migrations/0001_writer.sql", "utf8")) + (await readFile("migrations/0002_draft_trash.sql", "utf8"));
+  const migration =
+    (await readFile("migrations/0001_writer.sql", "utf8")) +
+    (await readFile("migrations/0002_draft_trash.sql", "utf8")) +
+    (await readFile("migrations/0003_media_chunks.sql", "utf8"));
   await db.batch(
     migration
       .split(";")
@@ -302,6 +305,73 @@ test("publication commits the post and referenced images together, leaving unuse
   const content = calls.find((call) => call.path.endsWith("/git/blobs") && call.data.encoding === "utf-8").data.content;
   assert.ok(!content.includes("/api/media/"));
   assert.match(content, /\/assets\/img\/posts\//);
+});
+test("5 MiB covers round-trip and publish unchanged in D1-safe chunks", async () => {
+  const value = await create(document({ collection: "books", slug: "large-cover", metadata: { lang: "ko" } }));
+  const bytes = Uint8Array.from({ length: 5 * 1024 * 1024 }, (_, index) => index % 251);
+  const uploaded = await request(`/api/drafts/${value.id}/media`, {
+    method: "POST",
+    headers: { "Content-Type": "image/png" },
+    body: bytes,
+  });
+  assert.equal(uploaded.status, 201);
+  const image = await uploaded.json();
+  const db = await mf.getD1Database("DB");
+  const id = image.url.split("/").at(-1);
+  const first = await db.prepare("SELECT size, length(data) AS length FROM media WHERE id = ?").bind(id).first();
+  const chunks = await db.prepare("SELECT position, length(data) AS length FROM media_chunks WHERE media_id = ? ORDER BY position").bind(id).all();
+  assert.equal(first.size, bytes.length);
+  assert.equal(first.length, 1024 * 1024);
+  assert.deepEqual(
+    chunks.results.map((chunk) => chunk.position),
+    [1, 2, 3, 4]
+  );
+  assert.ok(chunks.results.every((chunk) => chunk.length === 1024 * 1024));
+  assert.equal((await mf.dispatchFetch(`${origin}${image.url}`)).status, 401);
+  assert.deepEqual(new Uint8Array(await (await request(image.url)).arrayBuffer()), bytes);
+  const saved = await (
+    await request(`/api/drafts/${value.id}`, {
+      method: "PUT",
+      data: { version: value.version, document: { ...value.document, metadata: { lang: "ko", cover: image.url } } },
+    })
+  ).json();
+  calls = [];
+  const published = await request(`/api/drafts/${value.id}/publish`, { method: "POST", data: { version: saved.version } });
+  assert.equal(published.status, 200);
+  const blob = calls.find((call) => call.path.endsWith("/git/blobs") && call.data.encoding === "base64");
+  assert.deepEqual(new Uint8Array(Buffer.from(blob.data.content, "base64")), bytes);
+  const content = calls.find((call) => call.path.endsWith("/git/blobs") && call.data.encoding === "utf-8").data.content;
+  assert.match(content, /cover: \/assets\/img\/books\//);
+});
+test("oversized uploads leave no partial media and incomplete chunks cannot be published", async () => {
+  const value = await create();
+  const response = await request(`/api/drafts/${value.id}/media`, {
+    method: "POST",
+    headers: { "Content-Type": "image/png" },
+    body: new Uint8Array(5 * 1024 * 1024 + 1),
+  });
+  assert.equal(response.status, 413);
+  const db = await mf.getD1Database("DB");
+  assert.equal((await db.prepare("SELECT count(*) AS count FROM media WHERE draft_id = ?").bind(value.id).first()).count, 0);
+  const image = await (
+    await request(`/api/drafts/${value.id}/media`, {
+      method: "POST",
+      headers: { "Content-Type": "image/png" },
+      body: new Uint8Array(1024 * 1024 + 1),
+    })
+  ).json();
+  await db.prepare("DELETE FROM media_chunks WHERE media_id = ?").bind(image.url.split("/").at(-1)).run();
+  assert.equal((await request(image.url)).status, 422);
+  const saved = await (
+    await request(`/api/drafts/${value.id}`, {
+      method: "PUT",
+      data: { version: value.version, document: { ...value.document, body: `![image](${image.url})` } },
+    })
+  ).json();
+  calls = [];
+  const publish = await request(`/api/drafts/${value.id}/publish`, { method: "POST", data: { version: saved.version } });
+  assert.equal(publish.status, 422);
+  assert.ok(!calls.some((call) => call.path.endsWith("/git/blobs")));
 });
 test("invalid posts do not write to GitHub, and concurrent branch updates leave drafts recoverable", async () => {
   const value = await create(document({ date: "2026-13-90" }));

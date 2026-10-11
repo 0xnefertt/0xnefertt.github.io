@@ -14,9 +14,10 @@ import {
   type PostDocument,
 } from "./model";
 import { getSiteSettings, saveSiteSettings } from "./settings-github";
+import { IMAGE_LIMIT } from "./media-limits";
+import { MEDIA_CHUNK_SIZE, readMedia } from "./media-storage";
 
 const SESSION_SECONDS = 60 * 60 * 24 * 7;
-const IMAGE_LIMIT = 1024 * 1024;
 const COOKIE = "writer_session";
 interface Session {
   id: string;
@@ -342,9 +343,26 @@ async function route(request: Request, env: Env): Promise<Response> {
       if (!bytes.length) throw new HttpError(400, "빈 이미지는 첨부할 수 없습니다.");
       const fileId = crypto.randomUUID();
       const filename = `${id}/${fileId}.${extensions[mime]}`;
-      await env.DB.prepare("INSERT INTO media (id, draft_id, filename, mime, size, data) VALUES (?, ?, ?, ?, ?, ?)")
-        .bind(fileId, id, filename, mime, bytes.length, bytes.buffer)
-        .run();
+      const statements = [
+        env.DB.prepare("INSERT INTO media (id, draft_id, filename, mime, size, data) VALUES (?, ?, ?, ?, ?, ?)").bind(
+          fileId,
+          id,
+          filename,
+          mime,
+          bytes.length,
+          bytes.slice(0, MEDIA_CHUNK_SIZE).buffer
+        ),
+      ];
+      for (let offset = MEDIA_CHUNK_SIZE, position = 1; offset < bytes.length; offset += MEDIA_CHUNK_SIZE, position++) {
+        statements.push(
+          env.DB.prepare("INSERT INTO media_chunks (media_id, position, data) VALUES (?, ?, ?)").bind(
+            fileId,
+            position,
+            bytes.slice(offset, offset + MEDIA_CHUNK_SIZE).buffer
+          )
+        );
+      }
+      await env.DB.batch(statements);
       return json({ url: `/api/media/${fileId}` }, 201);
     }
     if (action === "publish" && request.method === "POST") {
@@ -381,12 +399,12 @@ async function route(request: Request, env: Env): Promise<Response> {
   const mediaMatch = path.match(/^\/api\/media\/([a-f0-9-]{36})$/);
   if (mediaMatch && request.method === "GET") {
     const object = await env.DB.prepare(
-      "SELECT media.data, media.mime FROM media JOIN drafts ON drafts.id = media.draft_id WHERE media.id = ? AND drafts.deleted_at IS NULL"
+      "SELECT media.mime FROM media JOIN drafts ON drafts.id = media.draft_id WHERE media.id = ? AND drafts.deleted_at IS NULL"
     )
       .bind(mediaMatch[1])
-      .first<{ data: number[]; mime: string }>();
+      .first<{ mime: string }>();
     if (!object) throw new HttpError(404, "이미지를 찾을 수 없습니다.");
-    return new Response(Uint8Array.from(object.data), {
+    return new Response(await readMedia(env.DB, mediaMatch[1]), {
       headers: { "Content-Type": object.mime, "Content-Disposition": "inline" },
     });
   }

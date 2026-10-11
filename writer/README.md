@@ -102,6 +102,9 @@ are moved into editable body lists when a project or old private draft is opened
 content remains visible in the body without preset section headings. Cover attachments stay private until publication.
 Book reviews allow a custom publication date. Leaving it blank records the first publication date automatically; later edits retain it unless explicitly changed and update `last_updated`. Translated reviews start without a publication date.
 The cover thumbnail is visible while writing. Attachment uploads immediately save their reference; the cover reaches the public site after publication.
+Book covers appear centered at the same width in the Preview tab and the public reader. PNG, JPG, WebP and GIF uploads support up to 5 MiB per file.
+Apply migration `0003_media_chunks.sql` before deploying the larger-upload support. Images retain their original bytes; files exceeding 1 MiB are stored
+in multiple rows to respect D1's 2 MB per-row limit. Existing attachments remain readable without conversion.
 Older book working copies can retain their edits when the repository changed only by adding the initial publication date. Any other remote change still requires conflict resolution.
 New books are written to `_books/<lang>/<slug>.md`, and new projects to `_projects/<lang>/<slug>.md`. Existing filenames and unrelated metadata are preserved,
 including Unicode book filenames and numeric legacy fields. Books and projects do not require blog dates, tags, or blog categories, and are excluded

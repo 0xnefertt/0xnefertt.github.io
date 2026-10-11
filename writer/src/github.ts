@@ -15,6 +15,7 @@ import {
 import { format } from "prettier/standalone";
 import markdown from "prettier/plugins/markdown";
 import yaml from "prettier/plugins/yaml";
+import { readMedia } from "./media-storage";
 
 export async function boundedBody(response: Response | Request, max = 1_000_000): Promise<Uint8Array> {
   const reader = response.body?.getReader();
@@ -180,9 +181,7 @@ export async function publishPost(env: Env, token: string, doc: PostDocument, me
   }
   const entries: { path: string; mode: "100644"; type: "blob"; sha: string }[] = [];
   for (const file of media) {
-    const object = await env.DB.prepare("SELECT data FROM media WHERE id = ?").bind(file.id).first<{ data: number[] }>();
-    if (!object) throw new HttpError(422, "첨부 이미지가 없습니다. 다시 첨부해 주세요.");
-    const bytes = Uint8Array.from(object.data);
+    const bytes = await readMedia(env.DB, file.id);
     let binary = "";
     for (let i = 0; i < bytes.length; i += 8192) binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
     const blob = await github<{ sha: string }>(token, `${repo.root}/git/blobs`, {

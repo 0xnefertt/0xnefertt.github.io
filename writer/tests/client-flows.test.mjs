@@ -96,7 +96,7 @@ async function setup() {
   const response = (value) => new Response(JSON.stringify(value), { headers: { "Content-Type": "application/json" } });
   globalThis.fetch = async (input, init = {}) => {
     const url = new URL(input, "http://localhost");
-    const payload = init.body ? JSON.parse(init.body) : null;
+    const payload = init.body && !url.pathname.endsWith("/media") ? JSON.parse(init.body) : null;
     calls.push({ path: url.pathname, collection: url.searchParams.get("collection"), method: init.method ?? "GET", payload });
     if (url.pathname === "/api/session") return response({ csrf: "fixture" });
     if (url.pathname === "/api/site-settings")
@@ -131,6 +131,7 @@ async function setup() {
       drafts.set(draft.id, draft);
       return response(draft);
     }
+    if (url.pathname.endsWith("/media")) return response({ url: "/api/media/12345678-1234-1234-1234-123456789012" });
     const draft = drafts.get(url.pathname.split("/")[3]);
     if (init.method === "DELETE") {
       draft.trashedAt = new Date().toISOString();
@@ -319,4 +320,26 @@ test("draft trash confirmation resets on cancel and restores the same saved docu
   document.getElementById("delete-dialog").close();
   await settle();
   assert.equal(ui.calls.filter((call) => call.method === "DELETE").length, 1);
+});
+
+test("book cover uploads accept 5 MiB, save the preview reference, and reject larger files before upload", async () => {
+  const ui = await setup();
+  await ui.click("manage-books");
+  await ui.click("new-post");
+  const input = document.getElementById("cover-image-file");
+  const select = async (size) => {
+    const file = new dom.window.File([new Uint8Array(size)], "cover.png", { type: "image/png" });
+    Object.defineProperty(input, "files", { value: [file], configurable: true });
+    input.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
+    await settle();
+  };
+  await select(5 * 1024 * 1024);
+  assert.equal(ui.calls.filter((call) => call.path.endsWith("/media")).length, 1);
+  assert.equal(ui.drafts.get("draft-1").document.metadata.cover, "/api/media/12345678-1234-1234-1234-123456789012");
+  await ui.click("preview-tab");
+  assert.equal(document.getElementById("preview-cover").hidden, false);
+  assert.equal(document.getElementById("preview-cover").dataset.source, ui.drafts.get("draft-1").document.metadata.cover);
+  await select(5 * 1024 * 1024 + 1);
+  assert.equal(ui.calls.filter((call) => call.path.endsWith("/media")).length, 1);
+  assert.match(document.body.textContent, /5MB 이하/);
 });

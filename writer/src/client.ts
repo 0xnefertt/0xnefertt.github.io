@@ -15,6 +15,7 @@ import { collectionEditor } from "./collection-editor";
 import { safeImage } from "./rich-content";
 import { siteManager } from "./site-manager";
 import { richEditor } from "./rich-editor";
+import { IMAGE_LIMIT } from "./media-limits";
 import "../../astro/public/assets/styles/global.css";
 import "./style.css";
 import editor from "./editor.html?raw";
@@ -794,8 +795,8 @@ element("new-post").addEventListener(
 
 async function attach(file: File, target: "body" | "cover" | "img" | "profile.image" = "body") {
   if (!current || locked) return;
-  if (!/^image\/(png|jpeg|webp|gif)$/.test(file.type) || file.size > 1024 * 1024)
-    throw new Error("1MB 이하의 PNG, JPG, WebP, GIF 이미지를 선택해 주세요.");
+  if (!/^image\/(png|jpeg|webp|gif)$/.test(file.type) || file.size > IMAGE_LIMIT)
+    throw new Error("5MB 이하의 PNG, JPG, WebP, GIF 이미지를 선택해 주세요.");
   setLocked(true);
   status("이미지 저장 중…");
   try {
