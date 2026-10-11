@@ -1,37 +1,32 @@
 ---
+description: Go hang out with your loved ones or something.
 lang: en
-translation_key: about
-layout: about
-title: about
-permalink: /
-description: "A software developer’s notes on technology, careers, life in Canada, and financial research."
-subtitle: "Go hang out with your loved ones or something."
-
-profile:
-  name: 0xnefertt
-  location: Vancouver, Canada
-  bio: "Notes on software development, life in Canada, and things I am learning."
-  align: right
-  image: prof_pic.jpg
-  image_circular: false # crops the image to make it circular
-  more_info: >
-    <p>Software Developer</p>
-    <p>British Columbia, Canada</p>
-    <p>React · TypeScript · Blockchain</p>
-
-social: true # includes social icons at the bottom of the page
-
+last_updated: 2026-10-11
 latest_posts:
   enabled: true
-  scrollable: true # adds a vertical scroll bar if there are more than 3 new posts items
-  limit: 5 # leave blank to include all the blog posts
-
+  limit: 5
+  scrollable: true
+layout: about
+permalink: /
+profile:
+  align: right
+  bio: Go hang out with your loved ones or something.
+  image: prof_pic.jpg
+  image_circular: false
+  location: Vancouver, Canada
+  more_info: |
+    <p>Software Developer</p> <p>British Columbia, Canada</p> <p>React · TypeScript · Blockchain</p>
+  name: 0xnefertt
+social: true
+subtitle: Go hang out with your loved ones or something.
+title: about
+translation_key: about
 useful_info:
-  enabled: true
-  location: Vancouver, BC
-  latitude: 49.2827
-  longitude: -123.1207
   base_currency: USD
+  enabled: true
+  latitude: 49.2827
+  location: Vancouver, BC
+  longitude: -123.1207
   target_currencies:
     - KRW
     - CAD
