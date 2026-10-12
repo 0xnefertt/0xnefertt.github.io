@@ -1,14 +1,14 @@
 ---
-import { localeFromPath, localizedPath, localeText } from '../../lib/locale';
+import { localeFromPath, localizedPath, localeText } from "../../lib/locale";
 
 const locale = localeFromPath(Astro.url.pathname);
 const l = (path: string) => localizedPath(path, locale);
-import { render, type CollectionEntry } from 'astro:content';
-import Layout from '../../layouts/Layout.astro';
-import { normalizeAssetPath } from '../../lib/content';
+import { render, type CollectionEntry } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import { normalizeAssetPath } from "../../lib/content";
 
 interface Props {
-  project: CollectionEntry<'projects'>;
+  project: CollectionEntry<"projects">;
 }
 
 const { project } = Astro.props;
@@ -20,12 +20,14 @@ const lessons = project.data.lessons ?? [];
 const links = project.data.links ?? [];
 ---
 
-<Layout title={project.data.title} description={project.data.description ?? project.data.title} currentPath={l('/projects/')}>
-  <a class="back-link" href={l('/projects/')}>{localeText(locale, 'Back to projects', '프로젝트 목록으로 돌아가기')}</a>
+<Layout title={project.data.title} description={project.data.description ?? project.data.title} currentPath={l("/projects/")}>
+  <a class="back-link" href={l("/projects/")}>
+    {localeText(locale, "Back to projects", "프로젝트 목록으로 돌아가기")}
+  </a>
 
   <article class="project-detail-header">
     <div>
-      <p class="eyebrow">{project.data.category ?? 'Project'}</p>
+      <p class="eyebrow">{project.data.category ?? "Project"}</p>
       <h1>{project.data.title}</h1>
       {project.data.description && <p>{project.data.description}</p>}
     </div>
@@ -39,10 +41,20 @@ const links = project.data.links ?? [];
         <Content />
         {/* Keep older repository content visible until it is saved as an editable body. */}
         {[...highlights, ...lessons].length > 0 && (
-          <ul>{[...highlights, ...lessons].map((item) => <li>{item}</li>)}</ul>
+          <ul>
+            {[...highlights, ...lessons].map((item) => (
+              <li>{item}</li>
+            ))}
+          </ul>
         )}
         {links.length > 0 && (
-          <ul>{links.map((link) => <li><a href={link.url}>{link.label}</a></li>)}</ul>
+          <ul>
+            {links.map((link) => (
+              <li>
+                <a href={link.url}>{link.label}</a>
+              </li>
+            ))}
+          </ul>
         )}
       </section>
     </div>
@@ -51,19 +63,19 @@ const links = project.data.links ?? [];
       <dl>
         {project.data.status && (
           <>
-            <dt>{localeText(locale, 'Status', '상태')}</dt>
+            <dt>{localeText(locale, "Status", "상태")}</dt>
             <dd>{project.data.status}</dd>
           </>
         )}
         {project.data.period && (
           <>
-            <dt>{localeText(locale, 'Period', '기간')}</dt>
+            <dt>{localeText(locale, "Period", "기간")}</dt>
             <dd>{project.data.period}</dd>
           </>
         )}
         {project.data.role && (
           <>
-            <dt>{localeText(locale, 'Role', '역할')}</dt>
+            <dt>{localeText(locale, "Role", "역할")}</dt>
             <dd>{project.data.role}</dd>
           </>
         )}

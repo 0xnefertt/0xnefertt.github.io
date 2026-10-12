@@ -1,19 +1,31 @@
 ---
-import { createMarkdownProcessor } from '@astrojs/markdown-remark';
-import { localeFromPath, localizedPath, localeText } from '../lib/locale';
-import { siteSettings } from '../lib/settings';
-import Layout from '../layouts/Layout.astro';
+import { createMarkdownProcessor } from "@astrojs/markdown-remark";
+import { localeFromPath, localizedPath, localeText } from "../lib/locale";
+import { siteSettings } from "../lib/settings";
+import Layout from "../layouts/Layout.astro";
 const locale = localeFromPath(Astro.url.pathname);
-const title = localeText(locale, 'Privacy', '개인정보 안내');
+const title = localeText(locale, "Privacy", "개인정보 안내");
 const processor = await createMarkdownProcessor({ syntaxHighlight: false });
 const content = await processor.render(localeText(locale, siteSettings.privacy.body, siteSettings.privacy.bodyKo));
 ---
 
-<Layout title={title} description={localeText(locale, 'Privacy, cookies, analytics and external services.', '개인정보, 쿠키, 방문 통계와 외부 서비스 안내.')} currentPath={localizedPath('/privacy/', locale)} disableAds>
+<Layout
+  title={title}
+  description={localeText(locale, "Privacy, cookies, analytics and external services.", "개인정보, 쿠키, 방문 통계와 외부 서비스 안내.")}
+  currentPath={localizedPath("/privacy/", locale)}
+  disableAds
+>
   <article class="privacy-page markdown-body">
     <h1>{title}</h1>
-    <p class="privacy-updated">{localeText(locale, 'Last updated', '최종 수정')}: <time datetime={siteSettings.privacy.updated}>{siteSettings.privacy.updated}</time></p>
+    <p class="privacy-updated">
+      {localeText(locale, "Last updated", "최종 수정")}: <time datetime={siteSettings.privacy.updated}>{siteSettings.privacy.updated}</time>
+    </p>
     <Fragment set:html={content.code} />
-    {siteSettings.email && <p>{localeText(locale, 'For privacy questions, contact ', '개인정보 관련 문의: ')}<a href={`mailto:${siteSettings.email}`}>{siteSettings.email}</a>.</p>}
+    {siteSettings.email && (
+      <p>
+        {localeText(locale, "For privacy questions, contact ", "개인정보 관련 문의: ")}
+        <a href={`mailto:${siteSettings.email}`}>{siteSettings.email}</a>.
+      </p>
+    )}
   </article>
 </Layout>

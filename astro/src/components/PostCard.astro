@@ -1,8 +1,8 @@
 ---
-import { localeFromPath, localizedPath, localeText } from '../lib/locale';
+import { localeFromPath, localizedPath, localeText } from "../lib/locale";
 
 const locale = localeFromPath(Astro.url.pathname);
-import { formatPostDate, type BlogSummary } from '../lib/blog';
+import { formatPostDate, type BlogSummary } from "../lib/blog";
 
 interface Props {
   post: BlogSummary;
@@ -11,27 +11,31 @@ interface Props {
 }
 
 const { post, headingLevel = 2, showDescription = true } = Astro.props;
-const HeadingTag = `h${headingLevel}` as 'h2' | 'h3';
+const HeadingTag = `h${headingLevel}` as "h2" | "h3";
 const previewImages = post.gallery.slice(0, 1);
 const visibleImages = previewImages;
 ---
 
-<li class={previewImages.length > 0 ? 'post-item post-item--with-media' : 'post-item'}>
-  {
-    previewImages.length > 0 && (
-      <a class="post-card-media" href={post.href} target={post.external ? '_blank' : undefined} rel={post.external ? 'noreferrer' : undefined} aria-label={post.title}>
-        <span class={`post-card-preview post-card-preview--${visibleImages.length}`} aria-hidden="true">
-          {visibleImages.map((image) => (
-            <img src={image} alt="" loading="lazy" />
-          ))}
-        </span>
-      </a>
-    )
-  }
+<li class={previewImages.length > 0 ? "post-item post-item--with-media" : "post-item"}>
+  {previewImages.length > 0 && (
+    <a
+      class="post-card-media"
+      href={post.href}
+      target={post.external ? "_blank" : undefined}
+      rel={post.external ? "noreferrer" : undefined}
+      aria-label={post.title}
+    >
+      <span class={`post-card-preview post-card-preview--${visibleImages.length}`} aria-hidden="true">
+        {visibleImages.map((image) => (
+          <img src={image} alt="" loading="lazy" />
+        ))}
+      </span>
+    </a>
+  )}
 
   <div class="post-card-content">
     <HeadingTag>
-      <a href={post.href} target={post.external ? '_blank' : undefined} rel={post.external ? 'noreferrer' : undefined}>
+      <a href={post.href} target={post.external ? "_blank" : undefined} rel={post.external ? "noreferrer" : undefined}>
         {post.title}
       </a>
     </HeadingTag>
@@ -43,7 +47,9 @@ const visibleImages = previewImages;
     </p>
     {post.categoryPaths.length > 0 && (
       <div class="post-card-categories">
-        {post.categoryPaths.map((categoryPath) => <a href={categoryPath.href}>{categoryPath.label}</a>)}
+        {post.categoryPaths.map((categoryPath) => (
+          <a href={categoryPath.href}>{categoryPath.label}</a>
+        ))}
       </div>
     )}
   </div>

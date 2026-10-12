@@ -1,8 +1,8 @@
 ---
-import editor from '../../../writer/src/editor.html?raw';
-import Favicon from '../components/Favicon.astro';
-import { siteConfig } from '../lib/site';
-const backend = new URL(import.meta.env.PUBLIC_WRITER_URL?.trim() || 'https://nefertt-writer.0xnefertt-writer.workers.dev').origin;
+import editor from "../../../writer/src/editor.html?raw";
+import Favicon from "../components/Favicon.astro";
+import { siteConfig } from "../lib/site";
+const backend = new URL(import.meta.env.PUBLIC_WRITER_URL?.trim() || "https://nefertt-writer.0xnefertt-writer.workers.dev").origin;
 const policy = `default-src 'self'; script-src 'self'; style-src 'self'; style-src-attr 'unsafe-inline'; img-src 'self' https: blob:; connect-src 'self' ${backend}; frame-src 'none'; base-uri 'none'; form-action 'self'`;
 ---
 
@@ -22,7 +22,7 @@ const policy = `default-src 'self'; script-src 'self'; style-src 'self'; style-s
     <Fragment set:html={editor} />
     <noscript>글쓰기를 사용하려면 JavaScript를 활성화해 주세요.</noscript>
     <script>
-      import '../../../writer/src/client';
+      import "../../../writer/src/client";
     </script>
   </body>
 </html>

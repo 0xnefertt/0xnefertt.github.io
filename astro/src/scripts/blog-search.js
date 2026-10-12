@@ -1,5 +1,5 @@
 (() => {
-  const korean = document.documentElement.lang === 'ko';
+  const korean = document.documentElement.lang === "ko";
   function readJsonScript(id, fallback) {
     if (!id) {
       return fallback;
@@ -11,7 +11,7 @@
     }
 
     try {
-      return JSON.parse(node.textContent || '');
+      return JSON.parse(node.textContent || "");
     } catch {
       return fallback;
     }
@@ -20,7 +20,7 @@
   async function loadPosts(config) {
     if (config.indexUrl) {
       try {
-        const response = await fetch(config.indexUrl, { credentials: 'same-origin' });
+        const response = await fetch(config.indexUrl, { credentials: "same-origin" });
         if (response.ok) {
           return await response.json();
         }
@@ -33,17 +33,17 @@
   }
 
   function trackSearch(query, resultCount, source) {
-    const normalizedQuery = String(query || '').trim();
+    const normalizedQuery = String(query || "").trim();
     if (!normalizedQuery) {
       return;
     }
 
     const analytics = window.siteAnalytics;
-    if (!analytics || typeof analytics.track !== 'function') {
+    if (!analytics || typeof analytics.track !== "function") {
       return;
     }
 
-    analytics.track('search_used', {
+    analytics.track("search_used", {
       search_query: normalizedQuery.slice(0, 120),
       results_count: resultCount,
       source,
@@ -52,23 +52,23 @@
   }
 
   function normalize(value) {
-    return String(value || '')
+    return String(value || "")
       .toLowerCase()
-      .replace(/[^a-z0-9\s가-힣-]/g, ' ')
-      .replace(/\s+/g, ' ')
+      .replace(/[^a-z0-9\s가-힣-]/g, " ")
+      .replace(/\s+/g, " ")
       .trim();
   }
 
   function buildHaystack(post) {
-    return normalize([post.title, post.description, post.content, ...(post.tags || []), ...(post.categories || [])].join(' '));
+    return normalize([post.title, post.description, post.content, ...(post.tags || []), ...(post.categories || [])].join(" "));
   }
 
   function scorePost(post, query) {
     const title = normalize(post.title);
     const description = normalize(post.description);
     const content = normalize(post.content);
-    const tags = normalize((post.tags || []).join(' '));
-    const categories = normalize((post.categories || []).join(' '));
+    const tags = normalize((post.tags || []).join(" "));
+    const categories = normalize((post.categories || []).join(" "));
     const haystack = buildHaystack(post);
 
     let score = 0;
@@ -83,30 +83,30 @@
   }
 
   function createPostItem(post) {
-    const item = document.createElement('li');
+    const item = document.createElement("li");
     const previewImages = Array.isArray(post.gallery) ? post.gallery.slice(0, 1) : post.thumbnail ? [post.thumbnail] : [];
-    item.className = previewImages.length > 0 ? 'post-item post-item--with-media' : 'post-item';
+    item.className = previewImages.length > 0 ? "post-item post-item--with-media" : "post-item";
 
     if (previewImages.length > 0) {
       const visibleImages = previewImages;
-      const mediaLink = document.createElement('a');
-      mediaLink.className = 'post-card-media';
+      const mediaLink = document.createElement("a");
+      mediaLink.className = "post-card-media";
       mediaLink.href = post.href;
-      mediaLink.setAttribute('aria-label', post.title);
+      mediaLink.setAttribute("aria-label", post.title);
       if (post.external) {
-        mediaLink.target = '_blank';
-        mediaLink.rel = 'noreferrer';
+        mediaLink.target = "_blank";
+        mediaLink.rel = "noreferrer";
       }
 
-      const preview = document.createElement('span');
+      const preview = document.createElement("span");
       preview.className = `post-card-preview post-card-preview--${visibleImages.length}`;
-      preview.setAttribute('aria-hidden', 'true');
+      preview.setAttribute("aria-hidden", "true");
 
       for (const image of visibleImages) {
-        const previewImage = document.createElement('img');
+        const previewImage = document.createElement("img");
         previewImage.src = image;
-        previewImage.alt = '';
-        previewImage.loading = 'lazy';
+        previewImage.alt = "";
+        previewImage.loading = "lazy";
         preview.appendChild(previewImage);
       }
 
@@ -115,28 +115,28 @@
       item.appendChild(mediaLink);
     }
 
-    const heading = document.createElement('h2');
-    const link = document.createElement('a');
+    const heading = document.createElement("h2");
+    const link = document.createElement("a");
     link.href = post.href;
     link.textContent = post.title;
     if (post.external) {
-      link.target = '_blank';
-      link.rel = 'noreferrer';
+      link.target = "_blank";
+      link.rel = "noreferrer";
     }
 
-    const content = document.createElement('div');
-    content.className = 'post-card-content';
+    const content = document.createElement("div");
+    content.className = "post-card-content";
 
     heading.appendChild(link);
     content.appendChild(heading);
 
-    const meta = document.createElement('p');
-    meta.className = 'post-meta';
-    meta.textContent = `${post.dateLabel} · ${korean ? `${post.readMinutes}분 읽기` : `${post.readMinutes} min read`}${post.externalSource ? ` · ${post.externalSource}` : ''}`;
+    const meta = document.createElement("p");
+    meta.className = "post-meta";
+    meta.textContent = `${post.dateLabel} · ${korean ? `${post.readMinutes}분 읽기` : `${post.readMinutes} min read`}${post.externalSource ? ` · ${post.externalSource}` : ""}`;
 
     if (post.description) {
-      const description = document.createElement('p');
-      description.className = 'post-excerpt';
+      const description = document.createElement("p");
+      description.className = "post-excerpt";
       description.textContent = post.description;
       content.appendChild(description);
     }
@@ -144,10 +144,10 @@
     content.appendChild(meta);
     const categoryPaths = Array.isArray(post.categoryPaths) ? post.categoryPaths : [];
     if (categoryPaths.length > 0) {
-      const categoryContainer = document.createElement('div');
-      categoryContainer.className = 'post-card-categories';
+      const categoryContainer = document.createElement("div");
+      categoryContainer.className = "post-card-categories";
       for (const categoryPath of categoryPaths) {
-        const categoryNode = document.createElement('a');
+        const categoryNode = document.createElement("a");
         categoryNode.href = categoryPath.href;
         categoryNode.textContent = categoryPath.label;
         categoryContainer.appendChild(categoryNode);
@@ -161,7 +161,7 @@
   }
 
   function renderPosts(container, items) {
-    container.textContent = '';
+    container.textContent = "";
 
     for (const post of items) {
       container.appendChild(createPostItem(post));
@@ -171,11 +171,11 @@
   function updateUrl(query) {
     const nextUrl = new URL(window.location.href);
     if (query) {
-      nextUrl.searchParams.set('q', query);
+      nextUrl.searchParams.set("q", query);
     } else {
-      nextUrl.searchParams.delete('q');
+      nextUrl.searchParams.delete("q");
     }
-    window.history.replaceState(null, '', nextUrl);
+    window.history.replaceState(null, "", nextUrl);
   }
 
   function getSearchMatches(posts, query) {
@@ -201,24 +201,24 @@
       return;
     }
 
-    if (form.dataset.blogSearchInitialized === 'true') {
+    if (form.dataset.blogSearchInitialized === "true") {
       return;
     }
-    form.dataset.blogSearchInitialized = 'true';
+    form.dataset.blogSearchInitialized = "true";
 
     if (!(resultsContainer instanceof HTMLUListElement) || !(metaNode instanceof HTMLParagraphElement) || !(emptyNode instanceof HTMLElement)) {
       return;
     }
 
     const posts = await loadPosts(config);
-    const mode = config.mode === 'search-page' ? 'search-page' : 'inline';
+    const mode = config.mode === "search-page" ? "search-page" : "inline";
     const initialResultsHtml = resultsContainer.innerHTML;
     const latestLimit = Number.isFinite(config.latestLimit) ? config.latestLimit : 12;
 
     const restoreDefaultList = () => {
       resultsContainer.innerHTML = initialResultsHtml;
       metaNode.hidden = true;
-      metaNode.textContent = '';
+      metaNode.textContent = "";
       emptyNode.hidden = true;
       if (paginationNode) {
         paginationNode.hidden = false;
@@ -228,7 +228,9 @@
     const renderSearchPageDefault = () => {
       const latest = [...posts].sort((a, b) => (b.dateValue || 0) - (a.dateValue || 0)).slice(0, latestLimit);
       metaNode.hidden = false;
-      metaNode.textContent = korean ? `최근 글 ${latest.length}개 · 전체 ${posts.length}개 글에서 검색하세요.` : `Showing latest ${latest.length} posts. Enter a keyword to search all ${posts.length} posts.`;
+      metaNode.textContent = korean
+        ? `최근 글 ${latest.length}개 · 전체 ${posts.length}개 글에서 검색하세요.`
+        : `Showing latest ${latest.length} posts. Enter a keyword to search all ${posts.length} posts.`;
       renderPosts(resultsContainer, latest);
       emptyNode.hidden = latest.length > 0;
       return latest.length;
@@ -237,7 +239,9 @@
     const renderSearchResults = (items, rawQuery) => {
       renderPosts(resultsContainer, items);
       metaNode.hidden = false;
-      metaNode.textContent = korean ? `"${rawQuery.trim()}" 검색 결과 ${items.length}개` : `${items.length} result${items.length === 1 ? '' : 's'} for "${rawQuery.trim()}".`;
+      metaNode.textContent = korean
+        ? `"${rawQuery.trim()}" 검색 결과 ${items.length}개`
+        : `${items.length} result${items.length === 1 ? "" : "s"} for "${rawQuery.trim()}".`;
       emptyNode.hidden = items.length > 0;
       if (paginationNode) {
         paginationNode.hidden = true;
@@ -253,7 +257,7 @@
       }
 
       if (!query) {
-        if (mode === 'search-page') {
+        if (mode === "search-page") {
           return renderSearchPageDefault();
         }
 
@@ -267,20 +271,20 @@
     };
 
     const params = new URLSearchParams(window.location.search);
-    const initialQuery = params.get('q') || '';
+    const initialQuery = params.get("q") || "";
     input.value = initialQuery;
     const initialCount = runSearch(initialQuery, false);
     if (initialQuery.trim()) {
-      trackSearch(initialQuery, initialCount, 'page_load');
+      trackSearch(initialQuery, initialCount, "page_load");
     }
 
-    form.addEventListener('submit', (event) => {
+    form.addEventListener("submit", (event) => {
       event.preventDefault();
       const resultCount = runSearch(input.value, true);
-      trackSearch(input.value, resultCount, 'submit');
+      trackSearch(input.value, resultCount, "submit");
     });
 
-    input.addEventListener('input', () => {
+    input.addEventListener("input", () => {
       runSearch(input.value, true);
     });
   }
@@ -299,8 +303,8 @@
   }
 
   if (!bootBlogSearch()) {
-    window.addEventListener('DOMContentLoaded', bootBlogSearch, { once: true });
-    window.addEventListener('load', bootBlogSearch, { once: true });
+    window.addEventListener("DOMContentLoaded", bootBlogSearch, { once: true });
+    window.addEventListener("load", bootBlogSearch, { once: true });
     window.setTimeout(bootBlogSearch, 0);
   }
 })();

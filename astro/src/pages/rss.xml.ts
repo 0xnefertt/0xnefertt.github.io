@@ -1,27 +1,22 @@
-import type { APIRoute } from 'astro';
-import { localeFromPath, localizedPath, localeText } from '../lib/locale';
-import { getCollection } from 'astro:content';
-import { getPostCategories, getPublishedBlogPosts, sortPostsDesc, toBlogSummary } from '../lib/blog';
-import { siteConfig } from '../lib/site';
+import type { APIRoute } from "astro";
+import { localeFromPath, localizedPath, localeText } from "../lib/locale";
+import { getCollection } from "astro:content";
+import { getPostCategories, getPublishedBlogPosts, sortPostsDesc, toBlogSummary } from "../lib/blog";
+import { siteConfig } from "../lib/site";
 
 function escapeXml(input: string): string {
-  return input
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
+  return input.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
 }
 
 function normalizeMarkdown(markdown: string): string {
   return markdown
-    .replace(/```[\s\S]*?```/g, ' ')
-    .replace(/`[^`]*`/g, ' ')
-    .replace(/!\[[^\]]*\]\([^)]+\)/g, ' ')
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/[>#*_~\-]/g, ' ')
-    .replace(/\s+/g, ' ')
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`[^`]*`/g, " ")
+    .replace(/!\[[^\]]*\]\([^)]+\)/g, " ")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/[>#*_~\-]/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
@@ -35,8 +30,8 @@ function excerpt(input: string, maxLength: number): string {
 
 export const GET: APIRoute = async ({ site, url }) => {
   const locale = localeFromPath(url.pathname);
-  const base = (site?.toString() ?? siteConfig.siteUrl).replace(/\/$/, '');
-  const posts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')), locale)
+  const base = (site?.toString() ?? siteConfig.siteUrl).replace(/\/$/, "");
+  const posts = getPublishedBlogPosts(sortPostsDesc(await getCollection("blog")), locale)
     .filter((entry) => !entry.data.redirect)
     .slice(0, 60);
 
@@ -45,30 +40,30 @@ export const GET: APIRoute = async ({ site, url }) => {
       const summary = toBlogSummary(entry);
       const url = `${base}${summary.href}`;
       const published = entry.data.date?.toUTCString() ?? new Date(0).toUTCString();
-      const description = excerpt(summary.description ?? normalizeMarkdown(entry.body ?? ''), 320);
+      const description = excerpt(summary.description ?? normalizeMarkdown(entry.body ?? ""), 320);
       const categories = getPostCategories(entry)
         .map((category) => `<category>${escapeXml(category)}</category>`)
-        .join('');
+        .join("");
 
       return [
-        '<item>',
+        "<item>",
         `<title>${escapeXml(summary.title)}</title>`,
         `<link>${escapeXml(url)}</link>`,
         `<guid isPermaLink="true">${escapeXml(url)}</guid>`,
         `<pubDate>${escapeXml(published)}</pubDate>`,
         `<description>${escapeXml(description)}</description>`,
         categories,
-        '</item>',
-      ].join('');
+        "</item>",
+      ].join("");
     })
-    .join('');
+    .join("");
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n  <channel>\n    <title>${escapeXml(siteConfig.blogName)}</title>\n    <description>${escapeXml(localeText(locale, siteConfig.blogDescription, siteConfig.blogDescriptionKo))}</description>\n    <link>${escapeXml(`${base}${localizedPath('/blog/', locale)}`)}</link>\n    <atom:link href="${escapeXml(`${base}${localizedPath('/rss.xml', locale)}`)}" rel="self" type="application/rss+xml" />\n    <language>${locale}</language>\n    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>\n    ${itemsXml}\n  </channel>\n</rss>`;
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n  <channel>\n    <title>${escapeXml(siteConfig.blogName)}</title>\n    <description>${escapeXml(localeText(locale, siteConfig.blogDescription, siteConfig.blogDescriptionKo))}</description>\n    <link>${escapeXml(`${base}${localizedPath("/blog/", locale)}`)}</link>\n    <atom:link href="${escapeXml(`${base}${localizedPath("/rss.xml", locale)}`)}" rel="self" type="application/rss+xml" />\n    <language>${locale}</language>\n    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>\n    ${itemsXml}\n  </channel>\n</rss>`;
 
   return new Response(xml, {
     headers: {
-      'Content-Type': 'application/rss+xml; charset=utf-8',
-      'Cache-Control': 'public, max-age=3600',
+      "Content-Type": "application/rss+xml; charset=utf-8",
+      "Cache-Control": "public, max-age=3600",
     },
   });
 };

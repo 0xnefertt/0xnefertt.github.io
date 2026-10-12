@@ -1,8 +1,8 @@
-import type { CollectionEntry } from 'astro:content';
-import { categoryName } from '../../../writer/src/site-settings';
-import { contentLocale, localizedPath, type Locale } from './locale';
-import { normalizeAssetPath } from './content';
-import { siteSettings } from './settings';
+import type { CollectionEntry } from "astro:content";
+import { categoryName } from "../../../writer/src/site-settings";
+import { contentLocale, localizedPath, type Locale } from "./locale";
+import { normalizeAssetPath } from "./content";
+import { siteSettings } from "./settings";
 
 export interface PostRoute {
   year: string;
@@ -71,40 +71,40 @@ interface ParentCategoryPreset {
 
 const LEGACY_CATEGORY_PRESETS: ParentCategoryPreset[] = [
   {
-    slug: 'study-log',
-    label: 'study log',
-    aliases: ['study-log', 'study', 'dev', 'english'],
+    slug: "study-log",
+    label: "study log",
+    aliases: ["study-log", "study", "dev", "english"],
     children: [
-      { slug: 'dev', label: 'dev' },
-      { slug: 'english', label: 'english' },
+      { slug: "dev", label: "dev" },
+      { slug: "english", label: "english" },
     ],
   },
   {
-    slug: 'money-talk',
-    label: 'money talk',
-    aliases: ['money-talk', 'money', 'finance', 'stock', 'property'],
+    slug: "money-talk",
+    label: "money talk",
+    aliases: ["money-talk", "money", "finance", "stock", "property"],
     children: [
-      { slug: 'finance', label: 'finance' },
-      { slug: 'stock', label: 'stock' },
-      { slug: 'property', label: 'property' },
+      { slug: "finance", label: "finance" },
+      { slug: "stock", label: "stock" },
+      { slug: "property", label: "property" },
     ],
   },
   {
-    slug: 'life-thoughts',
-    label: 'life · thoughts',
-    aliases: ['life-thoughts', 'thoughts', 'uncategory', 'life', 'opinions-is-my-own', 'retrospect'],
+    slug: "life-thoughts",
+    label: "life · thoughts",
+    aliases: ["life-thoughts", "thoughts", "uncategory", "life", "opinions-is-my-own", "retrospect"],
     children: [
-      { slug: 'opinions-is-my-own', label: 'opinions is my own' },
-      { slug: 'retrospect', label: 'retrospect' },
+      { slug: "opinions-is-my-own", label: "opinions is my own" },
+      { slug: "retrospect", label: "retrospect" },
     ],
   },
   {
-    slug: 'useful-tips',
-    label: 'useful tips',
-    aliases: ['useful-tips', 'tips', 'general', 'in-canada', 'canada'],
+    slug: "useful-tips",
+    label: "useful tips",
+    aliases: ["useful-tips", "tips", "general", "in-canada", "canada"],
     children: [
-      { slug: 'general', label: 'general' },
-      { slug: 'in-canada', label: 'in canada' },
+      { slug: "general", label: "general" },
+      { slug: "in-canada", label: "in canada" },
     ],
   },
 ];
@@ -124,26 +124,26 @@ const CHILD_CATEGORY_ORDER = new Map(
 );
 
 const CATEGORY_LABELS = new Map<string, string>([
-  ['dev', 'dev'],
-  ['english', 'english'],
-  ['finance', 'finance'],
-  ['general', 'general'],
-  ['in-canada', 'in canada'],
-  ['money', '자산'],
-  ['opinions-is-my-own', 'opinions is my own'],
-  ['portfolio', '포트폴리오'],
-  ['property', 'property'],
-  ['school', '학교'],
-  ['shool', '학교'],
-  ['stock', 'stock'],
-  ['technology', '기술'],
-  ['thoughts', '생각'],
-  ['uncategory', '기타'],
+  ["dev", "dev"],
+  ["english", "english"],
+  ["finance", "finance"],
+  ["general", "general"],
+  ["in-canada", "in canada"],
+  ["money", "자산"],
+  ["opinions-is-my-own", "opinions is my own"],
+  ["portfolio", "포트폴리오"],
+  ["property", "property"],
+  ["school", "학교"],
+  ["shool", "학교"],
+  ["stock", "stock"],
+  ["technology", "기술"],
+  ["thoughts", "생각"],
+  ["uncategory", "기타"],
 ]);
 
-const HIDDEN_NAV_CHILD_CATEGORY_SLUGS = new Set(['writed-by-ai']);
-const LANGUAGE_CATEGORY_SLUGS = new Set(['en', 'english', 'ko', 'korean']);
-const PARENT_ONLY_ALIAS_SLUGS = new Set(['life', 'life-thoughts', 'thoughts', 'uncategory']);
+const HIDDEN_NAV_CHILD_CATEGORY_SLUGS = new Set(["writed-by-ai"]);
+const LANGUAGE_CATEGORY_SLUGS = new Set(["en", "english", "ko", "korean"]);
+const PARENT_ONLY_ALIAS_SLUGS = new Set(["life", "life-thoughts", "thoughts", "uncategory"]);
 
 function categoryLabel(parentSlug: string, childSlug: string | undefined, locale: Locale, fallback: string): string {
   const parent = siteSettings.categories.find((group) => group.slug === parentSlug);
@@ -156,11 +156,11 @@ function toTitleCaseWords(input: string): string {
     .split(/\s+/)
     .filter(Boolean)
     .map((word) => word[0].toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
+    .join(" ");
 }
 
 function getCategoryLabel(name: string, slug: string): string {
-  return CATEGORY_LABELS.get(slug) ?? toTitleCaseWords(name.replace(/[-_]+/g, ' '));
+  return CATEGORY_LABELS.get(slug) ?? toTitleCaseWords(name.replace(/[-_]+/g, " "));
 }
 
 function remapCategoryPath(names: string[], slugs: string[]): { names: string[]; slugs: string[] } {
@@ -201,10 +201,10 @@ function remapCategoryPath(names: string[], slugs: string[]): { names: string[];
 function fallbackSlug(input: string): string {
   return input
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/[^a-z0-9\s-]/g, "")
     .trim()
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-');
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
 }
 
 export function slugifyTerm(input: string): string {
@@ -216,10 +216,7 @@ function splitPostPath(filePath?: string): string[] {
     return [];
   }
 
-  return filePath
-    .replace(/\\/g, '/')
-    .split('/')
-    .filter(Boolean);
+  return filePath.replace(/\\/g, "/").split("/").filter(Boolean);
 }
 
 function toTwoLevelSegments(segments: string[]): string[] {
@@ -228,7 +225,7 @@ function toTwoLevelSegments(segments: string[]): string[] {
     return normalized;
   }
 
-  return [normalized[0], normalized.slice(1).join('/')];
+  return [normalized[0], normalized.slice(1).join("/")];
 }
 
 function parseCategoryTerm(input: string): string[] {
@@ -236,12 +233,12 @@ function parseCategoryTerm(input: string): string[] {
     return [];
   }
 
-  return toTwoLevelSegments(input.split('/'));
+  return toTwoLevelSegments(input.split("/"));
 }
 
 function inferCategoryPathFromFilePath(filePath?: string): string[] {
   const segments = splitPostPath(filePath);
-  const postsIndex = segments.lastIndexOf('_posts');
+  const postsIndex = segments.lastIndexOf("_posts");
 
   if (postsIndex === -1) {
     return [];
@@ -252,7 +249,7 @@ function inferCategoryPathFromFilePath(filePath?: string): string[] {
     return [];
   }
 
-  return toTwoLevelSegments(relativeSegments.slice(['en', 'ko'].includes(relativeSegments[0]) ? 1 : 0, -1));
+  return toTwoLevelSegments(relativeSegments.slice(["en", "ko"].includes(relativeSegments[0]) ? 1 : 0, -1));
 }
 
 function toCategoryPath(segments: string[]): BlogCategoryPath | undefined {
@@ -297,11 +294,16 @@ function toCategoryPath(segments: string[]): BlogCategoryPath | undefined {
   };
 }
 
-export function getPostCategoryPaths(post: CollectionEntry<'blog'>): BlogCategoryPath[] {
-  const explicitCategories = normalizeTaxonomy(post.data.categories).map((item) => item.trim()).filter(Boolean);
+export function getPostCategoryPaths(post: CollectionEntry<"blog">): BlogCategoryPath[] {
+  const explicitCategories = normalizeTaxonomy(post.data.categories)
+    .map((item) => item.trim())
+    .filter(Boolean);
   const inferredCategoryPath = inferCategoryPathFromFilePath(post.filePath);
   const inferredParentSlug = inferredCategoryPath.length === 1 ? slugifyTerm(inferredCategoryPath[0]) : undefined;
-  const shouldUseInferredPath = post.data.category_override !== true && inferredCategoryPath.length > 0 && !(explicitCategories.length > 0 && inferredParentSlug && LANGUAGE_CATEGORY_SLUGS.has(inferredParentSlug));
+  const shouldUseInferredPath =
+    post.data.category_override !== true &&
+    inferredCategoryPath.length > 0 &&
+    !(explicitCategories.length > 0 && inferredParentSlug && LANGUAGE_CATEGORY_SLUGS.has(inferredParentSlug));
 
   const explicitEntries = explicitCategories.map(parseCategoryTerm).filter((segments) => segments.length > 0);
   const entries: string[][] = [...explicitEntries];
@@ -345,22 +347,31 @@ export function getPostCategoryPaths(post: CollectionEntry<'blog'>): BlogCategor
     }
   }
 
-  return [...uniqueByKey.values()].filter((path) => path.childSlug || ![...uniqueByKey.values()].some((other) => other.parentSlug === path.parentSlug && other.childSlug)).map((path) => {
-    const locale = contentLocale(post);
-    const parent = categoryLabel(path.parentSlug, undefined, locale, path.parentName);
-    const child = path.childSlug ? categoryLabel(path.parentSlug, path.childSlug, locale, path.childName!) : undefined;
-    const names: BlogCategoryPath['names'] = child ? [parent, child] : [parent];
-    return { ...path, names, parentName: parent, childName: child, label: child ? `${parent} / ${child}` : parent, href: localizedPath(path.href, locale) };
-  });
+  return [...uniqueByKey.values()]
+    .filter((path) => path.childSlug || ![...uniqueByKey.values()].some((other) => other.parentSlug === path.parentSlug && other.childSlug))
+    .map((path) => {
+      const locale = contentLocale(post);
+      const parent = categoryLabel(path.parentSlug, undefined, locale, path.parentName);
+      const child = path.childSlug ? categoryLabel(path.parentSlug, path.childSlug, locale, path.childName!) : undefined;
+      const names: BlogCategoryPath["names"] = child ? [parent, child] : [parent];
+      return {
+        ...path,
+        names,
+        parentName: parent,
+        childName: child,
+        label: child ? `${parent} / ${child}` : parent,
+        href: localizedPath(path.href, locale),
+      };
+    });
 }
 
-export function getLegacyCategoryPaths(post: CollectionEntry<'blog'>): BlogCategoryPath[] {
+export function getLegacyCategoryPaths(post: CollectionEntry<"blog">): BlogCategoryPath[] {
   return normalizeTaxonomy(post.data.legacy_categories)
     .map((item) => toCategoryPath(parseCategoryTerm(item)))
     .filter((item): item is BlogCategoryPath => Boolean(item));
 }
 
-export function getPostCategories(post: CollectionEntry<'blog'>): string[] {
+export function getPostCategories(post: CollectionEntry<"blog">): string[] {
   const categoryPaths = getPostCategoryPaths(post);
   const uniqueBySlug = new Map<string, string>();
 
@@ -390,15 +401,15 @@ function getFileStem(filePath?: string): string | undefined {
     return undefined;
   }
 
-  const fileName = filePath.split('/').pop();
+  const fileName = filePath.split("/").pop();
   if (!fileName) {
     return undefined;
   }
 
-  return fileName.replace(/\.mdx?$/, '');
+  return fileName.replace(/\.mdx?$/, "");
 }
 
-export function getPostRoute(post: CollectionEntry<'blog'>): PostRoute {
+export function getPostRoute(post: CollectionEntry<"blog">): PostRoute {
   const explicitSlug = post.data.slug?.trim();
   if (explicitSlug) {
     return {
@@ -426,14 +437,9 @@ export function getPostRoute(post: CollectionEntry<'blog'>): PostRoute {
 }
 
 export function estimateReadMinutes(markdownBody: string): number {
-  const strippedTemplateSyntax = markdownBody
-    .replace(/\{\%[\s\S]*?\%\}/g, ' ')
-    .replace(/\{\{[\s\S]*?\}\}/g, ' ');
+  const strippedTemplateSyntax = markdownBody.replace(/\{\%[\s\S]*?\%\}/g, " ").replace(/\{\{[\s\S]*?\}\}/g, " ");
 
-  const words = strippedTemplateSyntax
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean).length;
+  const words = strippedTemplateSyntax.trim().split(/\s+/).filter(Boolean).length;
 
   return Math.max(1, Math.ceil(words / WORDS_PER_MINUTE));
 }
@@ -455,7 +461,7 @@ export function normalizeTaxonomy(items?: string | string[]): string[] {
 
 function normalizeGallery(items?: string | string[]): string[] {
   return normalizeTaxonomy(items)
-    .map((item) => normalizeAssetPath(item, 'assets/img/posts'))
+    .map((item) => normalizeAssetPath(item, "assets/img/posts"))
     .filter((item): item is string => Boolean(item));
 }
 
@@ -469,14 +475,14 @@ function extractPostImageUrls(markdown?: string): string[] {
   const htmlImagePattern = /<img\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/g;
 
   for (const match of markdown.matchAll(markdownImagePattern)) {
-    const imagePath = normalizeAssetPath(match[1].replace(/^<|>$/g, ''), 'assets/img/posts');
+    const imagePath = normalizeAssetPath(match[1].replace(/^<|>$/g, ""), "assets/img/posts");
     if (imagePath) {
       imageUrls.add(imagePath);
     }
   }
 
   for (const match of markdown.matchAll(htmlImagePattern)) {
-    const imagePath = normalizeAssetPath(match[1], 'assets/img/posts');
+    const imagePath = normalizeAssetPath(match[1], "assets/img/posts");
     if (imagePath) {
       imageUrls.add(imagePath);
     }
@@ -485,7 +491,10 @@ function extractPostImageUrls(markdown?: string): string[] {
   return [...imageUrls];
 }
 
-export function listBlogCategoryTree(posts: CollectionEntry<'blog'>[], locale: Locale = posts[0] ? contentLocale(posts[0]) : 'en'): BlogCategoryTreeParent[] {
+export function listBlogCategoryTree(
+  posts: CollectionEntry<"blog">[],
+  locale: Locale = posts[0] ? contentLocale(posts[0]) : "en"
+): BlogCategoryTreeParent[] {
   const categoryMap = new Map<string, { name: string; slug: string; count: number; children: Map<string, BlogCategoryTreeChild> }>();
 
   for (const preset of PARENT_CATEGORY_PRESETS) {
@@ -580,7 +589,7 @@ export function listBlogCategoryTree(posts: CollectionEntry<'blog'>[], locale: L
     });
 }
 
-export function listBlogCategories(posts: CollectionEntry<'blog'>[]): BlogCategory[] {
+export function listBlogCategories(posts: CollectionEntry<"blog">[]): BlogCategory[] {
   return listBlogCategoryTree(posts).map((category) => ({
     name: category.name,
     slug: category.slug,
@@ -588,11 +597,11 @@ export function listBlogCategories(posts: CollectionEntry<'blog'>[]): BlogCatego
   }));
 }
 
-export function isDraftPost(post: CollectionEntry<'blog'>): boolean {
+export function isDraftPost(post: CollectionEntry<"blog">): boolean {
   return post.data.draft === true;
 }
 
-export function getPublishedBlogPosts(posts: CollectionEntry<'blog'>[], locale?: Locale): CollectionEntry<'blog'>[] {
+export function getPublishedBlogPosts(posts: CollectionEntry<"blog">[], locale?: Locale): CollectionEntry<"blog">[] {
   return posts.filter((post) => !isDraftPost(post) && (!locale || contentLocale(post) === locale));
 }
 
@@ -600,7 +609,7 @@ function isExternalUrl(url: string): boolean {
   return /^https?:\/\//.test(url);
 }
 
-export function getBlogHref(post: CollectionEntry<'blog'>): { href: string; external: boolean } {
+export function getBlogHref(post: CollectionEntry<"blog">): { href: string; external: boolean } {
   if (post.data.redirect) {
     return {
       href: post.data.redirect,
@@ -624,14 +633,14 @@ export function getBlogHref(post: CollectionEntry<'blog'>): { href: string; exte
   };
 }
 
-export function sortPostsDesc(posts: CollectionEntry<'blog'>[]): CollectionEntry<'blog'>[] {
+export function sortPostsDesc(posts: CollectionEntry<"blog">[]): CollectionEntry<"blog">[] {
   return [...posts].sort((a, b) => safeDate(b.data.date).getTime() - safeDate(a.data.date).getTime());
 }
 
-export function toBlogSummary(post: CollectionEntry<'blog'>): BlogSummary {
+export function toBlogSummary(post: CollectionEntry<"blog">): BlogSummary {
   const { year, slug } = getPostRoute(post);
   const { href, external } = getBlogHref(post);
-  const thumbnail = normalizeAssetPath(post.data.thumbnail ?? post.data.cover, 'assets/img/posts');
+  const thumbnail = normalizeAssetPath(post.data.thumbnail ?? post.data.cover, "assets/img/posts");
   const gallery = normalizeGallery(post.data.gallery);
   const bodyImages = extractPostImageUrls(post.body);
   const previewImages = [...new Set([...(thumbnail ? [thumbnail] : []), ...gallery, ...bodyImages])];
@@ -640,7 +649,7 @@ export function toBlogSummary(post: CollectionEntry<'blog'>): BlogSummary {
     title: post.data.title,
     description: post.data.description,
     date: post.data.date,
-    readMinutes: estimateReadMinutes(post.body ?? ''),
+    readMinutes: estimateReadMinutes(post.body ?? ""),
     tags: normalizeTaxonomy(post.data.tags),
     categories: getPostCategories(post),
     categoryPaths: getPostCategoryPaths(post),
@@ -656,8 +665,8 @@ export function toBlogSummary(post: CollectionEntry<'blog'>): BlogSummary {
 
 export function formatPostDate(date?: Date): string {
   if (!date) {
-    return 'Unknown date';
+    return "Unknown date";
   }
 
-  return date.toISOString().slice(0, 10).replaceAll('-', '.') + '.';
+  return date.toISOString().slice(0, 10).replaceAll("-", ".") + ".";
 }

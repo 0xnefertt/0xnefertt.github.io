@@ -1,17 +1,27 @@
 ---
-import { localeFromPath, localizedPath, localeText, contentLocale } from '../lib/locale';
-import { t } from '../lib/messages';
+import { localeFromPath, localizedPath, localeText, contentLocale } from "../lib/locale";
+import { t } from "../lib/messages";
 const locale = localeFromPath(Astro.url.pathname);
 const l = (path: string) => localizedPath(path, locale);
-import { getCollection, render, type CollectionEntry } from 'astro:content';
-import Layout from '../layouts/Layout.astro';
-import PostShare from './PostShare.astro';
-import { formatPostDate, getBlogHref, getPublishedBlogPosts, getPostCategories, getPostCategoryPaths, normalizeTaxonomy, slugifyTerm, sortPostsDesc, toBlogSummary } from '../lib/blog';
-import { siteConfig } from '../lib/site';
-import { normalizeAssetPath } from '../lib/content';
+import { getCollection, render, type CollectionEntry } from "astro:content";
+import Layout from "../layouts/Layout.astro";
+import PostShare from "./PostShare.astro";
+import {
+  formatPostDate,
+  getBlogHref,
+  getPublishedBlogPosts,
+  getPostCategories,
+  getPostCategoryPaths,
+  normalizeTaxonomy,
+  slugifyTerm,
+  sortPostsDesc,
+  toBlogSummary,
+} from "../lib/blog";
+import { siteConfig } from "../lib/site";
+import { normalizeAssetPath } from "../lib/content";
 
 interface Props {
-  post: CollectionEntry<'blog'>;
+  post: CollectionEntry<"blog">;
 }
 
 const { post } = Astro.props;
@@ -21,7 +31,7 @@ const tags = normalizeTaxonomy(post.data.tags);
 const categories = getPostCategories(post);
 const categoryPaths = getPostCategoryPaths(post);
 const redirectTarget = post.data.redirect;
-const allPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')), locale);
+const allPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection("blog")), locale);
 
 const currentTagSlugs = new Set(tags.map((tag) => slugifyTerm(tag)));
 const currentCategorySlugs = new Set(categories.map((category) => slugifyTerm(category)));
@@ -46,7 +56,10 @@ const scoredCandidates = allPosts
   .slice(0, 4)
   .map((candidate) => candidate.summary);
 
-const fallbackCandidates = allPosts.filter((candidate) => candidate.id !== post.id).map(toBlogSummary).slice(0, 4);
+const fallbackCandidates = allPosts
+  .filter((candidate) => candidate.id !== post.id)
+  .map(toBlogSummary)
+  .slice(0, 4);
 const recommendedPosts = scoredCandidates.length > 0 ? scoredCandidates : fallbackCandidates;
 
 const currentIndex = allPosts.findIndex((candidate) => candidate.id === post.id);
@@ -60,34 +73,34 @@ function toAbsoluteUrl(input: string): string {
     return input;
   }
 
-  const normalized = input.startsWith('/') ? input : `/${input}`;
+  const normalized = input.startsWith("/") ? input : `/${input}`;
   return new URL(normalized, siteConfig.siteUrl).toString();
 }
 
 const articleImageUrl = toAbsoluteUrl(post.data.thumbnail ?? siteConfig.defaultOgImage);
-const aboutPage = (await getCollection('pages')).find((entry) => entry.filePath?.endsWith('/about.md') && contentLocale(entry) === locale);
+const aboutPage = (await getCollection("pages")).find((entry) => entry.filePath?.endsWith("/about.md") && contentLocale(entry) === locale);
 const profile = aboutPage?.data.profile;
-const ownerPost = !post.data.author || post.data.author === '0xnefertt' || post.data.author === profile?.name;
-const authorName = ownerPost ? profile?.name ?? siteConfig.title : post.data.author;
+const ownerPost = !post.data.author || post.data.author === "0xnefertt" || post.data.author === profile?.name;
+const authorName = ownerPost ? (profile?.name ?? siteConfig.title) : post.data.author;
 const authorImage = normalizeAssetPath(profile?.image);
-const authorUrl = new URL(l('/'), siteConfig.siteUrl).toString();
+const authorUrl = new URL(l("/"), siteConfig.siteUrl).toString();
 const publishedIso = post.data.date?.toISOString();
 const modifiedIso = (post.data.last_updated ?? post.data.date)?.toISOString();
 const keywordValues = [...tags, ...categories];
 const articleJsonLd = JSON.stringify({
-  '@context': 'https://schema.org',
-  '@type': 'Article',
+  "@context": "https://schema.org",
+  "@type": "Article",
   headline: post.data.title,
   inLanguage: locale,
   description: post.data.description ?? post.data.title,
   author: {
-    '@type': 'Person',
+    "@type": "Person",
     name: authorName,
     url: authorUrl,
-    ...(ownerPost ? { sameAs: siteConfig.socialLinks.filter((link) => link.label !== 'email').map((link) => link.href) } : {}),
+    ...(ownerPost ? { sameAs: siteConfig.socialLinks.filter((link) => link.label !== "email").map((link) => link.href) } : {}),
   },
   publisher: {
-    '@type': 'Person',
+    "@type": "Person",
     name: profile?.name ?? siteConfig.title,
     url: authorUrl,
   },
@@ -95,22 +108,19 @@ const articleJsonLd = JSON.stringify({
   image: [articleImageUrl],
   datePublished: publishedIso,
   dateModified: modifiedIso,
-  keywords: keywordValues.join(', '),
-}).replace(/</g, '\\u003c');
+  keywords: keywordValues.join(", "),
+}).replace(/</g, "\\u003c");
 
 const giscusConfig = siteConfig.giscus;
 const hasGiscus =
-  giscusConfig.repo.length > 0 &&
-  giscusConfig.repoId.length > 0 &&
-  giscusConfig.category.length > 0 &&
-  giscusConfig.categoryId.length > 0;
+  giscusConfig.repo.length > 0 && giscusConfig.repoId.length > 0 && giscusConfig.category.length > 0 && giscusConfig.categoryId.length > 0;
 const showComments = hasGiscus && (post.data.giscus_comments ?? true) && !redirectTarget;
 ---
 
 <Layout
   title={post.data.title}
   description={post.data.description ?? post.data.title}
-  currentPath={l('/blog/')}
+  currentPath={l("/blog/")}
   canonicalHref={post.data.canonical ?? post.data.canonical_url ?? postHref}
   ogType="article"
   ogImage={post.data.thumbnail ?? siteConfig.defaultOgImage}
@@ -121,23 +131,33 @@ const showComments = hasGiscus && (post.data.giscus_comments ?? true) && !redire
 >
   {redirectTarget && <meta slot="head" http-equiv="refresh" content={`0; url=${redirectTarget}`} />}
   <script slot="head" type="application/ld+json" set:html={articleJsonLd}></script>
-
   <article class="post-header">
     <nav class="post-breadcrumbs" aria-label="글 카테고리">
-      <a href={l('/blog/')} data-i18n-key="blog_all">{t(locale, 'blog_all')}</a>
-      {categoryPaths[0] && <>{' / '}<a href={categoryPaths[0].href}>{categoryPaths[0].label}</a></>}
+      <a href={l("/blog/")} data-i18n-key="blog_all">
+        {t(locale, "blog_all")}
+      </a>
+      {categoryPaths[0] && (
+        <>
+          {" / "}
+          <a href={categoryPaths[0].href}>{categoryPaths[0].label}</a>
+        </>
+      )}
     </nav>
     <h1>{post.data.title}</h1>
     <p class="post-byline">
       {ownerPost && authorImage && <img class="post-author-avatar" src={authorImage} alt="" width="28" height="28" />}
-      <a href={l('/about/')} rel="author">{authorName}</a>
+      <a href={l("/about/")} rel="author">
+        {authorName}
+      </a>
       <time datetime={post.data.date?.toISOString()}>{formatPostDate(post.data.date)}</time>
-      {post.data.external_source ? ` · ${post.data.external_source}` : ''}
+      {post.data.external_source ? ` · ${post.data.external_source}` : ""}
     </p>
 
     {tags.length > 0 && (
       <div class="tags">
-        {tags.map((tag) => <span>#{tag}</span>)}
+        {tags.map((tag) => (
+          <span>#{tag}</span>
+        ))}
       </div>
     )}
   </article>
@@ -147,7 +167,13 @@ const showComments = hasGiscus && (post.data.giscus_comments ?? true) && !redire
       {outline.length > 1 && (
         <details class="post-outline">
           <summary>{localeText(locale, `Contents · ${outline.length} sections`, `목차 · ${outline.length}개 항목`)}</summary>
-          <ul>{outline.map((heading) => <li><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ul>
+          <ul>
+            {outline.map((heading) => (
+              <li>
+                <a href={`#${heading.slug}`}>{heading.text}</a>
+              </li>
+            ))}
+          </ul>
         </details>
       )}
       {redirectTarget && (
@@ -161,7 +187,7 @@ const showComments = hasGiscus && (post.data.giscus_comments ?? true) && !redire
       </div>
 
       <div class="post-reader-actions">
-        <a href={l('/blog/')}>{localeText(locale, 'Back to blog', '글 목록으로')}</a>
+        <a href={l("/blog/")}>{localeText(locale, "Back to blog", "글 목록으로")}</a>
         <PostShare title={post.data.title} url={canonicalPostUrl} locale={locale} />
       </div>
 
@@ -171,10 +197,12 @@ const showComments = hasGiscus && (post.data.giscus_comments ?? true) && !redire
             <a
               class="post-pager-link post-pager-link--prev"
               href={previousPost.href}
-              target={previousPost.external ? '_blank' : undefined}
-              rel={previousPost.external ? 'noreferrer' : undefined}
+              target={previousPost.external ? "_blank" : undefined}
+              rel={previousPost.external ? "noreferrer" : undefined}
             >
-              <span class="post-pager-label" data-i18n-key="post_previous">{t(locale, 'post_previous')}</span>
+              <span class="post-pager-label" data-i18n-key="post_previous">
+                {t(locale, "post_previous")}
+              </span>
               <span class="post-pager-title">{previousPost.title}</span>
             </a>
           ) : (
@@ -185,10 +213,12 @@ const showComments = hasGiscus && (post.data.giscus_comments ?? true) && !redire
             <a
               class="post-pager-link post-pager-link--next"
               href={nextPost.href}
-              target={nextPost.external ? '_blank' : undefined}
-              rel={nextPost.external ? 'noreferrer' : undefined}
+              target={nextPost.external ? "_blank" : undefined}
+              rel={nextPost.external ? "noreferrer" : undefined}
             >
-              <span class="post-pager-label" data-i18n-key="post_next">{t(locale, 'post_next')}</span>
+              <span class="post-pager-label" data-i18n-key="post_next">
+                {t(locale, "post_next")}
+              </span>
               <span class="post-pager-title">{nextPost.title}</span>
             </a>
           ) : (
@@ -200,11 +230,11 @@ const showComments = hasGiscus && (post.data.giscus_comments ?? true) && !redire
 
     {recommendedPosts.length > 0 && (
       <aside class="post-related card" aria-label="Recommended posts">
-        <h2 data-i18n-key="post_more_to_read">{t(locale, 'post_more_to_read')}</h2>
+        <h2 data-i18n-key="post_more_to_read">{t(locale, "post_more_to_read")}</h2>
         <ul class="post-related-list">
           {recommendedPosts.map((item) => (
             <li class="post-related-item">
-              <a href={item.href} target={item.external ? '_blank' : undefined} rel={item.external ? 'noreferrer' : undefined}>
+              <a href={item.href} target={item.external ? "_blank" : undefined} rel={item.external ? "noreferrer" : undefined}>
                 {item.title}
               </a>
               <p class="post-related-meta">

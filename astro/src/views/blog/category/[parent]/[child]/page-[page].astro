@@ -1,14 +1,14 @@
 ---
-import { localeFromPath, localizedPath, localeText } from '../../../../../lib/locale';
-import { t } from '../../../../../lib/messages';
+import { localeFromPath, localizedPath, localeText } from "../../../../../lib/locale";
+import { t } from "../../../../../lib/messages";
 const locale = localeFromPath(Astro.url.pathname);
 const l = (path: string) => localizedPath(path, locale);
-import { getCollection } from 'astro:content';
-import BlogCategoryFilter from '../../../../../components/BlogCategoryFilter.astro';
-import PostCard from '../../../../../components/PostCard.astro';
-import Layout from '../../../../../layouts/Layout.astro';
-import { getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from '../../../../../lib/blog';
-import { siteConfig } from '../../../../../lib/site';
+import { getCollection } from "astro:content";
+import BlogCategoryFilter from "../../../../../components/BlogCategoryFilter.astro";
+import PostCard from "../../../../../components/PostCard.astro";
+import Layout from "../../../../../layouts/Layout.astro";
+import { getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from "../../../../../lib/blog";
+import { siteConfig } from "../../../../../lib/site";
 
 interface Props {
   parentCategory: {
@@ -24,7 +24,7 @@ interface Props {
 
 const { parentCategory, childCategory, currentPage } = Astro.props;
 const postsPerPage = 8;
-const rawPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')), locale);
+const rawPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection("blog")), locale);
 const categoryTree = listBlogCategoryTree(rawPosts, locale);
 const allPosts = rawPosts
   .map(toBlogSummary)
@@ -49,13 +49,30 @@ function getPageHref(page: number): string {
   <section class="blog-header">
     <h1>{siteConfig.blogName}</h1>
     <p>
-      {localeText(locale, 'Category', '카테고리')}: <strong>{parentCategory.name} / {childCategory.name}</strong> ({allPosts.length}) · {localeText(locale, `Page ${pageIndex} of ${totalPages}`, `${totalPages}페이지 중 ${pageIndex}페이지`)}
+      {localeText(locale, "Category", "카테고리")}:{" "}
+      <strong>
+        {parentCategory.name} / {childCategory.name}
+      </strong>{" "}
+      ({allPosts.length}) · {localeText(locale, `Page ${pageIndex} of ${totalPages}`, `${totalPages}페이지 중 ${pageIndex}페이지`)}
     </p>
-    <form class="blog-search-form" action={l('/blog/search/')} method="get">
-      <input class="blog-search-input" type="search" name="q" placeholder={t(locale, 'search_placeholder')} data-i18n-placeholder="search_placeholder" />
-      <button class="blog-search-button" type="submit" data-i18n-key="search_button">{t(locale, 'search_button')}</button>
+    <form class="blog-search-form" action={l("/blog/search/")} method="get">
+      <input
+        class="blog-search-input"
+        type="search"
+        name="q"
+        placeholder={t(locale, "search_placeholder")}
+        data-i18n-placeholder="search_placeholder"
+      />
+      <button class="blog-search-button" type="submit" data-i18n-key="search_button">
+        {t(locale, "search_button")}
+      </button>
     </form>
-    <BlogCategoryFilter categoryTree={categoryTree} totalCount={rawPosts.length} activeParentSlug={parentCategory.slug} activeChildSlug={childCategory.slug} />
+    <BlogCategoryFilter
+      categoryTree={categoryTree}
+      totalCount={rawPosts.length}
+      activeParentSlug={parentCategory.slug}
+      activeChildSlug={childCategory.slug}
+    />
   </section>
 
   {posts.length === 0 ? (
@@ -64,45 +81,51 @@ function getPageHref(page: number): string {
     </section>
   ) : (
     <ul class="post-list" style="margin-top: 1rem;">
-      {
-        posts.map((post) => <PostCard post={post} />)
-      }
+      {posts.map((post) => (
+        <PostCard post={post} />
+      ))}
     </ul>
   )}
 
-  {
-    totalPages > 1 && (
-      <nav class="pagination" aria-label="Category pagination">
-        <ul class="pagination-list">
-          {pageIndex > 1 ? (
-            <li>
-              <a class="pagination-link" href={getPageHref(pageIndex - 1)} data-i18n-key="pagination_prev">{t(locale, 'pagination_prev')}</a>
-            </li>
-          ) : (
-            <li>
-              <span class="pagination-link pagination-link--disabled" data-i18n-key="pagination_prev">{t(locale, 'pagination_prev')}</span>
-            </li>
-          )}
+  {totalPages > 1 && (
+    <nav class="pagination" aria-label="Category pagination">
+      <ul class="pagination-list">
+        {pageIndex > 1 ? (
+          <li>
+            <a class="pagination-link" href={getPageHref(pageIndex - 1)} data-i18n-key="pagination_prev">
+              {t(locale, "pagination_prev")}
+            </a>
+          </li>
+        ) : (
+          <li>
+            <span class="pagination-link pagination-link--disabled" data-i18n-key="pagination_prev">
+              {t(locale, "pagination_prev")}
+            </span>
+          </li>
+        )}
 
-          {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
-            <li>
-              <a class={page === pageIndex ? 'pagination-link active' : 'pagination-link'} href={getPageHref(page)}>
-                {page}
-              </a>
-            </li>
-          ))}
+        {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+          <li>
+            <a class={page === pageIndex ? "pagination-link active" : "pagination-link"} href={getPageHref(page)}>
+              {page}
+            </a>
+          </li>
+        ))}
 
-          {pageIndex < totalPages ? (
-            <li>
-              <a class="pagination-link" href={getPageHref(pageIndex + 1)} data-i18n-key="pagination_next">{t(locale, 'pagination_next')}</a>
-            </li>
-          ) : (
-            <li>
-              <span class="pagination-link pagination-link--disabled" data-i18n-key="pagination_next">{t(locale, 'pagination_next')}</span>
-            </li>
-          )}
-        </ul>
-      </nav>
-    )
-  }
+        {pageIndex < totalPages ? (
+          <li>
+            <a class="pagination-link" href={getPageHref(pageIndex + 1)} data-i18n-key="pagination_next">
+              {t(locale, "pagination_next")}
+            </a>
+          </li>
+        ) : (
+          <li>
+            <span class="pagination-link pagination-link--disabled" data-i18n-key="pagination_next">
+              {t(locale, "pagination_next")}
+            </span>
+          </li>
+        )}
+      </ul>
+    </nav>
+  )}
 </Layout>

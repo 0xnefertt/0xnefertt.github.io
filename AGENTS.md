@@ -32,10 +32,9 @@ Use these from repository root unless stated otherwise:
 
 ## Testing Guidelines
 
-There is no unit-test suite in this repo. Minimum verification before PR:
+Writer tests cover the UI and the real local Workers/D1 runtime with mocked GitHub responses. Minimum verification before PR:
 
-- `npm run format:check`
-- `npm run build`
+- `npm run verify` (dependency audit, full-source formatting, content, types, writer tests, builds and generated output)
 
 Optional smoke tests:
 

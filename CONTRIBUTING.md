@@ -13,8 +13,7 @@ Thank you for contributing.
 Run these before opening a PR:
 
 ```bash
-npm run format:check
-npm run build
+npm run verify
 ```
 
 ## Issues

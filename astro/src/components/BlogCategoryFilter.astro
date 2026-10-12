@@ -1,9 +1,9 @@
 ---
-import { localeFromPath, localizedPath } from '../lib/locale';
-import { t } from '../lib/messages';
+import { localeFromPath, localizedPath } from "../lib/locale";
+import { t } from "../lib/messages";
 const locale = localeFromPath(Astro.url.pathname);
 const l = (path: string) => localizedPath(path, locale);
-import { type BlogCategoryTreeParent } from '../lib/blog';
+import { type BlogCategoryTreeParent } from "../lib/blog";
 
 interface Props {
   activeChildSlug?: string;
@@ -16,68 +16,89 @@ interface Props {
 const { activeChildSlug, activeParentSlug, categoryTree, isAllActive = false, totalCount } = Astro.props;
 ---
 
-{
-  categoryTree.length > 0 && (
-    <div class="blog-category-bar">
-      <nav class="blog-category-tabs" aria-label="주요 카테고리">
-        <a href={l('/blog/')} class={isAllActive ? 'active' : undefined} aria-current={isAllActive ? 'page' : undefined}>
-          <span data-i18n-key="blog_all">{t(locale, 'blog_all')}</span> <span class="category-count">{totalCount}</span>
-        </a>
-        {categoryTree.map((parent) => (
-          parent.count > 0 ? <a href={parent.href} class={parent.slug === activeParentSlug ? 'active' : undefined} aria-current={parent.slug === activeParentSlug && !activeChildSlug ? 'page' : undefined}>
+{categoryTree.length > 0 && (
+  <div class="blog-category-bar">
+    <nav class="blog-category-tabs" aria-label="주요 카테고리">
+      <a href={l("/blog/")} class={isAllActive ? "active" : undefined} aria-current={isAllActive ? "page" : undefined}>
+        <span data-i18n-key="blog_all">{t(locale, "blog_all")}</span> <span class="category-count">{totalCount}</span>
+      </a>
+      {categoryTree.map((parent) =>
+        parent.count > 0 ? (
+          <a
+            href={parent.href}
+            class={parent.slug === activeParentSlug ? "active" : undefined}
+            aria-current={parent.slug === activeParentSlug && !activeChildSlug ? "page" : undefined}
+          >
             <span>{parent.name}</span>
-          </a> : <span class="category-disabled" aria-disabled="true">{parent.name} (0)</span>
-        ))}
-      </nav>
-      <details class="category-disclosure">
-        <summary><span data-i18n-key="blog_categories">{t(locale, 'blog_categories')}</span><span aria-hidden="true">⌄</span></summary>
-        <nav class="blog-category-filter" aria-label="Blog categories">
-          <ul class="blog-category-parent-list">
-            <li>
-              <a href={l('/blog/')} class={isAllActive ? 'active' : undefined}>
-                <span data-i18n-key="blog_all">{t(locale, 'blog_all')}</span> <span class="category-count">({totalCount})</span>
-              </a>
+          </a>
+        ) : (
+          <span class="category-disabled" aria-disabled="true">
+            {parent.name} (0)
+          </span>
+        )
+      )}
+    </nav>
+    <details class="category-disclosure">
+      <summary>
+        <span data-i18n-key="blog_categories">{t(locale, "blog_categories")}</span>
+        <span aria-hidden="true">⌄</span>
+      </summary>
+      <nav class="blog-category-filter" aria-label="Blog categories">
+        <ul class="blog-category-parent-list">
+          <li>
+            <a href={l("/blog/")} class={isAllActive ? "active" : undefined}>
+              <span data-i18n-key="blog_all">{t(locale, "blog_all")}</span> <span class="category-count">({totalCount})</span>
+            </a>
+          </li>
+          {categoryTree.map((parent) => (
+            <li class="blog-category-parent-item">
+              {parent.count > 0 ? (
+                <a href={parent.href} class={parent.slug === activeParentSlug && !activeChildSlug ? "active" : undefined}>
+                  <span>{parent.name}</span> <span class="category-count">({parent.count})</span>
+                </a>
+              ) : (
+                <span class="category-disabled" aria-disabled="true">
+                  {parent.name} (0)
+                </span>
+              )}
+              {parent.children.length > 0 && (
+                <ul class="blog-category-child-list">
+                  {parent.children.map((child) => (
+                    <li>
+                      {child.count > 0 ? (
+                        <a href={child.href} class={parent.slug === activeParentSlug && child.slug === activeChildSlug ? "active" : undefined}>
+                          <span>{child.name}</span> <span class="category-count">({child.count})</span>
+                        </a>
+                      ) : (
+                        <span class="category-disabled" aria-disabled="true">
+                          {child.name} (0)
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </li>
-            {categoryTree.map((parent) => (
-              <li class="blog-category-parent-item">
-                {parent.count > 0 ? <a href={parent.href} class={parent.slug === activeParentSlug && !activeChildSlug ? 'active' : undefined}>
-                  <span>{parent.name}</span>{' '}
-                  <span class="category-count">({parent.count})</span>
-                </a> : <span class="category-disabled" aria-disabled="true">{parent.name} (0)</span>}
-                {parent.children.length > 0 && (
-                  <ul class="blog-category-child-list">
-                    {parent.children.map((child) => (
-                      <li>
-                        {child.count > 0 ? <a href={child.href} class={parent.slug === activeParentSlug && child.slug === activeChildSlug ? 'active' : undefined}>
-                          <span>{child.name}</span>{' '}
-                          <span class="category-count">({child.count})</span>
-                        </a> : <span class="category-disabled" aria-disabled="true">{child.name} (0)</span>}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </details>
-    </div>
-  )
-}
+          ))}
+        </ul>
+      </nav>
+    </details>
+  </div>
+)}
 
 <script>
-  document.querySelectorAll<HTMLElement>('.blog-category-tabs > a.active').forEach((link) => {
+  document.querySelectorAll<HTMLElement>(".blog-category-tabs > a.active").forEach((link) => {
     const tabs = link.parentElement;
     if (tabs) tabs.scrollLeft += link.getBoundingClientRect().left - tabs.getBoundingClientRect().left - 12;
   });
-  document.querySelectorAll<HTMLDetailsElement>('.category-disclosure').forEach((disclosure) => {
-    document.addEventListener('click', (event) => {
+  document.querySelectorAll<HTMLDetailsElement>(".category-disclosure").forEach((disclosure) => {
+    document.addEventListener("click", (event) => {
       if (event.target instanceof Node && !disclosure.contains(event.target)) disclosure.open = false;
     });
-    disclosure.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') {
+    disclosure.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
         disclosure.open = false;
-        disclosure.querySelector<HTMLElement>('summary')?.focus();
+        disclosure.querySelector<HTMLElement>("summary")?.focus();
       }
     });
   });

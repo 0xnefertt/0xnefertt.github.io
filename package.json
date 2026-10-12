@@ -20,10 +20,14 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "serve": "npm run astro:dev",
-    "build": "npm run astro:build"
+    "build": "npm run astro:build",
+    "astro:check": "npm --prefix astro run check",
+    "audit": "npm audit && npm --prefix astro audit && npm --prefix writer audit",
+    "verify": "npm run format:check && npm run audit && npm run verify:content && npm run astro:check && npm run writer:check && npm run writer:test && npm run writer:build && npm run verify:build"
   },
   "devDependencies": {
-    "prettier": "3.1.1"
+    "prettier": "3.9.10",
+    "prettier-plugin-astro": "1.1.1"
   },
   "name": "0xnefertt.github.io",
   "version": "1.0.0",

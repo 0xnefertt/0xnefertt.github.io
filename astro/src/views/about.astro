@@ -1,12 +1,12 @@
 ---
-import { getCollection, render } from 'astro:content';
-import Layout from '../layouts/Layout.astro';
-import { contentLocale, localeFromPath, localizedPath, localeText } from '../lib/locale';
-import { normalizeAssetPath } from '../lib/content';
-import { siteConfig } from '../lib/site';
+import { getCollection, render } from "astro:content";
+import Layout from "../layouts/Layout.astro";
+import { contentLocale, localeFromPath, localizedPath, localeText } from "../lib/locale";
+import { normalizeAssetPath } from "../lib/content";
+import { siteConfig } from "../lib/site";
 
 const locale = localeFromPath(Astro.url.pathname);
-const about = (await getCollection('pages')).find((entry) => entry.filePath?.endsWith('/about.md') && contentLocale(entry) === locale);
+const about = (await getCollection("pages")).find((entry) => entry.filePath?.endsWith("/about.md") && contentLocale(entry) === locale);
 if (!about) throw new Error(`Missing ${locale} About document`);
 const { Content } = await render(about);
 const profile = about.data.profile;
@@ -14,16 +14,30 @@ const image = normalizeAssetPath(profile?.image);
 const name = profile?.name ?? siteConfig.title;
 ---
 
-<Layout title={localeText(locale, 'About', '소개')} description={about.data.description} currentPath={localizedPath('/about/', locale)} mainClass="about-content" disableAds>
+<Layout
+  title={localeText(locale, "About", "소개")}
+  description={about.data.description}
+  currentPath={localizedPath("/about/", locale)}
+  mainClass="about-content"
+  disableAds
+>
   <article class="about-page">
     <header class="about-heading">
-      <p class="about-label">{localeText(locale, 'About', '소개')}</p>
+      <p class="about-label">{localeText(locale, "About", "소개")}</p>
       <h1>{name}</h1>
       {profile?.location && <p class="about-location">{profile.location}</p>}
       {profile?.bio && <p class="about-bio">{profile.bio}</p>}
     </header>
     <div class="about-details">
-      {image && <img class:list={['about-photo', { 'about-photo--circular': profile?.image_circular }]} src={image} alt={localeText(locale, `${name}'s profile photo`, `${name} 프로필 사진`)} width="240" height="240" />}
+      {image && (
+        <img
+          class:list={["about-photo", { "about-photo--circular": profile?.image_circular }]}
+          src={image}
+          alt={localeText(locale, `${name}'s profile photo`, `${name} 프로필 사진`)}
+          width="240"
+          height="240"
+        />
+      )}
       <div class="markdown-body about-body">
         <Content />
       </div>

@@ -1,4 +1,4 @@
-import { defineConfig } from 'astro/config';
+import { defineConfig } from "astro/config";
 
 function markdownStrongFallback() {
   function expandStrongText(value) {
@@ -10,16 +10,16 @@ function markdownStrongFallback() {
     while ((match = strongPattern.exec(value)) !== null) {
       if (match.index > cursor) {
         nodes.push({
-          type: 'text',
+          type: "text",
           value: value.slice(cursor, match.index),
         });
       }
 
       nodes.push({
-        type: 'strong',
+        type: "strong",
         children: [
           {
-            type: 'text',
+            type: "text",
             value: match[1],
           },
         ],
@@ -30,7 +30,7 @@ function markdownStrongFallback() {
 
     if (cursor < value.length) {
       nodes.push({
-        type: 'text',
+        type: "text",
         value: value.slice(cursor),
       });
     }
@@ -44,7 +44,7 @@ function markdownStrongFallback() {
     }
 
     node.children = node.children.flatMap((child) => {
-      if (child.type === 'text' && child.value.includes('**')) {
+      if (child.type === "text" && child.value.includes("**")) {
         return expandStrongText(child.value);
       }
 
@@ -59,8 +59,8 @@ function markdownStrongFallback() {
 }
 
 export default defineConfig({
-  site: 'https://0xnefertt.github.io',
-  i18n: { defaultLocale: 'en', locales: ['en', 'ko'], routing: { prefixDefaultLocale: false } },
+  site: "https://0xnefertt.github.io",
+  i18n: { defaultLocale: "en", locales: ["en", "ko"], routing: { prefixDefaultLocale: false } },
   markdown: {
     remarkPlugins: [markdownStrongFallback],
   },

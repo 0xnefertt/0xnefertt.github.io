@@ -1,15 +1,15 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import UsefulInfo from '../components/UsefulInfo.astro';
-import { localeFromPath, localizedPath, localeText } from '../lib/locale';
-import { siteSettings } from '../lib/settings';
+import Layout from "../layouts/Layout.astro";
+import UsefulInfo from "../components/UsefulInfo.astro";
+import { localeFromPath, localizedPath, localeText } from "../lib/locale";
+import { siteSettings } from "../lib/settings";
 
 const locale = localeFromPath(Astro.url.pathname);
 const favorites = siteSettings.favorites.filter((group) => group.items.length > 0);
 const description = localeText(locale, siteSettings.resourcesDescription, siteSettings.resourcesDescriptionKo);
 ---
 
-<Layout title="Resources" description={description} currentPath={localizedPath('/resources/', locale)} mainClass="resources-content" disableAds>
+<Layout title="Resources" description={description} currentPath={localizedPath("/resources/", locale)} mainClass="resources-content" disableAds>
   <header class="page-header">
     <h1>Resources</h1>
     <p>{description}</p>
@@ -18,7 +18,7 @@ const description = localeText(locale, siteSettings.resourcesDescription, siteSe
     <UsefulInfo config={siteSettings.usefulInfo} />
     <section class="resources-favorites" aria-labelledby="resources-favorites-title">
       <h2 id="resources-favorites-title">Favorite</h2>
-      {favorites.length === 0 && <p>{localeText(locale, 'No favorite links yet.', '아직 등록된 즐겨찾기가 없습니다.')}</p>}
+      {favorites.length === 0 && <p>{localeText(locale, "No favorite links yet.", "아직 등록된 즐겨찾기가 없습니다.")}</p>}
       <div class="resources-favorite-groups">
         {favorites.map((group) => (
           <details class="favorite-group resources-favorite-group" open>
@@ -29,7 +29,13 @@ const description = localeText(locale, siteSettings.resourcesDescription, siteSe
             <ul class="favorite-child-list">
               {group.items.map((item) => (
                 <li class="favorite-item">
-                  <a href={item.href} target={/^https?:\/\//.test(item.href) ? '_blank' : undefined} rel={/^https?:\/\//.test(item.href) ? 'noreferrer' : undefined}>{item.title}</a>
+                  <a
+                    href={item.href}
+                    target={/^https?:\/\//.test(item.href) ? "_blank" : undefined}
+                    rel={/^https?:\/\//.test(item.href) ? "noreferrer" : undefined}
+                  >
+                    {item.title}
+                  </a>
                   {item.note && <p class="favorite-note">{item.note}</p>}
                 </li>
               ))}

@@ -1,25 +1,25 @@
 ---
-import { localeFromPath, localizedPath, contentLocale, localeText } from '../lib/locale';
-import { t } from '../lib/messages';
+import { localeFromPath, localizedPath, contentLocale, localeText } from "../lib/locale";
+import { t } from "../lib/messages";
 const locale = localeFromPath(Astro.url.pathname);
 const l = (path: string) => localizedPath(path, locale);
-import { getCollection } from 'astro:content';
-import Layout from '../layouts/Layout.astro';
-import PostCard from '../components/PostCard.astro';
-import BlogCategoryFilter from '../components/BlogCategoryFilter.astro';
-import { getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from '../lib/blog';
-import { normalizeAssetPath } from '../lib/content';
-import { siteConfig } from '../lib/site';
-import { siteSettings } from '../lib/settings';
+import { getCollection } from "astro:content";
+import Layout from "../layouts/Layout.astro";
+import PostCard from "../components/PostCard.astro";
+import BlogCategoryFilter from "../components/BlogCategoryFilter.astro";
+import { getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from "../lib/blog";
+import { normalizeAssetPath } from "../lib/content";
+import { siteConfig } from "../lib/site";
+import { siteSettings } from "../lib/settings";
 
-const pages = await getCollection('pages');
-const aboutPage = pages.find((entry) => entry.filePath?.endsWith('/about.md') && contentLocale(entry) === locale);
+const pages = await getCollection("pages");
+const aboutPage = pages.find((entry) => entry.filePath?.endsWith("/about.md") && contentLocale(entry) === locale);
 
 if (!aboutPage) {
-  throw new Error('Missing about page: expected _pages/about.md.');
+  throw new Error("Missing about page: expected _pages/about.md.");
 }
 
-const allPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection('blog')), locale);
+const allPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection("blog")), locale);
 const latestLimit = siteSettings.latestPostsLimit;
 const latestPosts = allPosts.slice(0, latestLimit).map(toBlogSummary);
 const categoryTree = listBlogCategoryTree(allPosts, locale);
@@ -27,38 +27,63 @@ const profile = aboutPage.data.profile;
 const profileImage = normalizeAssetPath(profile?.image);
 ---
 
-<Layout title={localeText(locale, 'Blog', '블로그')} description={localeText(locale, siteConfig.blogDescription, siteConfig.blogDescriptionKo)} currentPath={l('/')} mainClass="home-content">
+<Layout
+  title={localeText(locale, "Blog", "블로그")}
+  description={localeText(locale, siteConfig.blogDescription, siteConfig.blogDescriptionKo)}
+  currentPath={l("/")}
+  mainClass="home-content"
+>
   <header class="blog-masthead">
-    <p class="blog-masthead-label">{localeText(locale, 'A space to write, learn, and share', '기록하고, 배우고, 나누는 공간')}</p>
+    <p class="blog-masthead-label">{localeText(locale, "A space to write, learn, and share", "기록하고, 배우고, 나누는 공간")}</p>
     <h1>{siteConfig.blogName}</h1>
     <p class="blog-masthead-description">{localeText(locale, siteConfig.blogDescription, siteConfig.blogDescriptionKo)}</p>
     <BlogCategoryFilter categoryTree={categoryTree} totalCount={allPosts.length} isAllActive />
   </header>
   <section class="home-latest-section" aria-labelledby="latest-posts-title">
     <div class="home-latest-heading">
-      <h2 class="section-title" id="latest-posts-title"><span data-i18n-key="blog_recent">{t(locale, 'blog_recent')}</span> <span class="feed-count">{latestPosts.length}</span></h2>
-      <form class="blog-search-form home-search" action={l('/blog/search/')} method="get" role="search">
-        <input class="blog-search-input" type="search" name="q" placeholder={t(locale, 'search_placeholder')} aria-label="Search posts" data-i18n-placeholder="search_placeholder" />
-        <button class="blog-search-button" type="submit" data-i18n-key="search_button">{t(locale, 'search_button')}</button>
+      <h2 class="section-title" id="latest-posts-title">
+        <span data-i18n-key="blog_recent">{t(locale, "blog_recent")}</span> <span class="feed-count">{latestPosts.length}</span>
+      </h2>
+      <form class="blog-search-form home-search" action={l("/blog/search/")} method="get" role="search">
+        <input
+          class="blog-search-input"
+          type="search"
+          name="q"
+          placeholder={t(locale, "search_placeholder")}
+          aria-label="Search posts"
+          data-i18n-placeholder="search_placeholder"
+        />
+        <button class="blog-search-button" type="submit" data-i18n-key="search_button">
+          {t(locale, "search_button")}
+        </button>
       </form>
     </div>
-    {latestPosts.length === 0 && <p>{localeText(locale, 'No English posts have been published yet.', '아직 발행된 한국어 글이 없습니다.')}</p>}
+    {latestPosts.length === 0 && <p>{localeText(locale, "No English posts have been published yet.", "아직 발행된 한국어 글이 없습니다.")}</p>}
     <ul class="post-list">
-      {latestPosts.map((post) => <PostCard post={post} headingLevel={3} />)}
+      {latestPosts.map((post) => (
+        <PostCard post={post} headingLevel={3} />
+      ))}
     </ul>
-    <a class="feed-more" href={l('/blog/')}><span data-i18n-key="blog_all">{t(locale, 'blog_all')}</span> {localeText(locale, `View all ${allPosts.length} posts`, `${allPosts.length}개 보기`)} &rarr;</a>
+    <a class="feed-more" href={l("/blog/")}>
+      <span data-i18n-key="blog_all">{t(locale, "blog_all")}</span>{" "}
+      {localeText(locale, `View all ${allPosts.length} posts`, `${allPosts.length}개 보기`)} &rarr;
+    </a>
   </section>
   <div class="home-intro">
     <section class="home-profile" id="about" aria-labelledby="profile-name">
       <div class="home-profile-heading">
-        {profileImage && <img class="profile-avatar" src={profileImage} alt={`${profile?.name ?? siteConfig.title} 프로필`} loading="lazy" width="64" height="64" />}
+        {profileImage && (
+          <img class="profile-avatar" src={profileImage} alt={`${profile?.name ?? siteConfig.title} 프로필`} loading="lazy" width="64" height="64" />
+        )}
         <div>
           <h2 id="profile-name">{profile?.name ?? siteConfig.title}</h2>
           {profile?.location && <p>{profile.location}</p>}
         </div>
       </div>
       {profile?.bio && <p class="home-profile-bio">{profile.bio}</p>}
-      <a class="profile-description" href={l('/about/')}>{localeText(locale, 'More about me', '소개 더보기')} &rarr;</a>
+      <a class="profile-description" href={l("/about/")}>
+        {localeText(locale, "More about me", "소개 더보기")} &rarr;
+      </a>
     </section>
   </div>
 </Layout>

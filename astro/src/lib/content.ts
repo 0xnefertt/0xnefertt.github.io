@@ -1,34 +1,34 @@
-import type { CollectionEntry } from 'astro:content';
-import { contentLocale, localizedPath } from './locale';
+import type { CollectionEntry } from "astro:content";
+import { contentLocale, localizedPath } from "./locale";
 
 function getFileStem(filePath?: string): string | undefined {
   if (!filePath) {
     return undefined;
   }
 
-  const fileName = filePath.split('/').pop();
+  const fileName = filePath.split("/").pop();
   if (!fileName) {
     return undefined;
   }
 
-  return fileName.replace(/\.mdx?$/, '');
+  return fileName.replace(/\.mdx?$/, "");
 }
 
 function fallbackSlug(input: string): string {
   return input
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/[^a-z0-9\s-]/g, "")
     .trim()
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-');
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
 }
 
 function isExternalUrl(url: string): boolean {
   return /^https?:\/\//.test(url);
 }
 
-export function normalizeAssetPath(assetPath: unknown, fallbackDir = 'assets/img'): string | undefined {
-  if (typeof assetPath !== 'string') {
+export function normalizeAssetPath(assetPath: unknown, fallbackDir = "assets/img"): string | undefined {
+  if (typeof assetPath !== "string") {
     return undefined;
   }
 
@@ -40,11 +40,11 @@ export function normalizeAssetPath(assetPath: unknown, fallbackDir = 'assets/img
     return assetPath;
   }
 
-  if (assetPath.startsWith('/')) {
+  if (assetPath.startsWith("/")) {
     return assetPath;
   }
 
-  if (assetPath.startsWith('assets/')) {
+  if (assetPath.startsWith("assets/")) {
     return `/${assetPath}`;
   }
 
@@ -57,7 +57,7 @@ export interface RouteInfo {
   external: boolean;
 }
 
-export function getProjectRoute(project: CollectionEntry<'projects'>): RouteInfo {
+export function getProjectRoute(project: CollectionEntry<"projects">): RouteInfo {
   if (project.data.redirect) {
     return {
       slug: getFileStem(project.filePath) ?? fallbackSlug(project.id),
@@ -74,7 +74,7 @@ export function getProjectRoute(project: CollectionEntry<'projects'>): RouteInfo
   };
 }
 
-export function getBookRoute(book: CollectionEntry<'books'>): RouteInfo {
+export function getBookRoute(book: CollectionEntry<"books">): RouteInfo {
   const slug = getFileStem(book.filePath) ?? fallbackSlug(book.id);
   return {
     slug,
@@ -83,7 +83,7 @@ export function getBookRoute(book: CollectionEntry<'books'>): RouteInfo {
   };
 }
 
-export function sortProjects(projects: CollectionEntry<'projects'>[]): CollectionEntry<'projects'>[] {
+export function sortProjects(projects: CollectionEntry<"projects">[]): CollectionEntry<"projects">[] {
   return [...projects].sort((a, b) => {
     const aImportance = a.data.importance ?? Number.MAX_SAFE_INTEGER;
     const bImportance = b.data.importance ?? Number.MAX_SAFE_INTEGER;
