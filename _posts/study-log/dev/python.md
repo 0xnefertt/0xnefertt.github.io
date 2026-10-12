@@ -287,14 +287,15 @@ except ValuError:
 ```
 
 **자주 보는 예외 종류**
-| 예외 | 의미 |
-| ---| ----|
-| ValueError | 값이 잘못됨 |
-| TypeError | 타입이 잘못됨 |
-| IndexError | 리스트 인덱스 범위 초과 |
-| KeyError | 딕셔너리에 없는 키 접근 |
-| ZeroDivisionError | 0으로 나눔 |
-| FileNotFoundError | 파일이 없음 |
+
+| 예외              | 의미                    |
+| ----------------- | ----------------------- |
+| ValueError        | 값이 잘못됨             |
+| TypeError         | 타입이 잘못됨           |
+| IndexError        | 리스트 인덱스 범위 초과 |
+| KeyError          | 딕셔너리에 없는 키 접근 |
+| ZeroDivisionError | 0으로 나눔              |
+| FileNotFoundError | 파일이 없음             |
 
 else도 있다.
 
