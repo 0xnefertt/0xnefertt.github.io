@@ -57,15 +57,15 @@ jobs:
   verify:
     outputs:
       writer_changed: ${{ steps.changes.outputs.writer_changed }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout 🛎️
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
 
       - name: Setup Node.js ⚙️
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7.1.0
         with:
           node-version: "22.22.3"
           cache: npm
@@ -109,7 +109,7 @@ jobs:
           PUBLIC_WRITER_URL: ${{ vars.PUBLIC_WRITER_URL }}
         run: npm run verify
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7.0.2
         with:
           name: verified-site
           path: astro/dist
@@ -118,12 +118,12 @@ jobs:
   deploy-writer:
     needs: verify
     if: github.event_name != 'pull_request' && needs.verify.outputs.writer_changed == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version: "22.22.3"
           cache: npm
@@ -144,10 +144,10 @@ jobs:
       contents: write
     needs: [verify, deploy-writer]
     if: always() && github.event_name != 'pull_request' && needs.verify.result == 'success' && (needs.deploy-writer.result == 'success' || needs.deploy-writer.result == 'skipped')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/download-artifact@v8.0.2
         with:
           name: verified-site
           path: astro/dist
