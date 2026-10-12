@@ -301,7 +301,7 @@ export function richEditor(options: Options) {
     el("insert-url-field").hidden = kind === "table";
     el("insert-alt-field").hidden = kind !== "image";
     el("insert-table-fields").hidden = kind !== "table";
-    el<HTMLInputElement>("insert-url").value = kind === "link" ? editor.getAttributes("link").href ?? "" : "";
+    el<HTMLInputElement>("insert-url").value = kind === "link" ? (editor.getAttributes("link").href ?? "") : "";
     el<HTMLInputElement>("insert-alt").value = "";
     el("insert-error").textContent = "";
     dialog.showModal();
@@ -362,7 +362,7 @@ export function richEditor(options: Options) {
     insertImage,
     isComposing: () => composing,
     isSource: () => sourceMode,
-    characters: () => (sourceMode ? source.value.length : editor?.state.doc.textContent.length ?? raw.length),
+    characters: () => (sourceMode ? source.value.length : (editor?.state.doc.textContent.length ?? raw.length)),
     setLocked: (value: boolean) => {
       locked = value;
       toolbar.disabled = value;

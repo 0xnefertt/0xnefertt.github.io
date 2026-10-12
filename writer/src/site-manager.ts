@@ -85,7 +85,7 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
       legacy.disabled = true;
       select.add(legacy);
     }
-    select.value = value || (wasEmpty ? options[0]?.value ?? "" : "");
+    select.value = value || (wasEmpty ? (options[0]?.value ?? "") : "");
     updateNewButton();
   }
   function updateNewButton() {

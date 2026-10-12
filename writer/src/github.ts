@@ -17,6 +17,7 @@ import markdown from "prettier/plugins/markdown";
 import yaml from "prettier/plugins/yaml";
 import { readMedia } from "./media-storage";
 import { assertWritableCategory, SETTINGS_PATH, validateSettings } from "./site-settings";
+import { parseDocument } from "yaml";
 
 export async function boundedBody(response: Response | Request, max = 1_000_000): Promise<Uint8Array> {
   const reader = response.body?.getReader();
@@ -87,6 +88,48 @@ export async function readPost(env: Env, token: string, path: string): Promise<P
   );
   if (file.size > 600_000) throw new HttpError(413, "이 글은 웹 편집기로 열기에는 너무 큽니다.");
   return parsePost(new TextDecoder().decode(Uint8Array.from(atob(file.content.replace(/\s/g, "")), (c) => c.charCodeAt(0))), path, file.sha);
+}
+
+// Hide the published version without publishing edits in its private working copy.
+export async function unpublishPost(env: Env, token: string, doc: PostDocument) {
+  if (!doc.sourcePath || !isContentPath(doc.sourcePath) || pathCollection(doc.sourcePath) === "about")
+    throw new HttpError(422, "발행된 글, 책, 프로젝트만 발행을 취소할 수 있습니다.");
+  const repo = await repositoryTree(env, token);
+  const current = repo.files.find((file) => file.path === doc.sourcePath && file.type === "blob");
+  if (!current || current.sha !== doc.sourceSha) throw new HttpError(409, "원본이 변경되었습니다. 새로 불러온 후 발행을 취소해 주세요.");
+  const blob = await github<{ content: string; size: number }>(token, `${repo.root}/git/blobs/${current.sha}`);
+  if (blob.size > 600_000) throw new HttpError(413, "이 글은 웹 편집기로 열기에는 너무 큽니다.");
+  const source = new TextDecoder().decode(Uint8Array.from(atob(blob.content.replace(/\s/g, "")), (c) => c.charCodeAt(0))).replace(/\r\n/g, "\n");
+  const header = source.match(/^---\n([\s\S]*?)\n---(?:\n|$)/);
+  if (!header) throw new HttpError(422, "원본 글의 머리말을 확인해 주세요.");
+  const metadata = parseDocument(header[1], { uniqueKeys: true });
+  if (metadata.errors.length || !metadata.toJSON() || Array.isArray(metadata.toJSON()) || typeof metadata.toJSON() !== "object")
+    throw new HttpError(422, "원본 글의 머리말을 확인해 주세요.");
+  metadata.set("draft", true);
+  const frontmatter = await format(metadata.toString(), {
+    parser: "yaml",
+    plugins: [yaml],
+    printWidth: 150,
+    trailingComma: "es5",
+  });
+  const content = `---\n${frontmatter.trimEnd()}\n---\n${source.slice(header[0].length)}`;
+  const saved = await github<{ sha: string }>(token, `${repo.root}/git/blobs`, {
+    method: "POST",
+    body: JSON.stringify({ content, encoding: "utf-8" }),
+  });
+  const tree = await github<{ sha: string }>(token, `${repo.root}/git/trees`, {
+    method: "POST",
+    body: JSON.stringify({ base_tree: repo.treeSha, tree: [{ path: doc.sourcePath, mode: "100644", type: "blob", sha: saved.sha }] }),
+  });
+  const commit = await github<{ sha: string }>(token, `${repo.root}/git/commits`, {
+    method: "POST",
+    body: JSON.stringify({ message: `Unpublish ${doc.title.trim().slice(0, 90)}`, tree: tree.sha, parents: [repo.head] }),
+  });
+  await github(token, `${repo.root}/git/refs/heads/${env.GITHUB_BRANCH}`, {
+    method: "PATCH",
+    body: JSON.stringify({ sha: commit.sha, force: false }),
+  });
+  return { commit: commit.sha, document: { ...doc, sourceSha: saved.sha, metadata: { ...doc.metadata, draft: true } } };
 }
 
 // Batch metadata reads to stay within Workers subrequest limits as the library grows.

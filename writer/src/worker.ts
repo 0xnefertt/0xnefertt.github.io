@@ -1,5 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
-import { boundedBody, github, publishPost, readPost, repositoryTree, readDocuments, type MediaFile } from "./github";
+import { boundedBody, github, publishPost, unpublishPost, readPost, repositoryTree, readDocuments, type MediaFile } from "./github";
 import {
   HttpError,
   validateDocument,
@@ -228,6 +228,7 @@ async function route(request: Request, env: Env): Promise<Response> {
       path: doc.sourcePath,
       sha: doc.sourceSha,
       language: documentLanguage(doc),
+      published: doc.metadata.draft !== true,
     }));
     return json({ posts });
   }
@@ -265,6 +266,7 @@ async function route(request: Request, env: Env): Promise<Response> {
           version: row.version,
           trashedAt: row.deleted_at,
           language: documentLanguage(doc),
+          published: Boolean(doc.sourcePath) && doc.metadata.draft !== true,
         };
       }),
     });
@@ -278,9 +280,10 @@ async function route(request: Request, env: Env): Promise<Response> {
     await env.DB.prepare("INSERT INTO drafts (id, document, updated) VALUES (?, ?, ?)").bind(id, JSON.stringify(doc), updated).run();
     return json({ id, document: doc, version: 1, updated }, 201);
   }
-  const match = path.match(/^\/api\/drafts\/([^/]+)(?:\/(publish|media|restore))?$/);
+  const match = path.match(/^\/api\/drafts\/([^/]+)(?:\/(publish|unpublish|media|restore)(?:\/([a-f0-9-]{36}))?)?$/);
   if (match) {
-    const [, id, action] = match;
+    const [, id, action, mediaId] = match;
+    if (mediaId && action !== "media") throw new HttpError(404, "요청한 기능을 찾을 수 없습니다.");
     const row = await getDraft(env, id, action === "restore");
     if (!action && request.method === "DELETE") {
       const data = await input(request);
@@ -332,7 +335,41 @@ async function route(request: Request, env: Env): Promise<Response> {
       if (!result) throw new HttpError(409, "다른 기기에서 변경했거나 발행 중인 글입니다. 내용을 내려받고 초안을 다시 열어 주세요.");
       return json(draft(result));
     }
-    if (action === "media" && request.method === "POST") {
+    if (action === "media" && !mediaId && request.method === "GET") {
+      const files = await env.DB.prepare("SELECT id, mime, size FROM media WHERE draft_id = ? ORDER BY id").bind(id).all<MediaFile>();
+      return json({
+        version: row.version,
+        media: files.results.map((file) => ({
+          id: file.id,
+          url: `/api/media/${file.id}`,
+          mime: file.mime,
+          size: file.size,
+          used: row.document.includes(`/api/media/${file.id}`),
+        })),
+      });
+    }
+    if (action === "media" && mediaId && request.method === "DELETE") {
+      const data = await input(request);
+      const file = await env.DB.prepare("SELECT id FROM media WHERE id = ? AND draft_id = ?").bind(mediaId, id).first();
+      if (!file) throw new HttpError(404, "첨부 이미지를 찾을 수 없습니다.");
+      const reference = `/api/media/${mediaId}`;
+      if (row.document.includes(reference)) throw new HttpError(422, "사용 중인 이미지입니다. 본문이나 표지에서 먼저 제거하고 저장해 주세요.");
+      const now = Date.now();
+      // One transaction checks the revision, deletes all chunks through the FK,
+      // and advances the working copy so an older editor cannot reuse the image.
+      const results = await env.DB.batch([
+        env.DB.prepare(
+          "DELETE FROM media WHERE id = ? AND draft_id = ? AND EXISTS (SELECT 1 FROM drafts WHERE id = ? AND version = ? AND publishing <= ? AND deleted_at IS NULL AND instr(document, ?) = 0) RETURNING id"
+        ).bind(mediaId, id, id, Number(data.version), now, reference),
+        env.DB.prepare(
+          "UPDATE drafts SET version = version + 1, updated = ? WHERE id = ? AND version = ? AND publishing <= ? AND deleted_at IS NULL AND instr(document, ?) = 0 AND NOT EXISTS (SELECT 1 FROM media WHERE id = ?) RETURNING *"
+        ).bind(new Date().toISOString(), id, Number(data.version), now, reference, mediaId),
+      ]);
+      if (!results[0].results.length || !results[1].results.length)
+        throw new HttpError(409, "초안이 변경되었거나 발행 중입니다. 다시 열어 확인해 주세요.");
+      return json({ draft: draft(results[1].results[0] as unknown as DraftRow) });
+    }
+    if (action === "media" && !mediaId && request.method === "POST") {
       if (row.publishing > Date.now()) throw new HttpError(409, "발행 중에는 이미지를 첨부할 수 없습니다.");
       const mime = request.headers.get("Content-Type")?.split(";")[0] ?? "";
       const extensions: Record<string, string> = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp", "image/gif": "gif" };
@@ -365,13 +402,26 @@ async function route(request: Request, env: Env): Promise<Response> {
       await env.DB.batch(statements);
       return json({ url: `/api/media/${fileId}` }, 201);
     }
-    if (action === "publish" && request.method === "POST") {
+    if ((action === "publish" || action === "unpublish") && request.method === "POST") {
       const data = await input(request);
       const locked = await env.DB.prepare("UPDATE drafts SET publishing = ? WHERE id = ? AND version = ? AND publishing <= ? RETURNING *")
         .bind(Date.now() + 600_000, id, Number(data.version), Date.now())
         .first<DraftRow>();
       if (!locked) throw new HttpError(409, "초안이 변경되었거나 이미 발행 중입니다. 초안을 다시 열어 주세요.");
       try {
+        if (action === "unpublish") {
+          const result = await unpublishPost(env, user.token, validateDocument(JSON.parse(locked.document)));
+          const saved = await env.DB.prepare(
+            "UPDATE drafts SET document = ?, updated = ?, version = version + 1, publishing = 0 WHERE id = ? RETURNING *"
+          )
+            .bind(JSON.stringify(result.document), new Date().toISOString(), id)
+            .first<DraftRow>();
+          return json({
+            ...result,
+            draft: saved ? draft(saved) : null,
+            workflowUrl: `https://github.com/${env.GITHUB_REPOSITORY}/actions?query=workflow%3A%22Deploy+site%22`,
+          });
+        }
         const doc = validateDocument(JSON.parse(locked.document), true);
         const files = await env.DB.prepare("SELECT id, filename, mime, size FROM media WHERE draft_id = ?").bind(id).all<MediaFile>();
         const referenced = files.results.filter(

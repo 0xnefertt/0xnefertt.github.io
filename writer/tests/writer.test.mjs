@@ -1,4 +1,4 @@
-import { after, before, test } from "node:test";
+import { after, afterEach, before, test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile, mkdir } from "node:fs/promises";
 import { build } from "esbuild";
@@ -28,6 +28,12 @@ let calls = [];
 const settingsSha = "1".repeat(40);
 let configuredSettings;
 let auth;
+let sourceBlob = existing;
+let sourceRevision = originalSha;
+afterEach(() => {
+  sourceBlob = existing;
+  sourceRevision = originalSha;
+});
 
 before(async () => {
   await build({
@@ -83,7 +89,7 @@ before(async () => {
           return json({
             truncated: false,
             tree: [
-              { path: sourcePath, sha: originalSha, type: "blob" },
+              { path: sourcePath, sha: sourceRevision, type: "blob" },
               { path: bookPath, sha: originalSha, type: "blob" },
               { path: projectPath, sha: originalSha, type: "blob" },
               { path: aboutPath, sha: originalSha, type: "blob" },
@@ -93,6 +99,8 @@ before(async () => {
               { path: "_data/site-settings.json", sha: settingsSha, type: "blob" },
             ],
           });
+        if (url.pathname.endsWith(`/git/blobs/${sourceRevision}`))
+          return json({ content: Buffer.from(sourceBlob).toString("base64"), size: Buffer.byteLength(sourceBlob) });
         if (url.pathname.endsWith(`/git/blobs/${settingsSha}`)) {
           const content = JSON.stringify(configuredSettings);
           return json({ content: Buffer.from(content).toString("base64"), size: content.length });
@@ -1054,6 +1062,185 @@ test("publication rejects parent-only and unconfigured categories without modify
     assert.match((await response.json()).error, /하위 카테고리/);
     assert.ok(!calls.some((call) => call.method === "POST" && call.path.endsWith("/git/blobs")));
     assert.equal((await (await request(`/api/drafts/${value.id}`)).json()).document.category, category);
+  }
+});
+
+test("unused attachments can be deleted with revision checks, reclaiming slots and removing every D1 chunk", async () => {
+  const value = await create();
+  const db = await mf.getD1Database("DB");
+  const upload = (size = 4) =>
+    request(`/api/drafts/${value.id}/media`, {
+      method: "POST",
+      headers: { "Content-Type": "image/png" },
+      body: new Uint8Array(size).fill(137),
+    });
+  const image = await (await upload(2 * 1024 * 1024 + 4)).json();
+  const id = image.url.split("/").at(-1);
+  const other = await create();
+  assert.equal((await request(`/api/drafts/${other.id}/media/${id}`, { method: "DELETE", data: { version: other.version } })).status, 404);
+  assert.equal((await request(`/api/drafts/${value.id}/media/${id}`, { method: "DELETE", data: { version: 99 } })).status, 409);
+  const readable = await request(image.url);
+  assert.equal(readable.status, 200);
+  await readable.arrayBuffer();
+  await db
+    .prepare("UPDATE drafts SET publishing = ? WHERE id = ?")
+    .bind(Date.now() + 60000, value.id)
+    .run();
+  assert.equal((await request(`/api/drafts/${value.id}/media/${id}`, { method: "DELETE", data: { version: value.version } })).status, 409);
+  await db.prepare("UPDATE drafts SET publishing = 0 WHERE id = ?").bind(value.id).run();
+  for (let index = 0; index < 19; index++)
+    await db
+      .prepare("INSERT INTO media (id,draft_id,filename,mime,size,data) VALUES (?,?,?,?,?,?)")
+      .bind(crypto.randomUUID(), value.id, `unused-${index}.png`, "image/png", 1, new Uint8Array([137]).buffer)
+      .run();
+  assert.equal((await upload()).status, 422);
+  calls = [];
+  const response = await request(`/api/drafts/${value.id}/media/${id}`, { method: "DELETE", data: { version: value.version } });
+  assert.equal(response.status, 200, await response.clone().text());
+  const removed = await response.json();
+  assert.equal(removed.draft.version, value.version + 1);
+  assert.equal((await request(image.url)).status, 404);
+  assert.equal((await db.prepare("SELECT count(*) AS count FROM media_chunks WHERE media_id = ?").bind(id).first()).count, 0);
+  assert.equal((await upload()).status, 201);
+  assert.equal(calls.length, 0, "private cleanup never modifies public repository images");
+});
+
+test("attachments referenced by Markdown, HTML tables or profile metadata cannot be deleted", async () => {
+  let value = await create();
+  const image = await (
+    await request(`/api/drafts/${value.id}/media`, {
+      method: "POST",
+      headers: { "Content-Type": "image/png" },
+      body: new Uint8Array([137, 80, 78, 71]),
+    })
+  ).json();
+  const id = image.url.split("/").at(-1);
+  for (const change of [
+    { body: `![Used](${image.url})` },
+    { body: `<table><tr><td><img src="${image.url}"></td></tr></table>` },
+    { body: "Body", metadata: { profile: { image: image.url } } },
+  ]) {
+    value = await (
+      await request(`/api/drafts/${value.id}`, {
+        method: "PUT",
+        data: {
+          version: value.version,
+          document: { ...value.document, ...change },
+        },
+      })
+    ).json();
+    const listing = await (await request(`/api/drafts/${value.id}/media`)).json();
+    assert.equal(listing.media[0].used, true);
+    assert.equal((await request(`/api/drafts/${value.id}/media/${id}`, { method: "DELETE", data: { version: value.version } })).status, 422);
+    assert.equal((await request(image.url)).status, 200);
+  }
+});
+
+test("new media and unpublish endpoints require owner sessions, origin and CSRF", async () => {
+  const value = await create();
+  for (const action of ["media", "media/12345678-1234-1234-1234-123456789012", "unpublish"]) {
+    const path = `/api/drafts/${value.id}/${action}`;
+    assert.equal((await mf.dispatchFetch(`${origin}${path}`)).status, 401);
+    const method = action.startsWith("media/") ? "DELETE" : "POST";
+    assert.equal((await request(path, { method, data: { version: value.version }, headers: { "X-CSRF-Token": "invalid" } })).status, 403);
+    assert.equal((await request(path, { method, data: { version: value.version }, headers: { Origin: "https://evil.example" } })).status, 403);
+  }
+});
+
+test("unpublishing hides only the published version, preserves private edits and images, and permits republishing the same path", async () => {
+  const db = await mf.getD1Database("DB");
+  await db.prepare("DELETE FROM drafts WHERE json_extract(document, '$.sourcePath') = ?").bind(sourcePath).run();
+  let value = await (await request("/api/posts/open", { method: "POST", data: { path: sourcePath } })).json();
+  value = await (
+    await request(`/api/drafts/${value.id}`, {
+      method: "PUT",
+      data: {
+        version: value.version,
+        document: { ...value.document, body: "Private unfinished edits." },
+      },
+    })
+  ).json();
+  calls = [];
+  const response = await request(`/api/drafts/${value.id}/unpublish`, { method: "POST", data: { version: value.version } });
+  assert.equal(response.status, 200, await response.clone().text());
+  const result = await response.json();
+  assert.equal(result.draft.document.body, "Private unfinished edits.");
+  assert.equal(result.draft.document.sourcePath, sourcePath);
+  assert.equal(result.draft.document.metadata.draft, true);
+  assert.equal(result.draft.version, value.version + 1);
+  const content = calls.find((call) => call.path.endsWith("/git/blobs") && call.method === "POST").data.content;
+  assert.match(content, /draft: true/);
+  assert.match(content, /Original body\./);
+  assert.ok(!content.includes("Private unfinished"));
+  assert.match(content, /series: Notes/);
+  assert.equal(await prettier.check(content, { parser: "markdown", printWidth: 150, trailingComma: "es5" }), true);
+  const tree = calls.find((call) => call.path.endsWith("/git/trees") && call.method === "POST").data.tree;
+  assert.deepEqual(
+    tree.map((item) => item.path),
+    [sourcePath]
+  );
+  assert.equal(calls.find((call) => call.path.endsWith("/git/refs/heads/main")).data.force, false);
+  sourceRevision = result.draft.document.sourceSha;
+  sourceBlob = content;
+  calls = [];
+  const published = await request(`/api/drafts/${value.id}/publish`, { method: "POST", data: { version: result.draft.version } });
+  assert.equal(published.status, 200, await published.clone().text());
+  const output = calls.find((call) => call.path.endsWith("/git/blobs") && call.method === "POST").data.content;
+  assert.ok(!output.includes("draft: true"));
+  assert.match(output, /Private unfinished edits\./);
+  assert.equal((await published.json()).draft.document.sourcePath, sourcePath);
+});
+
+test("unpublishing refuses private drafts, About pages, stale revisions, remote edits and non-fast-forward writes", async () => {
+  const privateDraft = await create();
+  assert.equal((await request(`/api/drafts/${privateDraft.id}/unpublish`, { method: "POST", data: { version: privateDraft.version } })).status, 422);
+  const about = await (await request("/api/posts/open", { method: "POST", data: { path: aboutPath } })).json();
+  assert.equal((await request(`/api/drafts/${about.id}/unpublish`, { method: "POST", data: { version: about.version } })).status, 422);
+  const db = await mf.getD1Database("DB");
+  await db.prepare("DELETE FROM drafts WHERE json_extract(document, '$.sourcePath') = ?").bind(sourcePath).run();
+  const value = await (await request("/api/posts/open", { method: "POST", data: { path: sourcePath } })).json();
+  calls = [];
+  assert.equal((await request(`/api/drafts/${value.id}/unpublish`, { method: "POST", data: { version: value.version + 1 } })).status, 409);
+  assert.equal(calls.length, 0);
+  sourceRevision = "9".repeat(40);
+  assert.equal((await request(`/api/drafts/${value.id}/unpublish`, { method: "POST", data: { version: value.version } })).status, 409);
+  assert.equal(calls.filter((call) => call.method !== "GET").length, 0);
+  sourceRevision = originalSha;
+  failBranch = true;
+  try {
+    assert.equal((await request(`/api/drafts/${value.id}/unpublish`, { method: "POST", data: { version: value.version } })).status, 409);
+  } finally {
+    failBranch = false;
+  }
+  const unchanged = await (await request(`/api/drafts/${value.id}`)).json();
+  assert.equal(unchanged.version, value.version);
+  assert.ok(unchanged.document.metadata.draft !== true);
+  assert.equal((await db.prepare("SELECT publishing FROM drafts WHERE id = ?").bind(value.id).first()).publishing, 0);
+});
+
+test("books and projects can be unpublished without changing their body or deleting their cover", async () => {
+  const db = await mf.getD1Database("DB");
+  for (const [path, content] of [
+    [bookPath, bookContent],
+    [projectPath, projectContent],
+  ]) {
+    await db.prepare("DELETE FROM drafts WHERE json_extract(document, '$.sourcePath') = ?").bind(path).run();
+    const value = await (await request("/api/posts/open", { method: "POST", data: { path } })).json();
+    sourceBlob = content;
+    calls = [];
+    const response = await request(`/api/drafts/${value.id}/unpublish`, { method: "POST", data: { version: value.version } });
+    assert.equal(response.status, 200, await response.clone().text());
+    const result = await response.json();
+    assert.equal(result.draft.document.metadata.draft, true);
+    assert.equal(result.draft.document.sourcePath, path);
+    const written = calls.find((call) => call.path.endsWith("/git/blobs") && call.method === "POST").data.content;
+    assert.match(written, /draft: true/);
+    assert.equal(written.split("\n---\n")[1], content.split("\n---\n")[1]);
+    assert.equal(calls.filter((call) => call.path.endsWith("/git/blobs") && call.method === "POST").length, 1);
+    assert.deepEqual(
+      calls.find((call) => call.path.endsWith("/git/trees") && call.method === "POST").data.tree.map((file) => file.path),
+      [path]
+    );
   }
 });
 

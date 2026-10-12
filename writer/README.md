@@ -70,7 +70,7 @@ Never put the GitHub Client Secret or the session secret in a `PUBLIC_` variable
 - Draft versions use optimistic concurrency. A stale edit is rejected instead of overwriting another device's work. If there is a conflict, download the local text before reopening the latest draft.
 - Markdown previews are sanitized. Raw HTML scripts and event handlers cannot execute. The preview shares the site's CSS, but it is not a full Astro build: legacy template syntax and custom Markdown processing may render differently.
 - Images accept PNG, JPEG, GIF, or WebP up to 5 MiB each, with up to 20 private attachments per working copy. Images share D1 storage; large image libraries should move to object storage. Downloading a draft exports text only; images remain in its private working copy.
-- Publication validates required fields, image references, and source revisions; formats Markdown with the repository's Prettier version; creates one Git commit containing the post and only its referenced images; and advances `main` without force. Removed or unused attachments stay private.
+- Publication validates required fields, image references, and source revisions; formats Markdown with the repository's matching Prettier version; creates one Git commit containing the post and only its referenced images; and advances `main` without force. Removed or unused attachments stay private.
 - Existing posts retain their filename and unrelated front matter. Category changes write `category_override` and `legacy_categories` metadata;
   Astro lists the post in its new category and keeps its previous category URLs available with the new canonical URL. Changing the date or slug, or
   editing a redirect/external-link post, requires direct repository editing.
@@ -139,3 +139,17 @@ Privacy body edits update the modification date; other setting edits retain it. 
 Profile photo shape is editable in About/Profile. See [admin controls](../docs/admin-controls.md) for the exact admin/code boundary.
 
 All settings sections share a working copy. “저장하고 반영” commits `_data/site-settings.json` to the configured repository and starts the existing site deployment. Settings are explicit-save, while post drafts continue to autosave. Export unsaved settings before reloading after a conflict. Authentication, owner checks, CSRF, bounded requests, and non-forced Git ref updates apply to settings as well as posts. The API uses batched GraphQL reads pinned to the repository head to check category usage.
+
+## Attachment cleanup and unpublishing
+
+Open **첨부 이미지 관리** to save pending changes, view attachment usage and size, and delete unused private images.
+Used body/cover/profile images, stale revisions, and publication locks prevent deletion. All D1 chunks are deleted together; public repository images remain.
+The operation is permanent, and the reclaimed attachment slot can be reused. No additional D1 migration is needed.
+
+For published posts, books and projects, **발행 취소** marks the published repository version as a draft without publishing unfinished working-copy edits.
+The site removes its listing, detail routes, search/RSS/sitemap entries after deployment. The private working copy keeps its edits and the new source revision;
+**다시 발행** restores the same URL. About pages cannot be unpublished. Already-public Git history, source files and images remain public.
+
+`npm run verify` from the root runs the full local/CI gate. GitHub Actions deploys changed Worker code and applies migrations before deploying the verified site.
+Configure the `CLOUDFLARE_API_TOKEN` repository secret with access to this Worker's Cloudflare account and D1 database. Worker runtime secrets remain managed in Cloudflare.
+A missing deployment token or a failed Worker deployment blocks the dependent site deployment. A content-only publication does not redeploy the API.

@@ -16,6 +16,7 @@ import { safeImage } from "./rich-content";
 import { siteManager } from "./site-manager";
 import { richEditor } from "./rich-editor";
 import { IMAGE_LIMIT } from "./media-limits";
+import { mediaManager } from "./media-manager";
 import "../../astro/public/assets/styles/global.css";
 import "./style.css";
 import editor from "./editor.html?raw";
@@ -32,7 +33,7 @@ if (apiBase && returned.has("session")) {
   sessionStorage.removeItem(loginNonceKey);
   history.replaceState(null, "", location.pathname);
 }
-let sessionToken = apiBase ? sessionStorage.getItem(sessionKey) ?? "" : "";
+let sessionToken = apiBase ? (sessionStorage.getItem(sessionKey) ?? "") : "";
 const mediaUrls = new Map<string, Promise<string>>();
 
 const element = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -62,8 +63,9 @@ let drafts: {
   updated: string;
   version: number;
   trashedAt?: string | null;
+  published?: boolean;
 }[] = [];
-let posts: { path: string; sha: string; language: string }[] | null = null;
+let posts: { path: string; sha: string; language: string; published?: boolean }[] | null = null;
 let showingPosts = false;
 let showingTrash = false;
 let listRevision = 0;
@@ -102,6 +104,23 @@ const composer = richEditor({
   report,
 });
 const details = collectionEditor(scheduleSave);
+const attachments = mediaManager({
+  api,
+  current: () => current,
+  isLocked: () => locked,
+  lock: setLocked,
+  save,
+  accept: (draft) => {
+    current = draft;
+    status("미사용 첨부 이미지를 삭제했습니다.");
+  },
+  imageSrc,
+  release: (source) => {
+    void mediaUrls.get(source)?.then((url) => URL.revokeObjectURL(url));
+    mediaUrls.delete(source);
+  },
+  report,
+});
 
 function configureCollection(kind: ContentCollection) {
   const label = contentLabels[kind];
@@ -262,9 +281,11 @@ function setLocked(value: boolean) {
   locked = value;
   composer.setLocked(value);
   details.setLocked(value);
+  attachments.setLocked(value);
   for (const id of [
     "save",
     "publish",
+    "unpublish",
     "delete-draft",
     "attach",
     "source-attach",
@@ -319,7 +340,14 @@ function showDraft(value: Draft) {
   element("empty").hidden = true;
   element("editor").hidden = false;
   element("notice").hidden = true;
-  element("document-state").textContent = doc.sourcePath ? "발행된 글의 작업본 · 저장한 변경은 다시 발행해야 반영됩니다." : "비공개 초안";
+  element("document-state").textContent = doc.sourcePath
+    ? doc.metadata.draft === true
+      ? "발행 취소된 작업본 · 다시 발행하면 사이트에 공개됩니다."
+      : "발행된 글의 작업본 · 저장한 변경은 다시 발행해야 반영됩니다."
+    : "비공개 초안";
+  element("unpublish").hidden = !doc.sourcePath || selectedCollection === "about" || doc.metadata.draft === true;
+  element("publish").textContent = doc.sourcePath && doc.metadata.draft === true ? "다시 발행" : "발행하기";
+  attachments.changed();
   status("모든 변경사항 저장됨");
   view(false);
   updatePreview();
@@ -428,7 +456,7 @@ function updateCoverThumbnail() {
   const profile = profileMetadata(metadata);
   const image = element<HTMLImageElement>("cover-thumbnail");
   const label = element("cover-status");
-  let source = String(selectedCollection === "about" ? profile.image ?? "" : metadata[selectedCollection === "books" ? "cover" : "img"] ?? "");
+  let source = String(selectedCollection === "about" ? (profile.image ?? "") : (metadata[selectedCollection === "books" ? "cover" : "img"] ?? ""));
   if (source.startsWith("assets/")) source = "/" + source;
   if (source && !source.includes("/")) source = "/assets/img/" + source;
   if (image.dataset.source === source && image.dataset.kind === selectedCollection) return;
@@ -484,7 +512,7 @@ function updatePreview() {
           : [metadata.category, metadata.status, metadata.period, metadata.role].filter(Boolean).join(" · ");
   const cover = element<HTMLImageElement>("preview-cover");
   cover.alt = selectedCollection === "about" ? "프로필 사진 미리보기" : "표지 미리보기";
-  let image = String(selectedCollection === "about" ? profile.image ?? "" : metadata[selectedCollection === "books" ? "cover" : "img"] ?? "");
+  let image = String(selectedCollection === "about" ? (profile.image ?? "") : (metadata[selectedCollection === "books" ? "cover" : "img"] ?? ""));
   if (image.startsWith("assets/")) image = "/" + image;
   if (image && !image.includes("/")) image = "/assets/img/" + image;
   cover.hidden = selectedCollection === "blog" || !safeImage(image);
@@ -577,7 +605,7 @@ function renderList() {
     ? (posts ?? []).map((post) => ({
         label: post.path.split("/").at(-1)!.replace(/\.md$/, ""),
         language: post.language,
-        detail: `${post.language === "ko" ? "한국어" : "English"} · ${post.path.split("/").slice(1, -1).join(" / ")}`,
+        detail: `${post.language === "ko" ? "한국어" : "English"} · ${post.published === false ? "발행 취소 · " : ""}${post.path.split("/").slice(1, -1).join(" / ")}`,
         action: () => openPost(post.path),
         selected: current?.document.sourcePath === post.path,
       }))
@@ -585,7 +613,13 @@ function renderList() {
         label: draft.title || `제목 없는 ${contentLabels[selectedCollection]}`,
         language: draft.language,
         detail: `${draft.language === "ko" ? "한국어" : draft.language === "en" ? "English" : "언어 미지정"} · ${
-          showingTrash ? "휴지통 · 클릭하여 복원" : draft.sourcePath ? "발행된 글의 작업본" : "비공개 초안"
+          showingTrash
+            ? "휴지통 · 클릭하여 복원"
+            : draft.sourcePath
+              ? draft.published === false
+                ? "발행 취소된 작업본"
+                : "발행된 글의 작업본"
+              : "비공개 초안"
         } · ${new Date(draft.updated).toLocaleDateString("ko-KR")}`,
         action: () => (showingTrash ? restoreDraft(draft.id, draft.version) : openDraft(draft.id)),
         selected: current?.id === draft.id,
@@ -811,6 +845,7 @@ async function attach(file: File, target: "body" | "cover" | "img" | "profile.im
     else details.setImage(target, result.url);
     scheduleSave();
     await save();
+    attachments.changed();
   } finally {
     setLocked(false);
   }
@@ -847,6 +882,49 @@ body.addEventListener("drop", (event) => {
 });
 const dialog = element<HTMLDialogElement>("publish-dialog");
 const deleteDialog = element<HTMLDialogElement>("delete-dialog");
+const unpublishDialog = element<HTMLDialogElement>("unpublish-dialog");
+let pendingUnpublishId: string | null = null;
+element("unpublish").addEventListener("click", () => {
+  if (!current?.document.sourcePath || locked || switching || selectedCollection === "about") return;
+  pendingUnpublishId = current.id;
+  unpublishDialog.returnValue = "";
+  unpublishDialog.showModal();
+});
+unpublishDialog.addEventListener("close", () => {
+  const id = pendingUnpublishId;
+  pendingUnpublishId = null;
+  if (unpublishDialog.returnValue !== "unpublish" || !id || current?.id !== id || locked) return;
+  void (async () => {
+    setLocked(true);
+    try {
+      await save();
+      if (dirty) await save();
+      status("발행 취소 중…");
+      const result = await api<{ draft: Draft; workflowUrl: string }>(`/api/drafts/${id}/unpublish`, {
+        method: "POST",
+        body: JSON.stringify({ version: current!.version }),
+      });
+      showDraft(result.draft);
+      posts = null;
+      notice("발행을 취소했습니다. 배포가 끝나면 사이트에서 숨겨집니다. ");
+      const link = document.createElement("a");
+      link.href = result.workflowUrl;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = "배포 상태 확인";
+      element("notice").append(link);
+      showingPosts = false;
+      showingTrash = false;
+      element("post-tab").setAttribute("aria-pressed", "false");
+      element("draft-tab").setAttribute("aria-pressed", "true");
+      element("trash-tab").setAttribute("aria-pressed", "false");
+      await refreshDrafts();
+      status("발행 취소 완료 · 사이트 반영 대기");
+    } finally {
+      setLocked(false);
+    }
+  })().catch(report);
+});
 let pendingTrashId: string | null = null;
 element("delete-draft").addEventListener("click", () => {
   if (!current || locked || switching) return;

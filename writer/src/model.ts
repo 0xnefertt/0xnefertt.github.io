@@ -345,7 +345,7 @@ export function renderPost(doc: PostDocument, mediaPaths: Map<string, string> = 
       metadata.legacy_categories = [...new Set([...list(doc.metadata.legacy_categories), ...list(doc.metadata.categories), previousCategory!])];
       metadata.category_override = true;
     }
-    metadata.categories = changedCategory || !doc.sourcePath ? [doc.category] : doc.metadata.categories ?? [doc.category];
+    metadata.categories = changedCategory || !doc.sourcePath ? [doc.category] : (doc.metadata.categories ?? [doc.category]);
   }
   const publicationDate = new Date().toISOString().slice(0, 10);
   if (collection === "books" && !privateDraft && !metadata.date) metadata.date = publicationDate;

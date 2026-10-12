@@ -88,6 +88,7 @@ async function setup() {
     this.dispatchEvent(new dom.window.Event("close"));
   };
   const drafts = new Map(),
+    media = new Map(),
     calls = [];
   let pendingSave,
     pendingList,
@@ -171,8 +172,38 @@ async function setup() {
       drafts.set(draft.id, draft);
       return response(draft);
     }
-    if (url.pathname.endsWith("/media")) return response({ url: "/api/media/12345678-1234-1234-1234-123456789012" });
+    if (url.pathname.endsWith("/media")) {
+      const draftId = url.pathname.split("/")[3];
+      if ((init.method ?? "GET") === "GET")
+        return response({
+          media: [...media.values()]
+            .filter((file) => file.draftId === draftId)
+            .map((file) => ({
+              ...file,
+              used: JSON.stringify(drafts.get(draftId).document).includes(file.url),
+            })),
+        });
+      const image = {
+        id: "12345678-1234-1234-1234-123456789012",
+        url: "/api/media/12345678-1234-1234-1234-123456789012",
+        mime: "image/png",
+        size: 1024,
+        draftId,
+      };
+      media.set(image.id, image);
+      return response({ url: image.url });
+    }
     const draft = drafts.get(url.pathname.split("/")[3]);
+    if (init.method === "DELETE" && url.pathname.includes("/media/")) {
+      media.delete(url.pathname.split("/").at(-1));
+      draft.version++;
+      return response({ draft });
+    }
+    if (url.pathname.endsWith("/unpublish")) {
+      draft.document = { ...draft.document, metadata: { ...draft.document.metadata, draft: true } };
+      draft.version++;
+      return response({ draft, workflowUrl: "https://example.com/build" });
+    }
     if (init.method === "DELETE") {
       draft.trashedAt = new Date().toISOString();
       draft.version++;
@@ -210,6 +241,7 @@ async function setup() {
   return {
     calls,
     drafts,
+    media,
     click,
     edit,
     holdList(kind) {
@@ -454,4 +486,66 @@ test("blog drafts save one child category path and keep its parent selection thr
   document.querySelector("#post-list .post-item").click();
   await settle();
   assert.equal(child.value, "study-log/career");
+});
+
+test("unpublish confirmation resets on cancel, keeps the working copy and exposes republishing", async () => {
+  const ui = await setup();
+  await ui.click("new-post");
+  const working = ui.drafts.get("draft-1");
+  working.document.sourcePath = "_posts/en/study-log/dev/2026-01-01-existing.md";
+  working.document.sourceSha = "fixture";
+  document.querySelector("#post-list button").click();
+  await settle();
+  assert.equal(document.getElementById("unpublish").hidden, false);
+  await ui.click("unpublish");
+  document.getElementById("unpublish-dialog").close("cancel");
+  await settle();
+  assert.equal(ui.calls.filter((call) => call.path.endsWith("/unpublish")).length, 0);
+  await ui.click("unpublish");
+  document.getElementById("unpublish-dialog").close("unpublish");
+  await settle();
+  assert.equal(ui.calls.filter((call) => call.path.endsWith("/unpublish")).length, 1);
+  assert.equal(working.document.metadata.draft, true);
+  assert.equal(document.getElementById("unpublish").hidden, true);
+  assert.equal(document.getElementById("publish").textContent, "다시 발행");
+  assert.match(document.getElementById("document-state").textContent, /발행 취소/);
+  assert.ok(document.querySelector('#notice a[href="https://example.com/build"]'));
+  assert.equal(working.trashedAt, undefined);
+});
+
+test("attachment management protects used covers and deletes unused images only after confirmation with the saved revision", async () => {
+  const ui = await setup();
+  await ui.click("manage-books");
+  await ui.click("new-post");
+  const file = {
+    id: "12345678-1234-1234-1234-123456789012",
+    url: "/api/media/12345678-1234-1234-1234-123456789012",
+    draftId: "draft-1",
+    mime: "image/png",
+    size: 1024,
+  };
+  ui.media.set(file.id, file);
+  ui.edit("metadata-cover", file.url);
+  const panel = document.getElementById("media-manager");
+  panel.open = true;
+  panel.dispatchEvent(new dom.window.Event("toggle"));
+  await settle();
+  assert.match(document.getElementById("media-count").textContent, /1\/20/);
+  assert.equal(document.querySelector("#media-list button").disabled, true);
+  ui.edit("metadata-cover", "");
+  await ui.click("media-refresh");
+  assert.equal(document.querySelector("#media-list button").disabled, false);
+  document.querySelector("#media-list button").click();
+  document.getElementById("media-delete-dialog").close("cancel");
+  await settle();
+  assert.equal(ui.media.size, 1);
+  const expectedVersion = ui.drafts.get("draft-1").version;
+  document.querySelector("#media-list button").click();
+  document.getElementById("media-delete-dialog").close("delete");
+  await settle();
+  assert.equal(ui.media.size, 0);
+  const deletion = ui.calls.find((call) => call.method === "DELETE" && call.path.includes("/media/"));
+  assert.equal(deletion.payload.version, expectedVersion);
+  assert.equal(ui.drafts.get("draft-1").version, expectedVersion + 1);
+  assert.match(document.getElementById("media-list").textContent, /없습니다/);
 });

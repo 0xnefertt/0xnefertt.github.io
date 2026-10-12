@@ -22,7 +22,8 @@ before(async () => {
             contents: `
           const post = (id, lang, slug, key, draft = false) => ({id, collection:'blog', filePath:'_posts/'+lang+'/study-log/dev/2026-01-01-'+slug+'.md', body:'Body', data:{title:id, lang, translation_key:key, categories:['study-log/dev'], date:new Date('2026-01-01'), draft}});
           const book = (lang) => ({id:lang+'-book', collection:'books', filePath:'_books/'+lang+'/book.md', body:'Review', data:{title:'Book',lang,translation_key:'book'}});
-          export async function getCollection(kind) { return kind === 'blog' ? [post('English','en','english-title','paired'),post('Korean','ko','korean-title','paired'),post('Untranslated','ko','only-korean','single'),post('Private','en','private','draft',true)] : kind === 'books' ? [book('en'),book('ko')] : []; }
+          const hidden = (kind) => ({id:'unpublished-'+kind,collection:kind,filePath:'_'+kind+'/ko/unpublished-'+kind+'.md',body:'Hidden',data:{title:'Hidden',lang:'ko',draft:true}});
+          export async function getCollection(kind) { return kind === 'blog' ? [post('English','en','english-title','paired'),post('Korean','ko','korean-title','paired'),post('Untranslated','ko','only-korean','single'),post('Private','en','private','draft',true)] : kind === 'books' ? [book('en'),book('ko'),hidden('books')] : kind === 'projects' ? [hidden('projects')] : []; }
         `,
           }));
         },
@@ -55,6 +56,7 @@ test("localized routes keep English at root, Korean under ko, and drafts out of 
   assert.ok(published.find((route) => route.locale === "en").path.startsWith("/blog/"));
   assert.ok(published.filter((route) => route.locale === "ko").every((route) => route.path.startsWith("/ko/blog/")));
   assert.ok(!catalogue.some((route) => route.path.includes("private")));
+  assert.ok(!catalogue.some((route) => route.path.includes("unpublished")), "hidden books and projects have no detail pages or legacy aliases");
   assert.ok(catalogue.some((route) => route.path === "/"));
   assert.ok(catalogue.some((route) => route.path === "/ko/"));
   const categories = catalogue.filter((route) => route.view === "blog/category/[category]");
