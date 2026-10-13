@@ -33,7 +33,7 @@ const { activeChildSlug, activeParentSlug, categoryTree, isAllActive = false, to
           </a>
         ) : (
           <span class="category-disabled" aria-disabled="true">
-            {parent.name} (0)
+            <span>{parent.name}</span>
           </span>
         )
       )}
