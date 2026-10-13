@@ -45,20 +45,20 @@
       })();
     </script><link rel="stylesheet" href="/assets/styles/global.css?v=20261011-1"><link rel="stylesheet" href="/assets/styles/blog.css?v=20261010-6"></head><body class="site-layout"><header class="site-header"><div class="container header-inner"><a class="site-title" href="/ko/">0xnefertt&#39;s thoughts</a><button type="button" class="menu-toggle" data-menu-toggle aria-controls="site-menu-panel" aria-expanded="false" aria-label="Open navigation menu"><span class="menu-toggle-icon" aria-hidden="true"></span><span>메뉴</span></button><div class="header-controls" id="site-menu-panel"><nav aria-label="Primary" id="primary-nav"><ul class="nav-list"><li class="nav-item"><a href="/ko/about/">소개</a></li><li class="nav-item nav-item--dropdown"><a class="active" href="/ko/blog/">블로그</a><ul class="nav-dropdown"><li class="nav-dropdown-item nav-dropdown-item--nested"><a href="/ko/blog/category/study-log/">공부 기록</a><ul class="nav-subdropdown"><li><a href="/ko/blog/category/study-log/dev/">개발</a></li><li><a href="/ko/blog/category/study-log/english/">영어</a></li><li><span class="nav-disabled" aria-disabled="true">커리어 (0)</span></li></ul></li><li class="nav-dropdown-item nav-dropdown-item--nested"><a href="/ko/blog/category/money-talk/">돈 이야기</a><ul class="nav-subdropdown"><li><a href="/ko/blog/category/money-talk/finance/">금융</a></li><li><a href="/ko/blog/category/money-talk/stock/">주식</a></li><li><span class="nav-disabled" aria-disabled="true">부동산 (0)</span></li></ul></li><li class="nav-dropdown-item nav-dropdown-item--nested"><a href="/ko/blog/category/life-thoughts/">일상 · 생각</a><ul class="nav-subdropdown"><li><a href="/ko/blog/category/life-thoughts/opinions-is-my-own/">개인적인 생각</a></li><li><a href="/ko/blog/category/life-thoughts/retrospect/">회고</a></li></ul></li><li class="nav-dropdown-item nav-dropdown-item--nested"><a href="/ko/blog/category/useful-tips/">정보 공유</a><ul class="nav-subdropdown"><li><a href="/ko/blog/category/useful-tips/general/">일반</a></li><li><a href="/ko/blog/category/useful-tips/in-canada/">캐나다 생활</a></li></ul></li></ul></li><li class="nav-item"><a href="/ko/books/">책장</a></li><li class="nav-item"><a href="/ko/projects/">프로젝트</a></li></ul></nav><div class="preference-controls"><button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch to dark mode" aria-pressed="false"><span class="theme-toggle-icon" aria-hidden="true"></span></button></div></div></div></header><main class="container post-content"><article class="post-header"><nav class="post-breadcrumbs" aria-label="글 카테고리"><a href="/ko/blog/" data-i18n-key="blog_all">전체 글</a> / <a href="/ko/blog/category/study-log/dev/">공부 기록 / 개발</a></nav><h1>파이썬 가비지 컬렉션</h1><p class="post-byline"><img class="post-author-avatar" src="/assets/img/prof_pic.jpg" alt="" width="28" height="28"><a href="/ko/about/" rel="author">0xnefertt</a><time datetime="2026-07-07T00:00:00.000Z">2026.07.07.</time></p><div class="tags"><span>#python</span><span>#dev</span></div></article><div class="post-detail-layout"><div class="post-main"><details class="post-outline"><summary>목차 · 4개 항목</summary><ul><li><a href="#reference-counting">Reference Counting</a></li><li><a href="#gc">GC</a></li><li><a href="#마무리">마무리</a></li><li><a href="#참고">참고</a></li></ul></details><div class="post-body markdown-body"><p>가비지 컬렉션(Garbage Collection)이란 더 이상 사용하지 않는 메모리를 정리하는 과정이다.</p>
 <p>예시를 보자.</p>
-<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#E1E4E8">a </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> [</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">2</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">3</span><span style="color:#E1E4E8">]</span></span>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F0F3F6">a </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> [</span><span style="color:#91CBFF">1</span><span style="color:#F0F3F6">, </span><span style="color:#91CBFF">2</span><span style="color:#F0F3F6">, </span><span style="color:#91CBFF">3</span><span style="color:#F0F3F6">]</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#6A737D"># 여기서 [1,2,3] 리스트 객체가 메모리에 생기고, a가 그 객체를 가리킨다.</span></span>
-<span class="line"><span style="color:#6A737D"># a -> [1,2,3]</span></span>
+<span class="line"><span style="color:#BDC4CC"># 여기서 [1,2,3] 리스트 객체가 메모리에 생기고, a가 그 객체를 가리킨다.</span></span>
+<span class="line"><span style="color:#BDC4CC"># a -> [1,2,3]</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#E1E4E8">a </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> None</span></span>
+<span class="line"><span style="color:#F0F3F6">a </span><span style="color:#FF9492">=</span><span style="color:#91CBFF"> None</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#6A737D">## 이제 [1,2,3] 을 가리키는 변수가 없어진다.</span></span></code></pre>
-<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> test</span><span style="color:#E1E4E8">():</span></span>
-<span class="line"><span style="color:#E1E4E8">    x </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> [</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">2</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">3</span><span style="color:#E1E4E8">]</span></span>
-<span class="line"><span style="color:#E1E4E8">    y </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> {</span><span style="color:#9ECBFF">"name"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"hong"</span><span style="color:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#BDC4CC">## 이제 [1,2,3] 을 가리키는 변수가 없어진다.</span></span></code></pre>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#FF9492">def</span><span style="color:#DBB7FF"> test</span><span style="color:#F0F3F6">():</span></span>
+<span class="line"><span style="color:#F0F3F6">    x </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> [</span><span style="color:#91CBFF">1</span><span style="color:#F0F3F6">, </span><span style="color:#91CBFF">2</span><span style="color:#F0F3F6">, </span><span style="color:#91CBFF">3</span><span style="color:#F0F3F6">]</span></span>
+<span class="line"><span style="color:#F0F3F6">    y </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> {</span><span style="color:#ADDCFF">"name"</span><span style="color:#F0F3F6">: </span><span style="color:#ADDCFF">"hong"</span><span style="color:#F0F3F6">}</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#6A737D">## 이 경우에는 함수가 실행되는 동안에는 x,y 가 살아있다.</span></span>
-<span class="line"><span style="color:#6A737D">## 함수가 끝나면 x,y 라는 이름은 사라지고 [1,2,3], {"name": "hong"} 을 가리키는 변수가 없어진다.</span></span></code></pre>
+<span class="line"><span style="color:#BDC4CC">## 이 경우에는 함수가 실행되는 동안에는 x,y 가 살아있다.</span></span>
+<span class="line"><span style="color:#BDC4CC">## 함수가 끝나면 x,y 라는 이름은 사라지고 [1,2,3], {"name": "hong"} 을 가리키는 변수가 없어진다.</span></span></code></pre>
 <p>아무도 안 가리키는 이런 객체들을 가비지라고 부른다.</p>
 <p>쓰레기를 치우는 과정이 곧 가비지 컬렉션이다.</p>
 <p>파이썬은 이걸 대부분 자동으로 해준다. <code>(Reference Counting + GC)</code></p>
@@ -66,44 +66,44 @@
 <p>파이썬이 가비지 컬렉션을 하는 방식은 두 단계로 나눠서 진행한다.</p>
 <h2 id="reference-counting">Reference Counting</h2>
 <p>Reference Counting이란? 이 객체를 몇명이 가리키고 있는지 세는 방식을 의미한다.</p>
-<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#E1E4E8">a </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> [</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">2</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">3</span><span style="color:#E1E4E8">]</span></span>
-<span class="line"><span style="color:#E1E4E8">b </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> a</span></span>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F0F3F6">a </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> [</span><span style="color:#91CBFF">1</span><span style="color:#F0F3F6">, </span><span style="color:#91CBFF">2</span><span style="color:#F0F3F6">, </span><span style="color:#91CBFF">3</span><span style="color:#F0F3F6">]</span></span>
+<span class="line"><span style="color:#F0F3F6">b </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> a</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#6A737D"># a ─┐</span></span>
-<span class="line"><span style="color:#6A737D">#    ├──> [1, 2, 3]</span></span>
-<span class="line"><span style="color:#6A737D"># b ─┘</span></span>
+<span class="line"><span style="color:#BDC4CC"># a ─┐</span></span>
+<span class="line"><span style="color:#BDC4CC">#    ├──> [1, 2, 3]</span></span>
+<span class="line"><span style="color:#BDC4CC"># b ─┘</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#6A737D"># Reference Count = 2</span></span>
+<span class="line"><span style="color:#BDC4CC"># Reference Count = 2</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#E1E4E8">a </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> None</span></span>
+<span class="line"><span style="color:#F0F3F6">a </span><span style="color:#FF9492">=</span><span style="color:#91CBFF"> None</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#6A737D"># b ──> [1, 2, 3]</span></span>
+<span class="line"><span style="color:#BDC4CC"># b ──> [1, 2, 3]</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#6A737D"># Reference Count = 1</span></span>
+<span class="line"><span style="color:#BDC4CC"># Reference Count = 1</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#E1E4E8">b </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> None</span></span>
+<span class="line"><span style="color:#F0F3F6">b </span><span style="color:#FF9492">=</span><span style="color:#91CBFF"> None</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#6A737D"># [1, 2, 3]</span></span>
+<span class="line"><span style="color:#BDC4CC"># [1, 2, 3]</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#6A737D"># Reference Count = 0</span></span></code></pre>
+<span class="line"><span style="color:#BDC4CC"># Reference Count = 0</span></span></code></pre>
 <p>Reference Counting가 0이 되면 즉시 메모리에서 제거</p>
 <h2 id="gc">GC</h2>
 <p>Reference Counting만으로 치울 수 없는 객체를 찾아서 메모리에서 제거한다.</p>
 <p>대표적인 경우가 <strong>순환 참조(cyclic reference)</strong>다.</p>
-<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#E1E4E8">a </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> []</span></span>
-<span class="line"><span style="color:#E1E4E8">b </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> []</span></span>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F0F3F6">a </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> []</span></span>
+<span class="line"><span style="color:#F0F3F6">b </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> []</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#E1E4E8">a.append(b)</span></span>
-<span class="line"><span style="color:#E1E4E8">b.append(a)</span></span>
+<span class="line"><span style="color:#F0F3F6">a.append(b)</span></span>
+<span class="line"><span style="color:#F0F3F6">b.append(a)</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#6A737D"># a ───> list A ───> list B</span></span>
-<span class="line"><span style="color:#6A737D">#        ↑          │</span></span>
-<span class="line"><span style="color:#6A737D">#        └──────────┘</span></span>
+<span class="line"><span style="color:#BDC4CC"># a ───> list A ───> list B</span></span>
+<span class="line"><span style="color:#BDC4CC">#        ↑          │</span></span>
+<span class="line"><span style="color:#BDC4CC">#        └──────────┘</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#E1E4E8">a </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> None</span></span>
-<span class="line"><span style="color:#E1E4E8">b </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> None</span></span>
+<span class="line"><span style="color:#F0F3F6">a </span><span style="color:#FF9492">=</span><span style="color:#91CBFF"> None</span></span>
+<span class="line"><span style="color:#F0F3F6">b </span><span style="color:#FF9492">=</span><span style="color:#91CBFF"> None</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#6A737D"># 이 경우 변수 a,b는 사라지지만, 리스트 A와 리스트 B는 서로를 가리키고 있다.</span></span></code></pre>
+<span class="line"><span style="color:#BDC4CC"># 이 경우 변수 a,b는 사라지지만, 리스트 A와 리스트 B는 서로를 가리키고 있다.</span></span></code></pre>
 <p>변수는 없어서 우리가 접근을 할 수 없는 상황이자 Reference Count는 0이 아니다.</p>
 <hr>
 <h2 id="마무리">마무리</h2>
