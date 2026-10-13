@@ -1,33 +1,50 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
+test.beforeEach(async ({ page }) => {
+  // Keep production analytics, ads, and other external services out of fixture runs.
+  await page.route("**/*", (route) => (new URL(route.request().url()).hostname === "127.0.0.1" ? route.continue() : route.abort()));
+});
+
 async function accessible(page) {
   const result = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
-  expect(result.violations.map(({ id, impact, nodes }) => ({ id, impact, targets: nodes.map((n) => n.target) }))).toEqual([]);
+  expect
+    .soft(
+      result.violations.map(({ id, impact, nodes }) => ({
+        id,
+        impact,
+        nodes: nodes.map(({ target, failureSummary }) => ({ target, failureSummary })),
+      })),
+      page.url()
+    )
+    .toEqual([]);
 }
 
 for (const width of [390, 1280]) {
-  test(`public navigation, search and accessibility at ${width}px`, async ({ page }) => {
-    await page.setViewportSize({ width, height: 844 });
-    for (const route of ["/", "/ko/", "/ko/blog/", "/ko/about/", "/ko/books/", "/ko/projects/", "/ko/resources/", "/ko/privacy/", "/admin/"]) {
-      await page.goto(route);
-      if (route === "/admin/") await expect(page.locator("#login-screen")).toBeVisible();
-      await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  for (const colorScheme of ["light", "dark"]) {
+    test(`public navigation, search and accessibility at ${width}px in ${colorScheme}`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme });
+      await page.setViewportSize({ width, height: 844 });
+      for (const route of ["/", "/ko/", "/ko/blog/", "/ko/about/", "/ko/books/", "/ko/projects/", "/ko/resources/", "/ko/privacy/", "/admin/"]) {
+        await page.goto(route);
+        if (route === "/admin/") await expect(page.locator("#login-screen")).toBeVisible();
+        await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+        await accessible(page);
+      }
+      await page.goto("/ko/blog/");
+      if (width === 390) {
+        await page.getByRole("button", { name: "Open navigation menu" }).click();
+        await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible();
+        await page.getByRole("button", { name: "Close navigation menu" }).click();
+      }
+      await page.getByRole("searchbox").fill("파이썬");
+      await expect(page.locator("#blog-inline-search-results li")).toHaveCount(5);
       await accessible(page);
-    }
-    await page.goto("/ko/blog/");
-    if (width === 390) {
-      await page.getByRole("button", { name: "Open navigation menu" }).click();
-      await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible();
-      await page.getByRole("button", { name: "Close navigation menu" }).click();
-    }
-    await page.getByRole("searchbox").fill("파이썬");
-    await expect(page.locator("#blog-inline-search-results li")).toHaveCount(5);
-    await accessible(page);
-    await page.getByRole("link", { name: "파이썬 가비지 컬렉션", exact: true }).click();
-    await expect(page.locator("h1")).toContainText("파이썬");
-    await accessible(page);
-  });
+      await page.getByRole("link", { name: "파이썬 가비지 컬렉션", exact: true }).click();
+      await expect(page.locator("h1")).toContainText("파이썬");
+      await accessible(page);
+    });
+  }
 }
 
 test("real Worker/D1 login, save, publish, unpublish, republish and logout", async ({ page, request }) => {
@@ -61,6 +78,7 @@ test("real Worker/D1 login, save, publish, unpublish, republish and logout", asy
   expect(published.publications).toBe(1);
   expect(published.posts).toHaveLength(1);
   const originalPath = published.posts[0].path;
+  await page.locator("#source-tab").click();
   await page.locator("#body").fill("## 복구 검증\n\n아직 발행하지 않은 변경입니다.");
   await page.locator("#save").click();
   await page.locator("#unpublish").click();
