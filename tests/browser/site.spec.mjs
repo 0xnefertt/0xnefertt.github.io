@@ -93,6 +93,35 @@ test("post breadcrumbs navigate independently to all posts, the parent group and
   expect(await listedPosts()).toEqual(index.map((post) => post.href).sort());
 });
 
+for (const width of [390, 1280]) {
+  test(`sharing beside post breadcrumbs opens, copies and restores focus at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "clipboard", { value: { writeText: async (value) => (window.copiedPostUrl = value) } });
+    });
+    await page.goto("/ko/blog/2026/python-duck-typing/");
+    const share = page.locator(".post-header-navigation [data-share-open]");
+    await expect(share).toBeVisible();
+    await expect(page.locator(".post-reader-actions")).toHaveCount(0);
+    await expect(page.locator("[data-post-share] > [data-share-copy]")).toHaveCount(0);
+    await expect(page.locator(".post-breadcrumbs a")).toHaveCount(3);
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await test.info().attach(`post-sharing-header-${width}`, { body: await page.screenshot(), contentType: "image/png" });
+
+    await share.click();
+    const dialog = page.getByRole("dialog", { name: "이 글 공유하기" });
+    await expect(dialog).toBeVisible();
+    await accessible(page);
+    const canonical = await page.locator("[data-post-share]").getAttribute("data-share-url");
+    await dialog.getByRole("button", { name: "링크 복사" }).click();
+    await expect(dialog.getByRole("status")).toHaveText("링크를 복사했습니다.");
+    expect(await page.evaluate(() => window.copiedPostUrl)).toBe(canonical);
+    await page.keyboard.press("Escape");
+    await expect(dialog).not.toBeVisible();
+    await expect(share).toBeFocused();
+  });
+}
+
 test("search rejects executable URLs while preserving ordinary links and text", async ({ page }) => {
   const title = 'security <img src=x onerror="window.searchXss=true">';
   const post = {

@@ -15,10 +15,6 @@ const copyLabel = localeText(locale, "Copy link", "링크 복사");
   <button type="button" data-share-open aria-haspopup="dialog" aria-controls="post-share-dialog">
     {localeText(locale, "Share", "공유하기")}
   </button>
-  <button type="button" data-share-copy>
-    {copyLabel}
-  </button>
-  <span class="post-copy-status" data-share-status role="status" aria-live="polite"></span>
   <dialog class="post-share-dialog" id="post-share-dialog" aria-labelledby="post-share-title">
     <div class="post-share-header">
       <h2 id="post-share-title">{localeText(locale, "Share this post", "이 글 공유하기")}</h2>

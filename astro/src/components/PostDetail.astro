@@ -132,17 +132,20 @@ const showComments = hasGiscus && (post.data.giscus_comments ?? true) && !redire
   {redirectTarget && <meta slot="head" http-equiv="refresh" content={`0; url=${redirectTarget}`} />}
   <script slot="head" type="application/ld+json" set:html={articleJsonLd}></script>
   <article class="post-header">
-    <nav class="post-breadcrumbs" aria-label="글 카테고리">
-      <a href={l("/blog/")} data-i18n-key="blog_all">
-        {t(locale, "blog_all")}
-      </a>
-      {categoryPaths[0]?.names.map((name, index) => (
-        <>
-          {" / "}
-          <a href={l(`/blog/category/${categoryPaths[0].slugs.slice(0, index + 1).join("/")}/`)}>{name}</a>
-        </>
-      ))}
-    </nav>
+    <div class="post-header-navigation">
+      <nav class="post-breadcrumbs" aria-label="글 카테고리">
+        <a href={l("/blog/")} data-i18n-key="blog_all">
+          {t(locale, "blog_all")}
+        </a>
+        {categoryPaths[0]?.names.map((name, index) => (
+          <>
+            {" / "}
+            <a href={l(`/blog/category/${categoryPaths[0].slugs.slice(0, index + 1).join("/")}/`)}>{name}</a>
+          </>
+        ))}
+      </nav>
+      <PostShare title={post.data.title} url={canonicalPostUrl} locale={locale} />
+    </div>
     <h1>{post.data.title}</h1>
     <p class="post-byline">
       {ownerPost && authorImage && <img class="post-author-avatar" src={authorImage} alt="" width="28" height="28" />}
@@ -184,11 +187,6 @@ const showComments = hasGiscus && (post.data.giscus_comments ?? true) && !redire
 
       <div class="post-body markdown-body">
         <Content />
-      </div>
-
-      <div class="post-reader-actions">
-        <a href={l("/blog/")}>{localeText(locale, "Back to blog", "글 목록으로")}</a>
-        <PostShare title={post.data.title} url={canonicalPostUrl} locale={locale} />
       </div>
 
       {(previousPost || nextPost) && (

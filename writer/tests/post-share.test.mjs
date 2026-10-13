@@ -34,7 +34,7 @@ test("share destinations preserve Korean titles and canonical locale paths witho
 function setup(lang, writeText) {
   const url = "https://0xnefertt.github.io/ko/blog/2026/example/";
   const dom = new JSDOM(
-    `<html lang="${lang}"><body><div data-post-share data-share-url="${url}"><button data-share-open>Share</button><button data-share-copy>Copy</button><span data-share-status></span><dialog><button data-share-close>Close</button><button data-share-copy>Copy</button><input type="url" class="post-share-url" value="${url}"><p data-share-status></p></dialog></div></body></html>`
+    `<html lang="${lang}"><body><div data-post-share data-share-url="${url}"><button data-share-open>Share</button><dialog><button data-share-close>Close</button><button data-share-copy>Copy</button><input type="url" class="post-share-url" value="${url}"><p data-share-status></p></dialog></div></body></html>`
   );
   globalThis.document = dom.window.document;
   Object.defineProperty(globalThis, "navigator", { value: { clipboard: { writeText } }, configurable: true });
@@ -78,21 +78,23 @@ test("Tab and Shift+Tab keep keyboard focus inside the dialog", () => {
   assert.equal(document.activeElement, first);
 });
 
-test("copy buttons copy the canonical URL and report successful copying in the page language", async () => {
+test("dialog copy button copies the canonical URL and reports successful copying in the page language", async () => {
   let copied;
   const { root, url } = setup("ko", async (value) => {
     copied = value;
   });
+  root.querySelector("[data-share-open]").click();
   root.querySelector("[data-share-copy]").click();
   await new Promise((resolve) => setImmediate(resolve));
   assert.equal(copied, url);
   assert.equal(root.querySelector("[data-share-status]").textContent, "링크를 복사했습니다.");
 });
 
-test("denied clipboard access opens the dialog and offers the selected URL without claiming success", async () => {
+test("denied clipboard access keeps the dialog open and offers the selected URL without claiming success", async () => {
   const { root, dialog } = setup("en", async () => {
     throw new Error("Permission denied");
   });
+  root.querySelector("[data-share-open]").click();
   root.querySelector("[data-share-copy]").click();
   await new Promise((resolve) => setImmediate(resolve));
   assert.ok(dialog.open);
