@@ -14,6 +14,40 @@ ROOT = Path(__file__).resolve().parents[1]
 TABLES = ("drafts", "media", "media_chunks", "d1_migrations")
 
 
+def d1_sql(sql):
+    """Rebuild large values incrementally to respect D1's 100KB SQL statement limit."""
+    with sqlite3.connect(":memory:") as db:
+        db.executescript(sql)
+        statements = []
+        quote = lambda value: db.execute("SELECT quote(?)", (value,)).fetchone()[0]
+        for table in (*TABLES, "sessions"):
+            schema = db.execute("SELECT sql FROM sqlite_schema WHERE type='table' AND name=?", (table,)).fetchone()[0]
+            statements.append(schema + ";")
+            columns = db.execute(f'PRAGMA table_info("{table}")').fetchall()
+            keys = sorted((column for column in columns if column[5]), key=lambda column: column[5])
+            for row in db.execute(f'SELECT * FROM "{table}" ORDER BY rowid').fetchall():
+                values = list(row)
+                deferred = []
+                for index, value in enumerate(row):
+                    if isinstance(value, (str, bytes)) and len(value) > 4000:
+                        if columns[index][5]:
+                            raise ValueError("Oversized primary key")
+                        values[index] = b"" if isinstance(value, bytes) else ""
+                        deferred.append((columns[index][1], value))
+                statements.append(f'INSERT INTO "{table}" VALUES ({",".join(quote(value) for value in values)});')
+                where = " AND ".join(f'"{column[1]}"={quote(row[column[0]])}' for column in keys)
+                for name, value in deferred:
+                    for offset in range(0, len(value), 4000):
+                        expression = f'"{name}" || {quote(value[offset:offset + 4000])}'
+                        if isinstance(value, bytes):
+                            expression = f"CAST({expression} AS BLOB)"
+                        statements.append(f'UPDATE "{table}" SET "{name}"={expression} WHERE {where};')
+        statements.extend(row[0] + ";" for row in db.execute("SELECT sql FROM sqlite_schema WHERE type='index' AND sql IS NOT NULL ORDER BY name"))
+        if any(len(statement.encode()) >= 100000 for statement in statements):
+            raise ValueError("Statement exceeds D1's SQL size limit")
+        return "\n".join(statements) + "\n"
+
+
 def inspect_snapshot(sql):
     # Every inspection restores the SQL into a fresh database, with extension loading disabled.
     with sqlite3.connect(":memory:") as db:
@@ -43,7 +77,11 @@ def inspect_snapshot(sql):
             media_bytes += size
             media_digest.update(media_id.encode())
             media_digest.update(hashlib.sha256(data).digest())
-        return {"tables": counts, "media_bytes": media_bytes, "media_sha256": media_digest.hexdigest()}
+        rows_digest = hashlib.sha256()
+        for table in TABLES:
+            rows = db.execute(f'SELECT * FROM "{table}" ORDER BY rowid').fetchall()
+            rows_digest.update(json.dumps(rows, ensure_ascii=False, default=lambda value: {"hex": value.hex()}).encode())
+        return {"tables": counts, "media_bytes": media_bytes, "media_sha256": media_digest.hexdigest(), "rows_sha256": rows_digest.hexdigest()}
 
 
 def verify(directory):
@@ -77,8 +115,13 @@ def export(remote):
         handle.write("\nCREATE TABLE sessions (id TEXT PRIMARY KEY, token TEXT NOT NULL, csrf TEXT NOT NULL, expires INTEGER NOT NULL);\n")
         handle.write("CREATE INDEX sessions_expiry ON sessions(expires);\n")
     output.chmod(0o600)
+    original = output.read_text()
+    summary = inspect_snapshot(original)
+    normalized = d1_sql(original)
+    if inspect_snapshot(normalized) != summary:
+        raise ValueError("D1-compatible SQL changed snapshot content")
+    output.write_text(normalized)
     raw = output.read_bytes()
-    summary = inspect_snapshot(raw.decode())
     manifest = {"created_at": datetime.now(timezone.utc).isoformat(), "source": "remote" if remote else "local",
                 "database": "nefertt-writer", "sql_sha256": hashlib.sha256(raw).hexdigest(), "restored": summary}
     (directory / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
@@ -90,13 +133,14 @@ def self_test():
         for migration in sorted((ROOT / "writer/migrations").glob("*.sql")):
             db.executescript(migration.read_text())
         db.execute("CREATE TABLE d1_migrations (id INTEGER PRIMARY KEY, name TEXT, applied_at TEXT)")
-        db.execute("INSERT INTO drafts(id,document,version,updated,deleted_at) VALUES (?,?,?,?,?)", ("draft", '{"body":"복구 테스트"}', 7, "2026-10-12", "2026-10-12"))
-        data = b"image" * 300000
+        db.execute("INSERT INTO drafts(id,document,version,updated,deleted_at) VALUES (?,?,?,?,?)", ("draft", json.dumps({"body": "복구 '; 테스트\n" * 20000}, ensure_ascii=False), 7, "2026-10-12", "2026-10-12"))
+        data = bytes(range(256)) * 6000
         db.execute("INSERT INTO media VALUES (?,?,?,?,?,?)", ("image", "draft", "test.png", "image/png", len(data), data[:1048576]))
         db.execute("INSERT INTO media_chunks VALUES (?,?,?)", ("image", 1, data[1048576:]))
         sql = "\n".join(db.iterdump())
         summary = inspect_snapshot(sql)
         assert summary["media_bytes"] == len(data) and summary["tables"]["drafts"] == 1
+        assert inspect_snapshot(d1_sql(sql)) == summary
         db.execute("DELETE FROM media_chunks")
         try:
             inspect_snapshot("\n".join(db.iterdump()))

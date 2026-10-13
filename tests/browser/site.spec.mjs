@@ -40,6 +40,7 @@ for (const width of [390, 1280]) {
       await page.getByRole("searchbox").fill("파이썬");
       await expect(page.locator("#blog-inline-search-results li")).toHaveCount(5);
       await accessible(page);
+      await test.info().attach(`blog-${width}-${colorScheme}`, { body: await page.screenshot(), contentType: "image/png" });
       await page.getByRole("link", { name: "파이썬 가비지 컬렉션", exact: true }).click();
       await expect(page.locator("h1")).toContainText("파이썬");
       await accessible(page);
@@ -56,6 +57,8 @@ test("real Worker/D1 login, save, publish, unpublish, republish and logout", asy
   await expect(page.locator("#new-post")).toBeEnabled();
   await accessible(page);
   await page.locator("#new-post").click();
+  await page.getByRole("textbox", { name: "글 본문", exact: true }).fill("서식 편집기 입력 확인");
+  await accessible(page);
   await page.locator("#title").fill("브라우저 복구 검증");
   await page.locator("#description").fill("로그인과 발행 흐름을 확인하는 테스트입니다.");
   await page.locator("#content-language").selectOption("ko");
@@ -63,6 +66,7 @@ test("real Worker/D1 login, save, publish, unpublish, republish and logout", asy
   await page.locator("#tags").fill("test");
   await page.locator("#slug").fill("browser-smoke");
   await page.getByRole("button", { name: "원문", exact: true }).click();
+  await expect(page.locator("#body")).toHaveValue(/서식 편집기 입력 확인/);
   await page.locator("#body").fill("## 복구 검증\n\n비공개 초안 본문입니다.");
   await page.locator("#save").click();
   await expect(page.locator("#save-status")).toContainText("저장");
@@ -96,6 +100,7 @@ test("real Worker/D1 login, save, publish, unpublish, republish and logout", asy
   expect(restored.posts[0].path).toBe(originalPath);
   expect(restored.posts[0].content).toContain("아직 발행하지 않은 변경");
   expect(restored.posts[0].content).not.toContain("draft: true");
+  await test.info().attach("writer-republished", { body: await page.screenshot(), contentType: "image/png" });
   await page.locator("#logout").click();
   await expect(page.locator("#login-screen")).toBeVisible();
   expect((await request.get("http://127.0.0.1:8789/api/drafts")).status()).toBe(401);

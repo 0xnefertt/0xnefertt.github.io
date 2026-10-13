@@ -1213,7 +1213,7 @@ main {
 }
 
 .pagination-link--disabled {
-  opacity: 0.55;
+  color: var(--text-muted);
   pointer-events: none;
 }
 
@@ -1760,6 +1760,11 @@ main {
 .markdown-body blockquote {
   margin-top: 0.7em;
   margin-bottom: 0.7em;
+}
+
+.markdown-body a {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
 }
 
 .markdown-body blockquote {

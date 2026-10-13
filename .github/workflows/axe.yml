@@ -27,9 +27,9 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
       - uses: actions/upload-artifact@v7.0.2
-        if: failure()
+        if: always()
         with:
-          name: browser-failure-report
+          name: browser-report
           path: |
             playwright-report
             test-results

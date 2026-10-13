@@ -65,6 +65,7 @@ export default defineConfig({
   i18n: { defaultLocale: "en", locales: ["en", "ko"], routing: { prefixDefaultLocale: false } },
   markdown: {
     processor: unified({ remarkPlugins: [markdownStrongFallback] }),
+    shikiConfig: { theme: "github-dark-high-contrast" },
   },
   vite: { build: { rolldownOptions: { output: { codeSplitting: writerChunks() } } } },
 });

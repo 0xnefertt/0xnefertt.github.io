@@ -27,7 +27,8 @@
     "test:browser": "playwright test",
     "writer:backup": "python3 scripts/writer-backup.py export --remote",
     "writer:backup:verify": "python3 scripts/writer-backup.py verify",
-    "verify:backup": "python3 scripts/writer-backup.py self-test"
+    "verify:backup": "python3 scripts/writer-backup.py self-test",
+    "writer:backup:verify:d1": "node writer/scripts/verify-backup.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
