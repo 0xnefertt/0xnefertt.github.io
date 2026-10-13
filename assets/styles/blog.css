@@ -543,8 +543,17 @@ body {
   letter-spacing: -0.045em;
 }
 
-.post-breadcrumbs {
+.post-header-navigation {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   margin-bottom: 0.85rem;
+}
+
+.post-breadcrumbs {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-size: 0.85rem;
 }
 
@@ -674,19 +683,17 @@ body {
   font-size: 0.85rem;
 }
 
-.post-reader-actions button {
+.post-share > [data-share-open] {
   background: var(--surface);
   color: var(--text);
   border: 1px solid var(--line);
   border-radius: 4px;
   font: inherit;
+  font-size: 0.85rem;
+  flex-shrink: 0;
   min-height: 44px;
   padding: 0.35rem 0.85rem;
   cursor: pointer;
-}
-
-.post-copy-status {
-  color: var(--text-muted);
 }
 
 .post-share {
