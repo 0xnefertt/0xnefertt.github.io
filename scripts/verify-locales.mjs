@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { parseFragment } from "parse5";
+
+function textContent(node) {
+  return node.nodeName === "#text" ? node.value : (node.childNodes || []).map(textContent).join("");
+}
 
 const root = path.resolve("astro/dist");
 async function htmlFiles(folder) {
@@ -32,7 +37,7 @@ for (const locale of ["en", "ko"]) {
     const footer = html.match(/<footer\b[^>]*>([\s\S]*?)<\/footer>/)?.[1];
     assert.ok(footer?.includes(`href="/${prefix}resources/"`), "Footer Resources must use the current language");
     assert.ok(footer?.includes('href="/sitemap.xml"'), "Both languages must link to the shared XML sitemap");
-    const footerLabels = [...footer.matchAll(/<a\b[^>]*>([\s\S]*?)<\/a>/g)].map((match) => match[1].replace(/<[^>]*>/g, "").trim());
+    const footerLabels = [...footer.matchAll(/<a\b[^>]*>([\s\S]*?)<\/a>/g)].map((match) => textContent(parseFragment(match[1])).trim());
     assert.deepEqual(
       footerLabels,
       ["Privacy", "Sitemap", "RSS", "Email", "GitHub", "X", "Resources", "Login", "EN", "KR"].filter((label) => footerLabels.includes(label)),

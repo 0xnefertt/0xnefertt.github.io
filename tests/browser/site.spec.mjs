@@ -48,6 +48,43 @@ for (const width of [390, 1280]) {
   }
 }
 
+test("search rejects executable URLs while preserving ordinary links and text", async ({ page }) => {
+  const title = 'security <img src=x onerror="window.searchXss=true">';
+  const post = {
+    title,
+    description: "security regression",
+    content: "security regression",
+    tags: [],
+    categories: [],
+    dateLabel: "2026-10-13",
+    readMinutes: 1,
+    categoryPaths: [{ href: "javascript:window.searchXss=true", label: "unsafe category" }],
+  };
+  await page.route("**/search-index.json", (route) =>
+    route.fulfill({
+      json: [
+        { ...post, href: "java\nscript:window.searchXss=true", thumbnail: "data:image/svg+xml,<svg onload=alert(1)>" },
+        { ...post, href: "/ko/about/", gallery: ["javascript:alert(1)"] },
+        { ...post, href: "https://example.com/article", thumbnail: "/assets/img/prof_pic.jpg", external: true },
+      ],
+    })
+  );
+  await page.goto("/ko/blog/");
+  await page.getByRole("searchbox").fill("security");
+  const results = page.locator("#blog-inline-search-results");
+  await expect(results.locator("li")).toHaveCount(3);
+  await expect(results.locator("h2 a").first()).toHaveAttribute("href", "#");
+  await expect(results.locator("h2 a").nth(1)).toHaveAttribute("href", "http://127.0.0.1:4321/ko/about/");
+  await expect(results.locator("h2 a").nth(2)).toHaveAttribute("href", "https://example.com/article");
+  await expect(results.locator("img")).toHaveCount(1);
+  await expect(results.locator("h2 a").first()).toHaveText(title);
+  await expect(results.locator(".post-card-categories a")).toHaveCount(0);
+  await results.locator("h2 a").first().click();
+  expect(await page.evaluate(() => window.searchXss)).toBeUndefined();
+  await page.getByRole("searchbox").fill("");
+  await expect(results.locator("h2 a").first()).not.toHaveText(title);
+});
+
 test("real Worker/D1 login, save, publish, unpublish, republish and logout", async ({ page, request }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/admin/");
