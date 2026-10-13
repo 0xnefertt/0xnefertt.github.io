@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# CI/CD is handled by GitHub Actions. Keep bot automation disabled while the
+# GitHub App installation remains connected; this file does not revoke access.
+reviews:
+  auto_review:
+    enabled: false
+    auto_incremental_review: false
+  review_status: false
+  review_progress: false
+  commit_status: false
+  slop_detection:
+    enabled: false
+chat:
+  auto_reply: false
+issue_enrichment:
+  auto_enrich:
+    enabled: false
+  planning:
+    enabled: false
+    auto_planning:
+      enabled: false

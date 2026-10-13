@@ -208,6 +208,10 @@ What they validate:
 
 ## CI/CD
 
+GitHub Actions owns validation, security scanning, browser checks, and deployment. CodeRabbit is optional review assistance and is not required for CI/CD.
+Automatic CodeRabbit reviews, progress statuses, replies, and issue planning are disabled in `.coderabbit.yaml`.
+This configuration does not revoke the GitHub App's access. To disconnect it completely, remove this repository from the CodeRabbit installation under GitHub **Settings → Applications → Installed GitHub Apps → CodeRabbit → Configure**.
+
 - Deploy: `.github/workflows/deploy.yml` (full verification; changed Worker/D1 first, then verified `astro/dist`; requires `CLOUDFLARE_API_TOKEN` for Worker changes)
 - Link check after deploy: `.github/workflows/broken-links-site.yml`
 - Weekly content health report: `.github/workflows/content-health.yml`
