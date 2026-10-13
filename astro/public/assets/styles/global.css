@@ -1327,6 +1327,8 @@ main {
 }
 
 .post-pager-title {
+  max-width: 100%;
+  overflow-wrap: anywhere;
   font-size: 0.9rem;
   line-height: 1.35;
   font-weight: 600;
@@ -2027,14 +2029,5 @@ main {
 
   .project-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .post-pager {
-    grid-template-columns: 1fr;
-  }
-
-  .post-pager-link--next {
-    text-align: left;
-    align-items: flex-start;
   }
 }
