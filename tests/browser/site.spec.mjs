@@ -48,6 +48,51 @@ for (const width of [390, 1280]) {
   }
 }
 
+test("post breadcrumbs navigate independently to all posts, the parent group and the child category", async ({ page, request }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const article = "/ko/blog/2026/python-duck-typing/";
+  const parent = "/ko/blog/category/study-log/";
+  const child = `${parent}dev/`;
+  const index = await (await request.get("/ko/blog/search-index.json")).json();
+  const expectedParent = index.filter((post) => post.categoryPaths.some((path) => path.href.startsWith(parent))).map((post) => post.href);
+  const expectedChild = index.filter((post) => post.categoryPaths.some((path) => path.href === child)).map((post) => post.href);
+  expect(expectedParent.length).toBeGreaterThan(expectedChild.length);
+
+  async function listedPosts() {
+    const links = () => page.locator(".post-card-content h2 > a").evaluateAll((nodes) => nodes.map((node) => node.getAttribute("href")));
+    const posts = await links();
+    const pages = await page
+      .locator(".pagination-link[href]")
+      .evaluateAll((nodes) => [...new Set(nodes.map((node) => node.getAttribute("href")))].filter((href) => /\/page-\d+\/$/.test(href)));
+    for (const path of pages) {
+      await page.goto(path);
+      posts.push(...(await links()));
+    }
+    return posts.sort();
+  }
+
+  await page.goto(article);
+  const breadcrumbs = page.locator(".post-breadcrumbs a");
+  await expect(breadcrumbs).toHaveCount(3);
+  await expect(breadcrumbs.nth(0)).toHaveAttribute("href", "/ko/blog/");
+  await expect(breadcrumbs.nth(1)).toHaveAttribute("href", parent);
+  await expect(breadcrumbs.nth(2)).toHaveAttribute("href", child);
+  await test.info().attach("independent-category-breadcrumbs", { body: await page.screenshot(), contentType: "image/png" });
+  await breadcrumbs.nth(1).click();
+  await expect(page).toHaveURL(new URL(parent, page.url()).href);
+  expect(await listedPosts()).toEqual(expectedParent.sort());
+
+  await page.goto(article);
+  await breadcrumbs.nth(2).click();
+  await expect(page).toHaveURL(new URL(child, page.url()).href);
+  expect(await listedPosts()).toEqual(expectedChild.sort());
+
+  await page.goto(article);
+  await breadcrumbs.nth(0).click();
+  await expect(page).toHaveURL(/\/ko\/blog\/$/);
+  expect(await listedPosts()).toEqual(index.map((post) => post.href).sort());
+});
+
 test("search rejects executable URLs while preserving ordinary links and text", async ({ page }) => {
   const title = 'security <img src=x onerror="window.searchXss=true">';
   const post = {

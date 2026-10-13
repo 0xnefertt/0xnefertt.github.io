@@ -136,12 +136,12 @@ const showComments = hasGiscus && (post.data.giscus_comments ?? true) && !redire
       <a href={l("/blog/")} data-i18n-key="blog_all">
         {t(locale, "blog_all")}
       </a>
-      {categoryPaths[0] && (
+      {categoryPaths[0]?.names.map((name, index) => (
         <>
           {" / "}
-          <a href={categoryPaths[0].href}>{categoryPaths[0].label}</a>
+          <a href={l(`/blog/category/${categoryPaths[0].slugs.slice(0, index + 1).join("/")}/`)}>{name}</a>
         </>
-      )}
+      ))}
     </nav>
     <h1>{post.data.title}</h1>
     <p class="post-byline">
