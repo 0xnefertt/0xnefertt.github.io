@@ -82,16 +82,30 @@
     return score;
   }
 
+  function safeWebUrl(value) {
+    if (typeof value !== "string" || !value.trim()) return null;
+    try {
+      const url = new URL(value, window.location.origin);
+      return url.protocol === "https:" || url.protocol === "http:" ? url.href : null;
+    } catch {
+      return null;
+    }
+  }
+
   function createPostItem(post) {
     const item = document.createElement("li");
-    const previewImages = Array.isArray(post.gallery) ? post.gallery.slice(0, 1) : post.thumbnail ? [post.thumbnail] : [];
+    const postUrl = safeWebUrl(post.href) || "#";
+    const previewImages = (Array.isArray(post.gallery) ? post.gallery : post.thumbnail ? [post.thumbnail] : [])
+      .map(safeWebUrl)
+      .filter(Boolean)
+      .slice(0, 1);
     item.className = previewImages.length > 0 ? "post-item post-item--with-media" : "post-item";
 
     if (previewImages.length > 0) {
       const visibleImages = previewImages;
       const mediaLink = document.createElement("a");
       mediaLink.className = "post-card-media";
-      mediaLink.href = post.href;
+      mediaLink.href = postUrl;
       mediaLink.setAttribute("aria-label", post.title);
       if (post.external) {
         mediaLink.target = "_blank";
@@ -117,7 +131,7 @@
 
     const heading = document.createElement("h2");
     const link = document.createElement("a");
-    link.href = post.href;
+    link.href = postUrl;
     link.textContent = post.title;
     if (post.external) {
       link.target = "_blank";
@@ -147,8 +161,10 @@
       const categoryContainer = document.createElement("div");
       categoryContainer.className = "post-card-categories";
       for (const categoryPath of categoryPaths) {
+        const categoryUrl = safeWebUrl(categoryPath.href);
+        if (!categoryUrl) continue;
         const categoryNode = document.createElement("a");
-        categoryNode.href = categoryPath.href;
+        categoryNode.href = categoryUrl;
         categoryNode.textContent = categoryPath.label;
         categoryContainer.appendChild(categoryNode);
       }
@@ -212,11 +228,11 @@
 
     const posts = await loadPosts(config);
     const mode = config.mode === "search-page" ? "search-page" : "inline";
-    const initialResultsHtml = resultsContainer.innerHTML;
+    const initialResults = [...resultsContainer.childNodes].map((node) => node.cloneNode(true));
     const latestLimit = Number.isFinite(config.latestLimit) ? config.latestLimit : 12;
 
     const restoreDefaultList = () => {
-      resultsContainer.innerHTML = initialResultsHtml;
+      resultsContainer.replaceChildren(...initialResults.map((node) => node.cloneNode(true)));
       metaNode.hidden = true;
       metaNode.textContent = "";
       emptyNode.hidden = true;
