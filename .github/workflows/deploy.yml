@@ -9,6 +9,8 @@ on:
       - "astro/**"
       - "writer/**"
       - "shared/**"
+      - "tests/browser/**"
+      - "playwright.config.mjs"
       - "scripts/**"
       - ".prettierrc"
       - ".prettierignore"
@@ -28,6 +30,8 @@ on:
       - "astro/**"
       - "writer/**"
       - "shared/**"
+      - "tests/browser/**"
+      - "playwright.config.mjs"
       - "scripts/**"
       - ".prettierrc"
       - ".prettierignore"
@@ -108,6 +112,21 @@ jobs:
           PUBLIC_GA_MEASUREMENT_ID: ${{ vars.PUBLIC_GA_MEASUREMENT_ID }}
           PUBLIC_WRITER_URL: ${{ vars.PUBLIC_WRITER_URL }}
         run: npm run verify
+
+      - name: Install browser test runtime
+        run: npx playwright install --with-deps chromium
+
+      - name: Check browser flows and accessibility
+        run: npm run test:browser
+
+      - uses: actions/upload-artifact@v7.0.2
+        if: failure()
+        with:
+          name: browser-failure-report
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7
 
       - uses: actions/upload-artifact@v7.0.2
         with:

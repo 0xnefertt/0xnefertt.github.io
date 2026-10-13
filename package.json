@@ -23,9 +23,15 @@
     "build": "npm run astro:build",
     "astro:check": "npm --prefix astro run check",
     "audit": "npm audit && npm --prefix astro audit && npm --prefix writer audit",
-    "verify": "npm run format:check && npm run audit && npm run verify:content && npm run astro:check && npm run writer:check && npm run writer:test && npm run writer:build && npm run verify:build"
+    "verify": "npm run format:check && npm run audit && npm run verify:content && npm run astro:check && npm run writer:check && npm run writer:test && npm run verify:backup && npm run writer:build && npm run verify:build",
+    "test:browser": "playwright test",
+    "writer:backup": "python3 scripts/writer-backup.py export --remote",
+    "writer:backup:verify": "python3 scripts/writer-backup.py verify",
+    "verify:backup": "python3 scripts/writer-backup.py self-test"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.64.0",
     "prettier": "3.9.10",
     "prettier-plugin-astro": "1.1.1"
   },

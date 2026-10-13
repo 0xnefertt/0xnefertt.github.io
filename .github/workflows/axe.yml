@@ -2,23 +2,19 @@ name: Axe accessibility testing
 
 on:
   workflow_dispatch:
-    inputs:
-      url:
-        description: "URL to be checked (e.g.: blog/)"
-        required: false
+  schedule:
+    - cron: "20 10 * * 1"
 
-env:
-  URL: ""
+permissions:
+  contents: read
 
 jobs:
-  check:
+  browser:
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
-      - name: Checkout 🛎️
-        uses: actions/checkout@v7.0.1
-
-      - name: Setup Node.js ⚙️
-        uses: actions/setup-node@v7.1.0
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version: "22.22.3"
           cache: npm
@@ -26,34 +22,15 @@ jobs:
             package-lock.json
             astro/package-lock.json
             writer/package-lock.json
-
-      - name: Install dependencies 💾
-        run: |
-          npm ci
-          npm --prefix astro ci
-          npm --prefix writer ci
-
-      - name: Build Astro site 🔧
-        run: npm run astro:build
-
-      - name: Get Chromium version 🌐
-        run: |
-          CHROMIUM_VERSION=$(wget -qO- https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_STABLE | cut -d. -f1)
-          echo "Chromium version: $CHROMIUM_VERSION"
-          echo "CHROMIUM_VERSION=$CHROMIUM_VERSION" >> $GITHUB_ENV
-
-      - name: Setup Chrome 🌐
-        id: setup-chrome
-        uses: browser-actions/setup-chrome@v1
+      - run: npm run setup:ci
+      - run: npm run verify:build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser
+      - uses: actions/upload-artifact@v7.0.2
+        if: failure()
         with:
-          chrome-version: ${{ env.CHROMIUM_VERSION }}
-
-      - name: Install chromedriver 🚗
-        run: npm install -g chromedriver@$CHROMIUM_VERSION
-
-      - name: Run axe 🪓
-        run: |
-          npm install -g @axe-core/cli
-          npm install -g http-server
-          http-server astro/dist/ &
-          axe --chromedriver-path $(npm root -g)/chromedriver/bin/chromedriver http://localhost:8080/${{ github.event.inputs.url || env.URL }} --load-delay=1500 --exit
+          name: browser-failure-report
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7

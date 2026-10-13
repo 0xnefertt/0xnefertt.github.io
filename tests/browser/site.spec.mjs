@@ -1,0 +1,84 @@
+import { test, expect } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
+
+async function accessible(page) {
+  const result = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
+  expect(result.violations.map(({ id, impact, nodes }) => ({ id, impact, targets: nodes.map((n) => n.target) }))).toEqual([]);
+}
+
+for (const width of [390, 1280]) {
+  test(`public navigation, search and accessibility at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    for (const route of ["/", "/ko/", "/ko/blog/", "/ko/about/", "/ko/books/", "/ko/projects/", "/ko/resources/", "/ko/privacy/", "/admin/"]) {
+      await page.goto(route);
+      if (route === "/admin/") await expect(page.locator("#login-screen")).toBeVisible();
+      await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+      await accessible(page);
+    }
+    await page.goto("/ko/blog/");
+    if (width === 390) {
+      await page.getByRole("button", { name: "Open navigation menu" }).click();
+      await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible();
+      await page.getByRole("button", { name: "Close navigation menu" }).click();
+    }
+    await page.getByRole("searchbox").fill("파이썬");
+    await expect(page.locator("#blog-inline-search-results li")).toHaveCount(5);
+    await accessible(page);
+    await page.getByRole("link", { name: "파이썬 가비지 컬렉션", exact: true }).click();
+    await expect(page.locator("h1")).toContainText("파이썬");
+    await accessible(page);
+  });
+}
+
+test("real Worker/D1 login, save, publish, unpublish, republish and logout", async ({ page, request }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/admin/");
+  await page.getByRole("link", { name: "GitHub로 로그인" }).click();
+  await expect(page.locator("#workspace")).toBeVisible();
+  await expect(page).toHaveURL(/\/admin\/$/);
+  await expect(page.locator("#new-post")).toBeEnabled();
+  await accessible(page);
+  await page.locator("#new-post").click();
+  await page.locator("#title").fill("브라우저 복구 검증");
+  await page.locator("#description").fill("로그인과 발행 흐름을 확인하는 테스트입니다.");
+  await page.locator("#content-language").selectOption("ko");
+  await page.locator("#extra-settings summary").click();
+  await page.locator("#tags").fill("test");
+  await page.locator("#slug").fill("browser-smoke");
+  await page.getByRole("button", { name: "원문", exact: true }).click();
+  await page.locator("#body").fill("## 복구 검증\n\n비공개 초안 본문입니다.");
+  await page.locator("#save").click();
+  await expect(page.locator("#save-status")).toContainText("저장");
+  await page.reload();
+  await page.getByRole("button", { name: /브라우저 복구 검증/ }).click();
+  await page.getByRole("button", { name: "원문", exact: true }).click();
+  await expect(page.locator("#body")).toHaveValue(/비공개 초안 본문/);
+  await accessible(page);
+  await page.locator("#publish").click();
+  await page.locator("#publish-dialog button[value=publish]").click();
+  await expect(page.locator("#save-status")).toContainText("발행 완료");
+  const published = await (await request.get("http://127.0.0.1:8789/test/state")).json();
+  expect(published.publications).toBe(1);
+  expect(published.posts).toHaveLength(1);
+  const originalPath = published.posts[0].path;
+  await page.locator("#body").fill("## 복구 검증\n\n아직 발행하지 않은 변경입니다.");
+  await page.locator("#save").click();
+  await page.locator("#unpublish").click();
+  await page.locator("#unpublish-dialog button[value=unpublish]").click();
+  await expect(page.locator("#publish")).toHaveText("다시 발행");
+  const hidden = await (await request.get("http://127.0.0.1:8789/test/state")).json();
+  expect(hidden.posts[0].content).toContain("draft: true");
+  expect(hidden.posts[0].content).not.toContain("아직 발행하지 않은 변경");
+  await expect(page.locator("#body")).toHaveValue(/아직 발행하지 않은 변경/);
+  await page.locator("#publish").click();
+  await page.locator("#publish-dialog button[value=publish]").click();
+  await expect(page.locator("#save-status")).toContainText("발행 완료");
+  const restored = await (await request.get("http://127.0.0.1:8789/test/state")).json();
+  expect(restored.publications).toBe(3);
+  expect(restored.posts[0].path).toBe(originalPath);
+  expect(restored.posts[0].content).toContain("아직 발행하지 않은 변경");
+  expect(restored.posts[0].content).not.toContain("draft: true");
+  await page.locator("#logout").click();
+  await expect(page.locator("#login-screen")).toBeVisible();
+  expect((await request.get("http://127.0.0.1:8789/api/drafts")).status()).toBe(401);
+});
