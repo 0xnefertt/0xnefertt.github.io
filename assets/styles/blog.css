@@ -364,7 +364,7 @@ body {
   scrollbar-width: thin;
 }
 
-.blog-category-tabs > a {
+.blog-category-tabs > :is(a, .category-disabled) {
   display: flex;
   gap: 0.35rem;
   align-items: center;
@@ -374,6 +374,10 @@ body {
   font-size: 0.9rem;
   border-bottom: 2px solid transparent;
   white-space: nowrap;
+}
+
+.blog-category-tabs > .category-disabled {
+  padding: 0;
 }
 
 .blog-category-tabs > a.active {
@@ -1062,7 +1066,7 @@ html.post-share-is-open {
     gap: 1rem;
   }
 
-  .blog-category-tabs > a,
+  .blog-category-tabs > :is(a, .category-disabled),
   .category-disclosure > summary {
     font-size: 0.82rem;
   }
