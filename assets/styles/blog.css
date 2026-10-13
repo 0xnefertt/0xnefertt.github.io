@@ -1132,8 +1132,7 @@ html.post-share-is-open {
     display: block;
   }
 
-  .book-outline-desktop,
-  .book-pager > span {
+  .book-outline-desktop {
     display: none;
   }
 
