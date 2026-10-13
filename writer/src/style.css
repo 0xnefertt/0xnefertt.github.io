@@ -61,6 +61,7 @@ select {
   background: var(--surface);
 }
 .brand {
+  min-width: 0;
   font-weight: 700;
   font-family: "IBM Plex Mono", monospace;
   color: var(--text);
@@ -398,8 +399,14 @@ dialog::backdrop {
   .writer-header {
     padding: 1rem;
   }
-  .brand span {
+  .brand span:last-child {
     display: none;
+  }
+  .brand #admin-site-title {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .workspace {
     grid-template-columns: 1fr;

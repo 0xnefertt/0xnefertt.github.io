@@ -13,3 +13,6 @@ writer/dist/
 writer/.test-build/
 writer/.wrangler/
 writer/worker-configuration.d.ts
+.private-backups/
+playwright-report/
+test-results/

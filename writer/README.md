@@ -153,3 +153,5 @@ The site removes its listing, detail routes, search/RSS/sitemap entries after de
 `npm run verify` from the root runs the full local/CI gate. GitHub Actions deploys changed Worker code and applies migrations before deploying the verified site.
 Configure the `CLOUDFLARE_API_TOKEN` repository secret with access to this Worker's Cloudflare account and D1 database. Worker runtime secrets remain managed in Cloudflare.
 A missing deployment token or a failed Worker deployment blocks the dependent site deployment. A content-only publication does not redeploy the API.
+
+For private snapshots, isolated restore drills, and browser/accessibility verification, see [the recovery guide](../docs/writer-recovery.md).
