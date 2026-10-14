@@ -21,7 +21,15 @@ const groupedProjects =
 const visibleGroups = groupedProjects.filter((group) => group.items.length > 0);
 ---
 
-<Layout title="projects" description={pageDef?.data.description ?? "Selected project case studies"} currentPath={l("/projects/")}>
+<Layout
+  title={t(locale, "nav_projects")}
+  description={localeText(
+    locale,
+    pageDef?.data.description ?? "Selected project case studies",
+    "직접 만들고 개선한 웹사이트와 자동화 프로젝트의 구현 과정, 결과와 배운 점을 소개합니다."
+  )}
+  currentPath={l("/projects/")}
+>
   <section class="page-header project-portfolio-header">
     <p class="eyebrow">Portfolio</p>
     <h1>{t(locale, "nav_projects")}</h1>

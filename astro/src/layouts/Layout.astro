@@ -33,7 +33,7 @@ const locale = localeFromPath(Astro.url.pathname);
 const {
   mainClass,
   title,
-  description = localeText(locale, siteConfig.blogDescription, siteConfig.blogDescriptionKo),
+  description = localeText(locale, siteConfig.seoDescription, siteConfig.seoDescriptionKo),
   currentPath = "/",
   canonicalHref,
   ogType = "website",

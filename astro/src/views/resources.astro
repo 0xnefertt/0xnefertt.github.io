@@ -9,7 +9,13 @@ const favorites = siteSettings.favorites.filter((group) => group.items.length > 
 const description = localeText(locale, siteSettings.resourcesDescription, siteSettings.resourcesDescriptionKo);
 ---
 
-<Layout title="Resources" description={description} currentPath={localizedPath("/resources/", locale)} mainClass="resources-content" disableAds>
+<Layout
+  title={localeText(locale, "Resources", "유용한 자료")}
+  description={description}
+  currentPath={localizedPath("/resources/", locale)}
+  mainClass="resources-content"
+  disableAds
+>
   <header class="page-header">
     <h1>Resources</h1>
     <p>{description}</p>

@@ -136,6 +136,7 @@ const books = defineCollection({
     translation_key: z.string().optional(),
     draft: z.boolean().optional(),
     title: z.string(),
+    description: z.string().optional(),
     date: z.coerce.date().optional(),
     last_updated: z.coerce.date().optional(),
     author: z.string().optional(),

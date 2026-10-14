@@ -21,6 +21,8 @@ export interface FavoriteGroup {
 export interface SiteContentSettings {
   blogDescription: string;
   blogDescriptionKo: string;
+  seoDescription: string;
+  seoDescriptionKo: string;
   siteTitle: string;
   blogName: string;
   email: string;
@@ -185,6 +187,8 @@ function contentSettings(input: Record<string, unknown>): SiteContentSettings {
   return {
     blogDescription: text(value.blogDescription, 500, "영어 소개 문구"),
     blogDescriptionKo: text(value.blogDescriptionKo, 500, "한국어 소개 문구"),
+    seoDescription: text(value.seoDescription, 500, "영어 검색 설명"),
+    seoDescriptionKo: text(value.seoDescriptionKo, 500, "한국어 검색 설명"),
     siteTitle: text(value.siteTitle, 100, "사이트 이름"),
     blogName: text(value.blogName, 100, "블로그 제목"),
     email,

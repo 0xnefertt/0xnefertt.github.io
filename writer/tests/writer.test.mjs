@@ -507,6 +507,8 @@ test("older settings clients retain saved descriptions when updating other setti
   try {
     configuredSettings.blogDescription = "Published custom English";
     configuredSettings.blogDescriptionKo = "이미 반영한 한국어 소개";
+    configuredSettings.seoDescription = "Previously saved search description";
+    configuredSettings.seoDescriptionKo = "이미 저장한 검색 설명";
     configuredSettings.siteTitle = "Published custom title";
     configuredSettings.usefulInfo.enabled = false;
     configuredSettings.privacy.body = "Existing custom Privacy content";
@@ -517,6 +519,8 @@ test("older settings clients retain saved descriptions when updating other setti
     const content = JSON.parse(calls.find((call) => call.path.endsWith("/git/blobs") && call.method === "POST").data.content);
     assert.equal(content.blogDescription, configuredSettings.blogDescription);
     assert.equal(content.blogDescriptionKo, configuredSettings.blogDescriptionKo);
+    assert.equal(content.seoDescription, configuredSettings.seoDescription);
+    assert.equal(content.seoDescriptionKo, configuredSettings.seoDescriptionKo);
     assert.equal(content.siteTitle, configuredSettings.siteTitle);
     assert.equal(content.usefulInfo.enabled, false);
     assert.deepEqual(content.privacy, configuredSettings.privacy);

@@ -9,6 +9,7 @@ import PostCard from "../../components/PostCard.astro";
 import Layout from "../../layouts/Layout.astro";
 import { getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from "../../lib/blog";
 import { siteConfig } from "../../lib/site";
+import { blogSeoDescription } from "../../lib/seo";
 
 interface Props {
   currentPage: number;
@@ -31,8 +32,8 @@ function getPageHref(page: number): string {
 ---
 
 <Layout
-  title={`blog · page ${pageIndex}`}
-  description={localeText(locale, siteConfig.blogDescription, siteConfig.blogDescriptionKo)}
+  title={localeText(locale, `Blog · page ${pageIndex}`, `블로그 · ${pageIndex}페이지`)}
+  description={blogSeoDescription(locale)}
   currentPath={l("/blog/")}
 >
   <section class="blog-header">

@@ -10,6 +10,7 @@ import Layout from "../../layouts/Layout.astro";
 import { toSafeJson } from "../../lib/blogSearch";
 import { getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from "../../lib/blog";
 import { siteConfig } from "../../lib/site";
+import { blogSeoDescription } from "../../lib/seo";
 import blogSearchScriptUrl from "../../scripts/blog-search.js?url";
 
 const POSTS_PER_PAGE = 8;
@@ -37,7 +38,7 @@ function getPageHref(page: number): string {
 }
 ---
 
-<Layout title="blog" description={localeText(locale, siteConfig.blogDescription, siteConfig.blogDescriptionKo)} currentPath={l("/blog/")}>
+<Layout title={t(locale, "nav_blog")} description={blogSeoDescription(locale)} currentPath={l("/blog/")}>
   <section class="blog-header">
     <h1>{siteConfig.blogName}</h1>
     <p>{localeText(locale, siteConfig.blogDescription, siteConfig.blogDescriptionKo)}</p>

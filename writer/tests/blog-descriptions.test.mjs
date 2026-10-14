@@ -52,11 +52,11 @@ before(async () => {
 test("blog descriptions retain legacy defaults and validate each language independently", () => {
   const legacy = { categories: [], favorites: [] };
   const defaults = settingsModule.validateSettings(legacy);
-  for (const field of ["blogDescription", "blogDescriptionKo"]) {
+  for (const field of ["blogDescription", "blogDescriptionKo", "seoDescription", "seoDescriptionKo"]) {
     assert.equal(defaults[field], settingsModule.DEFAULT_SITE_CONTENT[field]);
     const custom = settingsModule.validateSettings({ ...legacy, [field]: "  New introduction  " });
     assert.equal(custom[field], "New introduction");
-    const other = field === "blogDescription" ? "blogDescriptionKo" : "blogDescription";
+    const other = field.endsWith("Ko") ? field.slice(0, -2) : `${field}Ko`;
     assert.equal(custom[other], defaults[other]);
     for (const invalid of [null, 42, [], "", "   ", "x".repeat(501)]) {
       assert.throws(() => settingsModule.validateSettings({ ...legacy, [field]: invalid }));
@@ -202,6 +202,8 @@ test("admin description edits survive section changes, save with the revision an
     for (const [id, value] of [
       ["blog-description-en", "Edited English"],
       ["blog-description-ko", "수정한 한국어 소개"],
+      ["seo-description-en", "Separate English search description"],
+      ["seo-description-ko", "화면 소개와 별도로 저장하는 검색 설명"],
     ]) {
       const field = document.getElementById(id);
       field.value = value;
@@ -218,12 +220,15 @@ test("admin description edits survive section changes, save with the revision an
     assert.equal(saved.sha, "original");
     assert.equal(saved.settings.blogDescription, "Edited English");
     assert.equal(saved.settings.blogDescriptionKo, "수정한 한국어 소개");
+    assert.equal(saved.settings.seoDescription, "Separate English search description");
+    assert.equal(saved.settings.seoDescriptionKo, "화면 소개와 별도로 저장하는 검색 설명");
     assert.deepEqual(saved.settings.categories, initial.categories);
     assert.deepEqual(saved.settings.favorites, initial.favorites);
     assert.equal(initial.blogDescription, "Original English");
     assert.equal(manager.isDirty(), false);
     await manager.load();
     assert.equal(document.getElementById("blog-description-ko").value, "수정한 한국어 소개");
+    assert.equal(document.getElementById("seo-description-ko").value, "화면 소개와 별도로 저장하는 검색 설명");
   } finally {
     dom.window.close();
   }

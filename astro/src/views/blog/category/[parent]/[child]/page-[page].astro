@@ -9,6 +9,7 @@ import PostCard from "../../../../../components/PostCard.astro";
 import Layout from "../../../../../layouts/Layout.astro";
 import { getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from "../../../../../lib/blog";
 import { siteConfig } from "../../../../../lib/site";
+import { categorySeoDescription } from "../../../../../lib/seo";
 
 interface Props {
   parentCategory: {
@@ -42,8 +43,12 @@ function getPageHref(page: number): string {
 ---
 
 <Layout
-  title={`blog · ${parentCategory.name} / ${childCategory.name} · page ${pageIndex}`}
-  description={`Posts in ${parentCategory.name} / ${childCategory.name}`}
+  title={localeText(
+    locale,
+    `${parentCategory.name} / ${childCategory.name} · Blog · page ${pageIndex}`,
+    `${parentCategory.name} / ${childCategory.name} · 블로그 · ${pageIndex}페이지`
+  )}
+  description={categorySeoDescription(locale, [parentCategory.name, childCategory.name])}
   currentPath={l(`/blog/category/${parentCategory.slug}/${childCategory.slug}/`)}
 >
   <section class="blog-header">

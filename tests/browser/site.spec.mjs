@@ -159,6 +159,20 @@ test("search rejects executable URLs while preserving ordinary links and text", 
   await expect(results.locator("h2 a").first()).not.toHaveText(title);
 });
 
+test("admin offers separate English and Korean SEO descriptions without changing the visible introduction", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/admin/");
+  await page.getByRole("link", { name: "GitHub로 로그인" }).click();
+  await expect(page.locator("#workspace")).toBeVisible();
+  await page.locator("#manage-description").click();
+  await expect(page.locator("#seo-description-en")).toHaveValue(/Development learning notes/);
+  await expect(page.locator("#seo-description-ko")).toHaveValue(/개발 학습 기록/);
+  await expect(page.locator("#blog-description-en")).toHaveValue("1, 2, 3, Let's go!");
+  await accessible(page);
+  await test.info().attach("admin-seo-descriptions", { body: await page.screenshot({ path: "reports/seo-admin.png" }), contentType: "image/png" });
+  await page.locator("#logout").click();
+});
+
 test("real Worker/D1 login, save, publish, unpublish, republish and logout", async ({ page, request }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/admin/");

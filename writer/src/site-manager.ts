@@ -349,6 +349,8 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
     if (settings) {
       el<HTMLTextAreaElement>("blog-description-en").value = settings.blogDescription;
       el<HTMLTextAreaElement>("blog-description-ko").value = settings.blogDescriptionKo;
+      el<HTMLTextAreaElement>("seo-description-en").value = settings.seoDescription;
+      el<HTMLTextAreaElement>("seo-description-ko").value = settings.seoDescriptionKo;
     }
     renderSettingsFields();
     renderCategories();
@@ -392,6 +394,8 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
   for (const [id, field] of [
     ["blog-description-en", "blogDescription"],
     ["blog-description-ko", "blogDescriptionKo"],
+    ["seo-description-en", "seoDescription"],
+    ["seo-description-ko", "seoDescriptionKo"],
   ] as const) {
     el<HTMLTextAreaElement>(id).addEventListener("input", () => {
       if (!settings) return;

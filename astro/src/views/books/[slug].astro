@@ -30,11 +30,21 @@ const profile = pages.find((page) => page.filePath?.endsWith("/about.md") && con
 const reviewer = profile?.name ?? siteConfig.title;
 const avatar = normalizeAssetPath(profile?.image);
 const canonicalUrl = new URL(getBookRoute(entry).href, siteConfig.siteUrl).toString();
+const description =
+  entry.data.description ??
+  localeText(
+    locale,
+    `Reading notes and reflections on ${entry.data.title} by ${reviewer}.`,
+    `${reviewer}의 ${entry.data.title} 독서 기록입니다. 책에서 배운 점과 읽으며 떠올린 생각을 정리했습니다.`
+  );
+const articleImageUrl = new URL(cover ?? siteConfig.defaultOgImage, siteConfig.siteUrl).toString();
 const hasSidebar = outline.length > 0 || sidebarReviews.length > 0;
 const articleJsonLd = JSON.stringify({
   "@context": "https://schema.org",
   "@type": "Article",
   headline: entry.data.title,
+  description,
+  image: [articleImageUrl],
   inLanguage: locale,
   author: { "@type": "Person", name: reviewer, url: new URL(l("/about/"), siteConfig.siteUrl).toString() },
   datePublished: entry.data.date?.toISOString(),
@@ -46,7 +56,7 @@ const articleJsonLd = JSON.stringify({
 
 <Layout
   title={entry.data.title}
-  description={entry.data.title}
+  description={description}
   currentPath={l("/books/")}
   canonicalHref={canonicalUrl}
   ogType="article"

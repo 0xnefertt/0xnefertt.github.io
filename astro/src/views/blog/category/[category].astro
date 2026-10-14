@@ -9,6 +9,7 @@ import PostCard from "../../../components/PostCard.astro";
 import Layout from "../../../layouts/Layout.astro";
 import { getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from "../../../lib/blog";
 import { siteConfig } from "../../../lib/site";
+import { categorySeoDescription } from "../../../lib/seo";
 
 const POSTS_PER_PAGE = 8;
 
@@ -33,7 +34,11 @@ function getPageHref(page: number): string {
 }
 ---
 
-<Layout title={`blog · ${category.name}`} description={`Posts in ${category.name}`} currentPath={l(`/blog/category/${category.slug}/`)}>
+<Layout
+  title={`${category.name} · ${t(locale, "nav_blog")}`}
+  description={categorySeoDescription(locale, [category.name])}
+  currentPath={l(`/blog/category/${category.slug}/`)}
+>
   <section class="blog-header">
     <h1>{siteConfig.blogName}</h1>
     <p>

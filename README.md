@@ -222,6 +222,7 @@ This configuration does not revoke the GitHub App's access. To disconnect it com
 Use `/admin/` after GitHub login to manage posts, books, projects, About/Profile, blog introductions, category names/order, and Resources favorite groups/links.
 “블로그 소개” edits `blogDescription` (English) and `blogDescriptionKo` (Korean) in `_data/site-settings.json`.
 The homepage and blog headers use these saved values; About/Profile remains separate. Save with “저장하고 반영” to publish both languages through the existing site deployment.
+The same admin section edits `seoDescription` and `seoDescriptionKo` for search and sharing metadata independently of the visible introduction. Older saved settings use the descriptions in `_data/site-defaults.json` until customized.
 Categories have separate English and Korean names in `_data/site-settings.json`. Introductions and profile photos live in `_pages/about.md` and `_pages/ko/about.md`.
 Save settings with “저장하고 반영” to update the site. Existing category URLs are preserved, and categories used by posts or drafts cannot be deleted until reassigned.
 See [site languages](docs/languages.md) for English root URLs, Korean `/ko/` URLs, and translation management.

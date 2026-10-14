@@ -12,6 +12,8 @@ export const siteConfig = {
   siteUrl: "https://0xnefertt.github.io",
   blogName: siteSettings.blogName,
   blogDescriptionKo: siteSettings.blogDescriptionKo,
+  seoDescription: siteSettings.seoDescription,
+  seoDescriptionKo: siteSettings.seoDescriptionKo,
   blogDescription: siteSettings.blogDescription,
   defaultOgImage: siteSettings.defaultOgImage || "/favicon.svg",
   xHandle: siteSettings.xUrl.match(/^https?:\/\/(?:www\.)?(?:x\.com|twitter\.com)\/([\w]+)\/?$/)?.[1],
