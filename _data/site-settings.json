@@ -1,6 +1,8 @@
 {
   "blogDescription": "1, 2, 3, Let's go!",
   "blogDescriptionKo": "1, 2, 3, Let's go!",
+  "seoDescription": "Development learning notes, life in Canada, finance research, and book reviews by 0xnefertt.",
+  "seoDescriptionKo": "0xnefertt의 개발 학습 기록, 캐나다 생활 이야기, 금융 리서치와 독서 노트를 모은 개인 블로그입니다.",
   "siteTitle": "0xnefertt's thoughts",
   "blogName": "0xnefertt's Blog",
   "email": "adrwss2@gmail.com",
@@ -28,7 +30,8 @@
       "children": [
         { "name": "dev", "name_ko": "개발", "slug": "dev" },
         { "name": "english", "name_ko": "영어", "slug": "english" },
-        { "name": "career", "name_ko": "커리어", "slug": "career" }
+        { "name": "career", "name_ko": "커리어", "slug": "career" },
+        { "name": "business", "name_ko": "사업", "slug": "business" }
       ],
       "name": "study",
       "name_ko": "공부 기록",
