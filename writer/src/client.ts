@@ -16,6 +16,8 @@ import { safeImage } from "./rich-content";
 import { siteManager } from "./site-manager";
 import { richEditor } from "./rich-editor";
 import { IMAGE_LIMIT } from "./media-limits";
+import { slugify } from "../../shared/slug";
+import { configureCollection, contentLabels, element, updateLanguageNote } from "./workspace-ui";
 import { mediaManager } from "./media-manager";
 import "../../astro/public/assets/styles/global.css";
 import "./style.css";
@@ -36,7 +38,6 @@ if (apiBase && returned.has("session")) {
 let sessionToken = apiBase ? (sessionStorage.getItem(sessionKey) ?? "") : "";
 const mediaUrls = new Map<string, Promise<string>>();
 
-const element = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const title = element<HTMLInputElement>("title");
 const description = element<HTMLInputElement>("description");
 const body = element<HTMLTextAreaElement>("body");
@@ -70,7 +71,6 @@ let showingPosts = false;
 let showingTrash = false;
 let listRevision = 0;
 let selectedCollection: ContentCollection = "blog";
-const contentLabels = { blog: "글", books: "책", projects: "프로젝트", about: "소개" };
 
 class ApiError extends Error {
   constructor(
@@ -122,61 +122,6 @@ const attachments = mediaManager({
   report,
 });
 
-function configureCollection(kind: ContentCollection) {
-  const label = contentLabels[kind];
-  const object = kind === "projects" || kind === "about" ? `${label}를` : `${label}을`;
-  element("workspace").dataset.collection = kind;
-  element("new-post").textContent = kind === "books" ? "＋ 새 책 기록" : kind === "projects" ? "＋ 새 프로젝트 작성" : "＋ 새 글 쓰기";
-  element<HTMLButtonElement>("new-post").disabled = kind === "blog" && !category.value;
-  element("library-search-label").textContent = `${label} 찾기`;
-  element("post-tab").textContent = `기존 ${label}`;
-  element("empty-kind").textContent = kind.toUpperCase();
-  element("empty-heading").textContent = `${object} 선택하세요`;
-  element("empty-description").textContent = `새 ${object} 작성하거나 목록에서 수정할 항목을 선택하세요.`;
-  element("title-label").textContent = kind === "books" ? "책 제목" : kind === "projects" ? "프로젝트 이름" : "게시글 제목";
-  element("about-languages").hidden = kind !== "about";
-  element("add-translation").hidden = kind === "about";
-  element("new-post").hidden = kind === "about";
-  element("blog-category-field").hidden = kind !== "blog";
-  element("blog-date-field").hidden = kind !== "blog";
-  element("title-row").hidden = kind === "about";
-  element("extra-settings").hidden = kind === "about";
-  element("description-label").textContent = kind === "about" ? "검색 결과에 표시할 소개" : "한 줄 요약";
-  element("cover-attach").textContent = kind === "about" ? "프로필 사진 첨부" : "표지 이미지 첨부";
-  element("extra-settings-heading").textContent = kind === "blog" ? "추가 정보 · 태그, 날짜, 주소" : "추가 정보 · 태그, 주소";
-  description.placeholder =
-    kind === "books"
-      ? "독서 기록을 짧게 요약하세요 (선택)"
-      : kind === "projects"
-        ? "프로젝트를 짧게 소개하세요"
-        : kind === "about"
-          ? "블로그와 작성자를 짧게 소개하세요"
-          : "글의 내용을 짧게 요약하세요";
-  element("collection-settings").hidden = kind === "blog";
-  element("collection-settings-heading").textContent =
-    kind === "books" ? "독서 기록 · 발행일, 표지" : kind === "about" ? "프로필 · 이름, 소개, 사진" : "프로젝트 정보 · 이미지, 분류 등 (선택)";
-  element<HTMLDetailsElement>("collection-settings").open = kind !== "projects";
-  element("publish-heading").textContent = kind === "about" ? "소개와 프로필을 반영할까요?" : `이 ${object} 발행할까요?`;
-  element("publish").textContent = kind === "about" ? "소개 반영하기" : "발행하기";
-  element("library-note").textContent =
-    kind === "about"
-      ? "수정 내용은 비공개로 저장됩니다. 소개 반영하기를 누르면 소개 페이지에 공개됩니다."
-      : `초안은 자동으로 비공개 저장됩니다. 발행하면 ${kind === "books" ? "책장" : kind === "projects" ? "프로젝트 페이지" : "블로그"}에 공개됩니다.`;
-}
-function updateLanguageNote() {
-  const destination =
-    selectedCollection === "about"
-      ? language.value === "ko"
-        ? "한국어 · /ko/about/"
-        : "English · /about/"
-      : language.value === "ko"
-        ? "한국어 · /ko/"
-        : "English · 기본 사이트";
-  element("language-note").textContent =
-    selectedCollection === "about"
-      ? `${destination}에 반영됩니다. 영어·한국어 소개는 각각 수정할 수 있습니다.`
-      : `${destination}에 발행됩니다. 다른 언어 버전은 별도 초안과 발행 상태로 관리됩니다.`;
-}
 async function selectCollection(kind: ContentCollection): Promise<boolean> {
   if (switching) return false;
   if (selectedCollection === kind) return true;
@@ -210,7 +155,7 @@ async function selectCollection(kind: ContentCollection): Promise<boolean> {
     element("post-tab").setAttribute("aria-pressed", "false");
     element("editor").hidden = true;
     element("empty").hidden = false;
-    configureCollection(kind);
+    configureCollection(kind, { category, description });
     details.load(kind, {});
     if (aboutDraft) showDraft(aboutDraft);
     renderList();
@@ -315,14 +260,14 @@ function showDraft(value: Draft) {
   conflict = false;
   const doc = value.document;
   selectedCollection = documentCollection(doc);
-  configureCollection(selectedCollection);
+  configureCollection(selectedCollection, { category, description });
   details.load(selectedCollection, doc.metadata);
   language.value = documentLanguage(doc);
   translation.value = documentTranslationKey(doc);
   language.disabled = Boolean(doc.sourcePath);
   translation.disabled = false;
   element<HTMLButtonElement>("add-translation").disabled = !doc.sourcePath;
-  updateLanguageNote();
+  updateLanguageNote(selectedCollection, language.value);
   title.value = doc.title;
   description.value = doc.description;
   composer.load(doc.body);
@@ -428,12 +373,7 @@ body.addEventListener("compositionend", scheduleSave);
 title.addEventListener("blur", () => {
   if (!current?.document.sourcePath && !slug.value && title.value.trim()) {
     slug.value =
-      title.value
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, "")
-        .trim()
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-") ||
+      slugify(title.value) ||
       `${selectedCollection === "books" ? "book" : selectedCollection === "projects" ? "project" : "post"}-${current!.id.slice(0, 8)}`;
     scheduleSave();
   }
@@ -693,7 +633,7 @@ async function openPost(path: string) {
 languageFilter.addEventListener("change", renderList);
 language.addEventListener("change", () => {
   manager.refreshCategories();
-  updateLanguageNote();
+  updateLanguageNote(selectedCollection, language.value);
 });
 for (const locale of ["en", "ko"])
   element(`about-${locale}`).addEventListener("click", () => void openPost(locale === "ko" ? "_pages/ko/about.md" : "_pages/about.md").catch(report));
@@ -830,7 +770,7 @@ element("new-post").addEventListener(
 async function attach(file: File, target: "body" | "cover" | "img" | "profile.image" = "body") {
   if (!current || locked) return;
   if (!/^image\/(png|jpeg|webp|gif)$/.test(file.type) || file.size > IMAGE_LIMIT)
-    throw new Error("5MB 이하의 PNG, JPG, WebP, GIF 이미지를 선택해 주세요.");
+    throw new Error(`${IMAGE_LIMIT / 1024 / 1024}MB 이하의 PNG, JPG, WebP, GIF 이미지를 선택해 주세요.`);
   setLocked(true);
   status("이미지 저장 중…");
   try {
@@ -948,7 +888,7 @@ deleteDialog.addEventListener("close", () => {
       clearTimeout(timer);
       element("editor").hidden = true;
       element("empty").hidden = false;
-      configureCollection(selectedCollection);
+      configureCollection(selectedCollection, { category, description });
       showingPosts = false;
       showingTrash = false;
       element("draft-tab").setAttribute("aria-pressed", "true");

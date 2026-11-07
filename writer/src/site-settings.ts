@@ -1,14 +1,8 @@
 import { HttpError, list, type PostDocument } from "./model";
+import { categoryName, type CategoryChild, type CategoryGroup } from "../../shared/category";
 import defaults from "../../_data/site-defaults.json";
 
-export interface CategoryChild {
-  name: string;
-  name_ko?: string;
-  slug: string;
-}
-export interface CategoryGroup extends CategoryChild {
-  children: CategoryChild[];
-}
+export { categoryName, type CategoryChild, type CategoryGroup };
 export interface FavoriteLink {
   href: string;
   title: string;
@@ -254,9 +248,6 @@ export function validateSettings(value: unknown): SiteSettings {
     "즐겨찾기 그룹 이름이 중복됩니다."
   );
   return { ...contentSettings(input), categories, favorites };
-}
-export function categoryName(category: CategoryChild, locale: "en" | "ko"): string {
-  return locale === "ko" ? category.name_ko || category.name : category.name;
 }
 export function categoryOptions(settings: SiteSettings, locale: "en" | "ko" = "en"): { value: string; label: string }[] {
   return settings.categories.flatMap((group) => [
