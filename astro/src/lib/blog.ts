@@ -1,5 +1,6 @@
 import type { CollectionEntry } from "astro:content";
-import { categoryName } from "../../../writer/src/site-settings";
+import { categoryName } from "../../../shared/category";
+import { slugify } from "../../../shared/slug";
 import { contentLocale, localizedPath, type Locale } from "./locale";
 import { normalizeAssetPath } from "./content";
 import { siteSettings } from "./settings";
@@ -59,6 +60,7 @@ export interface BlogCategoryTreeParent {
   children: BlogCategoryTreeChild[];
 }
 
+// Average adult reading speed; used only for read-time estimates.
 const WORDS_PER_MINUTE = 180;
 const FILE_NAME_PATTERN = /^(\d{4})-\d{2}-\d{2}-(.+)$/;
 
@@ -69,54 +71,23 @@ interface ParentCategoryPreset {
   children: { slug: string; label: string }[];
 }
 
-const LEGACY_CATEGORY_PRESETS: ParentCategoryPreset[] = [
-  {
-    slug: "study-log",
-    label: "study log",
-    aliases: ["study-log", "study", "dev", "english"],
-    children: [
-      { slug: "dev", label: "dev" },
-      { slug: "english", label: "english" },
-    ],
-  },
-  {
-    slug: "money-talk",
-    label: "money talk",
-    aliases: ["money-talk", "money", "finance", "stock", "property"],
-    children: [
-      { slug: "finance", label: "finance" },
-      { slug: "stock", label: "stock" },
-      { slug: "property", label: "property" },
-    ],
-  },
-  {
-    slug: "life-thoughts",
-    label: "life · thoughts",
-    aliases: ["life-thoughts", "thoughts", "uncategory", "life", "opinions-is-my-own", "retrospect"],
-    children: [
-      { slug: "opinions-is-my-own", label: "opinions is my own" },
-      { slug: "retrospect", label: "retrospect" },
-    ],
-  },
-  {
-    slug: "useful-tips",
-    label: "useful tips",
-    aliases: ["useful-tips", "tips", "general", "in-canada", "canada"],
-    children: [
-      { slug: "general", label: "general" },
-      { slug: "in-canada", label: "in canada" },
-    ],
-  },
-];
+// Folder names used before categories became admin-editable; kept so old
+// front matter and directory layouts keep resolving to the current groups.
+const LEGACY_PARENT_ALIASES: Record<string, string[]> = {
+  "study-log": ["study-log", "study", "dev", "english"],
+  "money-talk": ["money-talk", "money", "finance", "stock", "property"],
+  "life-thoughts": ["life-thoughts", "thoughts", "uncategory", "life", "opinions-is-my-own", "retrospect"],
+  "useful-tips": ["useful-tips", "tips", "general", "in-canada", "canada"],
+};
 
 const PARENT_CATEGORY_PRESETS: ParentCategoryPreset[] = siteSettings.categories.map((group) => ({
   slug: group.slug,
   label: group.name,
-  aliases: LEGACY_CATEGORY_PRESETS.find((preset) => preset.slug === group.slug)?.aliases ?? [group.slug],
+  aliases: LEGACY_PARENT_ALIASES[group.slug] ?? [group.slug],
   children: group.children.map((child) => ({ slug: child.slug, label: child.name })),
 }));
 const PARENT_ALIAS_LOOKUP = new Map<string, ParentCategoryPreset>(
-  [...LEGACY_CATEGORY_PRESETS, ...PARENT_CATEGORY_PRESETS].flatMap((preset) => preset.aliases.map((alias) => [alias, preset] as const))
+  PARENT_CATEGORY_PRESETS.flatMap((preset) => preset.aliases.map((alias) => [alias, preset] as const))
 );
 const PARENT_CATEGORY_ORDER = new Map(PARENT_CATEGORY_PRESETS.map((preset, index) => [preset.slug, index]));
 const CHILD_CATEGORY_ORDER = new Map(
@@ -198,17 +169,8 @@ function remapCategoryPath(names: string[], slugs: string[]): { names: string[];
   };
 }
 
-function fallbackSlug(input: string): string {
-  return input
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
-}
-
 export function slugifyTerm(input: string): string {
-  return fallbackSlug(input);
+  return slugify(input);
 }
 
 function splitPostPath(filePath?: string): string[] {
@@ -414,7 +376,7 @@ export function getPostRoute(post: CollectionEntry<"blog">): PostRoute {
   if (explicitSlug) {
     return {
       year: String(safeDate(post.data.date).getUTCFullYear()),
-      slug: fallbackSlug(explicitSlug),
+      slug: slugify(explicitSlug),
     };
   }
 
@@ -432,7 +394,7 @@ export function getPostRoute(post: CollectionEntry<"blog">): PostRoute {
   const fallbackYear = String(safeDate(post.data.date).getUTCFullYear());
   return {
     year: fallbackYear,
-    slug: fallbackSlug(post.id),
+    slug: slugify(post.id),
   };
 }
 

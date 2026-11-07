@@ -1,5 +1,6 @@
 import type { CollectionEntry } from "astro:content";
 import { contentLocale, localizedPath } from "./locale";
+import { slugify } from "../../../shared/slug";
 
 function getFileStem(filePath?: string): string | undefined {
   if (!filePath) {
@@ -12,15 +13,6 @@ function getFileStem(filePath?: string): string | undefined {
   }
 
   return fileName.replace(/\.mdx?$/, "");
-}
-
-function fallbackSlug(input: string): string {
-  return input
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
 }
 
 function isExternalUrl(url: string): boolean {
@@ -57,16 +49,23 @@ export interface RouteInfo {
   external: boolean;
 }
 
+// Prefers the file name on disk so renamed titles keep stable URLs,
+// falling back to a slugified entry id when the file path is unknown.
+function resolveSlug(entry: Pick<CollectionEntry<"projects">, "filePath" | "id">): string {
+  return getFileStem(entry.filePath) ?? slugify(entry.id);
+}
+
 export function getProjectRoute(project: CollectionEntry<"projects">): RouteInfo {
+  const slug = resolveSlug(project);
+
   if (project.data.redirect) {
     return {
-      slug: getFileStem(project.filePath) ?? fallbackSlug(project.id),
+      slug,
       href: project.data.redirect,
       external: isExternalUrl(project.data.redirect),
     };
   }
 
-  const slug = getFileStem(project.filePath) ?? fallbackSlug(project.id);
   return {
     slug,
     href: localizedPath(`/projects/${slug}/`, contentLocale(project)),
@@ -75,7 +74,7 @@ export function getProjectRoute(project: CollectionEntry<"projects">): RouteInfo
 }
 
 export function getBookRoute(book: CollectionEntry<"books">): RouteInfo {
-  const slug = getFileStem(book.filePath) ?? fallbackSlug(book.id);
+  const slug = resolveSlug(book);
   return {
     slug,
     href: localizedPath(`/books/${slug}/`, contentLocale(book)),

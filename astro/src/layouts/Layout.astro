@@ -20,7 +20,7 @@ interface Props {
   lang?: "ko" | "en";
 }
 
-function toAbsoluteCanonicalUrl(input: string): string {
+function toAbsoluteUrl(input: string): string {
   if (/^https?:\/\//.test(input)) {
     return input;
   }
@@ -47,7 +47,7 @@ const {
 const l = (path: string) => localizedPath(path, locale);
 const languageLinks = await getLanguageLinks(Astro.url.pathname);
 const pageTitle = title ? `${title} | ${siteConfig.title}` : siteConfig.title;
-const canonicalUrl = canonicalHref ? toAbsoluteCanonicalUrl(canonicalHref) : new URL(Astro.url.pathname, siteConfig.siteUrl).toString();
+const canonicalUrl = canonicalHref ? toAbsoluteUrl(canonicalHref) : new URL(Astro.url.pathname, siteConfig.siteUrl).toString();
 const isBlogPaginationPage = /^\/blog\/(?:page-\d+|category\/[^/]+(?:\/[^/]+)?\/page-\d+)\/?$/.test(unlocalizedPath(Astro.url.pathname));
 const shouldNoindex = noindex || unlocalizedPath(Astro.url.pathname) === "/blog/search/" || isBlogPaginationPage;
 const currentYear = new Date().getFullYear();
@@ -57,15 +57,6 @@ const socialLabels: Record<string, string> = { email: "Email", github: "GitHub",
 const gaMeasurementId = siteConfig.gaMeasurementId?.trim() ?? "";
 const hasGaMeasurementId = gaMeasurementId.length > 0;
 const shouldLoadAds = siteConfig.adsensePublisherId.length > 0 && !disableAds;
-
-function toAbsoluteUrl(input: string): string {
-  if (/^https?:\/\//.test(input)) {
-    return input;
-  }
-
-  const normalized = input.startsWith("/") ? input : `/${input}`;
-  return new URL(normalized, siteConfig.siteUrl).toString();
-}
 
 function toIsoDate(value?: Date | string): string | undefined {
   if (!value) {
