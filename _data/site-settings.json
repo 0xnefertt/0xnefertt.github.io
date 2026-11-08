@@ -162,6 +162,14 @@
       ],
       "name": "Health / Bio"
     },
-    { "items": [], "name": "Quantum" }
+    { "items": [], "name": "Quantum" },
+    {
+      "items": [
+        { "href": "https://gg.ca/en", "title": "The Governor General of Canada" },
+        { "href": "https://www.canada.ca/en.html", "title": "Canada Official Website" },
+        { "href": "https://news.gov.bc.ca/", "title": "BC Government Website" }
+      ],
+      "name": "Canada"
+    }
   ]
 }
