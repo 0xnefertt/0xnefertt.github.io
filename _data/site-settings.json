@@ -30,8 +30,7 @@
       "children": [
         { "name": "dev", "name_ko": "개발", "slug": "dev" },
         { "name": "english", "name_ko": "영어", "slug": "english" },
-        { "name": "career", "name_ko": "커리어", "slug": "career" },
-        { "name": "business", "name_ko": "사업", "slug": "business" }
+        { "name": "career", "name_ko": "커리어", "slug": "career" }
       ],
       "name": "study",
       "name_ko": "공부 기록",
@@ -41,7 +40,8 @@
       "children": [
         { "name": "finance", "name_ko": "금융", "slug": "finance" },
         { "name": "stock", "name_ko": "주식", "slug": "stock" },
-        { "name": "property", "name_ko": "부동산", "slug": "property" }
+        { "name": "property", "name_ko": "부동산", "slug": "property" },
+        { "name": "business", "name_ko": "사업", "slug": "business" }
       ],
       "name": "money",
       "name_ko": "돈 이야기",
