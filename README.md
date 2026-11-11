@@ -59,7 +59,7 @@ Posts are organized by category directory under `_posts` (supports 1~2 levels).
 Create a new post:
 
 ```bash
-npm run post:new -- --title "My New Post" --description "One-line summary for preview cards" --category "engineering/frontend" --tags "astro,notes"
+npm run post:new -- --title "My New Post" --description "One-line summary for preview cards" --category "study-log/dev" --tags "astro,notes"
 ```
 
 Interactive mode:
@@ -90,7 +90,7 @@ Notes:
 - `--category` accepts `parent` or `parent/child` format (up to 2 levels).
 - If a post has no `categories` frontmatter, folder-based category inference still works.
 - `--description` and `--tags` are required for scaffolding.
-- New post template includes `Summary / Key points / Details / Conclusion` sections.
+- The template starts with `Summary / Key points / Details / Conclusion` headings. Supply `--cover` to set a thumbnail, or use `post:image` to add an image to the body.
 - Recommended image file location: `astro/public/assets/img/posts/<post-slug>/...`
 - Public image URL: `/assets/img/posts/<post-slug>/...`
 - `post:new` prints two SEO title candidates and description length.

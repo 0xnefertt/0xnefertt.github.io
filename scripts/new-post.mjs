@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { createInterface } from "node:readline/promises";
+import { parseArgs } from "./post-args.mjs";
 
 const repoRoot = process.cwd();
 const postsRoot = path.join(repoRoot, "_posts");
@@ -41,29 +42,6 @@ function parseCategoryPath(input) {
     slugs,
     label: segments.join("/"),
   };
-}
-
-function parseArgs(argv) {
-  const args = {};
-
-  for (let i = 0; i < argv.length; i += 1) {
-    const token = argv[i];
-    if (!token.startsWith("--")) {
-      continue;
-    }
-
-    const key = token.slice(2);
-    const value = argv[i + 1];
-    if (!value || value.startsWith("--")) {
-      args[key] = "true";
-      continue;
-    }
-
-    args[key] = value;
-    i += 1;
-  }
-
-  return args;
 }
 
 function parseList(input) {
@@ -176,8 +154,7 @@ async function run() {
       const draftAnswer = await ask(rl, "Draft? (y/n)", draft ? "y" : "n");
       draft = parseBoolean(draftAnswer) ?? false;
 
-      const defaultCover = cover || `/assets/img/posts/${slugify(slugInput || title)}/cover.png`;
-      cover = await ask(rl, "Cover image path (optional)", defaultCover);
+      cover = await ask(rl, "Cover image path (optional)", cover);
       canonical = await ask(rl, "Canonical URL (optional)", canonical);
     } finally {
       rl.close();
@@ -237,7 +214,6 @@ async function run() {
   const frontmatterOptionalBlock = optionalFrontmatter.length > 0 ? `${optionalFrontmatter.join("\n")}\n` : "";
 
   const content = `---
-layout: post
 lang: ${language}
 title: ${quoteYaml(title)}
 date: ${date}
@@ -248,23 +224,11 @@ ${frontmatterOptionalBlock}---
 
 ## Summary
 
-Short summary of the post.
-
 ## Key points
-
-- Point 1
-- Point 2
-- Point 3
 
 ## Details
 
-Write your detailed content here.
-
-![Optional cover image](/assets/img/posts/${slug}/cover.png)
-
 ## Conclusion
-
-Final takeaway.
 `;
 
   fs.writeFileSync(filePath, content, "utf8");
