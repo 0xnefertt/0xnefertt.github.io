@@ -2,47 +2,9 @@ name: Deploy site
 
 on:
   push:
-    branches:
-      - master
-      - main
-    paths:
-      - "astro/**"
-      - "writer/**"
-      - "shared/**"
-      - "tests/browser/**"
-      - "playwright.config.mjs"
-      - "scripts/**"
-      - ".prettierrc"
-      - ".prettierignore"
-      - "_pages/**"
-      - "_posts/**"
-      - "_projects/**"
-      - "_books/**"
-      - "_data/**"
-      - "package.json"
-      - "package-lock.json"
-      - ".github/workflows/deploy.yml"
+    branches: [main, master]
   pull_request:
-    branches:
-      - master
-      - main
-    paths:
-      - "astro/**"
-      - "writer/**"
-      - "shared/**"
-      - "tests/browser/**"
-      - "playwright.config.mjs"
-      - "scripts/**"
-      - ".prettierrc"
-      - ".prettierignore"
-      - "_pages/**"
-      - "_posts/**"
-      - "_projects/**"
-      - "_books/**"
-      - "_data/**"
-      - "package.json"
-      - "package-lock.json"
-      - ".github/workflows/deploy.yml"
+    branches: [main, master]
   workflow_dispatch:
     inputs:
       deploy_writer:
@@ -60,6 +22,7 @@ permissions:
 jobs:
   verify:
     outputs:
+      mode: ${{ steps.changes.outputs.mode }}
       writer_changed: ${{ steps.changes.outputs.writer_changed }}
     runs-on: ubuntu-24.04
     steps:
@@ -67,6 +30,14 @@ jobs:
         uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
+
+      - name: Select checks for the changed files
+        id: changes
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          DEPLOY_WRITER: ${{ inputs.deploy_writer }}
+        run: python3 scripts/ci-scope.py >> "$GITHUB_OUTPUT"
 
       - name: Setup Node.js ⚙️
         uses: actions/setup-node@v7.1.0
@@ -78,49 +49,51 @@ jobs:
             astro/package-lock.json
             writer/package-lock.json
 
-      - name: Install dependencies 💾
-        run: |
-          npm ci
-          npm --prefix astro ci
-          npm --prefix writer ci
+      - run: npm ci --no-audit
+      - name: Check formatting
+        if: steps.changes.outputs.mode == 'format'
+        run: npm run format:check
 
-      - name: Detect Worker changes
-        id: changes
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          BEFORE_SHA: ${{ github.event.before }}
-          DEPLOY_WRITER: ${{ inputs.deploy_writer }}
-        shell: bash
+      # Astro also bundles the admin UI from writer/src.
+      - name: Install site and writer dependencies
+        if: steps.changes.outputs.mode != 'format'
         run: |
-          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
-            echo "writer_changed=$DEPLOY_WRITER" >> "$GITHUB_OUTPUT"
-          elif [[ "$EVENT_NAME" == "push" ]]; then
-            if [[ "$BEFORE_SHA" =~ ^0+$ ]] || ! git cat-file -e "$BEFORE_SHA^{commit}"; then
-              echo "writer_changed=true" >> "$GITHUB_OUTPUT"
-            elif git diff --quiet "$BEFORE_SHA" HEAD -- writer shared _data/site-defaults.json .github/workflows/deploy.yml; then
-              echo "writer_changed=false" >> "$GITHUB_OUTPUT"
-            else
-              echo "writer_changed=true" >> "$GITHUB_OUTPUT"
-            fi
-          else
-            echo "writer_changed=false" >> "$GITHUB_OUTPUT"
-          fi
+          npm --prefix astro ci --no-audit
+          npm --prefix writer ci --no-audit
 
-      - name: Validate and build site ✅
+      - name: Validate and build site
+        if: steps.changes.outputs.mode != 'format'
         env:
+          MODE: ${{ steps.changes.outputs.mode }}
           PUBLIC_ADSENSE_PUBLISHER_ID: ${{ vars.PUBLIC_ADSENSE_PUBLISHER_ID }}
           PUBLIC_GA_MEASUREMENT_ID: ${{ vars.PUBLIC_GA_MEASUREMENT_ID }}
           PUBLIC_WRITER_URL: ${{ vars.PUBLIC_WRITER_URL }}
-        run: npm run verify
+        run: |
+          if [[ "$MODE" == "settings" ]]; then
+            npx --no-install prettier --check _data/site-settings.json
+            npm run verify:build
+          else
+            npm run verify
+          fi
+
+      - name: Check internal links in the built site
+        if: steps.changes.outputs.mode != 'format'
+        uses: lycheeverse/lychee-action@v2.9.0
+        with:
+          lycheeVersion: v0.24.2
+          fail: true
+          args: --offline --root-dir '${{ github.workspace }}/astro/dist' --no-progress 'astro/dist/**/*.html'
 
       - name: Install browser test runtime
+        if: steps.changes.outputs.mode == 'full'
         run: npx playwright install --with-deps chromium
 
       - name: Check browser flows and accessibility
+        if: steps.changes.outputs.mode == 'full'
         run: npm run test:browser
 
       - uses: actions/upload-artifact@v7.0.2
-        if: always()
+        if: always() && steps.changes.outputs.mode == 'full'
         with:
           name: browser-report
           path: |
@@ -128,7 +101,12 @@ jobs:
             test-results
           retention-days: 7
 
+      - name: Record the verified source revision for the next deployment
+        if: github.event_name != 'pull_request' && steps.changes.outputs.mode != 'format'
+        run: git rev-parse HEAD > astro/dist/.deployment-revision
+
       - uses: actions/upload-artifact@v7.0.2
+        if: github.event_name != 'pull_request' && steps.changes.outputs.mode != 'format'
         with:
           name: verified-site
           path: astro/dist
@@ -162,7 +140,7 @@ jobs:
     permissions:
       contents: write
     needs: [verify, deploy-writer]
-    if: always() && github.event_name != 'pull_request' && needs.verify.result == 'success' && (needs.deploy-writer.result == 'success' || needs.deploy-writer.result == 'skipped')
+    if: always() && github.event_name != 'pull_request' && needs.verify.result == 'success' && needs.verify.outputs.mode != 'format' && (needs.deploy-writer.result == 'success' || needs.deploy-writer.result == 'skipped')
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7.0.1

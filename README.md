@@ -167,7 +167,7 @@ The layout sets Consent Mode v2 to denied before loading Google tags. In AdSense
 
 ## Verification commands
 
-The complete local and deployment gate is `npm run verify` (dependency audits, formatting, content, Astro/Worker types, tests, and builds).
+The full local and CI check is `npm run verify` (dependency audits, formatting, content, Astro/Worker types, tests, and builds).
 
 ```bash
 npm run verify
@@ -212,8 +212,9 @@ GitHub Actions owns validation, security scanning, browser checks, and deploymen
 Automatic CodeRabbit reviews, progress statuses, replies, and issue planning are disabled in `.coderabbit.yaml`.
 This configuration does not revoke the GitHub App's access. To disconnect it completely, remove this repository from the CodeRabbit installation under GitHub **Settings → Applications → Installed GitHub Apps → CodeRabbit → Configure**.
 
-- Deploy: `.github/workflows/deploy.yml` (full verification; changed Worker/D1 first, then verified `astro/dist`; requires `CLOUDFLARE_API_TOKEN` for Worker changes)
-- Link check after deploy: `.github/workflows/broken-links-site.yml`
+- `.github/workflows/deploy.yml` runs formatting alone for changes outside the site build, such as root documentation.
+- Changes limited to `_data/site-settings.json` check that file’s formatting, build the site (including settings validation), and verify the generated output. Other site changes and manual runs use the full verification and browser suite.
+- Internal links are checked in the same `astro/dist` that is deployed. Pushes also account for unpublished site and Worker changes since the last deployment. Worker changes require `CLOUDFLARE_API_TOKEN` and deploy before the site.
 - Weekly content health report: `.github/workflows/content-health.yml`
 - Accessibility check (manual): `.github/workflows/axe.yml`
 

@@ -3,8 +3,12 @@ name: CodeQL Advanced
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "_data/site-settings.json"
   pull_request:
     branches: [main]
+    paths-ignore:
+      - "_data/site-settings.json"
   schedule:
     - cron: "45 4 * * 3"
   workflow_dispatch:
