@@ -10,6 +10,7 @@ tags:
   - vocabulary
 categories:
   - english
+draft: true
 ---
 
 | 단어                            | 뜻                                         | 예문                                                    |
