@@ -30,6 +30,8 @@
       "children": [
         { "name": "dev", "name_ko": "개발", "slug": "dev" },
         { "name": "english", "name_ko": "영어", "slug": "english" },
+        { "name": "french", "name_ko": "프랑스어", "slug": "french" },
+        { "name": "math", "name_ko": "수학", "slug": "math" },
         { "name": "career", "name_ko": "커리어", "slug": "career" }
       ],
       "name": "study",
