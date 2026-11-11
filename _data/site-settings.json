@@ -61,100 +61,37 @@
     {
       "children": [
         { "name": "general", "name_ko": "일반", "slug": "general" },
-        { "name": "in canada", "name_ko": "캐나다 생활", "slug": "in-canada" }
+        { "name": "canada", "name_ko": "캐나다 생활", "slug": "in-canada" }
       ],
-      "name": "tips",
-      "name_ko": "정보 공유",
+      "name": "guides",
+      "name_ko": "정보 · 가이드",
       "slug": "useful-tips"
     }
   ],
   "favorites": [
     {
       "items": [
-        {
-          "href": "https://openai.com/news/",
-          "title": "OpenAI News"
-        },
-        {
-          "href": "https://developers.openai.com/blog",
-          "title": "OpenAI Developers Blog"
-        },
-        {
-          "href": "https://www.anthropic.com/research",
-          "title": "Anthropic Research"
-        },
-        {
-          "href": "https://www.anthropic.com/news",
-          "title": "Anthropic Newsroom"
-        },
-        {
-          "href": "https://mistral.ai/news/",
-          "title": "Mistral AI News"
-        },
-        {
-          "href": "https://ollama.com/blog",
-          "title": "Ollama Blog"
-        },
-        {
-          "href": "https://about.fb.com/news/",
-          "title": "Meta Newsroom"
-        },
-        {
-          "href": "https://labs.scale.com/blog",
-          "title": "Scale Labs Blog"
-        },
-        {
-          "href": "https://blog.google/",
-          "title": "Google Blog"
-        },
-        {
-          "href": "https://github.blog/",
-          "title": "GitHub Blog"
-        },
-        {
-          "href": "https://www.apple.com/newsroom/",
-          "title": "Apple Newsroom"
-        },
-        {
-          "href": "https://react.dev/blog",
-          "title": "React Blog"
-        },
-        {
-          "href": "https://manus.im/blog",
-          "title": "Manus Blog"
-        },
-        {
-          "href": "https://openclaw.ai/blog",
-          "title": "OpenClaw Blog"
-        },
-        {
-          "href": "https://www.harness.io/blog",
-          "title": "Harness Blog"
-        },
-        {
-          "href": "https://huggingface.co/",
-          "title": "Hugging Face"
-        },
-        {
-          "href": "https://programbench.com/",
-          "title": "Programbench"
-        },
-        {
-          "href": "https://deepswe.dev/",
-          "title": "DeepSWE"
-        },
-        {
-          "href": "https://openaifoundation.org/",
-          "title": "OpenAI Foundation"
-        },
-        {
-          "href": "https://cohere.com/research",
-          "title": "Cohere Labs Research"
-        },
-        {
-          "href": "https://robostrategy.co/",
-          "title": "Robostrategy"
-        }
+        { "href": "https://openai.com/news/", "title": "OpenAI News" },
+        { "href": "https://developers.openai.com/blog", "title": "OpenAI Developers Blog" },
+        { "href": "https://www.anthropic.com/research", "title": "Anthropic Research" },
+        { "href": "https://www.anthropic.com/news", "title": "Anthropic Newsroom" },
+        { "href": "https://mistral.ai/news/", "title": "Mistral AI News" },
+        { "href": "https://ollama.com/blog", "title": "Ollama Blog" },
+        { "href": "https://about.fb.com/news/", "title": "Meta Newsroom" },
+        { "href": "https://labs.scale.com/blog", "title": "Scale Labs Blog" },
+        { "href": "https://blog.google/", "title": "Google Blog" },
+        { "href": "https://github.blog/", "title": "GitHub Blog" },
+        { "href": "https://www.apple.com/newsroom/", "title": "Apple Newsroom" },
+        { "href": "https://react.dev/blog", "title": "React Blog" },
+        { "href": "https://manus.im/blog", "title": "Manus Blog" },
+        { "href": "https://openclaw.ai/blog", "title": "OpenClaw Blog" },
+        { "href": "https://www.harness.io/blog", "title": "Harness Blog" },
+        { "href": "https://huggingface.co/", "title": "Hugging Face" },
+        { "href": "https://programbench.com/", "title": "Programbench" },
+        { "href": "https://deepswe.dev/", "title": "DeepSWE" },
+        { "href": "https://openaifoundation.org/", "title": "OpenAI Foundation" },
+        { "href": "https://cohere.com/research", "title": "Cohere Labs Research" },
+        { "href": "https://robostrategy.co/", "title": "Robostrategy" }
       ],
       "name": "AI"
     },
