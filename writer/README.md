@@ -134,7 +134,7 @@ Favorites supports group and link names, URLs, optional notes, ordering, additio
 “블로그 소개” manages independent English (`blogDescription`) and Korean (`blogDescriptionKo`) text for the homepage and blog headers.
 Each field accepts up to 500 characters. Existing text is retained on migration, and older editor tabs cannot overwrite these values by omitting them when saving other settings.
 About/Profile uses its separate introduction and profile fields.
-“사이트 설정”, “Resources”, and “Privacy” manage branding, contacts, default sharing images, homepage count, weather/currency settings, and localized Privacy bodies.
+“사이트 설정”, “유용한 자료”, and “개인정보 안내” manage branding, contacts, default sharing images, homepage count, weather/currency settings, and localized Privacy bodies.
 Privacy body edits update the modification date; other setting edits retain it. Clearing a contact hides its public link.
 Profile photo shape is editable in About/Profile. See [admin controls](../docs/admin-controls.md) for the exact admin/code boundary.
 

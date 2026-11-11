@@ -2,7 +2,7 @@
   <a class="brand" href="https://0xnefertt.github.io"><span id="admin-site-title">사이트 관리</span><span> / admin</span></a>
   <div class="header-actions"><span id="save-status" role="status">연결 중</span><button id="logout" hidden>로그아웃</button></div>
 </header>
-<main>
+<main class="writer-main">
   <section id="login-screen" class="welcome" hidden>
     <span class="eyebrow">ADMIN</span>
     <h1>사이트 관리</h1>
@@ -11,16 +11,24 @@
     <p id="login-message" class="muted" role="status"></p>
   </section>
   <nav id="admin-nav" class="admin-nav" aria-label="관리 메뉴" hidden>
-    <button id="manage-posts" aria-pressed="true">글</button>
-    <button id="manage-books" aria-pressed="false">책장</button>
-    <button id="manage-projects" aria-pressed="false">프로젝트</button>
-    <button id="manage-about" aria-pressed="false">소개·프로필</button>
-    <button id="manage-site" aria-pressed="false">사이트 설정</button>
-    <button id="manage-description" aria-pressed="false">블로그 소개</button>
-    <button id="manage-resources" aria-pressed="false">Resources</button>
-    <button id="manage-privacy" aria-pressed="false">Privacy</button>
-    <button id="manage-categories" aria-pressed="false">카테고리</button>
-    <button id="manage-favorites" aria-pressed="false">즐겨찾기</button>
+    <div class="admin-nav-group" role="group" aria-label="콘텐츠">
+      <button id="manage-posts" aria-pressed="true">글</button>
+      <button id="manage-categories" aria-pressed="false">카테고리</button>
+      <button id="manage-books" aria-pressed="false">책장</button>
+      <button id="manage-projects" aria-pressed="false">프로젝트</button>
+    </div>
+    <div class="admin-nav-group" role="group" aria-label="소개">
+      <button id="manage-about" aria-pressed="false">소개·프로필</button>
+      <button id="manage-description" aria-pressed="false">블로그 소개</button>
+    </div>
+    <div class="admin-nav-group" role="group" aria-label="자료">
+      <button id="manage-resources" aria-pressed="false">유용한 자료</button>
+      <button id="manage-favorites" aria-pressed="false">즐겨찾기</button>
+    </div>
+    <div class="admin-nav-group" role="group" aria-label="운영">
+      <button id="manage-privacy" aria-pressed="false">개인정보 안내</button>
+      <button id="manage-site" aria-pressed="false">사이트 설정</button>
+    </div>
     <a href="https://0xnefertt.github.io/" target="_blank" rel="noreferrer">블로그 보기 ↗</a>
   </nav>
   <section id="settings-panel" class="manager-panel" aria-labelledby="manager-heading" hidden>

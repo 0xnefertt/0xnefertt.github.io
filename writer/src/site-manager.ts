@@ -22,18 +22,18 @@ type SettingField = {
 };
 const settingFields: Record<"site" | "resources" | "privacy", SettingField[]> = {
   site: [
-    { path: "siteTitle", label: "사이트 이름 · 로고 텍스트, Footer", max: 100 },
+    { path: "siteTitle", label: "사이트 이름 · 로고 텍스트, 하단 영역", max: 100 },
     { path: "blogName", label: "블로그 제목", max: 100 },
-    { path: "email", label: "이메일", max: 254, note: "비워 두면 Footer와 Privacy의 이메일 링크를 숨깁니다." },
+    { path: "email", label: "이메일", max: 254, note: "비워 두면 사이트 하단과 개인정보 안내의 이메일 링크를 숨깁니다." },
     { path: "githubUrl", label: "GitHub 링크", max: 2000 },
     { path: "xUrl", label: "X 링크", max: 2000 },
     { path: "defaultOgImage", label: "공유 기본 이미지 주소", max: 2000, note: "이미지 주소 또는 /assets/ 경로. 비워 두면 파비콘을 사용합니다." },
     { path: "latestPostsLimit", label: "홈 화면 최근 글 수", type: "number", min: 1, limit: 20 },
   ],
   resources: [
-    { path: "resourcesDescription", label: "Resources 영어 소개", type: "textarea", max: 500 },
-    { path: "resourcesDescriptionKo", label: "Resources 한국어 소개", type: "textarea", max: 500 },
-    { path: "usefulInfo.enabled", label: "Useful Info 표시", type: "checkbox" },
+    { path: "resourcesDescription", label: "유용한 자료 영어 소개", type: "textarea", max: 500 },
+    { path: "resourcesDescriptionKo", label: "유용한 자료 한국어 소개", type: "textarea", max: 500 },
+    { path: "usefulInfo.enabled", label: "날씨·환율 표시", type: "checkbox" },
     { path: "usefulInfo.location", label: "날씨 지역 이름", max: 100 },
     { path: "usefulInfo.latitude", label: "위도", type: "number", min: -90, limit: 90 },
     { path: "usefulInfo.longitude", label: "경도", type: "number", min: -180, limit: 180 },
@@ -41,8 +41,8 @@ const settingFields: Record<"site" | "resources" | "privacy", SettingField[]> = 
     { path: "usefulInfo.targetCurrencies", label: "비교 통화", type: "list", max: 100, note: "쉼표로 구분하세요. 예: KRW, CAD" },
   ],
   privacy: [
-    { path: "privacy.body", label: "Privacy 영어 본문", type: "textarea", max: 30000 },
-    { path: "privacy.bodyKo", label: "Privacy 한국어 본문", type: "textarea", max: 30000 },
+    { path: "privacy.body", label: "개인정보 안내 영어 본문", type: "textarea", max: 30000 },
+    { path: "privacy.bodyKo", label: "개인정보 안내 한국어 본문", type: "textarea", max: 30000 },
   ],
 };
 export function siteManager(api: Api, leave: () => Promise<boolean>, selectContent: (kind: ContentCollection) => Promise<boolean>) {
@@ -368,27 +368,19 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
     el("blog-description-manager").hidden = next !== "description";
     for (const panel of ["site", "resources", "privacy"]) el(`${panel}-manager`).hidden = next !== panel;
     for (const item of sections) el(`manage-${item}`).setAttribute("aria-pressed", String(item === next));
-    const titles: Record<string, string> = {
-      site: "사이트 설정",
-      description: "블로그 소개",
-      resources: "Resources",
-      privacy: "Privacy",
-      categories: "카테고리",
-      favorites: "즐겨찾기",
-    };
-    el("manager-heading").textContent = titles[next] ?? "";
+    if (!content) el("manager-heading").textContent = el(`manage-${next}`).textContent;
     el("manager-description").textContent =
       next === "site"
         ? "사이트 이름과 연락처, 공유 이미지, 홈 화면을 설정하세요. 저장하면 사이트 전체에 함께 적용됩니다."
         : next === "resources"
-          ? "Resources 소개와 날씨 지역, 환율 표시를 관리하세요. 즐겨찾기 링크는 즐겨찾기 메뉴에서 수정합니다."
+          ? "자료 페이지의 소개 문구와 날씨 지역, 환율 표시를 관리하세요. 즐겨찾기 링크는 즐겨찾기 메뉴에서 수정합니다."
           : next === "privacy"
             ? "개인정보 안내 본문을 영어·한국어별로 수정하세요. Markdown으로 제목과 링크를 작성할 수 있습니다. 이메일은 사이트 설정을 사용하고, 본문을 변경하면 수정일이 갱신됩니다."
             : next === "description"
               ? "랜딩 페이지와 블로그 상단의 소개 문구를 영어·한국어별로 설정하세요. 소개·프로필의 자기소개 글과는 별개입니다. 저장하고 반영하면 사이트에 적용됩니다."
               : next === "categories"
                 ? "영어·한국어 이름과 순서를 따로 설정하세요. 이름을 바꿔도 주소는 유지됩니다. 글이 있는 카테고리는 삭제할 수 없으며, 새 카테고리는 글을 발행하면 블로그에 표시됩니다."
-                : "Resources에 표시할 그룹과 링크를 관리하세요. 순서는 위·아래 버튼으로 변경합니다. 빈 그룹은 Resources에 표시되지 않습니다.";
+                : "유용한 자료 페이지에 표시할 그룹과 링크를 관리하세요. 위·아래 버튼으로 순서를 바꿀 수 있으며, 빈 그룹은 표시되지 않습니다.";
   }
   for (const item of sections) el(`manage-${item}`).addEventListener("click", () => void show(item));
   for (const [id, field] of [

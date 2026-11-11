@@ -163,7 +163,7 @@ function contentSettings(input: Record<string, unknown>): SiteContentSettings {
   const latestPostsLimit = number(value.latestPostsLimit, 1, 20, "최근 글 수");
   if (!Number.isInteger(latestPostsLimit)) throw new HttpError(422, "최근 글 수는 1~20 사이의 정수로 입력하세요.");
   const info = object(value.usefulInfo);
-  if (typeof info.enabled !== "boolean") throw new HttpError(422, "Useful Info 표시 설정을 확인해 주세요.");
+  if (typeof info.enabled !== "boolean") throw new HttpError(422, "날씨·환율 표시 설정을 확인해 주세요.");
   const baseCurrency = text(info.baseCurrency, 3, "기준 통화").toUpperCase();
   const targetCurrencies = array(info.targetCurrencies, 8).map((currency) => text(currency, 3, "비교 통화").toUpperCase());
   if (
@@ -174,10 +174,10 @@ function contentSettings(input: Record<string, unknown>): SiteContentSettings {
     throw new HttpError(422, "통화는 USD, CAD, KRW 같은 3자리 코드로 입력하고 기준 통화는 비교 통화에서 제외하세요.");
   unique(targetCurrencies, "비교 통화가 중복됩니다.");
   const privacy = object(value.privacy);
-  const updated = text(privacy.updated, 10, "Privacy 수정일");
+  const updated = text(privacy.updated, 10, "개인정보 안내 수정일");
   const date = new Date(updated);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(updated) || Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== updated)
-    throw new HttpError(422, "Privacy 수정일을 확인해 주세요.");
+    throw new HttpError(422, "개인정보 안내 수정일을 확인해 주세요.");
   return {
     blogDescription: text(value.blogDescription, 500, "영어 소개 문구"),
     blogDescriptionKo: text(value.blogDescriptionKo, 500, "한국어 소개 문구"),
@@ -190,8 +190,8 @@ function contentSettings(input: Record<string, unknown>): SiteContentSettings {
     xUrl: publicUrl(value.xUrl, "X 링크"),
     defaultOgImage: publicUrl(value.defaultOgImage, "공유 기본 이미지", true),
     latestPostsLimit,
-    resourcesDescription: text(value.resourcesDescription, 500, "Resources 영어 소개"),
-    resourcesDescriptionKo: text(value.resourcesDescriptionKo, 500, "Resources 한국어 소개"),
+    resourcesDescription: text(value.resourcesDescription, 500, "유용한 자료 영어 소개"),
+    resourcesDescriptionKo: text(value.resourcesDescriptionKo, 500, "유용한 자료 한국어 소개"),
     usefulInfo: {
       enabled: info.enabled,
       location: text(info.location, 100, "날씨 지역 이름"),
@@ -200,7 +200,11 @@ function contentSettings(input: Record<string, unknown>): SiteContentSettings {
       baseCurrency,
       targetCurrencies,
     },
-    privacy: { body: text(privacy.body, 30000, "Privacy 영어 본문"), bodyKo: text(privacy.bodyKo, 30000, "Privacy 한국어 본문"), updated },
+    privacy: {
+      body: text(privacy.body, 30000, "개인정보 안내 영어 본문"),
+      bodyKo: text(privacy.bodyKo, 30000, "개인정보 안내 한국어 본문"),
+      updated,
+    },
   };
 }
 export function validateSettings(value: unknown): SiteSettings {
