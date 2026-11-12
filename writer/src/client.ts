@@ -1,5 +1,3 @@
-import DOMPurify from "dompurify";
-import { marked } from "marked";
 import {
   documentCollection,
   documentLanguage,
@@ -12,7 +10,7 @@ import {
   type ContentCollection,
 } from "./model";
 import { collectionEditor } from "./collection-editor";
-import { safeImage } from "./rich-content";
+import { previewBody, safeImage } from "./rich-content";
 import { siteManager } from "./site-manager";
 import { richEditor } from "./rich-editor";
 import { IMAGE_LIMIT } from "./media-limits";
@@ -480,9 +478,7 @@ function updatePreview() {
       })
   );
   // Markdown is untrusted; raw scripts, event handlers, and unsafe links must never run.
-  element("preview-body").innerHTML = DOMPurify.sanitize(marked.parse(composer.getBody(), { async: false }) as string, {
-    FORBID_TAGS: ["form", "input", "button", "style", "iframe"],
-  });
+  element("preview-body").replaceChildren(previewBody(composer.getBody()));
   for (const img of element("preview-body").querySelectorAll("img")) {
     const source = img.getAttribute("src") ?? "";
     if (source.startsWith("/api/media/")) img.removeAttribute("src");

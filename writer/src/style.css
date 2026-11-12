@@ -663,9 +663,6 @@ dialog::backdrop {
   font-size: 0.7rem;
   white-space: nowrap;
 }
-#rich-toolbar[hidden] + #image-layout-tip {
-  display: none;
-}
 #image-layout-tools {
   flex-wrap: wrap;
   font-size: 0.8rem;

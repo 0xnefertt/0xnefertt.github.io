@@ -1,8 +1,26 @@
-import { marked } from "marked";
+import { Marked } from "marked";
 import DOMPurify from "dompurify";
 import Turndown from "turndown";
+import { youtubeFrameAttributes, youtubeVideo } from "../../shared/youtube.mjs";
+
+// Marked emits block-level text instead of paragraphs inside tight lists.
+function renderVideoParagraph(token: { text: string; tokens?: unknown[] }): string | false {
+  const video = token.tokens?.length === 1 && youtubeVideo(token.text.trim());
+  return video ? `<p data-youtube="true">${video.url}</p>\n` : false;
+}
+const markdown = new Marked({ renderer: { paragraph: renderVideoParagraph, text: renderVideoParagraph } });
+
+export function videoFrame(video: NonNullable<ReturnType<typeof youtubeVideo>>) {
+  const frame = document.createElement("iframe");
+  for (const [name, value] of Object.entries(youtubeFrameAttributes(video))) frame.setAttribute(name, value);
+  return frame;
+}
 
 const converter = new Turndown({ headingStyle: "atx", codeBlockStyle: "fenced", bulletListMarker: "-", emDelimiter: "*" });
+converter.addRule("youtube", {
+  filter: (node) => node.nodeName === "P" && node.hasAttribute("data-youtube") && !!youtubeVideo(node.textContent ?? ""),
+  replacement: (_content, node) => `\n\n${node.textContent}\n\n`,
+});
 converter.keep(["u", "mark", "span", "table"]);
 converter.addRule("imageLayout", {
   filter: (node) =>
@@ -40,8 +58,24 @@ export function cleanHtml(value: string): string {
     FORBID_ATTR: ["srcset"],
   });
 }
-export function markdownToHtml(value: string): string {
-  return cleanHtml(marked.parse(value, { async: false }) as string);
+function bodyTemplate(value: string) {
+  const template = document.createElement("template");
+  template.innerHTML = cleanHtml(markdown.parse(value, { async: false }) as string);
+  return template;
+}
+export function editorBody(value: string): string {
+  const template = bodyTemplate(value);
+  // ProseMirror list items require a leading paragraph before block media.
+  for (const video of template.content.querySelectorAll("li > p[data-youtube]:first-child")) video.before(document.createElement("p"));
+  return template.innerHTML;
+}
+export function previewBody(value: string): DocumentFragment {
+  const template = bodyTemplate(value);
+  for (const marker of template.content.querySelectorAll("p[data-youtube]")) {
+    const video = youtubeVideo(marker.textContent ?? "");
+    if (video) marker.replaceWith(videoFrame(video));
+  }
+  return template.content;
 }
 export function richToMarkdown(html: string): string {
   const template = document.createElement("template");

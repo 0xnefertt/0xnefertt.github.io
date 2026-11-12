@@ -1,3 +1,4 @@
+import { youtubePlayerOrigin } from "../../shared/youtube.mjs";
 import { timingSafeEqual } from "node:crypto";
 import { boundedBody, github, publishPost, unpublishPost, readPost, repositoryTree, readDocuments, type MediaFile } from "./github";
 import {
@@ -485,7 +486,7 @@ export default {
     }
     result.headers.set(
       "Content-Security-Policy",
-      "default-src 'self'; script-src 'self'; style-src 'self'; style-src-attr 'unsafe-inline'; img-src 'self' https: blob:; connect-src 'self'; frame-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
+      `default-src 'self'; script-src 'self'; style-src 'self'; style-src-attr 'unsafe-inline'; img-src 'self' https: blob:; connect-src 'self'; frame-src ${youtubePlayerOrigin}; frame-ancestors 'none'; base-uri 'none'; form-action 'self'`
     );
     return result;
   },

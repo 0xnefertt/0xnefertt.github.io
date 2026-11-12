@@ -7,7 +7,34 @@ import TextAlign from "@tiptap/extension-text-align";
 import { TableKit } from "@tiptap/extension-table";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
-import { cleanHtml, markdownToHtml, requiresSource, richToMarkdown, safeImage, safeLink } from "./rich-content";
+import { cleanHtml, editorBody, requiresSource, richToMarkdown, safeImage, safeLink, videoFrame } from "./rich-content";
+import { youtubeVideo } from "../../shared/youtube.mjs";
+
+const Youtube = Node.create({
+  name: "youtube",
+  group: "block",
+  atom: true,
+  addAttributes: () => ({ url: { default: null } }),
+  parseHTML: () => [
+    {
+      tag: "p[data-youtube]",
+      priority: 60,
+      getAttrs: (el) => {
+        const video = youtubeVideo(el.textContent ?? "");
+        return video ? { url: video.url } : false;
+      },
+    },
+  ],
+  renderHTML: ({ node }) => ["p", { "data-youtube": "true" }, node.attrs.url],
+  addNodeView:
+    () =>
+    ({ node }) => {
+      const wrapper = document.createElement("div");
+      const video = youtubeVideo(node.attrs.url);
+      if (video) wrapper.append(videoFrame(video));
+      return { dom: wrapper };
+    },
+});
 
 type BodyImage = { src: string; alt: string };
 const ImagePair = Node.create({
@@ -55,7 +82,7 @@ export function richEditor(options: Options) {
   let composing = false;
   let supported = true;
   const uploads = (event: ClipboardEvent | DragEvent) => {
-    const transfer = event instanceof ClipboardEvent ? event.clipboardData : event.dataTransfer;
+    const transfer = "clipboardData" in event ? event.clipboardData : event.dataTransfer;
     const files = Array.from(transfer?.files ?? []);
     if (!files.length) return false;
     event.preventDefault();
@@ -111,16 +138,24 @@ export function richEditor(options: Options) {
         Highlight.configure({ multicolor: true }),
         TextAlign.configure({ types: ["heading", "paragraph"], defaultAlignment: null }),
         TableKit.configure({ table: { resizable: false } }),
+        Youtube,
         ImagePair,
         PrivateImage.configure({ allowBase64: false }),
         Placeholder.configure({ placeholder: "본문 내용을 입력하거나 이미지를 붙여넣으세요." }),
       ],
-      content: `${markdownToHtml(value)}<p></p>`,
+      content: `${editorBody(value)}<p></p>`,
       editable: !locked,
       editorProps: {
         attributes: { role: "textbox", "aria-label": "글 본문", "aria-multiline": "true", spellcheck: "true" },
         transformPastedHTML: cleanHtml,
-        handlePaste: (_view, event) => uploads(event),
+        handlePaste: (view, event) => {
+          if (uploads(event)) return true;
+          const { $from, empty } = view.state.selection;
+          if (!view.editable || !empty || $from.parent.type.name !== "paragraph" || $from.parent.content.size) return false;
+          const video = youtubeVideo(event.clipboardData?.getData("text/plain").trim() ?? "");
+          if (!video || !editor) return false;
+          return editor.commands.insertContent({ type: "youtube", attrs: { url: video.url } });
+        },
         handleDrop: (_view, event) => uploads(event),
       },
       onUpdate: () => {
@@ -385,11 +420,12 @@ export function richEditor(options: Options) {
     input.value = "";
   });
   const dialog = el<HTMLDialogElement>("insert-dialog");
-  let insert: "link" | "image" | "table" = "link";
+  let insert: "link" | "image" | "table" | "video" = "link";
   function showDialog(kind: typeof insert) {
     if (locked || sourceMode || !editor) return;
     insert = kind;
-    el("insert-heading").textContent = kind === "link" ? "링크 추가" : kind === "image" ? "이미지 주소 추가" : "표 추가";
+    el("insert-heading").textContent = { link: "링크 추가", image: "이미지 주소 추가", table: "표 추가", video: "YouTube 영상 추가" }[kind];
+    el<HTMLInputElement>("insert-url").placeholder = kind === "video" ? "https://youtu.be/…" : "https://example.com";
     el("insert-url-field").hidden = kind === "table";
     el("insert-alt-field").hidden = kind !== "image";
     el("insert-table-fields").hidden = kind !== "table";
@@ -398,6 +434,7 @@ export function richEditor(options: Options) {
     el("insert-error").textContent = "";
     dialog.showModal();
   }
+  el("rich-video").addEventListener("click", () => showDialog("video"));
   el("rich-link").addEventListener("click", () => showDialog("link"));
   el("rich-image-url").addEventListener("click", () => showDialog("image"));
   el("rich-table").addEventListener("click", () => showDialog("table"));
@@ -409,7 +446,20 @@ export function richEditor(options: Options) {
       el("insert-error").textContent = "올바른 주소를 입력하세요. 이미지 주소는 https를 사용하세요.";
       return;
     }
-    if (insert === "table") {
+    if (insert === "video") {
+      const video = youtubeVideo(url);
+      if (!video) {
+        el("insert-error").textContent = "YouTube 영상의 시청 주소나 공유 주소를 입력하세요.";
+        return;
+      }
+      run((e) =>
+        e
+          .chain()
+          .focus()
+          .insertContent({ type: "youtube", attrs: { url: video.url } })
+          .run()
+      );
+    } else if (insert === "table") {
       const rows = Number(el<HTMLInputElement>("table-rows").value),
         cols = Number(el<HTMLInputElement>("table-columns").value);
       if (!Number.isInteger(rows) || !Number.isInteger(cols) || rows < 1 || cols < 1 || rows > 10 || cols > 10) {

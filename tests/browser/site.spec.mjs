@@ -173,6 +173,32 @@ test("admin offers separate English and Korean SEO descriptions without changing
   await page.locator("#logout").click();
 });
 
+test("YouTube frames load in the editor, preview and published article", async ({ page }) => {
+  const videoId = "U0TXIXTzJEY";
+  await page.route(`https://www.youtube-nocookie.com/embed/${videoId}`, (route) =>
+    route.fulfill({ contentType: "text/html", body: "<title>Video fixture</title><p>Player loaded</p>" })
+  );
+  async function expectPlayer(selector) {
+    const frame = page.locator(selector);
+    await frame.scrollIntoViewIfNeeded();
+    await expect(frame.contentFrame().getByText("Player loaded")).toBeVisible();
+    const bounds = await frame.boundingBox();
+    expect(bounds.width / bounds.height).toBeCloseTo(16 / 9, 2);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/ko/blog/2026/2026-half-retrospect/");
+  await expectPlayer(".post-body iframe.youtube-player");
+  await page.goto("/admin/");
+  await page.getByRole("link", { name: "GitHub로 로그인" }).click();
+  await page.locator("#new-post").click();
+  await page.getByRole("button", { name: "영상 추가" }).click();
+  await page.locator("#insert-url").fill(`https://youtu.be/${videoId}`);
+  await page.locator("#insert-form button[type=submit]").click();
+  await expectPlayer("#rich-body iframe.youtube-player");
+  await page.locator("#preview-tab").click();
+  await expectPlayer("#preview-body iframe.youtube-player");
+});
+
 async function expectImageRow(row) {
   const images = row.locator("img");
   await expect(images).toHaveCount(2);
