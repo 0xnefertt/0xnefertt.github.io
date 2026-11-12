@@ -173,6 +173,17 @@ test("admin offers separate English and Korean SEO descriptions without changing
   await page.locator("#logout").click();
 });
 
+async function expectImageRow(row) {
+  const images = row.locator("img");
+  await expect(images).toHaveCount(2);
+  await expect.poll(() => images.evaluateAll((items) => items.every((img) => img.naturalWidth > 0))).toBe(true);
+  const [left, right] = await images.evaluateAll((items) => items.map((img) => img.getBoundingClientRect().toJSON()));
+  expect(left.width).toBeGreaterThan(0);
+  expect(Math.abs(left.width - right.width)).toBeLessThan(1);
+  expect(left.top).toBe(right.top);
+  expect(right.left).toBeGreaterThan(left.right);
+}
+
 test("real Worker/D1 login, save, publish, unpublish, republish and logout", async ({ page, request }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/admin/");
@@ -193,6 +204,35 @@ test("real Worker/D1 login, save, publish, unpublish, republish and logout", asy
   await page.getByRole("button", { name: "원문", exact: true }).click();
   await expect(page.locator("#body")).toHaveValue(/서식 편집기 입력 확인/);
   await page.locator("#body").fill("## 복구 검증\n\n비공개 초안 본문입니다.");
+  await page.locator("#write-tab").click();
+  await page.getByRole("textbox", { name: "글 본문", exact: true }).press("ControlOrMeta+End");
+  await page.locator("#image-file").setInputFiles(["astro/public/favicon-32x32.png", "astro/public/apple-touch-icon.png"]);
+  const editorImages = page.locator("#rich-body img");
+  const row = page.locator('#rich-body p[data-image-pair="true"]');
+  await expectImageRow(row);
+  await editorImages.first().click();
+  await page.getByRole("button", { name: "나란히 배치 해제" }).click();
+  await expect(row).toHaveCount(0);
+  await page.locator("#image-width").selectOption("75");
+  await page.locator("#preview-tab").click();
+  const single = page.locator('#preview-body img[data-image-width="75"]');
+  await expect(single).toBeVisible();
+  const fraction = await single.evaluate((img) => {
+    const parent = img.parentElement;
+    const style = getComputedStyle(parent);
+    const contentWidth = parent.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+    return img.getBoundingClientRect().width / contentWidth;
+  });
+  expect(fraction).toBeCloseTo(0.75);
+  await page.locator("#write-tab").click();
+  await editorImages.first().click();
+  await page.getByRole("button", { name: "다음 이미지와 나란히" }).click();
+  await page.locator("#preview-tab").click();
+  for (const width of [1280, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    await expectImageRow(page.locator('#preview-body p[data-image-pair="true"]'));
+  }
+  await page.locator("#write-tab").click();
   await page.locator("#save").click();
   await expect(page.locator("#save-status")).toContainText("저장");
   await page.reload();
@@ -206,6 +246,10 @@ test("real Worker/D1 login, save, publish, unpublish, republish and logout", asy
   const published = await (await request.get("http://127.0.0.1:8789/test/state")).json();
   expect(published.publications).toBe(1);
   expect(published.posts).toHaveLength(1);
+  expect(published.posts[0].content).toContain('data-image-pair="true"');
+  expect(published.posts[0].content).toContain('data-image-width="75"');
+  expect(published.posts[0].content.match(/<img\b[^>]*src="\/assets\/img\/posts\//g)).toHaveLength(2);
+  expect(published.posts[0].content).not.toContain("/api/media/");
   const originalPath = published.posts[0].path;
   await page.locator("#source-tab").click();
   await page.locator("#body").fill("## 복구 검증\n\n아직 발행하지 않은 변경입니다.");

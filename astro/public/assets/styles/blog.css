@@ -498,30 +498,6 @@ body {
   color: var(--text-muted);
 }
 
-.post-item--with-media {
-  grid-template-columns: minmax(0, 1fr) 116px;
-  gap: 1.4rem;
-}
-
-.post-item .post-card-media {
-  grid-column: 2;
-  grid-row: 1;
-  width: 116px;
-  height: 116px;
-  border: 0;
-  border-radius: 6px;
-}
-
-.post-item .post-card-content {
-  grid-column: 1;
-  grid-row: 1;
-}
-
-.post-item .post-card-preview {
-  width: 100%;
-  grid-auto-columns: 100%;
-}
-
 .post-content {
   padding-bottom: 1.5rem;
 }
@@ -1088,13 +1064,7 @@ html.post-share-is-open {
   }
 
   .post-item--with-media {
-    grid-template-columns: minmax(0, 1fr) 88px;
     gap: 1rem;
-  }
-
-  .post-item .post-card-media {
-    width: 88px;
-    height: 88px;
   }
 
   .post-excerpt {

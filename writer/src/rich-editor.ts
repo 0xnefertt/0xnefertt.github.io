@@ -1,4 +1,5 @@
-import { Editor } from "@tiptap/core";
+import { Editor, Node } from "@tiptap/core";
+import { NodeSelection, Plugin } from "@tiptap/pm/state";
 import StarterKit from "@tiptap/starter-kit";
 import { TextStyleKit } from "@tiptap/extension-text-style";
 import Highlight from "@tiptap/extension-highlight";
@@ -8,10 +9,37 @@ import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import { cleanHtml, markdownToHtml, requiresSource, richToMarkdown, safeImage, safeLink } from "./rich-content";
 
+type BodyImage = { src: string; alt: string };
+const ImagePair = Node.create({
+  name: "imagePair",
+  group: "block",
+  content: "image{0,2}",
+  isolating: true,
+  parseHTML: () => [{ tag: 'p[data-image-pair="true"]', priority: 60 }],
+  renderHTML: () => ["p", { "data-image-pair": "true" }, 0],
+  addProseMirrorPlugins() {
+    return [
+      new Plugin({
+        appendTransaction: (transactions, _previous, state) => {
+          if (!transactions.some((tr) => tr.docChanged)) return null;
+          const tr = state.tr;
+          state.doc.descendants((node, pos) => {
+            if (node.type.name === this.name && node.childCount < 2) {
+              tr.replaceWith(tr.mapping.map(pos), tr.mapping.map(pos + node.nodeSize), node.content);
+              return false;
+            }
+          });
+          return tr.docChanged ? tr : null;
+        },
+      }),
+    ];
+  },
+});
+
 type Options = {
   onChange: () => void;
   onComposition: (active: boolean) => void;
-  upload: (file: File) => Promise<void>;
+  upload: (files: File[]) => Promise<void>;
   imageSrc: (value: string) => Promise<string>;
   report: (error: unknown) => void;
 };
@@ -27,21 +55,34 @@ export function richEditor(options: Options) {
   let composing = false;
   let supported = true;
   const uploads = (event: ClipboardEvent | DragEvent) => {
-    const file =
-      event instanceof ClipboardEvent
-        ? [...(event.clipboardData?.items ?? [])].find((item) => item.type.startsWith("image/"))?.getAsFile()
-        : event.dataTransfer?.files[0];
-    if (!file) return false;
+    const transfer = event instanceof ClipboardEvent ? event.clipboardData : event.dataTransfer;
+    const files = Array.from(transfer?.files ?? []);
+    if (!files.length) return false;
     event.preventDefault();
-    void options.upload(file).catch(options.report);
+    void options.upload(files).catch(options.report);
     return true;
   };
   const PrivateImage = Image.extend({
+    addAttributes() {
+      return {
+        ...this.parent?.(),
+        "data-image-width": {
+          default: null,
+          parseHTML: (element) => {
+            const width = element.getAttribute("data-image-width");
+            return ["25", "50", "75", "100"].includes(width ?? "") ? width : null;
+          },
+        },
+      };
+    },
     addNodeView() {
       return ({ node }) => {
         const image = document.createElement("img");
         image.alt = node.attrs.alt ?? "";
         image.title = node.attrs.title ?? "";
+        for (const attr of ["data-image-width", "width", "height"]) {
+          if (node.attrs[attr] != null) image.setAttribute(attr, String(node.attrs[attr]));
+        }
         let disposed = false;
         void options
           .imageSrc(node.attrs.src)
@@ -70,6 +111,7 @@ export function richEditor(options: Options) {
         Highlight.configure({ multicolor: true }),
         TextAlign.configure({ types: ["heading", "paragraph"], defaultAlignment: null }),
         TableKit.configure({ table: { resizable: false } }),
+        ImagePair,
         PrivateImage.configure({ allowBase64: false }),
         Placeholder.configure({ placeholder: "본문 내용을 입력하거나 이미지를 붙여넣으세요." }),
       ],
@@ -100,6 +142,21 @@ export function richEditor(options: Options) {
     });
     updateTools();
   }
+  // Only combine neighboring images in the same block container. Never move text into the row.
+  function nextImageRange(e: Editor) {
+    const selection = e.state.selection;
+    if (!(selection instanceof NodeSelection) || selection.node.type.name !== "image") return null;
+    const parent = selection.$from.parent;
+    if (parent.type.name === "imagePair") return null;
+    let end = selection.to;
+    for (let i = selection.$from.index() + 1; i < parent.childCount; i++) {
+      const next = parent.child(i);
+      end += next.nodeSize;
+      if (next.type.name === "image") return { from: selection.from, to: end, images: [selection.node, next] };
+      if (next.type.name !== "paragraph" || next.content.size) break;
+    }
+    return null;
+  }
   function updateTools() {
     if (!editor) return;
     for (const button of toolbar.querySelectorAll<HTMLButtonElement>("[data-mark]"))
@@ -109,6 +166,16 @@ export function richEditor(options: Options) {
     el<HTMLButtonElement>("rich-undo").disabled = locked || !editor.can().undo();
     el<HTMLButtonElement>("rich-redo").disabled = locked || !editor.can().redo();
     el<HTMLSelectElement>("table-action").disabled = locked || !editor.isActive("table");
+    const selection = editor.state.selection;
+    const imageSelected = selection instanceof NodeSelection && selection.node.type.name === "image";
+    const paired = selection.$from.parent.type.name === "imagePair";
+    el("image-layout-tools").hidden = !imageSelected;
+    const width = el<HTMLSelectElement>("image-width");
+    width.disabled = locked || paired;
+    width.value = paired ? "50" : (editor.getAttributes("image")["data-image-width"] ?? "");
+    const pair = el<HTMLButtonElement>("image-pair");
+    pair.textContent = paired ? "나란히 배치 해제" : "다음 이미지와 나란히";
+    pair.disabled = locked || (!paired && !nextImageRange(editor));
     const heading = editor.getAttributes("heading").level;
     el<HTMLSelectElement>("block-style").value = heading ? String(heading) : "0";
     const style = editor.getAttributes("textStyle");
@@ -163,6 +230,31 @@ export function richEditor(options: Options) {
     callback(editor);
     updateTools();
   }
+  el<HTMLSelectElement>("image-width").addEventListener("change", (event) =>
+    run((e) => {
+      const width = (event.target as HTMLSelectElement).value || null;
+      e.chain().focus().updateAttributes("image", { "data-image-width": width }).run();
+    })
+  );
+  el("image-pair").addEventListener("mousedown", (event) => event.preventDefault());
+  el("image-pair").addEventListener("click", () =>
+    run((e) => {
+      const { $from } = e.state.selection;
+      const tr = e.state.tr;
+      let start: number;
+      if ($from.parent.type.name === "imagePair") {
+        start = $from.before();
+        tr.replaceWith(start, $from.after(), $from.parent.content);
+      } else {
+        const range = nextImageRange(e);
+        if (!range) return;
+        start = range.from + 1;
+        tr.replaceWith(range.from, range.to, e.schema.nodes.imagePair.create(null, range.images));
+      }
+      e.view.dispatch(tr.setSelection(NodeSelection.create(tr.doc, start)));
+      e.view.focus();
+    })
+  );
   const commands: Record<string, (value: Editor) => void> = {
     bold: (e) => {
       e.chain().focus().toggleBold().run();
@@ -350,6 +442,26 @@ export function richEditor(options: Options) {
       options.onChange();
     } else editor?.chain().focus().setImage({ src, alt }).run();
   }
+  function insertImagePair(images: BodyImage[]) {
+    if (sourceMode) {
+      const row = document.createElement("p");
+      row.dataset.imagePair = "true";
+      for (const { src, alt } of images) {
+        const image = document.createElement("img");
+        image.setAttribute("src", src);
+        image.alt = alt;
+        row.append(image);
+      }
+      source.setRangeText(`\n\n${row.outerHTML}\n\n`, source.selectionStart, source.selectionEnd, "end");
+      options.onChange();
+    } else {
+      editor
+        ?.chain()
+        .focus()
+        .insertContent({ type: "imagePair", content: images.map((attrs) => ({ type: "image", attrs })) })
+        .run();
+    }
+  }
   source.addEventListener("input", () => {
     supported = !requiresSource(source.value);
     el<HTMLButtonElement>("write-tab").disabled = !supported;
@@ -360,6 +472,7 @@ export function richEditor(options: Options) {
     load,
     getBody,
     insertImage,
+    insertImagePair,
     isComposing: () => composing,
     isSource: () => sourceMode,
     characters: () => (sourceMode ? source.value.length : (editor?.state.doc.textContent.length ?? raw.length)),

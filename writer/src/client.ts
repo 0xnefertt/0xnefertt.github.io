@@ -767,26 +767,32 @@ element("new-post").addEventListener(
     })().catch(report)
 );
 
-async function attach(file: File, target: "body" | "cover" | "img" | "profile.image" = "body") {
+async function attach(input: File | File[], target: "body" | "cover" | "img" | "profile.image" = "body") {
   if (!current || locked) return;
-  if (!/^image\/(png|jpeg|webp|gif)$/.test(file.type) || file.size > IMAGE_LIMIT)
+  const files = Array.isArray(input) ? input : [input];
+  if (files.length > 2) throw new Error("한 번에 이미지를 두 장까지 선택해 주세요.");
+  if (files.some((file) => !/^image\/(png|jpeg|webp|gif)$/.test(file.type) || file.size > IMAGE_LIMIT))
     throw new Error(`${IMAGE_LIMIT / 1024 / 1024}MB 이하의 PNG, JPG, WebP, GIF 이미지를 선택해 주세요.`);
   setLocked(true);
   status("이미지 저장 중…");
   try {
     await save();
-    const result = await api<{ url: string }>(`/api/drafts/${current.id}/media`, {
-      method: "POST",
-      headers: { "Content-Type": file.type },
-      body: file,
-    });
-    const alt = file.name.replace(/[\[\]\\\n]/g, "");
-    if (target === "body") composer.insertImage(result.url, alt);
-    else details.setImage(target, result.url);
+    const images = [];
+    for (const file of files) {
+      const result = await api<{ url: string }>(`/api/drafts/${current.id}/media`, {
+        method: "POST",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+      images.push({ src: result.url, alt: file.name.replace(/[\[\]\\\n]/g, "") });
+    }
+    if (images.length === 2) composer.insertImagePair(images);
+    else if (target === "body") composer.insertImage(images[0].src, images[0].alt);
+    else details.setImage(target, images[0].src);
     scheduleSave();
     await save();
-    attachments.changed();
   } finally {
+    attachments.changed();
     setLocked(false);
   }
 }
@@ -801,14 +807,14 @@ element("cover-image-file").addEventListener("change", (event) => {
 });
 element("image-file").addEventListener("change", (event) => {
   const input = event.target as HTMLInputElement;
-  if (input.files?.[0]) void attach(input.files[0]).catch(report);
+  if (input.files?.length) void attach(Array.from(input.files)).catch(report);
   input.value = "";
 });
 body.addEventListener("paste", (event) => {
-  const file = [...(event.clipboardData?.items ?? [])].find((item) => item.type.startsWith("image/"))?.getAsFile();
-  if (file) {
+  const files = Array.from(event.clipboardData?.files ?? []);
+  if (files.length) {
     event.preventDefault();
-    void attach(file).catch(report);
+    void attach(files).catch(report);
   }
 });
 body.addEventListener("dragover", (event) => {
@@ -817,7 +823,7 @@ body.addEventListener("dragover", (event) => {
 body.addEventListener("drop", (event) => {
   if (event.dataTransfer?.files.length) {
     event.preventDefault();
-    void attach(event.dataTransfer.files[0]).catch(report);
+    void attach(Array.from(event.dataTransfer.files)).catch(report);
   }
 });
 const dialog = element<HTMLDialogElement>("publish-dialog");

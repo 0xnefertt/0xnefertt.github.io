@@ -654,6 +654,7 @@ dialog::backdrop {
   font-size: 1rem;
   background: var(--surface);
 }
+.format-toolbar .image-layout-button,
 .format-toolbar button:has(.tool-text) {
   width: auto;
   padding-inline: 0.5rem;
@@ -661,6 +662,13 @@ dialog::backdrop {
 .tool-text {
   font-size: 0.7rem;
   white-space: nowrap;
+}
+#rich-toolbar[hidden] + #image-layout-tip {
+  display: none;
+}
+#image-layout-tools {
+  flex-wrap: wrap;
+  font-size: 0.8rem;
 }
 .format-toolbar select {
   height: 34px;

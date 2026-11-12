@@ -4,6 +4,12 @@ import Turndown from "turndown";
 
 const converter = new Turndown({ headingStyle: "atx", codeBlockStyle: "fenced", bulletListMarker: "-", emDelimiter: "*" });
 converter.keep(["u", "mark", "span", "table"]);
+converter.addRule("imageLayout", {
+  filter: (node) =>
+    (node.nodeName === "P" && node.getAttribute("data-image-pair") === "true") ||
+    (node.nodeName === "IMG" && ["data-image-width", "width", "height"].some((attr) => node.hasAttribute(attr))),
+  replacement: (_content, node) => `\n\n${(node as HTMLElement).outerHTML}\n\n`,
+});
 converter.addRule("strike", { filter: ["s", "del"], replacement: (content) => `~~${content}~~` });
 converter.addRule("styledBlock", {
   filter: (node) => /^(P|H[1-6])$/.test(node.nodeName) && node.hasAttribute("style"),
@@ -38,7 +44,16 @@ export function markdownToHtml(value: string): string {
   return cleanHtml(marked.parse(value, { async: false }) as string);
 }
 export function richToMarkdown(html: string): string {
-  return converter.turndown(cleanHtml(html));
+  const template = document.createElement("template");
+  template.innerHTML = cleanHtml(html);
+  // Tiptap stores standalone images as block nodes. Keep their paragraph breaks in Markdown.
+  for (const image of Array.from(template.content.children)) {
+    if (image.tagName !== "IMG") continue;
+    const paragraph = image.ownerDocument.createElement("p");
+    image.replaceWith(paragraph);
+    paragraph.append(image);
+  }
+  return converter.turndown(template.content);
 }
 // Custom embeds/templates and footnotes stay in source mode to prevent a lossy schema conversion.
 export function requiresSource(value: string): boolean {
