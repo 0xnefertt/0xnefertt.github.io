@@ -309,6 +309,8 @@ button[aria-pressed="true"] {
   width: 100%;
   min-width: 0;
   font-size: 1rem;
+  line-height: 1.25;
+  padding-block: 0.1875rem;
 }
 .workspace[data-collection="projects"] #collection-fields {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
