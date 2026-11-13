@@ -106,7 +106,7 @@
       const mediaLink = document.createElement("a");
       mediaLink.className = "post-card-media";
       mediaLink.href = postUrl;
-      mediaLink.setAttribute("aria-label", post.title);
+      mediaLink.setAttribute("aria-label", post.hasVideo ? `${post.title} (${korean ? "영상 포함" : "includes video"})` : post.title);
       if (post.external) {
         mediaLink.target = "_blank";
         mediaLink.rel = "noreferrer";
@@ -115,6 +115,7 @@
       const preview = document.createElement("span");
       preview.className = `post-card-preview post-card-preview--${visibleImages.length}`;
       preview.setAttribute("aria-hidden", "true");
+      if (post.hasVideo) preview.dataset.video = "true";
 
       for (const image of visibleImages) {
         const previewImage = document.createElement("img");

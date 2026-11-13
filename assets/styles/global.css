@@ -925,6 +925,34 @@ main {
   height: 100%;
 }
 
+.post-card-preview[data-video] {
+  position: relative;
+  justify-content: center;
+}
+
+.post-card-preview[data-video]::before,
+.post-card-preview[data-video]::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.post-card-preview[data-video]::before {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 72%);
+}
+
+.post-card-preview[data-video]::after {
+  margin-left: 1px;
+  border-block: 5px solid transparent;
+  border-left: 8px solid white;
+}
+
 .post-card-preview img {
   display: block;
   width: auto;
