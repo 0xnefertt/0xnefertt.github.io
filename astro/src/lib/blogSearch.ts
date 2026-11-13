@@ -15,6 +15,7 @@ export interface BlogSearchItem {
   categories: string[];
   thumbnail?: string;
   gallery: string[];
+  hasVideo: boolean;
   categoryPaths: {
     href: string;
     label: string;
@@ -52,6 +53,7 @@ export function buildBlogSearchIndex(posts: CollectionEntry<"blog">[]): BlogSear
       categories: post.categories,
       thumbnail: post.thumbnail,
       gallery: post.gallery,
+      hasVideo: post.hasVideo,
       categoryPaths: post.categoryPaths.map((categoryPath) => ({
         href: categoryPath.href,
         label: categoryPath.label,

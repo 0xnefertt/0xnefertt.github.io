@@ -33,6 +33,7 @@ export interface BlogSummary {
   categoryPaths: BlogCategoryPath[];
   thumbnail?: string;
   gallery: string[];
+  hasVideo: boolean;
   href: string;
   external: boolean;
   externalSource?: string;
@@ -607,13 +608,14 @@ export function toBlogSummary(post: CollectionEntry<"blog">): BlogSummary {
   const gallery = normalizeGallery(post.data.gallery);
   const bodyImages = extractPostImageUrls(post.body);
   const previewImages = [...new Set([...(thumbnail ? [thumbnail] : []), ...gallery, ...bodyImages])];
-  if (!previewImages.length) {
-    for (const frame of (post.rendered?.html ?? "").matchAll(/<iframe\b[^>]*?\ssrc=["']([^"']+)["']/gi)) {
-      const video = youtubeVideo(frame[1]);
-      if (video) {
-        previewImages.push(video.thumbnail);
-        break;
-      }
+  const html = post.rendered?.html ?? "";
+  let hasVideo = /<video\b/i.test(html);
+  for (const frame of html.matchAll(/<iframe\b[^>]*?\ssrc=["']([^"']+)["']/gi)) {
+    const video = youtubeVideo(frame[1]);
+    if (video) {
+      hasVideo = true;
+      if (!previewImages.length) previewImages.push(video.thumbnail);
+      break;
     }
   }
 
@@ -627,6 +629,7 @@ export function toBlogSummary(post: CollectionEntry<"blog">): BlogSummary {
     categoryPaths: getPostCategoryPaths(post),
     thumbnail,
     gallery: previewImages.slice(0, 8),
+    hasVideo,
     href,
     external,
     externalSource: post.data.external_source,
