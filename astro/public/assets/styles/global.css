@@ -1261,9 +1261,12 @@ main {
   margin-top: 0;
 }
 
+.youtube-player:not([width]) {
+  width: 100%;
+}
 .youtube-player {
   display: block;
-  width: 100%;
+  max-width: 100%;
   aspect-ratio: 16 / 9;
   height: auto;
   border: 0;
@@ -1293,9 +1296,12 @@ p[data-image-pair="true"] {
   gap: 0.5rem;
   align-items: start;
 }
+p[data-image-pair="true"] > img:not([width]) {
+  width: 100%;
+}
 p[data-image-pair="true"] > img {
   display: block;
-  width: 100%;
+  max-width: 100%;
   height: auto;
   margin: 0;
 }

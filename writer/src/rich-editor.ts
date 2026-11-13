@@ -8,13 +8,13 @@ import { TableKit } from "@tiptap/extension-table";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import { cleanHtml, editorBody, requiresSource, richToMarkdown, safeImage, safeLink, videoFrame } from "./rich-content";
-import { youtubeVideo } from "../../shared/youtube.mjs";
+import { pixelWidth, youtubeVideo } from "../../shared/youtube.mjs";
 
 const Youtube = Node.create({
   name: "youtube",
   group: "block",
   atom: true,
-  addAttributes: () => ({ url: { default: null } }),
+  addAttributes: () => ({ url: { default: null }, width: { default: null, parseHTML: (el) => pixelWidth(el.getAttribute("data-width")) } }),
   parseHTML: () => [
     {
       tag: "p[data-youtube]",
@@ -25,14 +25,27 @@ const Youtube = Node.create({
       },
     },
   ],
-  renderHTML: ({ node }) => ["p", { "data-youtube": "true" }, node.attrs.url],
+  renderHTML: ({ node }) => ["p", { "data-youtube": "true", "data-width": node.attrs.width }, node.attrs.url],
   addNodeView:
     () =>
-    ({ node }) => {
+    ({ node, editor, getPos }) => {
       const wrapper = document.createElement("div");
       const video = youtubeVideo(node.attrs.url);
-      if (video) wrapper.append(videoFrame(video));
-      return { dom: wrapper };
+      if (video) wrapper.append(videoFrame(video, node.attrs.width));
+      const resize = document.createElement("button");
+      resize.type = "button";
+      resize.className = "video-resize";
+      resize.textContent = "영상 크기 조정";
+      resize.contentEditable = "false";
+      resize.addEventListener("click", () => {
+        const pos = getPos();
+        if (editor.isEditable && pos !== undefined) {
+          editor.commands.setNodeSelection(pos);
+          document.getElementById("media-pixels")?.focus();
+        }
+      });
+      wrapper.append(resize);
+      return { dom: wrapper, stopEvent: (event) => event.target === resize };
     },
 });
 
@@ -210,11 +223,17 @@ export function richEditor(options: Options) {
     const selection = editor.state.selection;
     const imageSelected = selection instanceof NodeSelection && selection.node.type.name === "image";
     const paired = selection.$from.parent.type.name === "imagePair";
-    el("image-layout-tools").hidden = !imageSelected;
+    const videoSelected = selection instanceof NodeSelection && selection.node.type.name === "youtube";
+    el("image-layout-tools").hidden = !(imageSelected || videoSelected);
+    el("image-presets").hidden = !imageSelected;
+    const pixels = el<HTMLInputElement>("media-pixels");
+    if (imageSelected || videoSelected) pixels.value = pixelWidth(selection.node.attrs.width) ?? "";
+    pixels.disabled = locked;
     const width = el<HTMLSelectElement>("image-width");
     width.disabled = locked || paired;
-    width.value = paired ? "50" : (editor.getAttributes("image")["data-image-width"] ?? "");
+    width.value = pixels.value ? "pixels" : paired ? "50" : (editor.getAttributes("image")["data-image-width"] ?? "");
     const pair = el<HTMLButtonElement>("image-pair");
+    pair.hidden = !imageSelected;
     pair.textContent = paired ? "나란히 배치 해제" : "다음 이미지와 나란히";
     pair.disabled = locked || (!paired && !nextImageRange(editor));
     const heading = editor.getAttributes("heading").level;
@@ -274,9 +293,21 @@ export function richEditor(options: Options) {
   el<HTMLSelectElement>("image-width").addEventListener("change", (event) =>
     run((e) => {
       const width = (event.target as HTMLSelectElement).value || null;
-      e.chain().focus().updateAttributes("image", { "data-image-width": width }).run();
+      e.chain().focus().updateAttributes("image", { "data-image-width": width, width: null, height: null }).run();
     })
   );
+  const pixels = el<HTMLInputElement>("media-pixels");
+  pixels.addEventListener("input", () => {
+    const width = pixelWidth(pixels.value);
+    if (!pixels.validity.valid || (pixels.value && !width)) return;
+    run((e) => {
+      const selection = e.state.selection;
+      if (!(selection instanceof NodeSelection)) return;
+      const kind = selection.node.type.name;
+      if (kind !== "image" && kind !== "youtube") return;
+      e.commands.updateAttributes(kind, kind === "image" ? { width, height: null, "data-image-width": null } : { width });
+    });
+  });
   el("image-pair").addEventListener("mousedown", (event) => event.preventDefault());
   el("image-pair").addEventListener("click", () =>
     run((e) => {

@@ -22,14 +22,22 @@ export function youtubeVideo(value: string) {
   const seconds = parts ? Number(parts[1] ?? 0) * 3600 + Number(parts[2] ?? 0) * 60 + Number(parts[3] ?? 0) : 0;
   const timed = seconds > 0 && Number.isSafeInteger(seconds);
   return {
+    thumbnail: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
     url: `https://youtu.be/${id}${timed ? `?t=${seconds}` : ""}`,
     src: `${youtubePlayerOrigin}/embed/${id}${timed ? `?start=${seconds}` : ""}`,
   };
 }
 
-export function youtubeFrameAttributes(video: NonNullable<ReturnType<typeof youtubeVideo>>) {
+export function pixelWidth(value: unknown): string | null {
+  const text = String(value ?? "");
+  return /^[1-9]\d*$/.test(text) && Number.isSafeInteger(Number(text)) ? text : null;
+}
+
+export function youtubeFrameAttributes(video: NonNullable<ReturnType<typeof youtubeVideo>>, width?: unknown): Record<string, string> {
+  const pixels = pixelWidth(width);
   return {
     class: "youtube-player",
+    ...(pixels ? { width: pixels } : {}),
     src: video.src,
     title: "YouTube video player",
     loading: "lazy",

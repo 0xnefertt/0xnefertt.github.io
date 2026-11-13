@@ -1,5 +1,6 @@
 import type { CollectionEntry } from "astro:content";
 import { categoryName } from "../../../shared/category";
+import { youtubeVideo } from "../../../shared/youtube.mjs";
 import { slugify } from "../../../shared/slug";
 import { contentLocale, localizedPath, type Locale } from "./locale";
 import { normalizeAssetPath } from "./content";
@@ -606,6 +607,15 @@ export function toBlogSummary(post: CollectionEntry<"blog">): BlogSummary {
   const gallery = normalizeGallery(post.data.gallery);
   const bodyImages = extractPostImageUrls(post.body);
   const previewImages = [...new Set([...(thumbnail ? [thumbnail] : []), ...gallery, ...bodyImages])];
+  if (!previewImages.length) {
+    for (const frame of (post.rendered?.html ?? "").matchAll(/<iframe\b[^>]*?\ssrc=["']([^"']+)["']/gi)) {
+      const video = youtubeVideo(frame[1]);
+      if (video) {
+        previewImages.push(video.thumbnail);
+        break;
+      }
+    }
+  }
 
   return {
     title: post.data.title,

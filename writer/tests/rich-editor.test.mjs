@@ -175,12 +175,17 @@ test("videos in lists and rich table cells survive editing, preview and site ren
   const astroRequire = createRequire(new URL("../../astro/package.json", import.meta.url));
   const { createMarkdownProcessor } = await import(astroRequire.resolve("@astrojs/markdown-remark"));
   const url = "https://youtu.be/U0TXIXTzJEY";
-  const html = `<ul><li><p data-youtube="true">${url}</p></li></ul><table><tbody><tr><td><p data-youtube="true">${url}</p></td></tr></tbody></table>`;
+  const marker = `<p data-youtube="true" data-width="320">${url}</p>`;
+  const html = `${marker}<ul><li>${marker}</li></ul><table><tbody><tr><td>${marker}</td></tr></tbody></table>`;
   const markdown = content.richToMarkdown(html);
   adapter.load(markdown);
   const processor = await createMarkdownProcessor({ remarkPlugins: [markdownYoutube] });
   const published = new JSDOM((await processor.render(markdown)).code);
   for (const root of [document.querySelector(".tiptap"), content.previewBody(markdown), published.window.document]) {
+    assert.deepEqual(
+      [...root.querySelectorAll("iframe")].map((frame) => frame.getAttribute("width")),
+      ["320", "320", "320"]
+    );
     for (const container of ["li", "td"]) {
       assert.equal(root.querySelector(`${container} iframe`)?.src, "https://www.youtube-nocookie.com/embed/U0TXIXTzJEY");
     }

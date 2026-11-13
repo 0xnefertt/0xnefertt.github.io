@@ -188,6 +188,10 @@ test("YouTube frames load in the editor, preview and published article", async (
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/ko/blog/2026/2026-half-retrospect/");
   await expectPlayer(".post-body iframe.youtube-player");
+  await page.goto("/ko/blog/");
+  await page.getByRole("searchbox").fill("낙관적 비관주의");
+  const videoCard = page.locator('#blog-inline-search-results .post-card-media[href*="optimistic-pessimism"] .post-card-preview--1 img').first();
+  await expect(videoCard).toHaveAttribute("src", "https://i.ytimg.com/vi/l-oCt441--E/hqdefault.jpg");
   await page.goto("/admin/");
   await page.getByRole("link", { name: "GitHub로 로그인" }).click();
   await page.locator("#new-post").click();
@@ -195,8 +199,13 @@ test("YouTube frames load in the editor, preview and published article", async (
   await page.locator("#insert-url").fill(`https://youtu.be/${videoId}`);
   await page.locator("#insert-form button[type=submit]").click();
   await expectPlayer("#rich-body iframe.youtube-player");
+  await page.getByRole("button", { name: "영상 크기 조정" }).click();
+  await page.getByLabel("너비 (px)").fill("210");
+  await page.getByLabel("너비 (px)").press("Tab");
+  await expect(page.locator("#rich-body iframe")).toHaveCSS("width", "210px");
   await page.locator("#preview-tab").click();
   await expectPlayer("#preview-body iframe.youtube-player");
+  await expect(page.locator("#preview-body iframe")).toHaveCSS("width", "210px");
 });
 
 async function expectImageRow(row) {
@@ -239,6 +248,9 @@ test("real Worker/D1 login, save, publish, unpublish, republish and logout", asy
   await editorImages.first().click();
   await page.getByRole("button", { name: "나란히 배치 해제" }).click();
   await expect(row).toHaveCount(0);
+  await page.locator("#media-pixels").fill("120");
+  await page.locator("#media-pixels").press("Tab");
+  await expect(editorImages.first()).toHaveCSS("width", "120px");
   await page.locator("#image-width").selectOption("75");
   await page.locator("#preview-tab").click();
   const single = page.locator('#preview-body img[data-image-width="75"]');

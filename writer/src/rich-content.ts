@@ -1,7 +1,7 @@
 import { Marked } from "marked";
 import DOMPurify from "dompurify";
 import Turndown from "turndown";
-import { youtubeFrameAttributes, youtubeVideo } from "../../shared/youtube.mjs";
+import { pixelWidth, youtubeFrameAttributes, youtubeVideo } from "../../shared/youtube.mjs";
 
 // Marked emits block-level text instead of paragraphs inside tight lists.
 function renderVideoParagraph(token: { text: string; tokens?: unknown[] }): string | false {
@@ -10,16 +10,20 @@ function renderVideoParagraph(token: { text: string; tokens?: unknown[] }): stri
 }
 const markdown = new Marked({ renderer: { paragraph: renderVideoParagraph, text: renderVideoParagraph } });
 
-export function videoFrame(video: NonNullable<ReturnType<typeof youtubeVideo>>) {
+export function videoFrame(video: NonNullable<ReturnType<typeof youtubeVideo>>, width?: unknown) {
   const frame = document.createElement("iframe");
-  for (const [name, value] of Object.entries(youtubeFrameAttributes(video))) frame.setAttribute(name, value);
+  for (const [name, value] of Object.entries(youtubeFrameAttributes(video, width))) frame.setAttribute(name, value);
   return frame;
 }
 
 const converter = new Turndown({ headingStyle: "atx", codeBlockStyle: "fenced", bulletListMarker: "-", emDelimiter: "*" });
 converter.addRule("youtube", {
   filter: (node) => node.nodeName === "P" && node.hasAttribute("data-youtube") && !!youtubeVideo(node.textContent ?? ""),
-  replacement: (_content, node) => `\n\n${node.textContent}\n\n`,
+  replacement: (_content, node) => {
+    const width = pixelWidth((node as HTMLElement).getAttribute("data-width"));
+    const url = youtubeVideo(node.textContent ?? "")!.url;
+    return width ? `\n\n<p data-youtube="true" data-width="${width}">${url}</p>\n\n` : `\n\n${url}\n\n`;
+  },
 });
 converter.keep(["u", "mark", "span", "table"]);
 converter.addRule("imageLayout", {
@@ -73,7 +77,7 @@ export function previewBody(value: string): DocumentFragment {
   const template = bodyTemplate(value);
   for (const marker of template.content.querySelectorAll("p[data-youtube]")) {
     const video = youtubeVideo(marker.textContent ?? "");
-    if (video) marker.replaceWith(videoFrame(video));
+    if (video) marker.replaceWith(videoFrame(video, marker.getAttribute("data-width")));
   }
   return template.content;
 }

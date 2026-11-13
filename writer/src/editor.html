@@ -488,14 +488,19 @@
               </select>
             </div>
             <div class="tool-group" id="image-layout-tools" hidden>
-              <label for="image-width">이미지 너비</label>
-              <select id="image-width">
-                <option value="">원래 크기</option>
-                <option value="25">25%</option>
-                <option value="50">50%</option>
-                <option value="75">75%</option>
-                <option value="100">100%</option>
-              </select>
+              <label id="image-presets"
+                >이미지 너비
+                <select id="image-width">
+                  <option value="">원래 크기</option>
+                  <option value="pixels" disabled>픽셀 지정</option>
+                  <option value="25">25%</option>
+                  <option value="50">50%</option>
+                  <option value="75">75%</option>
+                  <option value="100">100%</option>
+                </select>
+              </label>
+              <label for="media-pixels">너비 (px)</label>
+              <input id="media-pixels" type="number" min="1" step="1" inputmode="numeric" placeholder="자동" />
               <button type="button" id="image-pair" class="image-layout-button">다음 이미지와 나란히</button>
             </div>
           </fieldset>
