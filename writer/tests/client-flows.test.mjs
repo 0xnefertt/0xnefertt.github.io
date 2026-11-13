@@ -330,6 +330,55 @@ test("clearing an explicit translation key and changing a draft language survive
   assert.equal(document.querySelectorAll("#post-list .post-item").length, 0);
 });
 
+test("the three project fields save and publish while retaining legacy data across collection switches", async () => {
+  const ui = await setup();
+  await ui.click("manage-projects");
+  const filter = document.getElementById("language-filter");
+  filter.value = "ko";
+  await ui.click("new-post");
+  const visibleInputs = () =>
+    [...document.querySelectorAll("#editor input, #editor select, #editor textarea")]
+      .filter((field) => !field.closest("[hidden]"))
+      .map((field) => field.id);
+  assert.deepEqual(visibleInputs(), ["title", "project-link", "description"]);
+  const link = document.getElementById("project-link");
+  ui.edit("title", "새 프로젝트");
+  await ui.click("publish");
+  assert.equal(link.validity.valueMissing, true);
+  assert.equal(document.getElementById("publish-dialog").open, false);
+  ui.edit("project-link", "https://example.com/one");
+  ui.edit("description", "첫 번째 설명");
+  await ui.click("save");
+  const first = ui.drafts.get("draft-1");
+  assert.equal(first.document.metadata.lang, "ko");
+  assert.match(first.document.slug, /^[a-z0-9]+(-[a-z0-9]+)*$/);
+  assert.equal(first.document.metadata.redirect, "https://example.com/one");
+  assert.equal(first.document.body, "");
+  first.document.body = "## Legacy body";
+  Object.assign(first.document.metadata, { img: "assets/img/cover.jpg", stack: ["Astro"], importance: 1 });
+  await ui.click("manage-books");
+  await ui.click("new-post");
+  assert.ok(visibleInputs().includes("metadata-cover"));
+  assert.equal(document.getElementById("write-panel").hidden, false);
+  await ui.click("manage-projects");
+  document.querySelector("#post-list button.post-item").click();
+  await settle();
+  assert.deepEqual(visibleInputs(), ["title", "project-link", "description"]);
+  assert.equal(link.value, "https://example.com/one");
+  ui.edit("description", "새 설명");
+  ui.edit("project-link", "https://example.com/two");
+  await ui.click("publish");
+  document.getElementById("publish-dialog").close("publish");
+  await settle();
+  assert.ok(ui.calls.some((call) => call.path === "/api/drafts/draft-1/publish"));
+  assert.equal(first.document.body, "## Legacy body");
+  assert.equal(first.document.description, "새 설명");
+  assert.equal(first.document.metadata.redirect, "https://example.com/two");
+  assert.equal(first.document.metadata.importance, 1);
+  assert.deepEqual(first.document.metadata.stack, ["Astro"]);
+  assert.equal(first.document.metadata.img, "assets/img/cover.jpg");
+});
+
 test("a custom book publication date survives saving and reopening without restoring removed inputs", async () => {
   const ui = await setup();
   await ui.click("manage-books");

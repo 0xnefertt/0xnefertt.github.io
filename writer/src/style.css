@@ -667,7 +667,7 @@ dialog::backdrop {
   color: var(--text-muted);
 }
 .post-meta-row .title-input,
-.summary-field .description-input {
+.summary-field input {
   border: 0;
   border-bottom: 1px solid var(--line);
   border-radius: 0;

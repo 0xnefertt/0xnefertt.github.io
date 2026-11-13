@@ -37,6 +37,7 @@ let sessionToken = apiBase ? (sessionStorage.getItem(sessionKey) ?? "") : "";
 const mediaUrls = new Map<string, Promise<string>>();
 
 const title = element<HTMLInputElement>("title");
+const projectLink = element<HTMLInputElement>("project-link");
 const description = element<HTMLInputElement>("description");
 const body = element<HTMLTextAreaElement>("body");
 const category = element<HTMLSelectElement>("category");
@@ -201,7 +202,20 @@ function report(error: unknown) {
   notice(message);
 }
 function read(): PostDocument {
-  const metadata: Record<string, unknown> = { ...details.read(current!.document.metadata), lang: language.value };
+  const doc = current!.document;
+  if (selectedCollection === "projects") {
+    const metadata = { ...doc.metadata };
+    if (projectLink.value.trim()) metadata.redirect = projectLink.value.trim();
+    else delete metadata.redirect;
+    return {
+      ...doc,
+      metadata,
+      title: title.value,
+      description: description.value,
+      slug: doc.slug || (title.value.trim() ? `${slugify(title.value).replace(/^-|-$/g, "") || "project"}-${current!.id.slice(0, 8)}` : ""),
+    };
+  }
+  const metadata: Record<string, unknown> = { ...details.read(doc.metadata), lang: language.value };
   if (translation.value.trim()) metadata.translation_key = translation.value.trim();
   else delete metadata.translation_key;
   return {
@@ -241,7 +255,7 @@ function setLocked(value: boolean) {
   ])
     element<HTMLButtonElement>(id).disabled = value;
   element<HTMLButtonElement>("add-translation").disabled = value || !current?.document.sourcePath;
-  for (const field of [title, description, body, category, tags, date, slug, language, translation]) field.disabled = value;
+  for (const field of [title, projectLink, description, body, category, tags, date, slug, language, translation]) field.disabled = value;
   element<HTMLSelectElement>("category-parent").disabled = value;
   if (current?.document.sourcePath) {
     slug.disabled = true;
@@ -268,7 +282,12 @@ function showDraft(value: Draft) {
   element<HTMLButtonElement>("add-translation").disabled = !doc.sourcePath;
   title.value = doc.title;
   description.value = doc.description;
-  composer.load(doc.body);
+  if (selectedCollection === "projects") {
+    projectLink.value = String(doc.metadata.redirect ?? "");
+    element("rich-note").hidden = true;
+  } else {
+    composer.load(doc.body);
+  }
   date.value = doc.date;
   tags.value = doc.tags.join(", ");
   slug.value = doc.slug;
@@ -356,7 +375,7 @@ function scheduleSave() {
   }, 1500);
   updatePreview();
 }
-for (const input of [title, description, body, category, tags, date, slug, language, translation])
+for (const input of [title, projectLink, description, body, category, tags, date, slug, language, translation])
   input.addEventListener("input", (event) => {
     if (event instanceof InputEvent && event.isComposing) {
       dirty = true;
@@ -369,10 +388,8 @@ for (const input of [title, description, body, category, tags, date, slug, langu
 body.addEventListener("compositionstart", () => clearTimeout(timer));
 body.addEventListener("compositionend", scheduleSave);
 title.addEventListener("blur", () => {
-  if (!current?.document.sourcePath && !slug.value && title.value.trim()) {
-    slug.value =
-      slugify(title.value) ||
-      `${selectedCollection === "books" ? "book" : selectedCollection === "projects" ? "project" : "post"}-${current!.id.slice(0, 8)}`;
+  if (selectedCollection !== "projects" && !current?.document.sourcePath && !slug.value && title.value.trim()) {
+    slug.value = slugify(title.value) || `${selectedCollection === "books" ? "book" : "post"}-${current!.id.slice(0, 8)}`;
     scheduleSave();
   }
 });
@@ -432,7 +449,7 @@ function updateCoverThumbnail() {
     });
 }
 function updatePreview() {
-  if (!current) return;
+  if (!current || selectedCollection === "projects") return;
   element("word-count").textContent = `${composer.characters().toLocaleString()}자`;
   updateCoverThumbnail();
   if (element("preview-panel").hidden) return;
@@ -492,9 +509,9 @@ function updatePreview() {
   }
 }
 function view(preview: boolean) {
-  element("write-panel").hidden = preview;
+  element("write-panel").hidden = preview || selectedCollection === "projects";
   element("source-attach").hidden = preview || !composer.isSource();
-  element("preview-panel").hidden = !preview;
+  element("preview-panel").hidden = !preview || selectedCollection === "projects";
   element("write-tab").setAttribute("aria-pressed", String(!preview && !composer.isSource()));
   element("source-tab").setAttribute("aria-pressed", String(!preview && composer.isSource()));
   element("preview-tab").setAttribute("aria-pressed", String(preview));
@@ -648,10 +665,11 @@ element("add-translation").addEventListener(
         element("draft-tab").setAttribute("aria-pressed", "true");
         element("post-tab").setAttribute("aria-pressed", "false");
         await refreshDrafts();
+        const locale = target === "ko" ? "한국어" : "English";
         notice(
-          `${
-            target === "ko" ? "한국어" : "English"
-          } 번역 초안을 만들었습니다. 원문 본문과 이미지를 가져왔습니다. 제목·요약·본문을 번역한 뒤 별도로 발행하세요.`
+          selectedCollection === "projects"
+            ? `${locale} 프로젝트 초안을 만들었습니다. 제목과 한 줄 설명을 번역한 뒤 발행하세요.`
+            : `${locale} 번역 초안을 만들었습니다. 원문 본문과 이미지를 가져왔습니다. 제목·요약·본문을 번역한 뒤 별도로 발행하세요.`
         );
         title.focus();
       } finally {
@@ -902,6 +920,7 @@ deleteDialog.addEventListener("close", () => {
   })().catch(report);
 });
 element("publish").addEventListener("click", () => {
+  if (selectedCollection === "projects" && (!title.reportValidity() || !projectLink.reportValidity())) return;
   dialog.returnValue = "";
   dialog.showModal();
 });

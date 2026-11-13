@@ -121,7 +121,7 @@
             </div>
           </div>
           <div class="language-row">
-            <label
+            <label id="language-field"
               ><span class="sr-only">콘텐츠 언어</span
               ><select id="content-language">
                 <option value="en">English</option>
@@ -134,10 +134,14 @@
             </div>
           </div>
         </div>
+        <label id="project-link-field" class="summary-field" hidden
+          ><span>프로젝트 링크 *</span
+          ><input id="project-link" type="url" inputmode="url" placeholder="https://example.com" maxlength="2000" required
+        /></label>
         <label class="summary-field"
           ><span id="description-label">한 줄 요약</span><input id="description" class="description-input" maxlength="1000"
         /></label>
-        <div class="editor-toolbar">
+        <div id="body-toolbar" class="editor-toolbar">
           <strong id="body-label">본문</strong>
           <div role="group" aria-label="편집 보기">
             <button id="write-tab" aria-pressed="true">서식 편집</button><button id="source-tab" aria-pressed="false">원문</button

@@ -62,34 +62,6 @@ test("book forms edit publication date and cover while preserving removed author
   date.value = "";
   assert.ok(!("date" in editor.read(original)));
 });
-test("project forms keep optional details without imposing tasks, lessons or link sections", () => {
-  const { editor } = setup();
-  const original = {
-    period: 2026,
-    stack: ["Astro", "GitHub Actions"],
-    highlights: ["One"],
-    links: [{ label: "Repository", url: "https://example.com" }],
-    related_publications: false,
-  };
-  editor.load("projects", original);
-  assert.deepEqual(editor.read(original), original);
-  document.getElementById("metadata-stack").value = "Astro, Workers";
-  assert.equal(document.getElementById("metadata-highlights"), null);
-  assert.equal(document.getElementById("metadata-lessons"), null);
-  assert.equal(document.querySelector(".collection-links"), null);
-  editor.setImage("img", "/api/media/private-cover");
-  const changed = editor.read(original);
-  assert.deepEqual(changed.stack, ["Astro", "Workers"]);
-  assert.deepEqual(changed.highlights, original.highlights);
-  assert.deepEqual(changed.links, original.links);
-  assert.equal(changed.img, "/api/media/private-cover");
-  assert.equal(changed.period, 2026);
-  assert.equal(changed.related_publications, false);
-  editor.load("books", {});
-  assert.deepEqual(editor.read({}), {});
-  assert.equal(document.querySelector(".collection-links"), null);
-});
-
 test("about fields edit nested profile data without losing home settings or altering the source object", () => {
   const { editor } = setup();
   const original = {

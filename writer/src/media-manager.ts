@@ -24,7 +24,7 @@ export function mediaManager(options: {
 
   async function load() {
     const draft = options.current();
-    if (!draft) return;
+    if (!draft || draft.document.collection === "projects") return;
     const requestRevision = ++revision;
     count.textContent = "첨부 이미지를 불러오는 중…";
     list.replaceChildren();

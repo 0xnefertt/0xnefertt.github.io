@@ -1,7 +1,7 @@
-import { list, profileMetadata, type ContentCollection } from "./model";
+import { profileMetadata, type ContentCollection } from "./model";
 
-type Field = { key: string; label: string; type?: "number" | "date" | "list" | "checkbox"; placeholder?: string; fallback?: string; note?: string };
-const fields: Record<Exclude<ContentCollection, "blog">, Field[]> = {
+type Field = { key: string; label: string; type?: "date" | "checkbox"; placeholder?: string; note?: string };
+const fields: Record<"books" | "about", Field[]> = {
   about: [
     { key: "profile.name", label: "프로필 이름" },
     { key: "profile.location", label: "활동 지역" },
@@ -13,16 +13,6 @@ const fields: Record<Exclude<ContentCollection, "blog">, Field[]> = {
     { key: "date", label: "발행일", type: "date", note: "미입력 시 발행한 날짜" },
     { key: "cover", label: "표지 이미지", placeholder: "https://…" },
   ],
-  projects: [
-    { key: "redirect", label: "프로젝트 링크", placeholder: "https://", note: "주소를 입력하면 목록에서 바로 이동합니다. 본문은 비워도 됩니다." },
-    { key: "category", label: "프로젝트 분류", placeholder: "웹사이트, 앱, 연구" },
-    { key: "img", label: "대표 이미지", placeholder: "https://…" },
-    { key: "status", label: "진행 상태", placeholder: "진행 중, 완료" },
-    { key: "period", label: "진행 기간", placeholder: "2026.01–2026.10" },
-    { key: "role", label: "담당 역할" },
-    { key: "importance", label: "목록 정렬 순서 (작을수록 먼저)", type: "number" },
-    { key: "stack", label: "사용한 기술", type: "list", placeholder: "Astro, TypeScript" },
-  ],
 };
 
 export function collectionEditor(change: () => void) {
@@ -31,17 +21,13 @@ export function collectionEditor(change: () => void) {
   let collection: ContentCollection = "blog";
   function displayValue(field: Field, metadata: Record<string, unknown>): string {
     const value = field.key.startsWith("profile.") ? profileMetadata(metadata)[field.key.slice(8)] : metadata[field.key];
-    return field.type === "list"
-      ? list(value).join(", ")
-      : field.type === "checkbox"
-        ? String(value === true)
-        : String(value ?? field.fallback ?? "");
+    return field.type === "checkbox" ? String(value === true) : String(value ?? "");
   }
   function load(kind: ContentCollection, metadata: Record<string, unknown>) {
     collection = kind;
     controls = [];
     container.replaceChildren();
-    if (kind === "blog") return;
+    if (kind !== "books" && kind !== "about") return;
     for (const field of fields[kind]) {
       const wrapper = document.createElement("label");
       wrapper.textContent = field.label;
@@ -49,11 +35,7 @@ export function collectionEditor(change: () => void) {
       input.id = `metadata-${field.key.replaceAll(".", "-")}`;
       input.setAttribute("aria-label", field.label);
       input.placeholder = field.placeholder ?? "";
-      input.type = field.type === "number" || field.type === "date" || field.type === "checkbox" ? field.type : "text";
-      if (field.type === "number") {
-        input.min = "0";
-        input.step = "1";
-      }
+      input.type = field.type ?? "text";
       input.value = displayValue(field, metadata);
       if (field.type === "checkbox") input.checked = input.value === "true";
       controls.push({ field, input, original: input.value });
@@ -76,19 +58,8 @@ export function collectionEditor(change: () => void) {
       const nested = field.key.startsWith("profile.");
       const target = nested ? profileMetadata(metadata) : metadata;
       const key = nested ? field.key.slice(8) : field.key;
-      if (!value && !field.fallback) delete target[key];
-      else
-        target[key] =
-          field.type === "checkbox"
-            ? input.checked
-            : field.type === "number"
-              ? Number(value)
-              : field.type === "list"
-                ? value
-                    .split(",")
-                    .map((item) => item.trim())
-                    .filter(Boolean)
-                : value;
+      if (!value) delete target[key];
+      else target[key] = field.type === "checkbox" ? input.checked : value;
     }
 
     return metadata;
