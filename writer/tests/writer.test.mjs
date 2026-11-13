@@ -725,17 +725,15 @@ test("new books record the first publication date without requiring blog fields 
   }
 });
 
-test("existing projects keep their URL and convert legacy sections into a freeform body", async () => {
+test("existing projects retain their URL and structured notes when republished", async () => {
   const response = await request("/api/posts/open", { method: "POST", data: { path: projectPath } });
   assert.equal(response.status, 200);
   const value = await response.json();
   assert.equal(value.document.slug, "2026-05-06-site-platform");
   assert.match(value.document.body, /Original project body/);
-  assert.match(value.document.body, /Original highlight/);
-  assert.match(value.document.body, /Original lesson/);
+  assert.deepEqual(value.document.metadata.highlights, ["Original highlight"]);
+  assert.deepEqual(value.document.metadata.lessons, ["Original lesson"]);
   assert.match(value.document.body, /\[Repository\]/);
-  assert.ok(!("highlights" in value.document.metadata));
-  assert.ok(!("lessons" in value.document.metadata));
   assert.ok(!("links" in value.document.metadata));
   const saved = await (
     await request(`/api/drafts/${value.id}`, {
@@ -749,6 +747,7 @@ test("existing projects keep their URL and convert legacy sections into a freefo
             role: "Lead developer",
             stack: ["Astro", "Workers"],
             highlights: ["New highlight"],
+            review: "A personal reflection.",
             links: [{ label: "Demo", url: "https://example.com" }],
           },
         },
@@ -762,15 +761,15 @@ test("existing projects keep their URL and convert legacy sections into a freefo
   assert.equal(result.path, projectPath);
   assert.equal(result.draft.document.metadata.related_publications, false);
   assert.deepEqual(result.draft.document.metadata.stack, ["Astro", "Workers"]);
-  assert.match(result.draft.document.body, /New highlight/);
+  assert.deepEqual(result.draft.document.metadata.highlights, ["New highlight"]);
+  assert.deepEqual(result.draft.document.metadata.lessons, ["Original lesson"]);
+  assert.equal(result.draft.document.metadata.review, "A personal reflection.");
   assert.match(result.draft.document.body, /\[Demo\]\(https:\/\/example.com\/\)/);
-  assert.ok(!("highlights" in result.draft.document.metadata));
-  assert.ok(!("lessons" in result.draft.document.metadata));
   assert.ok(!("links" in result.draft.document.metadata));
   assert.equal(calls.find((call) => call.path.endsWith("/git/refs/heads/main")).data.force, false);
 });
 
-test("old private project drafts expose legacy content once and save as ordinary body text", async () => {
+test("old private project drafts retain structured notes and migrate only legacy links", async () => {
   const original = document({
     collection: "projects",
     body: "## My own topic\n\n自由롭게 작성한 본문.",
@@ -784,9 +783,8 @@ test("old private project drafts expose legacy content once and save as ordinary
   const value = await create(original);
   const loaded = await (await request(`/api/drafts/${value.id}`)).json();
   assert.match(loaded.document.body, /## My own topic/);
-  assert.match(loaded.document.body, /A task/);
-  assert.match(loaded.document.body, /A lesson/);
-  assert.ok(loaded.document.body.includes("\\<script\\>alert(1)\\</script\\>"));
+  assert.deepEqual(loaded.document.metadata.highlights, original.metadata.highlights);
+  assert.deepEqual(loaded.document.metadata.lessons, original.metadata.lessons);
   assert.ok(loaded.document.body.includes("[\\[Custom link\\]](<https://example.com/a)b>)"));
   assert.equal(loaded.document.metadata.role, "Developer");
   assert.ok(!("links" in loaded.document.metadata));
@@ -797,10 +795,10 @@ test("old private project drafts expose legacy content once and save as ordinary
   const published = await request(`/api/drafts/${value.id}/publish`, { method: "POST", data: { version: reloaded.version } });
   assert.equal(published.status, 200, await published.clone().text());
   const result = await published.json();
-  assert.ok(!("highlights" in result.draft.document.metadata));
-  assert.ok(!("lessons" in result.draft.document.metadata));
   assert.ok(!("links" in result.draft.document.metadata));
-  assert.equal(result.draft.document.body.split("A task").length, 2);
+  assert.deepEqual(result.draft.document.metadata.highlights, original.metadata.highlights);
+  assert.deepEqual(result.draft.document.metadata.lessons, original.metadata.lessons);
+  assert.doesNotMatch(result.draft.document.body, /A task/);
 });
 
 test("projects with only a title and destination publish without a body", async () => {

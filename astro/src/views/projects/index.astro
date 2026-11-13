@@ -3,6 +3,7 @@ import { localeFromPath, localizedPath, inLocale, localeText } from "../../lib/l
 import { t } from "../../lib/messages";
 const locale = localeFromPath(Astro.url.pathname);
 const l = (path: string) => localizedPath(path, locale);
+import ProjectNotes from "../../components/ProjectNotes.astro";
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import { getProjectRoute, normalizeAssetPath, sortProjects } from "../../lib/content";
@@ -41,6 +42,7 @@ const visibleGroups = groupedProjects.filter((group) => group.items.length > 0);
         {group.items.map((project) => {
           const route = getProjectRoute(project);
           const image = normalizeAssetPath(project.data.img);
+          const dialogId = `project-dialog-${project.id}`;
           const Heading = visibleGroups.length > 1 && group.category ? "h3" : "h2";
 
           return (
@@ -53,13 +55,36 @@ const visibleGroups = groupedProjects.filter((group) => group.items.length > 0);
               <div class="project-content">
                 {project.data.period && <p class="project-period">{project.data.period}</p>}
                 <Heading>
-                  <a class="project-card-link" href={route.href}>
-                    {project.data.title} <span aria-hidden="true">{route.external ? "↗" : "→"}</span>
+                  <a class="project-card-link" href={route.href} aria-haspopup="dialog" aria-controls={dialogId}>
+                    {project.data.title} <span aria-hidden="true">→</span>
                   </a>
                 </Heading>
                 {project.data.description && <p class="project-description">{project.data.description}</p>}
                 {!!project.data.stack?.length && <p class="project-technologies">{project.data.stack.join(" · ")}</p>}
               </div>
+              <dialog class="project-dialog" id={dialogId} aria-labelledby={`${dialogId}-title`}>
+                <header>
+                  <h2 id={`${dialogId}-title`}>{project.data.title}</h2>
+                  <form method="dialog">
+                    <button aria-label={localeText(locale, "Close", "닫기")}>
+                      <span aria-hidden="true">×</span>
+                    </button>
+                  </form>
+                </header>
+                {project.data.description && <p class="project-description">{project.data.description}</p>}
+                {!!project.data.stack?.length && (
+                  <section class="dialog-stack">
+                    <h3>{localeText(locale, "Tech stack", "사용 스택")}</h3>
+                    <p class="project-technologies">{project.data.stack.join(" · ")}</p>
+                  </section>
+                )}
+                <ProjectNotes data={project.data} locale={locale} />
+                <div class="dialog-actions">
+                  <a href={route.href}>
+                    {localeText(locale, "View project", "프로젝트 바로가기")} <span aria-hidden="true">{route.external ? "↗" : "→"}</span>
+                  </a>
+                </div>
+              </dialog>
             </article>
           );
         })}
@@ -67,3 +92,78 @@ const visibleGroups = groupedProjects.filter((group) => group.items.length > 0);
     </section>
   ))}
 </Layout>
+
+<script>
+  for (const link of document.querySelectorAll<HTMLAnchorElement>(".project-card-link[aria-controls]")) {
+    const dialog = document.getElementById(link.getAttribute("aria-controls")!);
+    if (!(dialog instanceof HTMLDialogElement)) continue;
+    link.addEventListener("click", (event) => {
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      dialog.showModal();
+    });
+    dialog.addEventListener("click", (event) => {
+      if (event.target !== dialog) return;
+      const bounds = dialog.getBoundingClientRect();
+      if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.close();
+    });
+  }
+</script>
+
+<style>
+  .project-dialog {
+    width: min(34rem, calc(100% - 2rem));
+    max-height: calc(100dvh - 2rem);
+    margin: auto;
+    padding: clamp(1.25rem, 3vw, 2rem);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--bg);
+    color: var(--text);
+    overflow-wrap: anywhere;
+    overscroll-behavior: contain;
+  }
+  .project-dialog::backdrop {
+    background: rgb(0 0 0 / 52%);
+  }
+  .project-dialog header {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .project-dialog h2 {
+    margin: 0;
+    font-size: 1.35rem;
+  }
+  .project-dialog button {
+    display: grid;
+    place-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin: -0.5rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+  .dialog-stack {
+    margin-block: 1rem;
+  }
+  .dialog-stack h3 {
+    margin: 0;
+    font-size: 1rem;
+  }
+  .project-dialog .dialog-actions {
+    margin-top: 1.25rem;
+    border-top: 1px solid var(--line);
+    padding-top: 1rem;
+  }
+  .project-dialog .dialog-actions a {
+    color: var(--accent);
+    font-weight: 600;
+  }
+</style>

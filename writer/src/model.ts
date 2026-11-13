@@ -121,6 +121,8 @@ function validateCollectionMetadata(doc: PostDocument): void {
     if (metadata.subtitle !== undefined && (typeof metadata.subtitle !== "string" || metadata.subtitle.length > 2000))
       throw new HttpError(422, "소개 부제목을 확인해 주세요.");
   }
+  if (kind === "projects" && metadata.review !== undefined && (typeof metadata.review !== "string" || metadata.review.length > 10000))
+    throw new HttpError(422, "프로젝트 후기는 10,000자까지 입력할 수 있습니다.");
   for (const key of ["author", "status", "role", "category", "cover", "img", "olid", "buy_link"]) {
     if (metadata[key] !== undefined && (typeof metadata[key] !== "string" || (metadata[key] as string).length > 2000))
       throw new HttpError(422, `${key} 정보를 확인해 주세요.`);
@@ -210,7 +212,6 @@ export function parsePost(content: string, sourcePath: string, sourceSha: string
   });
 }
 
-// Legacy project sections become ordinary Markdown that can be edited in one body.
 export function documentLanguage(doc: PostDocument): ContentLanguage {
   return inferContentLanguage({ ...doc.metadata, title: doc.title }, doc.body, doc.sourcePath ?? "");
 }
@@ -248,18 +249,14 @@ export function sourceCategory(path: string): string {
 export function editableDocument(doc: PostDocument): PostDocument {
   const key = documentTranslationKey(doc);
   doc = { ...doc, metadata: { ...doc.metadata, lang: documentLanguage(doc), ...(key ? { translation_key: key } : {}) } };
-  if (documentCollection(doc) !== "projects" || !["highlights", "lessons", "links"].some((key) => key in doc.metadata)) return doc;
+  if (documentCollection(doc) !== "projects" || !("links" in doc.metadata)) return doc;
   validateCollectionMetadata(doc);
   const text = (value: string) => value.replace(/[\r\n]+/g, " ").replace(/[\\`*_[\]<>]/g, "\\$&");
   const sections = [doc.body.trimEnd()];
-  for (const key of ["highlights", "lessons"]) {
-    const items = list(doc.metadata[key]);
-    if (items.length) sections.push(items.map((item) => `- ${text(item)}`).join("\n"));
-  }
   const links = doc.metadata.links as { label: string; url: string }[] | undefined;
   if (links?.length) sections.push(links.map((link) => `- [${text(link.label)}](<${new URL(link.url).href}>)`).join("\n"));
   const metadata = { ...doc.metadata };
-  for (const key of ["highlights", "lessons", "links"]) delete metadata[key];
+  delete metadata.links;
   const body = sections.filter(Boolean).join("\n\n");
   if (body.length > 300_000) throw new HttpError(413, "글이 너무 깁니다.");
   return { ...doc, body, metadata };

@@ -1,0 +1,43 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { localeText, type Locale } from "../lib/locale";
+
+interface Props {
+  data: CollectionEntry<"projects">["data"];
+  locale: Locale;
+}
+
+const { data, locale } = Astro.props;
+const sections = [
+  { title: localeText(locale, "Lessons learned", "배운 점"), paragraphs: data.lessons },
+  { title: localeText(locale, "Reflection", "후기"), paragraphs: data.review ? [data.review] : [] },
+  { title: localeText(locale, "Outcomes", "성과"), paragraphs: data.highlights },
+];
+---
+
+{sections.map(
+  ({ title, paragraphs }) =>
+    !!paragraphs?.length && (
+      <section class="project-note">
+        <h3>{title}</h3>
+        {paragraphs.map((paragraph) => (
+          <p>{paragraph}</p>
+        ))}
+      </section>
+    )
+)}
+
+<style>
+  .project-note {
+    margin-block: 1rem;
+  }
+  .project-note h3 {
+    margin: 0 0 0.25rem;
+    font-size: 1rem;
+  }
+  .project-note p {
+    margin: 0.25rem 0;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+</style>

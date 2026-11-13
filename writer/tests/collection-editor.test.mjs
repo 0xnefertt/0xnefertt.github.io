@@ -24,7 +24,7 @@ function setup() {
   const editor = collectionEditor(() => changes++);
   return { editor, dom, changes: () => changes };
 }
-test("book forms edit publication date and cover while preserving removed author, category and legacy fields", () => {
+test("book forms edit publication date and cover while preserving metadata managed outside the details panel", () => {
   const { editor, dom, changes } = setup();
   const original = {
     date: "2026-01-07",

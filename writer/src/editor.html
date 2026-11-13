@@ -105,6 +105,7 @@
         <div class="editor-basics">
           <div class="post-meta-row" id="title-row">
             <label><span id="title-label">게시글 제목</span><input id="title" class="title-input" maxlength="300" /></label>
+            <label id="book-author-field" hidden>저자<input id="book-author" maxlength="2000" /></label>
             <div id="blog-category-field" class="category-selector">
               <label
                 ><span>상위 분류 *</span
@@ -518,7 +519,7 @@
         </article>
         <section id="collection-settings" aria-label="상세 정보" class="post-settings" hidden>
           <fieldset id="collection-fields" class="settings-grid"></fieldset>
-          <div class="cover-controls">
+          <div id="cover-controls" class="cover-controls">
             <button id="cover-attach" type="button">표지 이미지 첨부</button>
             <input id="cover-image-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden />
             <p class="muted">최대 5MB</p>

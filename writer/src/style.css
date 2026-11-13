@@ -301,6 +301,28 @@ button[aria-pressed="true"] {
   grid-template-columns: minmax(0, 1fr);
 }
 
+.workspace[data-collection="books"] #title-row {
+  flex: 0 1 40rem;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+}
+.workspace[data-collection="books"] #title-row input {
+  width: 100%;
+  min-width: 0;
+  font-size: 1rem;
+}
+.workspace[data-collection="projects"] #collection-fields {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+}
+.workspace[data-collection="projects"] #collection-fields > label:first-child {
+  grid-column: 1 / -1;
+}
+#collection-fields textarea {
+  min-height: 5rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.55rem;
+  font: inherit;
+}
 .workspace[data-collection="about"] {
   display: block;
 }
@@ -667,6 +689,7 @@ dialog::backdrop {
   color: var(--text-muted);
 }
 .post-meta-row .title-input,
+#book-author,
 .summary-field input {
   border: 0;
   border-bottom: 1px solid var(--line);

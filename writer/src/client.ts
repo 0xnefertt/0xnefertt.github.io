@@ -37,6 +37,7 @@ let sessionToken = apiBase ? (sessionStorage.getItem(sessionKey) ?? "") : "";
 const mediaUrls = new Map<string, Promise<string>>();
 
 const title = element<HTMLInputElement>("title");
+const author = element<HTMLInputElement>("book-author");
 const projectLink = element<HTMLInputElement>("project-link");
 const description = element<HTMLInputElement>("description");
 const body = element<HTMLTextAreaElement>("body");
@@ -204,7 +205,7 @@ function report(error: unknown) {
 function read(): PostDocument {
   const doc = current!.document;
   if (selectedCollection === "projects") {
-    const metadata = { ...doc.metadata };
+    const metadata = details.read(doc.metadata);
     if (projectLink.value.trim()) metadata.redirect = projectLink.value.trim();
     else delete metadata.redirect;
     return {
@@ -216,6 +217,10 @@ function read(): PostDocument {
     };
   }
   const metadata: Record<string, unknown> = { ...details.read(doc.metadata), lang: language.value };
+  if (selectedCollection === "books") {
+    if (author.value.trim()) metadata.author = author.value.trim();
+    else delete metadata.author;
+  }
   if (translation.value.trim()) metadata.translation_key = translation.value.trim();
   else delete metadata.translation_key;
   return {
@@ -255,7 +260,7 @@ function setLocked(value: boolean) {
   ])
     element<HTMLButtonElement>(id).disabled = value;
   element<HTMLButtonElement>("add-translation").disabled = value || !current?.document.sourcePath;
-  for (const field of [title, projectLink, description, body, category, tags, date, slug, language, translation]) field.disabled = value;
+  for (const field of [title, author, projectLink, description, body, category, tags, date, slug, language, translation]) field.disabled = value;
   element<HTMLSelectElement>("category-parent").disabled = value;
   if (current?.document.sourcePath) {
     slug.disabled = true;
@@ -282,6 +287,7 @@ function showDraft(value: Draft) {
   element<HTMLButtonElement>("add-translation").disabled = !doc.sourcePath;
   title.value = doc.title;
   description.value = doc.description;
+  author.value = String(doc.metadata.author ?? "");
   if (selectedCollection === "projects") {
     projectLink.value = String(doc.metadata.redirect ?? "");
     element("rich-note").hidden = true;
@@ -375,7 +381,7 @@ function scheduleSave() {
   }, 1500);
   updatePreview();
 }
-for (const input of [title, projectLink, description, body, category, tags, date, slug, language, translation])
+for (const input of [title, author, projectLink, description, body, category, tags, date, slug, language, translation])
   input.addEventListener("input", (event) => {
     if (event instanceof InputEvent && event.isComposing) {
       dirty = true;

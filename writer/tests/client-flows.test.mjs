@@ -330,7 +330,7 @@ test("clearing an explicit translation key and changing a draft language survive
   assert.equal(document.querySelectorAll("#post-list .post-item").length, 0);
 });
 
-test("the three project fields save and publish while retaining legacy data across collection switches", async () => {
+test("project details save and publish while retaining legacy data across collection switches", async () => {
   const ui = await setup();
   await ui.click("manage-projects");
   const filter = document.getElementById("language-filter");
@@ -340,7 +340,15 @@ test("the three project fields save and publish while retaining legacy data acro
     [...document.querySelectorAll("#editor input, #editor select, #editor textarea")]
       .filter((field) => !field.closest("[hidden]"))
       .map((field) => field.id);
-  assert.deepEqual(visibleInputs(), ["title", "project-link", "description"]);
+  assert.deepEqual(visibleInputs(), [
+    "title",
+    "project-link",
+    "description",
+    "metadata-stack",
+    "metadata-lessons",
+    "metadata-review",
+    "metadata-highlights",
+  ]);
   const link = document.getElementById("project-link");
   ui.edit("title", "새 프로젝트");
   await ui.click("publish");
@@ -363,8 +371,21 @@ test("the three project fields save and publish while retaining legacy data acro
   await ui.click("manage-projects");
   document.querySelector("#post-list button.post-item").click();
   await settle();
-  assert.deepEqual(visibleInputs(), ["title", "project-link", "description"]);
+  assert.deepEqual(visibleInputs(), [
+    "title",
+    "project-link",
+    "description",
+    "metadata-stack",
+    "metadata-lessons",
+    "metadata-review",
+    "metadata-highlights",
+  ]);
   assert.equal(link.value, "https://example.com/one");
+  assert.equal(document.getElementById("metadata-stack").value, "Astro");
+  ui.edit("metadata-stack", "Astro, Cloudflare Workers");
+  ui.edit("metadata-review", "다음 프로젝트에도 적용할 계획이다.");
+  ui.edit("metadata-lessons", "첫 번째 교훈\n두 번째 교훈");
+  ui.edit("metadata-highlights", "배포 시간을 줄였다.");
   ui.edit("description", "새 설명");
   ui.edit("project-link", "https://example.com/two");
   await ui.click("publish");
@@ -375,7 +396,10 @@ test("the three project fields save and publish while retaining legacy data acro
   assert.equal(first.document.description, "새 설명");
   assert.equal(first.document.metadata.redirect, "https://example.com/two");
   assert.equal(first.document.metadata.importance, 1);
-  assert.deepEqual(first.document.metadata.stack, ["Astro"]);
+  assert.deepEqual(first.document.metadata.stack, ["Astro", "Cloudflare Workers"]);
+  assert.deepEqual(first.document.metadata.lessons, ["첫 번째 교훈", "두 번째 교훈"]);
+  assert.deepEqual(first.document.metadata.highlights, ["배포 시간을 줄였다."]);
+  assert.equal(first.document.metadata.review, "다음 프로젝트에도 적용할 계획이다.");
   assert.equal(first.document.metadata.img, "assets/img/cover.jpg");
 });
 
@@ -384,17 +408,20 @@ test("a custom book publication date survives saving and reopening without resto
   await ui.click("manage-books");
   await ui.click("new-post");
   ui.edit("title", "Book review");
+  ui.edit("book-author", "Paul Graham");
   ui.edit("metadata-date", "2024-11-20");
   await ui.click("save");
   assert.equal(ui.drafts.get("draft-1").document.metadata.date, "2024-11-20");
   document.querySelector("#post-list button.post-item").click();
   await settle();
   assert.equal(document.getElementById("metadata-date").value, "2024-11-20");
-  assert.equal(document.getElementById("metadata-author"), null);
+  assert.equal(document.getElementById("book-author").value, "Paul Graham");
+  ui.edit("book-author", "");
   assert.equal(document.getElementById("metadata-categories"), null);
   ui.edit("metadata-date", "");
   await ui.click("save");
   assert.ok(!("date" in ui.drafts.get("draft-1").document.metadata));
+  assert.ok(!("author" in ui.drafts.get("draft-1").document.metadata));
 });
 
 test("cover thumbnails appear while writing, report failures, and can be cleared after saving", async () => {

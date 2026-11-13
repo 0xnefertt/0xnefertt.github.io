@@ -26,6 +26,7 @@ export function configureCollection(kind: ContentCollection, fields: { category:
   element("new-post").hidden = kind === "about";
   element("blog-category-field").hidden = kind !== "blog";
   element("blog-date-field").hidden = kind !== "blog";
+  element("book-author-field").hidden = kind !== "books";
   element("title-row").hidden = kind === "about";
   const project = kind === "projects";
   element("project-link-field").hidden = !project;
@@ -40,7 +41,8 @@ export function configureCollection(kind: ContentCollection, fields: { category:
   element("body-label").textContent = kind === "blog" ? "본문 *" : "본문";
   element<HTMLTextAreaElement>("body").required = kind === "blog";
   element("cover-attach").textContent = kind === "about" ? "프로필 사진 첨부" : "표지 이미지 첨부";
-  element("collection-settings").hidden = kind === "blog" || project;
+  element("collection-settings").hidden = kind === "blog";
+  element("cover-controls").hidden = project;
   element("publish-heading").textContent = kind === "about" ? "소개와 프로필을 반영할까요?" : `이 ${object} 발행할까요?`;
   element("publish").textContent = kind === "about" ? "소개 반영하기" : "발행하기";
 }

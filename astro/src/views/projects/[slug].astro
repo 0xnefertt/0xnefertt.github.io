@@ -4,6 +4,7 @@ import { localeFromPath, localizedPath, localeText } from "../../lib/locale";
 const locale = localeFromPath(Astro.url.pathname);
 const l = (path: string) => localizedPath(path, locale);
 import { render, type CollectionEntry } from "astro:content";
+import ProjectNotes from "../../components/ProjectNotes.astro";
 import Layout from "../../layouts/Layout.astro";
 import { normalizeAssetPath } from "../../lib/content";
 
@@ -15,8 +16,6 @@ const { project } = Astro.props;
 const { Content } = await render(project);
 const image = normalizeAssetPath(project.data.img);
 const stack = project.data.stack ?? [];
-const highlights = project.data.highlights ?? [];
-const lessons = project.data.lessons ?? [];
 const links = project.data.links ?? [];
 ---
 
@@ -39,14 +38,7 @@ const links = project.data.links ?? [];
 
       <section class="post-body markdown-body">
         <Content />
-        {/* Keep older repository content visible until it is saved as an editable body. */}
-        {[...highlights, ...lessons].length > 0 && (
-          <ul>
-            {[...highlights, ...lessons].map((item) => (
-              <li>{item}</li>
-            ))}
-          </ul>
-        )}
+        <ProjectNotes data={project.data} locale={locale} />
         {links.length > 0 && (
           <ul>
             {links.map((link) => (

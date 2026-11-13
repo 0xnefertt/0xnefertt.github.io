@@ -110,6 +110,7 @@ const projects = defineCollection({
     period: z.coerce.string().optional(),
     role: z.string().optional(),
     stack: z.array(z.string()).optional(),
+    review: z.string().optional(),
     highlights: z.array(z.string()).optional(),
     lessons: z.array(z.string()).optional(),
     links: z
