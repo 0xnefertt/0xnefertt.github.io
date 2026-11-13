@@ -308,9 +308,6 @@ button[aria-pressed="true"] {
 .workspace[data-collection="books"] #title-row input {
   width: 100%;
   min-width: 0;
-  font-size: 1rem;
-  line-height: 1.25;
-  padding-block: 0.1875rem;
 }
 .workspace[data-collection="projects"] #collection-fields {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
@@ -703,8 +700,12 @@ dialog::backdrop {
   padding: 0.25rem 0;
   margin: 0;
 }
+.post-meta-row .title-input,
+#book-author {
+  line-height: 1.25;
+  padding-block: 0.1875rem;
+}
 .post-meta-row .title-input {
-  font-size: clamp(1.25rem, 2.4vw, 1.65rem);
   font-weight: 600;
 }
 .summary-field {
