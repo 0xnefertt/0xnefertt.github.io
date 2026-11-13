@@ -71,8 +71,11 @@ async function buildRoutes(): Promise<SiteRoute[]> {
     }
     for (const entry of inLocale(books, locale))
       add(unlocalizedPath(getBookRoute(entry).href), "books/[slug]", locale, { entry }, `books:${translationKey(entry)}`);
-    for (const project of inLocale(projects, locale).filter((entry) => !entry.data.redirect))
-      add(unlocalizedPath(getProjectRoute(project).href), "projects/[slug]", locale, { project }, `projects:${translationKey(project)}`);
+    for (const project of inLocale(projects, locale)) {
+      const { slug, href } = getProjectRoute(project);
+      if (project.data.redirect) alias(localizedPath(`/projects/${slug}/`, locale), href, locale);
+      else add(unlocalizedPath(href), "projects/[slug]", locale, { project }, `projects:${translationKey(project)}`);
+    }
   }
   // Preserve old and category-migration links with redirects to the canonical language URL.
   function alias(path: string, destination: string, locale: Locale) {
@@ -100,7 +103,8 @@ async function buildRoutes(): Promise<SiteRoute[]> {
   for (const entry of [...inLocale(books, "ko"), ...inLocale(projects, "ko")]) {
     const destination =
       entry.collection === "books" ? getBookRoute(entry as (typeof books)[number]).href : getProjectRoute(entry as (typeof projects)[number]).href;
-    alias(unlocalizedPath(destination), destination, "ko");
+    const legacyPath = entry.collection === "projects" ? `/projects/${getProjectRoute(entry).slug}/` : unlocalizedPath(destination);
+    alias(legacyPath, destination, "ko");
   }
   return [...routes.values()];
 }

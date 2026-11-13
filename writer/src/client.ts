@@ -15,7 +15,7 @@ import { siteManager } from "./site-manager";
 import { richEditor } from "./rich-editor";
 import { IMAGE_LIMIT } from "./media-limits";
 import { slugify } from "../../shared/slug";
-import { configureCollection, contentLabels, element, updateLanguageNote } from "./workspace-ui";
+import { configureCollection, contentLabels, element } from "./workspace-ui";
 import { mediaManager } from "./media-manager";
 import "../../astro/public/assets/styles/global.css";
 import "./style.css";
@@ -265,7 +265,6 @@ function showDraft(value: Draft) {
   language.disabled = Boolean(doc.sourcePath);
   translation.disabled = false;
   element<HTMLButtonElement>("add-translation").disabled = !doc.sourcePath;
-  updateLanguageNote(selectedCollection, language.value);
   title.value = doc.title;
   description.value = doc.description;
   composer.load(doc.body);
@@ -277,6 +276,10 @@ function showDraft(value: Draft) {
   category.value = doc.category;
   element("editor").hidden = false;
   manager.refreshCategories();
+  slug.required = !doc.sourcePath;
+  element("slug-label").textContent = slug.required ? "글 주소 *" : "글 주소";
+  date.required = selectedCollection === "blog" && !doc.sourcePath;
+  element("date-label").textContent = date.required ? "날짜 *" : "날짜";
   slug.disabled = Boolean(doc.sourcePath);
   date.disabled = Boolean(doc.sourcePath);
   category.disabled = false;
@@ -629,7 +632,6 @@ async function openPost(path: string) {
 languageFilter.addEventListener("change", renderList);
 language.addEventListener("change", () => {
   manager.refreshCategories();
-  updateLanguageNote(selectedCollection, language.value);
 });
 for (const locale of ["en", "ko"])
   element(`about-${locale}`).addEventListener("click", () => void openPost(locale === "ko" ? "_pages/ko/about.md" : "_pages/about.md").catch(report));

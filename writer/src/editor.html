@@ -51,10 +51,10 @@
         <div id="privacy-fields" class="settings-grid"></div>
       </div>
       <div id="blog-description-manager" class="settings-grid" hidden>
-        <label>영어 소개 문구<textarea id="blog-description-en" rows="3" maxlength="500" required></textarea></label>
-        <label>한국어 소개 문구<textarea id="blog-description-ko" rows="3" maxlength="500" required></textarea></label>
-        <label>영어 검색 설명<textarea id="seo-description-en" rows="3" maxlength="500" required></textarea></label>
-        <label>한국어 검색 설명<textarea id="seo-description-ko" rows="3" maxlength="500" required></textarea></label>
+        <label>영어 소개 문구 *<textarea id="blog-description-en" rows="3" maxlength="500" required></textarea></label>
+        <label>한국어 소개 문구 *<textarea id="blog-description-ko" rows="3" maxlength="500" required></textarea></label>
+        <label>영어 검색 설명 *<textarea id="seo-description-en" rows="3" maxlength="500" required></textarea></label>
+        <label>한국어 검색 설명 *<textarea id="seo-description-ko" rows="3" maxlength="500" required></textarea></label>
         <p class="muted">검색 설명은 검색 결과와 공유 미리보기에 사용됩니다. 화면 상단의 소개 문구와 별도로 설정할 수 있습니다.</p>
       </div>
       <div id="category-manager">
@@ -70,13 +70,14 @@
   <div id="workspace" class="workspace" data-collection="blog" hidden>
     <aside class="library">
       <button id="new-post" class="primary" disabled>＋ 새 글 쓰기</button>
-      <label class="search-label" id="library-search-label" for="search">글 찾기</label>
+
       <label class="search-label" for="language-filter">콘텐츠 언어</label>
       <select id="language-filter">
         <option value="all">모든 언어</option>
         <option value="en">English</option>
         <option value="ko">한국어</option>
       </select>
+      <label class="search-label" id="library-search-label" for="search">글 찾기</label>
       <input id="search" type="search" placeholder="제목이나 주소로 검색" />
       <div class="library-tabs" role="group" aria-label="글 목록 선택">
         <button id="draft-tab" aria-pressed="true">초안</button><button id="post-tab" aria-pressed="false">기존 글</button
@@ -100,67 +101,75 @@
           </div>
         </div>
         <div id="notice" role="status" hidden></div>
-        <div class="post-meta-row" id="title-row">
-          <label
-            ><span id="title-label">게시글 제목</span><input id="title" class="title-input" placeholder="제목을 입력하세요" maxlength="300"
-          /></label>
-          <div id="blog-category-field" class="category-selector">
+        <div class="editor-basics">
+          <div class="post-meta-row" id="title-row">
             <label
-              >상위 분류<select id="category-parent">
-                <option value="">상위 분류를 선택하세요</option>
+              ><span id="title-label">게시글 제목</span><input id="title" class="title-input" placeholder="제목을 입력하세요" maxlength="300"
+            /></label>
+            <div id="blog-category-field" class="category-selector">
+              <label
+                ><span>상위 분류 *</span
+                ><select id="category-parent" required>
+                  <option value="">상위 분류를 선택하세요</option>
+                </select></label
+              >
+              <label
+                ><span>하위 분류 *</span
+                ><select id="category" required>
+                  <option value="">하위 분류를 선택하세요</option>
+                </select></label
+              >
+            </div>
+          </div>
+          <div class="language-row">
+            <label
+              >콘텐츠 언어<select id="content-language">
+                <option value="en">English · 기본 사이트</option>
+                <option value="ko">한국어 · /ko/</option>
               </select></label
             >
-            <label
-              >하위 분류<select id="category">
-                <option value="">하위 분류를 선택하세요</option>
-              </select></label
-            >
+            <button id="add-translation" type="button">다른 언어 버전 추가</button>
+            <div id="about-languages" hidden>
+              <button id="about-en" type="button">English 소개</button><button id="about-ko" type="button">한국어 소개</button>
+            </div>
           </div>
         </div>
-        <div class="post-meta-row">
-          <label
-            >콘텐츠 언어<select id="content-language">
-              <option value="en">English · 기본 사이트</option>
-              <option value="ko">한국어 · /ko/</option>
-            </select></label
-          >
-          <button id="add-translation" type="button">다른 언어 버전 추가</button>
-          <div id="about-languages" hidden>
-            <button id="about-en" type="button">English 소개</button><button id="about-ko" type="button">한국어 소개</button>
-          </div>
-        </div>
-        <p class="muted" id="language-note">선택한 언어의 목록·검색·RSS에 발행됩니다.</p>
         <label class="summary-field"
           ><span id="description-label">한 줄 요약</span
           ><input id="description" class="description-input" placeholder="글의 내용을 짧게 요약하세요" maxlength="1000"
         /></label>
-        <details id="collection-settings" class="post-settings" hidden open>
-          <summary id="collection-settings-heading">상세 정보</summary>
+        <section id="collection-settings" class="post-settings" hidden>
+          <h3 id="collection-settings-heading">상세 정보</h3>
           <fieldset id="collection-fields" class="settings-grid"></fieldset>
-          <button id="cover-attach" type="button">표지 이미지 첨부</button>
-          <input id="cover-image-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden />
-          <p class="muted">PNG · JPG · WebP · GIF, 5MB 이하. 미리보기에서 표지 배치를 확인할 수 있습니다. 발행하면 사이트에 표시됩니다.</p>
-          <div class="cover-status-panel">
-            <img id="cover-thumbnail" class="cover-thumbnail" alt="표지 이미지 확인" hidden />
-            <p id="cover-status" role="status">등록된 표지가 없습니다.</p>
+          <div class="cover-controls">
+            <button id="cover-attach" type="button">표지 이미지 첨부</button>
+            <input id="cover-image-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden />
+            <p class="muted">PNG · JPG · WebP · GIF, 최대 5MB</p>
+            <div class="cover-status-panel">
+              <img id="cover-thumbnail" class="cover-thumbnail" alt="표지 이미지 확인" hidden />
+              <p id="cover-status" role="status">등록된 표지가 없습니다.</p>
+            </div>
           </div>
-        </details>
-        <details class="post-settings" id="extra-settings">
-          <summary id="extra-settings-heading">추가 정보 · 태그, 날짜, 주소</summary>
+        </section>
+        <section class="post-settings" id="extra-settings">
+          <h3 id="extra-settings-heading">추가 정보 · 태그, 날짜, 주소</h3>
           <div class="settings-grid">
             <label
               >번역 연결 주소<input id="translation-key" maxlength="200" placeholder="같은 글의 한·영 버전은 같은 주소" /><small
                 >연결된 버전은 언어 전환 시 서로 이동합니다.</small
               ></label
             >
-            <label>태그<input id="tags" placeholder="astro, 기록, 개발" /></label>
-            <label id="blog-date-field">날짜<input id="date" type="date" /></label>
+            <label><span id="tags-label">태그</span><input id="tags" placeholder="astro, 기록, 개발" /></label>
+            <label id="blog-date-field"><span id="date-label">날짜</span><input id="date" type="date" /></label>
             <label
-              >글 주소<input id="slug" placeholder="my-first-post" pattern="[a-z0-9]+(-[a-z0-9]+)*" /><small>영문 소문자·숫자·하이픈</small></label
+              ><span id="slug-label">글 주소</span><input id="slug" placeholder="my-first-post" pattern="[a-z0-9]+(-[a-z0-9]+)*" /><small
+                >제목에서 자동 생성 · 영문 소문자, 숫자, 하이픈</small
+              ></label
             >
           </div>
-        </details>
+        </section>
         <div class="editor-toolbar">
+          <strong id="body-label">본문</strong>
           <div role="group" aria-label="편집 보기">
             <button id="write-tab" aria-pressed="true">서식 편집</button><button id="source-tab" aria-pressed="false">원문</button
             ><button id="preview-tab" aria-pressed="false">미리보기</button>
@@ -524,13 +533,13 @@
         </div>
         <input id="image-file" type="file" multiple accept="image/png,image/jpeg,image/webp,image/gif" hidden />
         <p id="rich-note" class="muted" hidden></p>
-        <details id="media-manager" class="media-manager">
-          <summary>첨부 이미지 관리</summary>
+        <section id="media-manager" class="media-manager">
+          <h3>첨부 이미지 관리</h3>
           <p class="muted">본문이나 표지에서 제거한 이미지만 삭제할 수 있습니다. 공개 사이트의 이미지에는 영향을 주지 않습니다.</p>
           <button id="media-refresh" type="button">저장하고 목록 새로고침</button>
           <p id="media-count" role="status"></p>
           <div id="media-list" class="media-list"></div>
-        </details>
+        </section>
         <article id="preview-panel" class="post-preview" hidden>
           <header class="post-header">
             <h1 id="preview-title"></h1>

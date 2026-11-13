@@ -803,6 +803,18 @@ test("old private project drafts expose legacy content once and save as ordinary
   assert.equal(result.draft.document.body.split("A task").length, 2);
 });
 
+test("projects with only a title and destination publish without a body", async () => {
+  const destination = "https://example.com/project";
+  const draft = await create(
+    document({ collection: "projects", slug: "linked-project", description: "", body: "", metadata: { redirect: destination } })
+  );
+  const response = await request(`/api/drafts/${draft.id}/publish`, { method: "POST", data: { version: draft.version } });
+  assert.equal(response.status, 200, await response.clone().text());
+  const { draft: published } = await response.json();
+  assert.equal(published.document.metadata.redirect, destination);
+  assert.equal(published.document.body.trim(), "");
+});
+
 test("project cover attachments publish atomically and unsafe paths and links are rejected", async () => {
   const value = await create(document({ collection: "projects" }));
   const image = await (

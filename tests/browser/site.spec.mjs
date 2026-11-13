@@ -224,7 +224,7 @@ test("real Worker/D1 login, save, publish, unpublish, republish and logout", asy
   await page.locator("#title").fill("브라우저 복구 검증");
   await page.locator("#description").fill("로그인과 발행 흐름을 확인하는 테스트입니다.");
   await page.locator("#content-language").selectOption("ko");
-  await page.locator("#extra-settings summary").click();
+  await expect(page.locator("#tags")).toBeVisible();
   await page.locator("#tags").fill("test");
   await page.locator("#slug").fill("browser-smoke");
   await page.getByRole("button", { name: "원문", exact: true }).click();

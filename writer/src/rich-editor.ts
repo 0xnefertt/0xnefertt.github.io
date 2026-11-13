@@ -146,7 +146,13 @@ export function richEditor(options: Options) {
       content: `${editorBody(value)}<p></p>`,
       editable: !locked,
       editorProps: {
-        attributes: { role: "textbox", "aria-label": "글 본문", "aria-multiline": "true", spellcheck: "true" },
+        attributes: {
+          role: "textbox",
+          "aria-label": "글 본문",
+          "aria-required": String(el<HTMLTextAreaElement>("body").required),
+          "aria-multiline": "true",
+          spellcheck: "true",
+        },
         transformPastedHTML: cleanHtml,
         handlePaste: (view, event) => {
           if (uploads(event)) return true;

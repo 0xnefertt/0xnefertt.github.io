@@ -54,7 +54,6 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
   let busy = false;
   let savedPaths = new Set<string>();
   let section: (typeof sections)[number] = "posts";
-  const expanded = new WeakSet<object>();
   const message = (value: string) => {
     el("settings-status").textContent = value;
   };
@@ -129,14 +128,15 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
     label: string,
     value: string,
     update: (value: string) => void,
-    options: { readonly?: boolean; max?: number; placeholder?: string } = {}
+    options: { readonly?: boolean; max?: number; placeholder?: string; optional?: boolean } = {}
   ) {
     const wrapper = document.createElement("label");
-    wrapper.textContent = label;
+    wrapper.textContent = options.optional || options.readonly ? label : `${label} *`;
     const field = document.createElement("input");
     field.value = value;
     field.maxLength = options.max ?? 100;
     field.readOnly = options.readonly ?? false;
+    field.required = !options.optional && !field.readOnly;
     field.placeholder = options.placeholder ?? "";
     field.addEventListener("input", () => {
       update(field.value);
@@ -173,16 +173,11 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
     controls.append(up, down, remove);
     return controls;
   }
-  function groupShell(group: object, name: string, count: string, index: number) {
-    const card = document.createElement("details");
+  function groupShell(name: string, count: string) {
+    const card = document.createElement("section");
     card.className = "manager-group";
-    const summary = document.createElement("summary");
+    const summary = document.createElement("h3");
     summary.textContent = `${name || "새 그룹"} · ${count}`;
-    card.open = expanded.has(group) || index === 0;
-    card.addEventListener("toggle", () => {
-      if (card.open) expanded.add(group);
-      else expanded.delete(group);
-    });
     const content = document.createElement("div");
     content.className = "manager-group-body";
     card.append(summary, content);
@@ -200,7 +195,7 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
       (next) => {
         value.name_ko = next;
       },
-      { placeholder: "비워 두면 영어 이름을 표시합니다." }
+      { optional: true, placeholder: "비워 두면 영어 이름을 표시합니다." }
     );
     const slug = input(
       "주소",
@@ -233,7 +228,7 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
     container.replaceChildren();
     if (!settings) return;
     settings.categories.forEach((group, index) => {
-      const { card, content, summary } = groupShell(group, categoryName(group, "ko"), `하위 ${group.children.length}개`, index);
+      const { card, content, summary } = groupShell(categoryName(group, "ko"), `하위 ${group.children.length}개`);
       const parentRow = categoryRow(group, group.slug);
       parentRow.addEventListener("input", () => {
         summary.textContent = `${categoryName(group, "ko") || "새 그룹"} · 하위 ${group.children.length}개`;
@@ -250,7 +245,6 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
       content.append(
         action("＋ 하위 카테고리 추가", () => {
           group.children.push({ name: "", slug: "" });
-          expanded.add(group);
         })
       );
       container.append(card);
@@ -261,7 +255,7 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
     container.replaceChildren();
     if (!settings) return;
     settings.favorites.forEach((group, index) => {
-      const { card, content, summary } = groupShell(group, group.name, `링크 ${group.items.length}개`, index);
+      const { card, content, summary } = groupShell(group.name, `링크 ${group.items.length}개`);
       const heading = document.createElement("div");
       heading.className = "manager-group-heading";
       const name = input("그룹 이름", group.name, (next) => {
@@ -276,7 +270,7 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
         row.append(
           input("링크 이름", item.title, (next) => (item.title = next), { max: 200 }),
           input("링크 주소", item.href, (next) => (item.href = next), { max: 2000, placeholder: "https://example.com" }),
-          input("설명 (선택)", item.note ?? "", (next) => (item.note = next), { max: 500 }),
+          input("설명 (선택)", item.note ?? "", (next) => (item.note = next), { max: 500, optional: true }),
           order(group.items, itemIndex, `${item.title || "링크"}`)
         );
         content.append(row);
@@ -284,7 +278,6 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
       content.append(
         action("＋ 링크 추가", () => {
           group.items.push({ href: "", title: "" });
-          expanded.add(group);
         })
       );
       container.append(card);
@@ -300,8 +293,10 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
         const key = keys.pop()!;
         const parent = keys.reduce((value, key) => value[key] as Record<string, unknown>, settings as unknown as Record<string, unknown>);
         const label = document.createElement("label");
-        label.textContent = field.label;
+        const required = field.type !== "checkbox" && !["email", "githubUrl", "xUrl", "defaultOgImage"].includes(field.path);
+        label.textContent = required ? `${field.label} *` : field.label;
         const control = field.type === "textarea" ? document.createElement("textarea") : document.createElement("input");
+        control.required = required;
         control.id = `setting-${field.path.replaceAll(".", "-")}`;
         if (control.tagName === "TEXTAREA") {
           const textarea = control as HTMLTextAreaElement;
@@ -399,7 +394,6 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
     if (!settings) return;
     const group = { children: [], name: "", slug: "" };
     settings.categories.push(group);
-    expanded.add(group);
     dirty();
     render();
   });
@@ -407,7 +401,6 @@ export function siteManager(api: Api, leave: () => Promise<boolean>, selectConte
     if (!settings) return;
     const group = { items: [], name: "" };
     settings.favorites.push(group);
-    expanded.add(group);
     dirty();
     render();
   });

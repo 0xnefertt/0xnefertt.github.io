@@ -14,6 +14,7 @@ const fields: Record<Exclude<ContentCollection, "blog">, Field[]> = {
     { key: "cover", label: "표지 이미지", placeholder: "이미지 주소 또는 아래 첨부 버튼" },
   ],
   projects: [
+    { key: "redirect", label: "프로젝트 링크", placeholder: "https://", note: "주소를 입력하면 목록에서 바로 이동합니다. 본문은 비워도 됩니다." },
     { key: "category", label: "프로젝트 분류", placeholder: "웹사이트, 앱, 연구" },
     { key: "img", label: "대표 이미지", placeholder: "이미지 주소 또는 아래 첨부 버튼" },
     { key: "status", label: "진행 상태", placeholder: "진행 중, 완료" },

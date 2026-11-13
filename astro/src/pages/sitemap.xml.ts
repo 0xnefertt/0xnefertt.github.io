@@ -28,12 +28,7 @@ export const GET: APIRoute = async ({ site }) => {
     if (route.view === "index") lastmod = latestLastmod([...(about ? [modified(about)] : []), ...published.map(modified)]);
     if (route.view === "blog/index") lastmod = latestLastmod(published.map(modified));
     if (route.view === "books/index") lastmod = latestLastmod(inLocale(books, route.locale).map(modified));
-    if (route.view === "projects/index")
-      lastmod = latestLastmod(
-        inLocale(projects, route.locale)
-          .filter((entry) => !entry.data.redirect)
-          .map(modified)
-      );
+    if (route.view === "projects/index") lastmod = latestLastmod(inLocale(projects, route.locale).map(modified));
     return {
       location: new URL(route.path, base).href,
       lastmod,

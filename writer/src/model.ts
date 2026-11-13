@@ -157,6 +157,8 @@ function validateCollectionMetadata(doc: PostDocument): void {
       return false;
     }
   }
+  if (kind === "projects" && metadata.redirect !== undefined && !webUrl(metadata.redirect))
+    throw new HttpError(422, "프로젝트 링크는 http 또는 https 주소로 입력해 주세요.");
   if (metadata.buy_link !== undefined && !webUrl(metadata.buy_link)) throw new HttpError(422, "구매 링크는 http 또는 https 주소로 입력해 주세요.");
   for (const value of contentImages(metadata)) {
     if (value === undefined || webUrl(value)) continue;
@@ -224,8 +226,8 @@ export function translationDraft(source: PostDocument): PostDocument {
   if (source.body.includes("/api/media/") || JSON.stringify(source.metadata).includes("/api/media/"))
     throw new HttpError(422, "첨부 사진을 포함한 원본 변경을 먼저 발행한 뒤 번역본을 추가해 주세요.");
   const metadata = { ...source.metadata, lang: documentLanguage(source) === "en" ? "ko" : "en", translation_key: documentTranslationKey(source) };
-  for (const key of ["canonical", "canonical_url", "redirect", "external_source", "draft", "last_updated"])
-    delete (metadata as Record<string, unknown>)[key];
+  for (const key of ["canonical", "canonical_url", "external_source", "draft", "last_updated"]) delete (metadata as Record<string, unknown>)[key];
+  if (documentCollection(source) !== "projects") delete (metadata as Record<string, unknown>).redirect;
   if (documentCollection(source) === "books") delete (metadata as Record<string, unknown>).date;
   return {
     ...source,
@@ -310,7 +312,8 @@ export function validateDocument(value: unknown, publishing = false): PostDocume
       throw new HttpError(422, "글 주소는 영문 소문자, 숫자, 하이픈으로 입력해 주세요.");
     if (collection === "blog" && !/^[a-z0-9-]+(?:\/[a-z0-9-]+)?$/.test(doc.category)) throw new HttpError(422, "카테고리를 선택해 주세요.");
     validateCollectionMetadata(doc);
-    if (doc.metadata.redirect || doc.metadata.external_source) throw new HttpError(422, "외부 링크 글은 저장소에서 직접 수정해 주세요.");
+    if ((collection !== "projects" && doc.metadata.redirect) || doc.metadata.external_source)
+      throw new HttpError(422, "외부 링크 글은 저장소에서 직접 수정해 주세요.");
   }
   return publishing ? editableDocument(doc) : doc;
 }

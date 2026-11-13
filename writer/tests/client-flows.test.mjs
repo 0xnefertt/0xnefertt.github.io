@@ -406,13 +406,13 @@ test("book cover uploads accept 5 MiB, save the preview reference, and reject la
     await settle();
   };
   await select(5 * 1024 * 1024);
-  assert.equal(ui.calls.filter((call) => call.path.endsWith("/media")).length, 1);
+  assert.equal(ui.calls.filter((call) => call.method === "POST" && call.path.endsWith("/media")).length, 1);
   assert.equal(ui.drafts.get("draft-1").document.metadata.cover, "/api/media/12345678-1234-1234-1234-123456789012");
   await ui.click("preview-tab");
   assert.equal(document.getElementById("preview-cover").hidden, false);
   assert.equal(document.getElementById("preview-cover").dataset.source, ui.drafts.get("draft-1").document.metadata.cover);
   await select(5 * 1024 * 1024 + 1);
-  assert.equal(ui.calls.filter((call) => call.path.endsWith("/media")).length, 1);
+  assert.equal(ui.calls.filter((call) => call.method === "POST" && call.path.endsWith("/media")).length, 1);
   assert.match(document.body.textContent, /5MB 이하/);
 });
 
@@ -443,7 +443,7 @@ test("adding another language retains the original book body, image positions an
   assert.equal(translated.sourcePath, null);
   assert.equal(translated.title, "");
   assert.equal(original.document.body, originalBody);
-  assert.equal(ui.calls.filter((call) => call.path.endsWith("/media")).length, 0);
+  assert.equal(ui.calls.filter((call) => call.method === "POST" && call.path.endsWith("/media")).length, 0);
   await ui.click("preview-tab");
   const images = [...document.querySelectorAll("#preview-body img")].map((img) => img.getAttribute("src"));
   assert.deepEqual(images, ["https://0xnefertt.github.io/assets/img/photo.png", "https://example.com/second.png"]);
@@ -526,10 +526,7 @@ test("attachment management protects used covers and deletes unused images only 
   };
   ui.media.set(file.id, file);
   ui.edit("metadata-cover", file.url);
-  const panel = document.getElementById("media-manager");
-  panel.open = true;
-  panel.dispatchEvent(new dom.window.Event("toggle"));
-  await settle();
+  await ui.click("media-refresh");
   assert.match(document.getElementById("media-count").textContent, /1\/20/);
   assert.equal(document.querySelector("#media-list button").disabled, true);
   ui.edit("metadata-cover", "");

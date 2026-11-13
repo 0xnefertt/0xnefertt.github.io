@@ -13,57 +13,53 @@ const categories = pageDef?.data.display_categories;
 
 const groupedProjects =
   categories && categories.length > 0
-    ? categories.map((category) => ({
-        category,
-        items: allProjects.filter((project) => project.data.category === category),
-      }))
+    ? [
+        ...categories.map((category) => ({
+          category,
+          items: allProjects.filter((project) => project.data.category === category),
+        })),
+        { category: undefined, items: allProjects.filter((project) => !categories.includes(project.data.category ?? "")) },
+      ]
     : [{ category: undefined, items: allProjects }];
 const visibleGroups = groupedProjects.filter((group) => group.items.length > 0);
 ---
 
 <Layout
   title={t(locale, "nav_projects")}
-  description={localeText(
-    locale,
-    pageDef?.data.description ?? "Selected project case studies",
-    "직접 만들고 개선한 웹사이트와 자동화 프로젝트의 구현 과정, 결과와 배운 점을 소개합니다."
-  )}
+  description={localeText(locale, pageDef?.data.description ?? "Selected project case studies", "직접 만든 프로젝트와 실험을 둘러보세요.")}
   currentPath={l("/projects/")}
 >
-  <section class="page-header project-portfolio-header">
-    <p class="eyebrow">Portfolio</p>
+  <header class="page-header">
     <h1>{t(locale, "nav_projects")}</h1>
-    <p>
-      {localeText(
-        locale,
-        pageDef?.data.description ?? "A curated collection of things I built, improved, and learned from.",
-        "만들고 개선하며 배운 프로젝트와 실험을 기록합니다."
-      )}
-    </p>
-  </section>
+  </header>
 
   {visibleGroups.length === 0 && <p>{localeText(locale, "No English projects have been published yet.", "아직 한국어 프로젝트가 없습니다.")}</p>}
   {visibleGroups.map((group) => (
     <section class="project-section">
-      {group.category && <h2 class="section-title">{group.category}</h2>}
-      <div class="project-grid">
+      {visibleGroups.length > 1 && group.category && <h2 class="section-title">{group.category}</h2>}
+      <div class="project-list">
         {group.items.map((project) => {
           const route = getProjectRoute(project);
           const image = normalizeAssetPath(project.data.img);
+          const Heading = visibleGroups.length > 1 && group.category ? "h3" : "h2";
 
           return (
             <article class="project-card">
-              <a
-                class="project-card-link"
-                href={route.href}
-                target={route.external ? "_blank" : undefined}
-                rel={route.external ? "noreferrer" : undefined}
-              >
-                {image && <img class="project-image" src={image} alt={`${project.data.title} thumbnail`} loading="lazy" />}
-                <div class="project-content">
-                  <h2>{project.data.title}</h2>
+              {image && (
+                <div class="project-preview">
+                  <img class="project-image" src={image} alt="" loading="lazy" />
                 </div>
-              </a>
+              )}
+              <div class="project-content">
+                {project.data.period && <p class="project-period">{project.data.period}</p>}
+                <Heading>
+                  <a class="project-card-link" href={route.href}>
+                    {project.data.title} <span aria-hidden="true">{route.external ? "↗" : "→"}</span>
+                  </a>
+                </Heading>
+                {project.data.description && <p class="project-description">{project.data.description}</p>}
+                {!!project.data.stack?.length && <p class="project-technologies">{project.data.stack.join(" · ")}</p>}
+              </div>
             </article>
           );
         })}

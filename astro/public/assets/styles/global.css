@@ -873,7 +873,6 @@ main {
 }
 
 .post-list,
-.book-list,
 .repo-list {
   list-style: none;
   margin: 0;
@@ -883,7 +882,6 @@ main {
 }
 
 .post-item,
-.book-item,
 .repo-item {
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -893,7 +891,6 @@ main {
 
 .post-item h2,
 .post-item h3,
-.book-item h2,
 .repo-item h2 {
   margin: 0;
   font-size: 1.06rem;
@@ -939,7 +936,6 @@ main {
 }
 
 .post-meta,
-.book-meta,
 .project-meta {
   margin-top: 0.33rem;
   color: var(--text-muted);
@@ -978,12 +974,6 @@ main {
   text-decoration: none;
   background: color-mix(in srgb, var(--surface-muted), #dce7de 50%);
   color: var(--text);
-}
-
-@media (max-width: 620px) {
-  .project-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 .blog-header h1,
@@ -1369,84 +1359,86 @@ p[data-image-pair="true"] > img:only-child {
   color: var(--accent);
 }
 
-.project-portfolio-header {
-  max-width: 720px;
-}
-
 .project-section {
-  margin-top: 1.4rem;
+  margin-block: 1.5rem;
 }
 
-.project-grid {
+.project-list {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
+  gap: 1.75rem;
 }
 
 .project-card {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface);
-  overflow: hidden;
-  transition:
-    border-color 0.18s ease,
-    box-shadow 0.18s ease,
-    transform 0.18s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: clamp(0.85rem, 2.5vw, 1.5rem);
 }
 
-.project-card:hover {
-  border-color: color-mix(in srgb, var(--accent), white 58%);
-  box-shadow: 0 14px 32px color-mix(in srgb, var(--text), transparent 88%);
-  transform: translateY(-2px);
-}
-
-.project-card-link {
-  display: block;
-  color: inherit;
-  text-decoration: none;
-  height: 100%;
+.project-preview {
+  flex: 0 0 clamp(5rem, 21vw, 11.5rem);
 }
 
 .project-image {
-  width: 100%;
-  height: 132px;
-  object-fit: cover;
   display: block;
-  border-bottom: 1px solid var(--line);
-  background: var(--surface-muted);
+  width: 100%;
+  aspect-ratio: 1.5;
+  object-fit: contain;
+  border-radius: 5px;
 }
 
 .project-content {
-  display: grid;
-  padding: 0.72rem 0.82rem;
+  min-width: 0;
+  max-width: 62ch;
 }
 
-.project-card-topline {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.42rem;
-}
-
-.project-card-topline span {
-  border: 1px solid color-mix(in srgb, var(--line), var(--accent-soft) 35%);
-  border-radius: 999px;
-  background: var(--surface-muted);
+.project-period {
+  margin: 0 0 0.2rem;
   color: var(--text-muted);
-  font-size: 0.76rem;
-  line-height: 1.2;
-  padding: 0.16rem 0.48rem;
+  font:
+    0.82rem/1.5 "IBM Plex Mono",
+    monospace;
 }
 
-.project-content h2 {
+.project-content :is(h2, h3) {
   margin: 0;
-  color: var(--text);
-  font-size: 0.98rem;
-  line-height: 1.24;
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  line-height: 1.3;
 }
 
-.project-content .project-meta {
-  margin: -0.18rem 0 0;
-  line-height: 1.5;
+.project-card-link {
+  color: var(--text);
+}
+
+.project-card-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.project-card-link span,
+.project-card:hover .project-card-link,
+.project-card-link:focus-visible {
+  color: var(--accent);
+}
+
+.project-description {
+  margin: 0.35rem 0 0;
+  line-height: 1.55;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.project-technologies {
+  margin: 0.45rem 0 0;
+  color: var(--accent);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 640px) {
+  .project-card {
+    align-items: flex-start;
+  }
 }
 
 .project-role {
@@ -1550,8 +1542,8 @@ p[data-image-pair="true"] > img:only-child {
 
 .project-detail-image {
   width: 100%;
-  max-height: 360px;
-  object-fit: cover;
+  max-height: 440px;
+  object-fit: contain;
   display: block;
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -1614,19 +1606,185 @@ p[data-image-pair="true"] > img:only-child {
   border-top: 1px solid var(--line);
 }
 
-.book-cover {
-  width: 74px;
-  aspect-ratio: 2 / 3;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid var(--line);
+.bookshelf-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
-.book-row {
+.bookshelf-filter {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.bookshelf-filter select {
+  margin-inline-start: 0.35rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 0.4rem;
+  color: var(--text);
+  background: var(--surface);
+  font: inherit;
+}
+
+.bookshelf {
+  --cover-height: clamp(8.75rem, 21vw, 11rem);
+  --plank-height: 0.65rem;
+  container-type: inline-size;
+  margin-block: 1.65rem 2rem;
+}
+
+.shelf-books {
+  list-style: none;
   display: grid;
-  grid-template-columns: 74px 1fr;
-  gap: 0.9rem;
-  align-items: start;
+  grid-template-columns: repeat(auto-fill, minmax(min(50%, 10.5rem), 1fr));
+  row-gap: 2rem;
+  overflow-x: clip;
+  padding: 0;
+  margin: 0;
+}
+
+.shelf-books li {
+  position: relative;
+  min-width: 0;
+  padding-inline: 0.65rem;
+  text-align: center;
+}
+
+.shelf-books li::before {
+  content: "";
+  position: absolute;
+  inset: var(--cover-height) auto auto 0;
+  width: 100%;
+  height: var(--plank-height);
+  background:
+    repeating-linear-gradient(0deg, transparent 0 2px, #5a392212 3px, transparent 4px 9px),
+    linear-gradient(to bottom, #d8b78e 0 28%, #b78d66 30%, #9e7352 100%);
+  pointer-events: none;
+}
+
+/* Extend the plank past the last book when its row is only partly filled. */
+.shelf-books li:nth-last-child(1 of :not([hidden]))::before {
+  width: 100cqw;
+}
+
+.shelf-book {
+  display: block;
+  color: var(--text);
+}
+
+.shelf-cover {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: var(--cover-height);
+}
+
+.shelf-volume {
+  position: relative;
+  display: block;
+  max-width: 100%;
+  border-radius: 1px 3px 2px 1px;
+  background: #d9ccad;
+  box-shadow: 2px 1px 3px #20130840;
+}
+
+.shelf-jacket {
+  display: block;
+  position: relative;
+  max-width: 100%;
+  max-height: var(--cover-height);
+  border-radius: inherit;
+}
+
+.shelf-cloth-cover {
+  display: grid;
+  place-content: center;
+  height: var(--cover-height);
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  padding: 0.8rem;
+  border-left: 5px solid #344a41;
+  background: #486256;
+  color: #fff7e3;
+  font-family: Georgia, serif;
+  overflow-wrap: anywhere;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .shelf-volume::before,
+  .shelf-volume::after {
+    content: "";
+    position: absolute;
+    inset: 1px 1px 1px 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #cebea1, #faf4e6 16%, #fffaf0);
+    box-shadow: 1px 0 2px #49351d42;
+  }
+
+  .shelf-volume::before {
+    --turn: -19deg;
+    --leaf-delay: 85ms;
+  }
+
+  .shelf-volume::after {
+    --turn: -40deg;
+    --leaf-delay: 45ms;
+  }
+
+  .shelf-jacket {
+    --turn: -63deg;
+    --leaf-delay: 0ms;
+    z-index: 1;
+  }
+
+  .shelf-volume::before,
+  .shelf-volume::after,
+  .shelf-jacket {
+    transform-origin: left center;
+    transform: perspective(650px) rotateY(calc(var(--turn) * var(--open-book, 0)));
+    transition: transform 380ms ease-in-out var(--leaf-delay);
+    animation: shelf-riffle 850ms ease-in-out calc(var(--shelf-delay) + var(--leaf-delay));
+  }
+
+  .shelf-book:focus-visible {
+    --open-book: 1;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .shelf-book:hover {
+      --open-book: 1;
+    }
+  }
+}
+
+@keyframes shelf-riffle {
+  0%,
+  100% {
+    transform: perspective(650px) rotateY(calc(var(--turn) * var(--open-book, 0)));
+  }
+  45% {
+    transform: perspective(650px) rotateY(var(--turn));
+  }
+}
+
+.shelf-title {
+  display: block;
+  margin-top: calc(var(--plank-height) + 0.65rem);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
+  word-break: keep-all;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+.shelf-author {
+  margin: 0.15rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
 }
 
 .social-links {
@@ -1991,9 +2149,5 @@ p[data-image-pair="true"] > img:only-child {
 
   .project-summary-panel {
     position: static;
-  }
-
-  .project-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

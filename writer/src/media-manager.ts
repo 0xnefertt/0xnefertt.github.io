@@ -14,7 +14,6 @@ export function mediaManager(options: {
   release: (source: string) => void;
   report: (error: unknown) => void;
 }) {
-  const panel = document.getElementById("media-manager") as HTMLDetailsElement;
   const list = document.getElementById("media-list")!;
   const count = document.getElementById("media-count")!;
   const dialog = document.getElementById("media-delete-dialog") as HTMLDialogElement;
@@ -24,7 +23,7 @@ export function mediaManager(options: {
 
   async function load() {
     const draft = options.current();
-    if (!draft || !panel.open) return;
+    if (!draft) return;
     const requestRevision = ++revision;
     count.textContent = "첨부 이미지를 불러오는 중…";
     list.replaceChildren();
@@ -76,9 +75,6 @@ export function mediaManager(options: {
       options.lock(false);
     }
   }
-  panel.addEventListener("toggle", () => {
-    if (panel.open) void reload().catch(options.report);
-  });
   refresh.addEventListener("click", () => void reload().catch(options.report));
   dialog.addEventListener("close", () => {
     const selection = pending;
@@ -106,7 +102,7 @@ export function mediaManager(options: {
       pending = null;
       list.replaceChildren();
       count.textContent = "";
-      if (panel.open) void load().catch(options.report);
+      void load().catch(options.report);
     },
     setLocked: (locked: boolean) => {
       refresh.disabled = locked;
