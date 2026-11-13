@@ -27,7 +27,7 @@ Personal site and blog built with Astro.
 
 ## Prerequisites
 
-- Node.js 22.12+ (CI: 22.22.3)
+- Node.js 22.23.4+ (CI: 22.23.4)
 - npm 10+
 
 ## Quick start
