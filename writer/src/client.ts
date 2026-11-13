@@ -264,6 +264,7 @@ function showDraft(value: Draft) {
   translation.value = documentTranslationKey(doc);
   language.disabled = Boolean(doc.sourcePath);
   translation.disabled = false;
+  element("add-translation").hidden = !doc.sourcePath || selectedCollection === "about";
   element<HTMLButtonElement>("add-translation").disabled = !doc.sourcePath;
   title.value = doc.title;
   description.value = doc.description;
@@ -286,11 +287,7 @@ function showDraft(value: Draft) {
   element("empty").hidden = true;
   element("editor").hidden = false;
   element("notice").hidden = true;
-  element("document-state").textContent = doc.sourcePath
-    ? doc.metadata.draft === true
-      ? "발행 취소된 작업본 · 다시 발행하면 사이트에 공개됩니다."
-      : "발행된 글의 작업본 · 저장한 변경은 다시 발행해야 반영됩니다."
-    : "비공개 초안";
+  element("document-state").textContent = doc.sourcePath ? (doc.metadata.draft === true ? "발행 취소됨" : "발행본 편집 중") : "비공개 초안";
   element("unpublish").hidden = !doc.sourcePath || selectedCollection === "about" || doc.metadata.draft === true;
   element("publish").textContent = doc.sourcePath && doc.metadata.draft === true ? "다시 발행" : "발행하기";
   attachments.changed();
@@ -406,7 +403,7 @@ function updateCoverThumbnail() {
   image.hidden = true;
   image.removeAttribute("src");
   if (!source) {
-    label.textContent = selectedCollection === "about" ? "등록된 프로필 사진이 없습니다." : "등록된 표지가 없습니다.";
+    label.textContent = "";
     return;
   }
   if (!safeImage(source)) {
@@ -415,7 +412,7 @@ function updateCoverThumbnail() {
   }
   label.textContent = "이미지를 불러오는 중…";
   image.onload = () => {
-    if (image.dataset.source === source) label.textContent = "이미지 확인됨 · 저장한 변경은 발행해야 사이트에 반영됩니다.";
+    if (image.dataset.source === source) label.textContent = "";
   };
   image.onerror = () => {
     if (image.dataset.source === source) {
@@ -551,15 +548,14 @@ function renderList() {
     : drafts.map((draft) => ({
         label: draft.title || `제목 없는 ${contentLabels[selectedCollection]}`,
         language: draft.language,
-        detail: `${draft.language === "ko" ? "한국어" : draft.language === "en" ? "English" : "언어 미지정"} · ${
-          showingTrash
-            ? "휴지통 · 클릭하여 복원"
-            : draft.sourcePath
-              ? draft.published === false
-                ? "발행 취소된 작업본"
-                : "발행된 글의 작업본"
-              : "비공개 초안"
-        } · ${new Date(draft.updated).toLocaleDateString("ko-KR")}`,
+        detail: [
+          showingTrash && "복원",
+          languageFilter.value === "all" && (draft.language === "ko" ? "한국어" : draft.language === "en" ? "English" : "언어 미지정"),
+          draft.sourcePath && (draft.published === false ? "발행 취소" : "발행본"),
+          new Date(draft.updated).toLocaleDateString("ko-KR"),
+        ]
+          .filter(Boolean)
+          .join(" · "),
         action: () => (showingTrash ? restoreDraft(draft.id, draft.version) : openDraft(draft.id)),
         selected: current?.id === draft.id,
       }));

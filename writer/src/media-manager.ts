@@ -14,6 +14,7 @@ export function mediaManager(options: {
   release: (source: string) => void;
   report: (error: unknown) => void;
 }) {
+  const panel = document.getElementById("media-manager")!;
   const list = document.getElementById("media-list")!;
   const count = document.getElementById("media-count")!;
   const dialog = document.getElementById("media-delete-dialog") as HTMLDialogElement;
@@ -29,11 +30,9 @@ export function mediaManager(options: {
     list.replaceChildren();
     const result = await options.api<{ media: Attachment[] }>(`/api/drafts/${draft.id}/media`);
     if (requestRevision !== revision || options.current()?.id !== draft.id) return;
+    panel.hidden = result.media.length === 0;
     count.textContent = `${result.media.length}/20개 · ${(result.media.reduce((sum, file) => sum + file.size, 0) / 1024 / 1024).toFixed(1)} MB`;
-    if (!result.media.length) {
-      list.textContent = "비공개 첨부 이미지가 없습니다.";
-      return;
-    }
+
     for (const file of result.media) {
       const row = document.createElement("div");
       row.className = "media-item";
@@ -99,6 +98,7 @@ export function mediaManager(options: {
   return {
     changed: () => {
       revision++;
+      panel.hidden = true;
       pending = null;
       list.replaceChildren();
       count.textContent = "";

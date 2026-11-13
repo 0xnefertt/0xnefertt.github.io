@@ -324,7 +324,10 @@ test("clearing an explicit translation key and changing a draft language survive
   const filter = document.getElementById("language-filter");
   filter.value = "ko";
   filter.dispatchEvent(new dom.window.Event("change"));
-  assert.match(document.getElementById("post-list").textContent, /한국어/);
+  assert.equal(document.querySelectorAll("#post-list .post-item").length, 1);
+  filter.value = "en";
+  filter.dispatchEvent(new dom.window.Event("change"));
+  assert.equal(document.querySelectorAll("#post-list .post-item").length, 0);
 });
 
 test("a custom book publication date survives saving and reopening without restoring removed inputs", async () => {
@@ -349,7 +352,7 @@ test("cover thumbnails appear while writing, report failures, and can be cleared
   const ui = await setup();
   await ui.click("manage-books");
   await ui.click("new-post");
-  assert.match(document.getElementById("cover-status").textContent, /등록된 표지가 없습니다/);
+  assert.equal(document.getElementById("cover-status").textContent, "");
   ui.edit("metadata-cover", "assets/img/cover.jpg");
   await settle();
   const thumbnail = document.getElementById("cover-thumbnail");
@@ -357,7 +360,7 @@ test("cover thumbnails appear while writing, report failures, and can be cleared
   assert.equal(thumbnail.hidden, false);
   assert.equal(document.getElementById("preview-panel").hidden, true);
   thumbnail.dispatchEvent(new dom.window.Event("load"));
-  assert.match(document.getElementById("cover-status").textContent, /이미지 확인됨/);
+  assert.equal(document.getElementById("cover-status").textContent, "");
   await ui.click("save");
   ui.edit("metadata-cover", "");
   await ui.click("save");
@@ -544,5 +547,5 @@ test("attachment management protects used covers and deletes unused images only 
   const deletion = ui.calls.find((call) => call.method === "DELETE" && call.path.includes("/media/"));
   assert.equal(deletion.payload.version, expectedVersion);
   assert.equal(ui.drafts.get("draft-1").version, expectedVersion + 1);
-  assert.match(document.getElementById("media-list").textContent, /없습니다/);
+  assert.equal(document.getElementById("media-manager").hidden, true);
 });
