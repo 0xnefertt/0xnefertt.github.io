@@ -1,6 +1,9 @@
 import { inferContentLanguage, contentTranslationKey, type ContentLanguage } from "../../shared/content-language";
 import { parseDocument, stringify } from "yaml";
 
+export const MAX_PINNED_POSTS = 5;
+export const PIN_LIMIT_MESSAGE = "더 이상 고정글을 게시할 수 없다.";
+
 export interface PostDocument {
   collection?: ContentCollection;
   title: string;
@@ -227,7 +230,8 @@ export function translationDraft(source: PostDocument): PostDocument {
   if (source.body.includes("/api/media/") || JSON.stringify(source.metadata).includes("/api/media/"))
     throw new HttpError(422, "첨부 사진을 포함한 원본 변경을 먼저 발행한 뒤 번역본을 추가해 주세요.");
   const metadata = { ...source.metadata, lang: documentLanguage(source) === "en" ? "ko" : "en", translation_key: documentTranslationKey(source) };
-  for (const key of ["canonical", "canonical_url", "external_source", "draft", "last_updated"]) delete (metadata as Record<string, unknown>)[key];
+  for (const key of ["canonical", "canonical_url", "external_source", "draft", "last_updated", "pinned"])
+    delete (metadata as Record<string, unknown>)[key];
   if (documentCollection(source) !== "projects") delete (metadata as Record<string, unknown>).redirect;
   if (documentCollection(source) === "books") delete (metadata as Record<string, unknown>).date;
   return {
@@ -284,6 +288,8 @@ export function validateDocument(value: unknown, publishing = false): PostDocume
   }
   if (collection === "about" && !doc.sourcePath?.match(/^_pages\/(?:ko\/)?about\.md$/))
     throw new HttpError(400, "소개 페이지는 기존 소개 글을 불러와 수정해 주세요.");
+  if (doc.metadata.pinned !== undefined && (collection !== "blog" || typeof doc.metadata.pinned !== "boolean"))
+    throw new HttpError(422, "공지 설정을 확인해 주세요.");
   if (doc.metadata.lang !== undefined && doc.metadata.lang !== "en" && doc.metadata.lang !== "ko")
     throw new HttpError(422, "콘텐츠 언어를 선택해 주세요.");
   if (

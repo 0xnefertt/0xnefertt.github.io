@@ -25,6 +25,7 @@ export function configureCollection(kind: ContentCollection, fields: { category:
   element("add-translation").hidden = kind === "about";
   element("new-post").hidden = kind === "about";
   element("blog-category-field").hidden = kind !== "blog";
+  element("pinned-field").hidden = kind !== "blog";
   element("blog-date-field").hidden = kind !== "blog";
   element("book-author-field").hidden = kind !== "books";
   element("title-row").hidden = kind === "about";

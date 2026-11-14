@@ -27,6 +27,7 @@ const blog = defineCollection({
     external_source: z.string().optional(),
     series: z.string().optional(),
     featured: z.coerce.boolean().optional(),
+    pinned: z.boolean().optional(),
     cover: z.string().optional(),
     thumbnail: z.string().optional(),
     gallery: z.union([z.array(z.string()), z.string()]).optional(),

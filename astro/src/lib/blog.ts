@@ -24,6 +24,7 @@ export interface BlogCategoryPath {
 }
 
 export interface BlogSummary {
+  pinned: boolean;
   title: string;
   description?: string;
   date?: Date;
@@ -601,6 +602,11 @@ export function sortPostsDesc(posts: CollectionEntry<"blog">[]): CollectionEntry
   return [...posts].sort((a, b) => safeDate(b.data.date).getTime() - safeDate(a.data.date).getTime());
 }
 
+export function listBlogPosts(posts: CollectionEntry<"blog">[], locale: Locale): CollectionEntry<"blog">[] {
+  const published = sortPostsDesc(getPublishedBlogPosts(posts, locale));
+  return published.sort((a, b) => Number(b.data.pinned === true) - Number(a.data.pinned === true));
+}
+
 export function toBlogSummary(post: CollectionEntry<"blog">): BlogSummary {
   const { year, slug } = getPostRoute(post);
   const { href, external } = getBlogHref(post);
@@ -620,6 +626,7 @@ export function toBlogSummary(post: CollectionEntry<"blog">): BlogSummary {
   }
 
   return {
+    pinned: post.data.pinned === true,
     title: post.data.title,
     description: post.data.description,
     date: post.data.date,

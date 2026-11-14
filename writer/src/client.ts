@@ -1,4 +1,6 @@
 import {
+  MAX_PINNED_POSTS,
+  PIN_LIMIT_MESSAGE,
   documentCollection,
   documentLanguage,
   documentTranslationKey,
@@ -43,6 +45,7 @@ const description = element<HTMLInputElement>("description");
 const body = element<HTMLTextAreaElement>("body");
 const category = element<HTMLSelectElement>("category");
 const tags = element<HTMLInputElement>("tags");
+const pinned = element<HTMLInputElement>("pinned");
 const date = element<HTMLInputElement>("date");
 const language = element<HTMLSelectElement>("content-language");
 const translation = element<HTMLInputElement>("translation-key");
@@ -54,6 +57,7 @@ let dirty = false;
 let conflict = false;
 let locked = false;
 let switching = false;
+let checkingPinFor: string | null = null;
 let saveFlight: Promise<void> | null = null;
 let timer: ReturnType<typeof setTimeout>;
 let drafts: {
@@ -66,7 +70,7 @@ let drafts: {
   trashedAt?: string | null;
   published?: boolean;
 }[] = [];
-let posts: { path: string; sha: string; language: string; published?: boolean }[] | null = null;
+let posts: { path: string; sha: string; language: string; published?: boolean; pinned?: boolean }[] | null = null;
 let showingPosts = false;
 let showingTrash = false;
 let listRevision = 0;
@@ -221,6 +225,10 @@ function read(): PostDocument {
     if (author.value.trim()) metadata.author = author.value.trim();
     else delete metadata.author;
   }
+  if (selectedCollection === "blog") {
+    if (pinned.checked) metadata.pinned = true;
+    else delete metadata.pinned;
+  }
   if (translation.value.trim()) metadata.translation_key = translation.value.trim();
   else delete metadata.translation_key;
   return {
@@ -259,8 +267,10 @@ function setLocked(value: boolean) {
     "about-ko",
   ])
     element<HTMLButtonElement>(id).disabled = value;
+  element<HTMLButtonElement>("publish").disabled = value || (checkingPinFor !== null && checkingPinFor === current?.id);
   element<HTMLButtonElement>("add-translation").disabled = value || !current?.document.sourcePath;
-  for (const field of [title, author, projectLink, description, body, category, tags, date, slug, language, translation]) field.disabled = value;
+  for (const field of [title, author, projectLink, description, body, category, tags, pinned, date, slug, language, translation])
+    field.disabled = value;
   element<HTMLSelectElement>("category-parent").disabled = value;
   if (current?.document.sourcePath) {
     slug.disabled = true;
@@ -295,6 +305,10 @@ function showDraft(value: Draft) {
     composer.load(doc.body);
   }
   date.value = doc.date;
+  checkingPinFor = null;
+  element<HTMLButtonElement>("publish").disabled = locked;
+  pinned.disabled = locked;
+  pinned.checked = doc.metadata.pinned === true;
   tags.value = doc.tags.join(", ");
   slug.value = doc.slug;
   if (selectedCollection === "blog" && ![...category.options].some((item) => item.value === doc.category))
@@ -391,6 +405,39 @@ for (const input of [title, author, projectLink, description, body, category, ta
     }
     scheduleSave();
   });
+pinned.addEventListener("click", (event) => {
+  if (!pinned.checked) {
+    scheduleSave();
+    return;
+  }
+  event.preventDefault();
+  const draft = current;
+  if (!draft || locked) return;
+  checkingPinFor = draft.id;
+  pinned.disabled = true;
+  element<HTMLButtonElement>("publish").disabled = true;
+  void (async () => {
+    try {
+      const result = await api<{ posts: NonNullable<typeof posts> }>("/api/posts?collection=blog");
+      if (checkingPinFor !== draft.id || current?.id !== draft.id || locked || switching) return;
+      const others = result.posts.filter((post) => post.published && post.pinned && post.path !== draft.document.sourcePath);
+      if (others.length >= MAX_PINNED_POSTS) {
+        window.alert(PIN_LIMIT_MESSAGE);
+        return;
+      }
+      pinned.checked = true;
+      scheduleSave();
+    } catch (error) {
+      if (current?.id === draft.id) report(error);
+    } finally {
+      if (checkingPinFor === draft.id) {
+        checkingPinFor = null;
+        pinned.disabled = locked;
+        element<HTMLButtonElement>("publish").disabled = locked;
+      }
+    }
+  })();
+});
 body.addEventListener("compositionstart", () => clearTimeout(timer));
 body.addEventListener("compositionend", scheduleSave);
 title.addEventListener("blur", () => {
@@ -965,6 +1012,9 @@ dialog.addEventListener("close", () => {
       element("post-tab").setAttribute("aria-pressed", "false");
       await refreshDrafts();
       status("발행 완료 · 사이트 반영 대기");
+    } catch (error) {
+      if (error instanceof ApiError && error.message === PIN_LIMIT_MESSAGE) window.alert(PIN_LIMIT_MESSAGE);
+      throw error;
     } finally {
       setLocked(false);
     }

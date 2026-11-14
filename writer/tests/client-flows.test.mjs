@@ -57,7 +57,7 @@ function deferred() {
   return { promise, resolve };
 }
 
-async function setup() {
+async function setup({ publishedNotices = [] } = {}) {
   dom = new JSDOM(markup, { url: "http://localhost/", pretendToBeVisual: true });
   for (const key of [
     "window",
@@ -149,7 +149,12 @@ async function setup() {
     if (url.pathname === "/api/posts") {
       const kind = url.searchParams.get("collection");
       if (pendingList?.kind === kind) await pendingList.promise;
-      return response({ posts: [{ path: kind === "books" ? "_books/book.md" : "_posts/study-log/post.md", sha: "fixture", language: "en" }] });
+      return response({
+        posts: [
+          ...(kind === "blog" ? publishedNotices : []),
+          { path: kind === "books" ? "_books/book.md" : "_posts/study-log/post.md", sha: "fixture", language: "en" },
+        ],
+      });
     }
     if (url.pathname === "/api/drafts" && !payload) {
       if (pendingDrafts?.kind === url.searchParams.get("collection")) await pendingDrafts.promise;
@@ -270,6 +275,24 @@ test("late published-list responses cannot replace another collection's library"
   assert.match(document.getElementById("post-list").textContent, /book/);
   assert.doesNotMatch(document.getElementById("post-list").textContent, /post\.md|study-log/);
   assert.ok(ui.calls.some((call) => call.path === "/api/posts" && call.collection === "books"));
+});
+
+test("notice selection alerts at capacity, then saves and clears the flag when a slot opens", async () => {
+  const publishedNotices = Array.from({ length: 5 }, (_, n) => ({ path: `notice-${n}`, published: true, pinned: true }));
+  const ui = await setup({ publishedNotices });
+  const messages = [];
+  window.alert = (message) => messages.push(message);
+  await ui.click("new-post");
+  await ui.click("pinned");
+  assert.deepEqual(messages, ["더 이상 고정글을 게시할 수 없다."]);
+  assert.equal(document.getElementById("pinned").checked, false);
+  publishedNotices.pop();
+  await ui.click("pinned");
+  await ui.click("save");
+  assert.equal(ui.drafts.get("draft-1").document.metadata.pinned, true);
+  await ui.click("pinned");
+  await ui.click("save");
+  assert.equal(ui.drafts.get("draft-1").document.metadata.pinned, undefined);
 });
 
 test("late draft-list responses cannot replace another collection's library", async () => {

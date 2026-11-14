@@ -28,9 +28,11 @@ let calls = [];
 const settingsSha = "1".repeat(40);
 let configuredSettings;
 let auth;
+const noticeSources = new Map();
 let sourceBlob = existing;
 let sourceRevision = originalSha;
 afterEach(() => {
+  noticeSources.clear();
   sourceBlob = existing;
   sourceRevision = originalSha;
 });
@@ -90,6 +92,7 @@ before(async () => {
             truncated: false,
             tree: [
               { path: sourcePath, sha: sourceRevision, type: "blob" },
+              ...Array.from(noticeSources.keys(), (path) => ({ path, sha: originalSha, type: "blob" })),
               { path: bookPath, sha: originalSha, type: "blob" },
               { path: projectPath, sha: originalSha, type: "blob" },
               { path: aboutPath, sha: originalSha, type: "blob" },
@@ -125,7 +128,7 @@ before(async () => {
                                 ? aboutContent
                                 : path === aboutKoPath
                                   ? aboutKoContent
-                                  : existing,
+                                  : (noticeSources.get(path) ?? existing),
                       },
                     ];
                   })
@@ -143,7 +146,7 @@ before(async () => {
                   ? aboutContent
                   : path === aboutKoPath
                     ? aboutKoContent
-                    : existing;
+                    : (noticeSources.get(path) ?? existing);
           return json({ content: Buffer.from(content).toString("base64"), sha: originalSha, size: content.length });
         }
         if (url.pathname.endsWith("/git/blobs")) return json({ sha: "d".repeat(40) });
@@ -221,6 +224,26 @@ async function create(doc = document()) {
   assert.equal(response.status, 201);
   return response.json();
 }
+
+test("only five published blog notices share slots across languages; existing pins and ordinary posts can still publish", async () => {
+  for (let n = 0; n < 5; n++) {
+    const path = `_posts/en/study-log/dev/2026-01-01-notice-${n}.md`;
+    noticeSources.set(path, existing.replace("lang: ko", "lang: en\npinned: true").replace("slug: existing", `slug: notice-${n}`));
+  }
+  const metadata = { lang: "ko", pinned: true };
+  const draft = await create(document({ metadata }));
+  const publish = (draft) => request(`/api/drafts/${draft.id}/publish`, { method: "POST", data: { version: draft.version } });
+  const full = await publish(draft);
+  assert.equal(full.status, 422);
+  assert.equal((await full.json()).error, "더 이상 고정글을 게시할 수 없다.");
+  const path = [...noticeSources.keys()][0];
+  const opened = await (await request("/api/posts/open", { method: "POST", data: { path } })).json();
+  assert.equal(opened.document.metadata.pinned, true);
+  assert.equal((await publish(opened)).status, 200);
+  assert.equal((await publish(await create())).status, 200);
+  noticeSources.set(path, noticeSources.get(path).replace("pinned: true", "pinned: true\ndraft: true"));
+  assert.equal((await publish(draft)).status, 200);
+});
 
 test("private drafts and media cannot be read without a session", async () => {
   const value = await create();

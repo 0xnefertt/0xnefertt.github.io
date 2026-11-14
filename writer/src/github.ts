@@ -1,5 +1,7 @@
 import {
   HttpError,
+  MAX_PINNED_POSTS,
+  PIN_LIMIT_MESSAGE,
   isContentPath,
   documentCollection,
   pathCollection,
@@ -197,8 +199,14 @@ export async function publishPost(env: Env, token: string, doc: PostDocument, me
   const files = repo.files.filter(
     (file) => file.type === "blob" && file.path !== path && isContentPath(file.path) && pathCollection(file.path) === documentCollection(doc)
   );
+  const otherDocuments = await readDocuments(env, token, repo, files);
+  if (
+    doc.metadata.pinned === true &&
+    otherDocuments.filter((post) => post.metadata.pinned === true && post.metadata.draft !== true).length >= MAX_PINNED_POSTS
+  )
+    throw new HttpError(422, PIN_LIMIT_MESSAGE);
   // Languages may share a slug; each language must have only one version of a translation group.
-  for (const candidate of await readDocuments(env, token, repo, files)) {
+  for (const candidate of otherDocuments) {
     if (documentLanguage(candidate) !== documentLanguage(doc)) continue;
     if (
       documentTranslationKey(candidate) === documentTranslationKey(doc) ||

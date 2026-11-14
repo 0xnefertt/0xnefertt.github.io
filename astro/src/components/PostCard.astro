@@ -35,6 +35,7 @@ const visibleImages = previewImages;
 
   <div class="post-card-content">
     <HeadingTag>
+      {post.pinned && <span class="notice-label">{localeText(locale, "Notice", "공지")}</span>}
       <a href={post.href} target={post.external ? "_blank" : undefined} rel={post.external ? "noreferrer" : undefined}>
         {post.title}
       </a>
@@ -54,3 +55,15 @@ const visibleImages = previewImages;
     )}
   </div>
 </li>
+
+<style>
+  .notice-label {
+    display: inline-block;
+    margin-inline-end: 0.5rem;
+    padding: 0.15rem 0.45rem;
+    border: 1px solid currentColor;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    vertical-align: middle;
+  }
+</style>

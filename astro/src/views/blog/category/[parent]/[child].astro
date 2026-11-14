@@ -7,7 +7,7 @@ import { getCollection } from "astro:content";
 import BlogCategoryFilter from "../../../../components/BlogCategoryFilter.astro";
 import PostCard from "../../../../components/PostCard.astro";
 import Layout from "../../../../layouts/Layout.astro";
-import { getPublishedBlogPosts, listBlogCategoryTree, sortPostsDesc, toBlogSummary } from "../../../../lib/blog";
+import { listBlogCategoryTree, listBlogPosts, toBlogSummary } from "../../../../lib/blog";
 import { siteConfig } from "../../../../lib/site";
 import { categorySeoDescription } from "../../../../lib/seo";
 
@@ -25,7 +25,7 @@ interface Props {
 }
 
 const { parentCategory, childCategory } = Astro.props;
-const rawPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection("blog")), locale);
+const rawPosts = listBlogPosts(await getCollection("blog"), locale);
 const categoryTree = listBlogCategoryTree(rawPosts, locale);
 const allPosts = rawPosts
   .map(toBlogSummary)

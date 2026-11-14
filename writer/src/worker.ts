@@ -230,6 +230,7 @@ async function route(request: Request, env: Env): Promise<Response> {
       sha: doc.sourceSha,
       language: documentLanguage(doc),
       published: doc.metadata.draft !== true,
+      pinned: doc.metadata.pinned === true,
     }));
     return json({ posts });
   }
