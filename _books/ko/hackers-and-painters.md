@@ -3,11 +3,11 @@ author: 폴 그레이엄
 cover: /assets/img/books/348cc879-02f1-4e8a-883e-6ffe4dc0750e/ffb68cac-ae1a-4b98-8a94-b139c58a4b9e.png
 date: 2024-11-21
 lang: ko
-last_updated: 2026-10-11
+last_updated: 2026-11-14
 tags:
   - 폴그레이엄
   - 해커와화가
-title: 해커와 화가, 폴 그레이엄
+title: 해커와 화가
 translation_key: hackers-and-painters
 ---
 
