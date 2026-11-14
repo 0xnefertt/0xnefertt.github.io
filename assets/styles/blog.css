@@ -513,6 +513,25 @@ body {
   border-bottom: 1px solid var(--line);
 }
 
+.post-header:has(> .post-header-image) {
+  position: relative;
+  isolation: isolate;
+}
+
+.post-header-image {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 4px;
+  opacity: 0.28;
+  mask-image: linear-gradient(100deg, transparent, rgb(0 0 0 / 24%) 48%, black);
+  pointer-events: none;
+}
+
 .post-header h1 {
   font-size: clamp(1.65rem, 3.5vw, 2.15rem);
   line-height: 1.5;
@@ -569,6 +588,68 @@ body {
   border-left: 1px solid var(--line);
   border-radius: 0;
   padding: 0 0 0 1.3rem;
+}
+
+.post-tags {
+  margin-block: 0.75rem 1.5rem;
+  overflow-wrap: anywhere;
+}
+
+.post-recommendations h2 {
+  color: var(--text);
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.post-recommendations .post-related-list {
+  gap: 0;
+  margin-top: 0.6rem;
+  border-top: 2px solid var(--accent);
+}
+
+.post-recommendations li + li {
+  border-top: 1px solid var(--line);
+}
+
+.post-recommendations .post-related-item a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  padding-block: 0.8rem;
+  text-decoration: none;
+}
+
+.post-related-copy {
+  min-width: 0;
+}
+
+.post-related-title {
+  display: block;
+  font-size: 0.98rem;
+  line-height: 1.5;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.post-recommendations a:is(:hover, :focus-visible) .post-related-title {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.post-recommendations .post-related-meta {
+  display: block;
+  margin-top: 0.3rem;
+  font-weight: 400;
+}
+
+.post-related-thumb {
+  flex: none;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 4px;
+  object-fit: cover;
 }
 
 .post-outline {
