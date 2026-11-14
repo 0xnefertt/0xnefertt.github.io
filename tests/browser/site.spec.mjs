@@ -112,6 +112,31 @@ test.describe("mobile footer tags", () => {
   });
 });
 
+test("only the selected blog group shows its subcategories, including on paginated lists", async ({ page, request }) => {
+  const all = "/ko/blog/";
+  const group = `${all}category/study-log/`;
+  const index = await (await request.get(`${all}search-index.json`)).json();
+  const childPaths = [
+    ...new Set(index.flatMap((post) => post.categoryPaths.map(({ href }) => href)).filter((href) => href.startsWith(group) && href !== group)),
+  ].sort();
+  await page.goto(all);
+  const tabs = page.getByRole("navigation", { name: "주요 카테고리" });
+  const children = page.getByRole("navigation", { name: "공부 기록 하위 카테고리" });
+  await expect(page.locator(".blog-subcategories")).toHaveCount(0);
+  await tabs.getByRole("link", { name: "공부 기록" }).click();
+  await expect(children).toBeVisible();
+  expect(await children.locator("a").evaluateAll((nodes) => nodes.map((node) => node.getAttribute("href")).sort())).toEqual(childPaths);
+  const pagination = page.locator('.pagination-link[href$="/page-2/"]').first();
+  if (await pagination.count()) {
+    await pagination.click();
+    await expect(children).toBeVisible();
+  }
+  await children.locator("a").first().click();
+  expect(await children.locator('[aria-current="page"]').getAttribute("href")).toBe(new URL(page.url()).pathname);
+  await tabs.getByRole("link", { name: /전체 글/ }).click();
+  await expect(page.locator(".blog-subcategories")).toHaveCount(0);
+});
+
 test("post breadcrumbs navigate independently to all posts, the parent group and the child category", async ({ page, request }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const article = "/ko/blog/2026/python-duck-typing/";
