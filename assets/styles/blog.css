@@ -790,6 +790,10 @@ body {
   cursor: pointer;
 }
 
+.post-share-trigger-icon {
+  display: none;
+}
+
 .post-share {
   display: contents;
 }
@@ -1106,6 +1110,107 @@ html.post-share-is-open {
     padding-block: 0.5rem;
   }
 
+  .post-share > [data-share-open] {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+  }
+
+  [data-share-open] > span {
+    display: none;
+  }
+
+  .post-share-trigger-icon {
+    display: block;
+  }
+
+  .post-share > [data-share-open]:is(:active, :focus-visible) {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .site-footer {
+    padding-block: 1.2rem max(1rem, env(safe-area-inset-bottom));
+    background: var(--surface-muted);
+  }
+
+  .footer-inner {
+    gap: 0.5rem;
+  }
+
+  .footer-inner > p {
+    width: 100%;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--line);
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .footer-links nav {
+    width: 100%;
+  }
+
+  .footer-site-links {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "site social" "resources language";
+    gap: 0 1rem;
+    font-size: 0.875rem;
+  }
+
+  .footer-link-group {
+    flex-wrap: wrap;
+    gap: 0 0.65rem;
+  }
+
+  .footer-group-site {
+    grid-area: site;
+  }
+
+  .footer-group-social {
+    grid-area: social;
+    justify-content: flex-end;
+  }
+
+  .footer-group-resources {
+    grid-area: resources;
+  }
+
+  .footer-group-language {
+    grid-area: language;
+    justify-self: end;
+  }
+
+  .footer-divider,
+  .footer-links .language-switch > span {
+    display: none;
+  }
+
+  .footer-site-links a {
+    min-width: 44px;
+    text-decoration: none;
+  }
+
+  .footer-links .language-switch {
+    gap: 0;
+  }
+
+  .footer-links .language-option {
+    min-width: 44px;
+    justify-content: center;
+  }
+
+  .footer-site-links a:is(:hover, :focus-visible),
+  .footer-links .language-option.is-active {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+  }
+
   .home-content {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -1225,5 +1330,15 @@ html.post-share-is-open {
   .post-body th,
   .post-body td {
     min-width: 9rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .footer-site-links {
+    grid-template-areas: "site site" "social social" "resources language";
+  }
+
+  .footer-group-social {
+    justify-content: flex-start;
   }
 }
