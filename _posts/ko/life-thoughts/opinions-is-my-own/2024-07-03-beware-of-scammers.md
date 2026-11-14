@@ -7,21 +7,22 @@ lang: ko
 last_updated: 2026-11-14
 naver_date: 2026-09-26
 naver_url: https://blog.naver.com/martin-lee/224422160826
+pinned: true
 tags:
   - 일상·생각
-title: "[공지] 언제 어디서나 사기꾼을 조심하세요"
-translation_key: 2024-07-03-beware-of-scammers
+title: 언제 어디서나 사기꾼을 조심하세요
+translation_key: beware-of-scammers
 ---
 
 ※ 본 글은 블로그 이전으로 인해 기존 글을 옮겨온 것입니다. (작성일: 2024년 7월 3일 17:49)
+
+---
 
 ![](/assets/img/posts/188ac169-7fd9-5481-a18e-af82c33141d3/36ad08ca-fe4c-5a14-a86b-3479b93cfea1.jpg)
 
 각박한 대한민국에서 살아남기 위해서는 언제 어디서 일어날지 모르는 사기를 조심해야 한다.
 
-[https://www.newsis.com/view/NISX20240701\_0002794401](https://www.newsis.com/view/NISX20240701_0002794401)
-
-[서울 영등포서 130억원대 전세사기…임대인 2명 구속송치](https://www.newsis.com/view/NISX20240701_0002794401)
+<figure data-image-caption="true"><img src="/assets/img/posts/188ac169-7fd9-5481-a18e-af82c33141d3/e4d5d18b-c820-4be3-a4d0-96af3fdceacf.png" alt="image.png" width="600"><figcaption><a rel="noopener noreferrer" href="https://www.newsis.com/view/NISX20240701_0002794401">https://www.newsis.com/view/NISX20240701_0002794401</a></figcaption></figure>
 
 매일매일 곳곳에서 다양한 사건사고들이 발생하고 있지만
 
@@ -37,13 +38,13 @@ translation_key: 2024-07-03-beware-of-scammers
 
 그래서 사기를 조심하기 위해서는 두 가지를 기억해두면 좋다.
 
-**1\. 초면에 잘해주는 사람을 경계할 것**
+## **1\. 초면에 잘해주는 사람을 경계할 것**
 
 ![](/assets/img/posts/188ac169-7fd9-5481-a18e-af82c33141d3/32b0303b-699d-5f8a-a900-afa47fbf8f0d.jpg)
 
 관련해서 사기꾼과 사업가는 종이 한 장 차이라는 말을 예전에 들은 적이 있다.
 
-**2\. 본인이 한 말을 끝까지 지키면 사업가, 결국 본인이 한 말을 못 지키면 사기꾼.**
+## **2\. 본인이 한 말을 끝까지 지키면 사업가, 결국 본인이 한 말을 못 지키면 사기꾼.**
 
 ![](/assets/img/posts/188ac169-7fd9-5481-a18e-af82c33141d3/df0caa3f-e673-5772-a113-09b2600b63d9.png)
 
@@ -55,19 +56,19 @@ translation_key: 2024-07-03-beware-of-scammers
 
 뭔가 사기꾼 같은 계정을 발견했다.
 
-![](/assets/img/posts/188ac169-7fd9-5481-a18e-af82c33141d3/0eaa826f-7350-5723-abe3-14fbd0a47dc5.png)
+<img src="/assets/img/posts/188ac169-7fd9-5481-a18e-af82c33141d3/0eaa826f-7350-5723-abe3-14fbd0a47dc5.png" alt="" width="600">
 
 안그래도 이 업계는 사기꾼들이 많다라는 인식이 많은데,
 
 이런 계정들때문에 더욱 더 그런 인식들이 부각될 것 같아서 블로그에 박제해두려고 글 쓴다.
 
-![](/assets/img/posts/188ac169-7fd9-5481-a18e-af82c33141d3/31a3f5b8-f365-5a84-ad04-ed6b93ff8b83.png)
+<img src="/assets/img/posts/188ac169-7fd9-5481-a18e-af82c33141d3/31a3f5b8-f365-5a84-ad04-ed6b93ff8b83.png" alt="" width="600">
 
-![](/assets/img/posts/188ac169-7fd9-5481-a18e-af82c33141d3/6caa43bc-b2aa-52fe-a8cb-16619f9d012d.png)
+<img src="/assets/img/posts/188ac169-7fd9-5481-a18e-af82c33141d3/6caa43bc-b2aa-52fe-a8cb-16619f9d012d.png" alt="" width="600">
 
-![](/assets/img/posts/188ac169-7fd9-5481-a18e-af82c33141d3/0985e13a-f7f3-5e37-aa02-ee5fafd576de.png)
+<img src="/assets/img/posts/188ac169-7fd9-5481-a18e-af82c33141d3/0985e13a-f7f3-5e37-aa02-ee5fafd576de.png" alt="" width="600">
 
-![](/assets/img/posts/188ac169-7fd9-5481-a18e-af82c33141d3/f01e589e-de93-5c09-a0dc-99cf68cac7f5.png)
+<img src="/assets/img/posts/188ac169-7fd9-5481-a18e-af82c33141d3/f01e589e-de93-5c09-a0dc-99cf68cac7f5.png" alt="" width="400">
 
 이전부터 쓰레드에 수익인증 자랑글 올리면서 본인 오픈 카톡방으로 입장료 받고 끌어들였음
 
@@ -87,8 +88,8 @@ translation_key: 2024-07-03-beware-of-scammers
 
 한번 하면 되는건데 사기꾼들은 괜히 자존심만 쎄서 그게 어렵나보다.
 
-1. 수익 인증같은거 하는거 다 조작 할 수 있으니깐 그런거에 현혹되서 너무 믿지말 것
+1.  수익 인증같은거 하는거 다 조작 할 수 있으니깐 그런거에 현혹되서 너무 믿지말 것
 
-2. 뒤에서 추종하는 사람들 인증내역들이 많다한들 그조차도 다 조작할 수 있으니깐 믿지말 것
+2.  뒤에서 추종하는 사람들 인증내역들이 많다한들 그조차도 다 조작할 수 있으니깐 믿지말 것
 
-3. 순식간에 부의 추월차선에 오를수 있는 마법같은 기법은 절대 없음.
+3.  순식간에 부의 추월차선에 오를수 있는 마법같은 기법은 절대 없음.
