@@ -843,6 +843,9 @@ dialog::backdrop {
   height: auto;
   border-radius: 8px;
 }
+.rich-body figcaption {
+  min-height: 1.5em;
+}
 .rich-body .tiptap .ProseMirror-selectednode {
   outline: 2px solid var(--accent);
 }

@@ -13,9 +13,8 @@ const copyLabel = localeText(locale, "Copy link", "링크 복사");
 ---
 
 <div class="post-share" data-post-share data-share-url={links.url}>
-  <button type="button" data-share-open aria-label={shareLabel} aria-haspopup="dialog" aria-controls="post-share-dialog">
+  <button type="button" data-share-open aria-label={shareLabel} title={shareLabel} aria-haspopup="dialog" aria-controls="post-share-dialog">
     <svg
-      class="post-share-trigger-icon"
       width="20"
       height="20"
       viewBox="0 0 24 24"
@@ -28,7 +27,6 @@ const copyLabel = localeText(locale, "Copy link", "링크 복사");
     >
       <path d="M12 14V3m-4 4 4-4 4 4M7 10H5v11h14V10h-2" />
     </svg>
-    <span>{shareLabel}</span>
   </button>
   <dialog class="post-share-dialog" id="post-share-dialog" aria-labelledby="post-share-title">
     <div class="post-share-header">

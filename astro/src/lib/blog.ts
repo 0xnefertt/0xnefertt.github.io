@@ -436,18 +436,9 @@ function extractPostImageUrls(markdown?: string): string[] {
   }
 
   const imageUrls = new Set<string>();
-  const markdownImagePattern = /!\[[^\]]*]\((\S+)(?:\s+["'][^"']*["'])?\)/g;
-  const htmlImagePattern = /<img\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/g;
-
-  for (const match of markdown.matchAll(markdownImagePattern)) {
-    const imagePath = normalizeAssetPath(match[1].replace(/^<|>$/g, ""), "assets/img/posts");
-    if (imagePath) {
-      imageUrls.add(imagePath);
-    }
-  }
-
-  for (const match of markdown.matchAll(htmlImagePattern)) {
-    const imagePath = normalizeAssetPath(match[1], "assets/img/posts");
+  const imagePattern = /!\[[^\]]*]\((\S+)(?:\s+["'][^"']*["'])?\)|<img\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/g;
+  for (const match of markdown.matchAll(imagePattern)) {
+    const imagePath = normalizeAssetPath(match[2] ?? match[1].replace(/^<|>$/g, ""), "assets/img/posts");
     if (imagePath) {
       imageUrls.add(imagePath);
     }

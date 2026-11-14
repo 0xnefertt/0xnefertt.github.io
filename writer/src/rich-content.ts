@@ -28,7 +28,8 @@ converter.addRule("youtube", {
 converter.keep(["u", "mark", "span", "table"]);
 converter.addRule("imageLayout", {
   filter: (node) =>
-    (node.nodeName === "P" && node.getAttribute("data-image-pair") === "true") ||
+    (node.nodeName === "FIGURE" && node.getAttribute("data-image-caption") === "true") ||
+    node.getAttribute("data-image-pair") === "true" ||
     (node.nodeName === "IMG" && ["data-image-width", "width", "height"].some((attr) => node.hasAttribute(attr))),
   replacement: (_content, node) => `\n\n${(node as HTMLElement).outerHTML}\n\n`,
 });
@@ -84,6 +85,11 @@ export function previewBody(value: string): DocumentFragment {
 export function richToMarkdown(html: string): string {
   const template = document.createElement("template");
   template.innerHTML = cleanHtml(html);
+  for (const figure of template.content.querySelectorAll('figure[data-image-caption="true"]')) {
+    const caption = figure.querySelector("figcaption");
+    const image = figure.querySelector("img");
+    if (image && !caption?.textContent?.trim()) figure.replaceWith(image);
+  }
   // Tiptap stores standalone images as block nodes. Keep their paragraph breaks in Markdown.
   for (const image of Array.from(template.content.children)) {
     if (image.tagName !== "IMG") continue;
@@ -124,6 +130,9 @@ export function requiresSource(value: string): boolean {
     "br",
     "a",
     "img",
+    "figure",
+    "figcaption",
+    "div",
     "table",
     "thead",
     "tbody",
@@ -133,6 +142,7 @@ export function requiresSource(value: string): boolean {
     "colgroup",
     "col",
   ]);
+  if (/<figure\b(?!\s+data-image-caption=["']true["']\s*>)|<div\b(?!\s+data-image-pair=["']true["']\s*>)/i.test(text)) return true;
   if (/<(?:p|h[1-6]|span|img|table|td|th|a)\b[^>]*\b(?:class|id)\s*=/i.test(text)) return true;
   return [...text.matchAll(/<\/?([a-z][a-z0-9-]*)(?:\s[^>]*|\/)?\s*>/gi)].some((match) => !allowed.has(match[1].toLowerCase()));
 }

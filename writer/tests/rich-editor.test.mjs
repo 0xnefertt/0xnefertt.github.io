@@ -98,6 +98,22 @@ test("private images keep their original media reference, including insertion wh
   assert.equal(document.querySelector(".tiptap img").getAttribute("src"), "blob:preview-only");
   adapter.setLocked(false);
 });
+test("linked image captions stay editable with their original credit, URL and alt text", () => {
+  const source =
+    '<figure data-image-caption="true"><img src="/assets/photo.jpg" alt="Photo"><figcaption><a href="https://example.com/credit">© Credit</a></figcaption></figure>';
+  adapter.load(source);
+  assert.equal(adapter.isSource(), false);
+  const rich = document.querySelector(".tiptap");
+  const saved = content.richToMarkdown(rich.innerHTML);
+  for (const root of [rich, content.previewBody(saved)]) {
+    assert.equal(root.querySelector("figure img").alt, "Photo");
+    assert.equal(root.querySelector("figcaption a").href, "https://example.com/credit");
+    assert.equal(root.querySelector("figcaption").textContent, "© Credit");
+  }
+  rich.querySelector("figcaption").textContent = "";
+  assert.doesNotMatch(content.richToMarkdown(rich.innerHTML), /figure|figcaption/);
+});
+
 test("custom embeds use source mode and unsafe pasted content and links are rejected", () => {
   const source = '<div class="video"><iframe src="https://example.com"></iframe></div>\n';
   adapter.load(source);

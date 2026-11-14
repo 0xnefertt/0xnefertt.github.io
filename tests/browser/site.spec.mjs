@@ -331,11 +331,16 @@ test("real Worker/D1 login, save, publish, unpublish, republish and logout", asy
   expect(fraction).toBeCloseTo(0.75);
   await page.locator("#write-tab").click();
   await editorImages.first().click();
+  await page.getByRole("button", { name: "캡션 추가" }).click();
+  await page.keyboard.insertText("첫 번째 사진 설명");
+  await expect(page.locator("#rich-body figcaption")).toHaveText("첫 번째 사진 설명");
+  await editorImages.first().click();
   await page.getByRole("button", { name: "다음 이미지와 나란히" }).click();
   await page.locator("#preview-tab").click();
   for (const width of [1280, 390]) {
     await page.setViewportSize({ width, height: 844 });
-    await expectImageRow(page.locator('#preview-body p[data-image-pair="true"]'));
+    await expectImageRow(page.locator('#preview-body [data-image-pair="true"]'));
+    await expect(page.locator("#preview-body figure > figcaption")).toHaveText("첫 번째 사진 설명");
   }
   await page.locator("#write-tab").click();
   await page.locator("#save").click();
@@ -353,6 +358,7 @@ test("real Worker/D1 login, save, publish, unpublish, republish and logout", asy
   expect(published.posts).toHaveLength(1);
   expect(published.posts[0].content).toContain('data-image-pair="true"');
   expect(published.posts[0].content).toContain('data-image-width="75"');
+  expect(published.posts[0].content).toContain("<figcaption>첫 번째 사진 설명</figcaption>");
   expect(published.posts[0].content.match(/<img\b[^>]*src="\/assets\/img\/posts\//g)).toHaveLength(2);
   expect(published.posts[0].content).not.toContain("/api/media/");
   const originalPath = published.posts[0].path;

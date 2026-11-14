@@ -1,5 +1,5 @@
 import { Editor, Node } from "@tiptap/core";
-import { NodeSelection, Plugin } from "@tiptap/pm/state";
+import { NodeSelection, Plugin, TextSelection } from "@tiptap/pm/state";
 import StarterKit from "@tiptap/starter-kit";
 import { TextStyleKit } from "@tiptap/extension-text-style";
 import Highlight from "@tiptap/extension-highlight";
@@ -50,13 +50,28 @@ const Youtube = Node.create({
 });
 
 type BodyImage = { src: string; alt: string };
+const ImageFigure = Node.create({
+  name: "imageFigure",
+  group: "block",
+  content: "image imageCaption",
+  selectable: false,
+  parseHTML: () => [{ tag: 'figure[data-image-caption="true"]' }],
+  renderHTML: () => ["figure", { "data-image-caption": "true" }, 0],
+});
+const ImageCaption = Node.create({
+  name: "imageCaption",
+  content: "inline*",
+  parseHTML: () => [{ tag: "figcaption" }],
+  renderHTML: () => ["figcaption", 0],
+});
+
 const ImagePair = Node.create({
   name: "imagePair",
   group: "block",
-  content: "image{0,2}",
+  content: "(image | imageFigure){0,2}",
   isolating: true,
-  parseHTML: () => [{ tag: 'p[data-image-pair="true"]', priority: 60 }],
-  renderHTML: () => ["p", { "data-image-pair": "true" }, 0],
+  parseHTML: () => [{ tag: '[data-image-pair="true"]', priority: 60 }],
+  renderHTML: ({ node }) => [node.children.some((child) => child.type.name === "imageFigure") ? "div" : "p", { "data-image-pair": "true" }, 0],
   addProseMirrorPlugins() {
     return [
       new Plugin({
@@ -152,6 +167,8 @@ export function richEditor(options: Options) {
         TextAlign.configure({ types: ["heading", "paragraph"], defaultAlignment: null }),
         TableKit.configure({ table: { resizable: false } }),
         Youtube,
+        ImageFigure,
+        ImageCaption,
         ImagePair,
         PrivateImage.configure({ allowBase64: false }),
         Placeholder.configure({ placeholder: "본문 내용을 입력하거나 이미지를 붙여넣으세요." }),
@@ -196,17 +213,21 @@ export function richEditor(options: Options) {
     });
     updateTools();
   }
-  // Only combine neighboring images in the same block container. Never move text into the row.
+  // Move the caption along with its image during pairing and unpairing.
+  function imageBlockStart(e: Editor) {
+    const { $from } = e.state.selection;
+    return $from.parent.type.name === "imageFigure" ? e.state.doc.resolve($from.before()) : $from;
+  }
+
   function nextImageRange(e: Editor) {
-    const selection = e.state.selection;
-    if (!(selection instanceof NodeSelection) || selection.node.type.name !== "image") return null;
-    const parent = selection.$from.parent;
-    if (parent.type.name === "imagePair") return null;
-    let end = selection.to;
-    for (let i = selection.$from.index() + 1; i < parent.childCount; i++) {
-      const next = parent.child(i);
+    const start = imageBlockStart(e);
+    const image = start.nodeAfter;
+    if (!image || start.parent.type.name === "imagePair") return null;
+    let end = start.pos + image.nodeSize;
+    for (let i = start.index() + 1; i < start.parent.childCount; i++) {
+      const next = start.parent.child(i);
       end += next.nodeSize;
-      if (next.type.name === "image") return { from: selection.from, to: end, images: [selection.node, next] };
+      if (next.type.name === "image" || next.type.name === "imageFigure") return { from: start.pos, to: end, images: [image, next] };
       if (next.type.name !== "paragraph" || next.content.size) break;
     }
     return null;
@@ -222,7 +243,10 @@ export function richEditor(options: Options) {
     el<HTMLSelectElement>("table-action").disabled = locked || !editor.isActive("table");
     const selection = editor.state.selection;
     const imageSelected = selection instanceof NodeSelection && selection.node.type.name === "image";
-    const paired = selection.$from.parent.type.name === "imagePair";
+    const paired = imageSelected && imageBlockStart(editor).parent.type.name === "imagePair";
+    const caption = el<HTMLButtonElement>("image-caption");
+    caption.hidden = !imageSelected;
+    caption.textContent = selection.$from.parent.type.name === "imageFigure" ? "캡션 편집" : "캡션 추가";
     const videoSelected = selection instanceof NodeSelection && selection.node.type.name === "youtube";
     el("image-layout-tools").hidden = !(imageSelected || videoSelected);
     el("image-presets").hidden = !imageSelected;
@@ -308,10 +332,26 @@ export function richEditor(options: Options) {
       e.commands.updateAttributes(kind, kind === "image" ? { width, height: null, "data-image-width": null } : { width });
     });
   });
+  el("image-caption").addEventListener("mousedown", (event) => event.preventDefault());
+  el("image-caption").addEventListener("click", () =>
+    run((e) => {
+      const selection = e.state.selection;
+      if (!(selection instanceof NodeSelection) || selection.node.type.name !== "image") return;
+      const tr = e.state.tr;
+      let imageEnd = selection.to;
+      if (selection.$from.parent.type.name !== "imageFigure") {
+        const figure = e.schema.nodes.imageFigure.create(null, [selection.node, e.schema.nodes.imageCaption.create()]);
+        tr.replaceWith(selection.from, selection.to, figure);
+        imageEnd++;
+      }
+      e.view.dispatch(tr.setSelection(TextSelection.create(tr.doc, imageEnd + 1)));
+      e.view.focus();
+    })
+  );
   el("image-pair").addEventListener("mousedown", (event) => event.preventDefault());
   el("image-pair").addEventListener("click", () =>
     run((e) => {
-      const { $from } = e.state.selection;
+      const $from = imageBlockStart(e);
       const tr = e.state.tr;
       let start: number;
       if ($from.parent.type.name === "imagePair") {
@@ -323,6 +363,7 @@ export function richEditor(options: Options) {
         start = range.from + 1;
         tr.replaceWith(range.from, range.to, e.schema.nodes.imagePair.create(null, range.images));
       }
+      if (tr.doc.nodeAt(start)?.type.name === "imageFigure") start++;
       e.view.dispatch(tr.setSelection(NodeSelection.create(tr.doc, start)));
       e.view.focus();
     })
