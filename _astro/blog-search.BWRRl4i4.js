@@ -228,6 +228,9 @@
       return;
     }
 
+    const params = new URLSearchParams(window.location.search);
+    const urlQuery = params.get("q") || "";
+    if (!input.value) input.value = urlQuery;
     const posts = await loadPosts(config);
     const mode = config.mode === "search-page" ? "search-page" : "inline";
     const heading = mode === "search-page" ? document.getElementById("blog-search-heading") : null;
@@ -291,9 +294,7 @@
       return matches.length;
     };
 
-    const params = new URLSearchParams(window.location.search);
-    const initialQuery = params.get("q") || "";
-    input.value = initialQuery;
+    const initialQuery = input.value;
     const tag = mode === "search-page" && !initialQuery ? params.get("tag")?.trim() : "";
     if (tag) {
       const tagKey = (value) => value.trim().normalize("NFC").toLowerCase();
@@ -305,7 +306,7 @@
       metaNode.textContent = korean ? `${label} 태그가 붙은 글 · ${matches.length}편` : `Posts tagged ${label} · ${matches.length}`;
       emptyNode.hidden = matches.length > 0;
     } else {
-      const initialCount = runSearch(initialQuery, false);
+      const initialCount = runSearch(initialQuery, initialQuery !== urlQuery);
       if (initialQuery.trim()) trackSearch(initialQuery, initialCount, "page_load");
     }
 
