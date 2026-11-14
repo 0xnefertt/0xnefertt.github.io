@@ -131,8 +131,16 @@ export function richEditor(options: Options) {
       };
     },
     addNodeView() {
-      return ({ node }) => {
+      return ({ node, editor, getPos }) => {
         const image = document.createElement("img");
+        image.addEventListener("click", (event) => {
+          if (!editor.isEditable || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+          const pos = getPos();
+          if (pos !== undefined) {
+            editor.commands.setNodeSelection(pos);
+            editor.view.focus();
+          }
+        });
         image.alt = node.attrs.alt ?? "";
         image.title = node.attrs.title ?? "";
         for (const attr of ["data-image-width", "width", "height"]) {
