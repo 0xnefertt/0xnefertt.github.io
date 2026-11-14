@@ -227,7 +227,9 @@ const showComments = hasGiscus && (post.data.giscus_comments ?? true) && !redire
             <li class="post-related-item">
               <a href={item.href} target={item.external ? "_blank" : undefined} rel={item.external ? "noreferrer" : undefined}>
                 <span class="post-related-copy">
-                  <span class="post-related-title">{item.title}</span>
+                  <span class="post-related-title" title={item.title}>
+                    {item.title}
+                  </span>
                   <span class="post-related-meta">
                     {formatPostDate(item.date)} · {localeText(locale, `${item.readMinutes} min read`, `${item.readMinutes}분 읽기`)}
                   </span>

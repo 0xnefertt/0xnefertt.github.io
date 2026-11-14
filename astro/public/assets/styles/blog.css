@@ -661,9 +661,12 @@ body {
   min-width: 0;
 }
 
-.post-related-title {
-  display: block;
-  font-size: 0.98rem;
+.post-related-item .post-related-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: 0.875rem;
   line-height: 1.5;
   word-break: keep-all;
   overflow-wrap: anywhere;

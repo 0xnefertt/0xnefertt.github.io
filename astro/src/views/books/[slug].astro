@@ -165,7 +165,9 @@ const articleJsonLd = JSON.stringify({
             <ul class="post-related-list">
               {sidebarReviews.map((item) => (
                 <li class="post-related-item">
-                  <a href={item.href}>{item.title}</a>
+                  <a class="post-related-title" href={item.href} title={item.title}>
+                    {item.title}
+                  </a>
                   <p class="post-related-meta">
                     {localeText(locale, item.kind === "books" ? "Book review" : "Blog", item.kind === "books" ? "독서 기록" : "블로그")}
                     {"locale" in item && ` · ${item.locale === "ko" ? "한국어" : "English"}`}
