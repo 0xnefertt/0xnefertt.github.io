@@ -30,7 +30,7 @@ converter.addRule("imageLayout", {
   filter: (node) =>
     (node.nodeName === "FIGURE" && node.getAttribute("data-image-caption") === "true") ||
     node.getAttribute("data-image-pair") === "true" ||
-    (node.nodeName === "IMG" && ["data-image-width", "width", "height"].some((attr) => node.hasAttribute(attr))),
+    (node.nodeName === "IMG" && ["data-image-align", "data-image-width", "width", "height"].some((attr) => node.hasAttribute(attr))),
   replacement: (_content, node) => `\n\n${(node as HTMLElement).outerHTML}\n\n`,
 });
 converter.addRule("strike", { filter: ["s", "del"], replacement: (content) => `~~${content}~~` });

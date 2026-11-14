@@ -121,6 +121,13 @@ export function richEditor(options: Options) {
     addAttributes() {
       return {
         ...this.parent?.(),
+        "data-image-align": {
+          default: null,
+          parseHTML: (element) => {
+            const align = element.getAttribute("data-image-align");
+            return ["left", "center", "right"].includes(align ?? "") ? align : null;
+          },
+        },
         "data-image-width": {
           default: null,
           parseHTML: (element) => {
@@ -143,7 +150,7 @@ export function richEditor(options: Options) {
         });
         image.alt = node.attrs.alt ?? "";
         image.title = node.attrs.title ?? "";
-        for (const attr of ["data-image-width", "width", "height"]) {
+        for (const attr of ["data-image-align", "data-image-width", "width", "height"]) {
           if (node.attrs[attr] != null) image.setAttribute(attr, String(node.attrs[attr]));
         }
         let disposed = false;
@@ -244,13 +251,17 @@ export function richEditor(options: Options) {
     if (!editor) return;
     for (const button of toolbar.querySelectorAll<HTMLButtonElement>("[data-mark]"))
       button.setAttribute("aria-pressed", String(editor.isActive(button.dataset.mark!)));
-    for (const button of toolbar.querySelectorAll<HTMLButtonElement>("[data-align]"))
-      button.setAttribute("aria-pressed", String(editor.isActive({ textAlign: button.dataset.align })));
     el<HTMLButtonElement>("rich-undo").disabled = locked || !editor.can().undo();
     el<HTMLButtonElement>("rich-redo").disabled = locked || !editor.can().redo();
     el<HTMLSelectElement>("table-action").disabled = locked || !editor.isActive("table");
     const selection = editor.state.selection;
     const imageSelected = selection instanceof NodeSelection && selection.node.type.name === "image";
+    for (const button of toolbar.querySelectorAll<HTMLButtonElement>("[data-align]")) {
+      const align = button.dataset.align;
+      button.disabled = locked || (imageSelected && align === "justify");
+      const active = imageSelected ? (selection.node.attrs["data-image-align"] ?? "left") === align : editor.isActive({ textAlign: align });
+      button.setAttribute("aria-pressed", String(active));
+    }
     const paired = imageSelected && imageBlockStart(editor).parent.type.name === "imagePair";
     const caption = el<HTMLButtonElement>("image-caption");
     caption.hidden = !imageSelected;
@@ -428,7 +439,13 @@ export function richEditor(options: Options) {
     button.addEventListener("mousedown", (event) => event.preventDefault());
     button.addEventListener("click", () =>
       run((e) => {
-        e.chain().focus().setTextAlign(button.dataset.align!).run();
+        const align = button.dataset.align!;
+        const selection = e.state.selection;
+        if (selection instanceof NodeSelection && selection.node.type.name === "image") {
+          e.chain().focus().updateAttributes("image", { "data-image-align": align }).run();
+        } else {
+          e.chain().focus().setTextAlign(align).run();
+        }
       })
     );
   }

@@ -1337,6 +1337,25 @@ img[data-image-width="100"] {
   grid-column: 1 / -1;
 }
 
+img[data-image-align] {
+  display: block;
+}
+img[data-image-align="left"] {
+  margin-inline: 0 auto;
+}
+img[data-image-align="center"] {
+  margin-inline: auto;
+}
+img[data-image-align="right"] {
+  margin-inline: auto 0;
+}
+img[data-image-align="center"] + figcaption {
+  text-align: center;
+}
+img[data-image-align="right"] + figcaption {
+  text-align: right;
+}
+
 figure[data-image-caption] {
   margin: 1.1em 0;
   min-width: 0;

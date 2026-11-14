@@ -333,6 +333,16 @@ async function expectImageRow(row) {
   expect(right.left).toBeGreaterThan(left.right);
 }
 
+async function expectCenteredImage(image) {
+  await expect(image).toHaveAttribute("data-image-align", "center");
+  const error = await image.evaluate((img) => {
+    const box = img.getBoundingClientRect();
+    const parent = img.parentElement.getBoundingClientRect();
+    return Math.abs(box.left - parent.left - (parent.right - box.right));
+  });
+  expect(error).toBeLessThan(2);
+}
+
 test("real Worker/D1 login, save, publish, unpublish, republish and logout", async ({ page, request }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/admin/");
@@ -362,6 +372,14 @@ test("real Worker/D1 login, save, publish, unpublish, republish and logout", asy
   await editorImages.first().click();
   await page.getByRole("button", { name: "나란히 배치 해제" }).click();
   await expect(row).toHaveCount(0);
+  await page.getByRole("button", { name: "가운데 정렬" }).click();
+  await expect(page.getByRole("button", { name: "가운데 정렬" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("button", { name: "양쪽 정렬" })).toBeDisabled();
+  await expectCenteredImage(editorImages.first());
+  await page.locator("#source-tab").click();
+  await expect(page.locator("#body")).toHaveValue(/data-image-align="center"/);
+  await page.locator("#write-tab").click();
+  await editorImages.first().click();
   await page.locator("#media-pixels").fill("120");
   await page.locator("#media-pixels").press("Tab");
   await expect(editorImages.first()).toHaveCSS("width", "120px");
@@ -369,6 +387,10 @@ test("real Worker/D1 login, save, publish, unpublish, republish and logout", asy
   await page.locator("#preview-tab").click();
   const single = page.locator('#preview-body img[data-image-width="75"]');
   await expect(single).toBeVisible();
+  for (const width of [1280, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    await expectCenteredImage(single);
+  }
   const fraction = await single.evaluate((img) => {
     const parent = img.parentElement;
     const style = getComputedStyle(parent);
@@ -381,6 +403,8 @@ test("real Worker/D1 login, save, publish, unpublish, republish and logout", asy
   await page.getByRole("button", { name: "캡션 추가" }).click();
   await page.keyboard.insertText("첫 번째 사진 설명");
   await expect(page.locator("#rich-body figcaption")).toHaveText("첫 번째 사진 설명");
+  await expectCenteredImage(editorImages.first());
+  await expect(page.locator("#rich-body figcaption")).toHaveCSS("text-align", "center");
   await editorImages.first().click();
   await page.getByRole("button", { name: "다음 이미지와 나란히" }).click();
   await page.locator("#preview-tab").click();
@@ -405,6 +429,7 @@ test("real Worker/D1 login, save, publish, unpublish, republish and logout", asy
   expect(published.posts).toHaveLength(1);
   expect(published.posts[0].content).toContain('data-image-pair="true"');
   expect(published.posts[0].content).toContain('data-image-width="75"');
+  expect(published.posts[0].content).toContain('data-image-align="center"');
   expect(published.posts[0].content).toContain("<figcaption>첫 번째 사진 설명</figcaption>");
   expect(published.posts[0].content.match(/<img\b[^>]*src="\/assets\/img\/posts\//g)).toHaveLength(2);
   expect(published.posts[0].content).not.toContain("/api/media/");
