@@ -607,13 +607,18 @@ export function listBlogPosts(posts: CollectionEntry<"blog">[], locale: Locale):
   return published.sort((a, b) => Number(b.data.pinned === true) - Number(a.data.pinned === true));
 }
 
-export function toBlogSummary(post: CollectionEntry<"blog">): BlogSummary {
-  const { year, slug } = getPostRoute(post);
-  const { href, external } = getBlogHref(post);
+export function getPostImages(post: CollectionEntry<"blog">) {
   const thumbnail = normalizeAssetPath(post.data.thumbnail ?? post.data.cover, "assets/img/posts");
   const gallery = normalizeGallery(post.data.gallery);
   const bodyImages = extractPostImageUrls(post.body);
   const previewImages = [...new Set([...(thumbnail ? [thumbnail] : []), ...gallery, ...bodyImages])];
+  return { thumbnail, previewImages };
+}
+
+export function toBlogSummary(post: CollectionEntry<"blog">): BlogSummary {
+  const { year, slug } = getPostRoute(post);
+  const { href, external } = getBlogHref(post);
+  const { thumbnail, previewImages } = getPostImages(post);
   const html = post.rendered?.html ?? "";
   let hasVideo = /<video\b/i.test(html);
   for (const frame of html.matchAll(/<iframe\b[^>]*?\ssrc=["']([^"']+)["']/gi)) {

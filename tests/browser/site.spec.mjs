@@ -55,6 +55,29 @@ for (const width of [390, 1280]) {
   }
 }
 
+test("a photo post shows its artwork, footer tags and six related Korean posts", async ({ page, request }) => {
+  const index = await (await request.get("/ko/blog/search-index.json")).json();
+  const article = index.find((post) => !post.external && !post.hasVideo && post.gallery.length && post.tags.length);
+  await page.goto(article.href);
+  await expect(page.locator(".post-header-image")).toHaveAttribute("src", article.gallery[0]);
+  await expect(page.locator(".post-header .tags")).toHaveCount(0);
+  await expect(page.locator(".post-body + .post-tags span")).toHaveText(article.tags.map((tag) => `#${tag}`));
+  const links = page.locator(".post-recommendations li a");
+  await expect(links).toHaveCount(6);
+  const urls = await links.evaluateAll((nodes) => nodes.map((node) => node.getAttribute("href")));
+  expect(new Set(urls).size).toBe(6);
+  expect(urls).not.toContain(article.href);
+  const tags = new Set(article.tags.map((tag) => tag.trim().normalize("NFC").toLowerCase()));
+  const related = index.filter(
+    (post) =>
+      post.href !== article.href &&
+      (post.categories.some((category) => article.categories.includes(category)) ||
+        post.tags.some((tag) => tags.has(tag.trim().normalize("NFC").toLowerCase())))
+  );
+  const matches = new Set(related.map((post) => post.href));
+  expect(urls.slice(0, Math.min(6, matches.size)).every((url) => matches.has(url))).toBe(true);
+});
+
 test("post breadcrumbs navigate independently to all posts, the parent group and the child category", async ({ page, request }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const article = "/ko/blog/2026/python-duck-typing/";

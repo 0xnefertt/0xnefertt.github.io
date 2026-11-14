@@ -12,8 +12,8 @@ import {
   getPublishedBlogPosts,
   getPostCategories,
   getPostCategoryPaths,
+  getPostImages,
   normalizeTaxonomy,
-  slugifyTerm,
   sortPostsDesc,
   toBlogSummary,
 } from "../lib/blog";
@@ -26,6 +26,7 @@ interface Props {
 
 const { post } = Astro.props;
 const { Content, headings } = await render(post);
+const headerImage = getPostImages(post).previewImages[0];
 const outline = headings.filter((heading) => heading.depth === 2);
 const tags = normalizeTaxonomy(post.data.tags);
 const categories = getPostCategories(post);
@@ -33,34 +34,23 @@ const categoryPaths = getPostCategoryPaths(post);
 const redirectTarget = post.data.redirect;
 const allPosts = getPublishedBlogPosts(sortPostsDesc(await getCollection("blog")), locale);
 
-const currentTagSlugs = new Set(tags.map((tag) => slugifyTerm(tag)));
-const currentCategorySlugs = new Set(categories.map((category) => slugifyTerm(category)));
+function tagKey(tag: string) {
+  return tag.trim().normalize("NFC").toLowerCase();
+}
 
-const scoredCandidates = allPosts
+const currentTags = new Set(tags.map(tagKey));
+const currentCategories = new Set(categories);
+const recommendedPosts = allPosts
   .filter((candidate) => candidate.id !== post.id)
   .map((candidate) => {
-    const summary = toBlogSummary(candidate);
-    const sharedCategoryCount = summary.categories.filter((category) => currentCategorySlugs.has(slugifyTerm(category))).length;
-    const sharedTagCount = summary.tags.filter((tag) => currentTagSlugs.has(slugifyTerm(tag))).length;
-    const score = sharedCategoryCount * 4 + sharedTagCount * 2;
-    const publishedAt = summary.date?.getTime() ?? 0;
-
-    return {
-      summary,
-      score,
-      publishedAt,
-    };
+    const sharedCategoryCount = getPostCategories(candidate).filter((category) => currentCategories.has(category)).length;
+    const sharedTagCount = normalizeTaxonomy(candidate.data.tags).filter((tag) => currentTags.has(tagKey(tag))).length;
+    return { candidate, score: sharedCategoryCount * 4 + sharedTagCount * 2 };
   })
-  .filter((candidate) => candidate.score > 0)
-  .sort((a, b) => b.score - a.score || b.publishedAt - a.publishedAt)
-  .slice(0, 4)
-  .map((candidate) => candidate.summary);
-
-const fallbackCandidates = allPosts
-  .filter((candidate) => candidate.id !== post.id)
-  .map(toBlogSummary)
-  .slice(0, 4);
-const recommendedPosts = scoredCandidates.length > 0 ? scoredCandidates : fallbackCandidates;
+  // allPosts is already newest first, including ties and posts without shared terms.
+  .sort((a, b) => b.score - a.score)
+  .slice(0, 6)
+  .map(({ candidate }) => toBlogSummary(candidate));
 
 const currentIndex = allPosts.findIndex((candidate) => candidate.id === post.id);
 const previousPost = currentIndex >= 0 && currentIndex < allPosts.length - 1 ? toBlogSummary(allPosts[currentIndex + 1]) : undefined;
@@ -132,6 +122,7 @@ const showComments = hasGiscus && (post.data.giscus_comments ?? true) && !redire
   {redirectTarget && <meta slot="head" http-equiv="refresh" content={`0; url=${redirectTarget}`} />}
   <script slot="head" type="application/ld+json" set:html={articleJsonLd}></script>
   <article class="post-header">
+    {headerImage && <img class="post-header-image" src={headerImage} alt="" decoding="async" />}
     <div class="post-header-navigation">
       <nav class="post-breadcrumbs" aria-label="글 카테고리">
         <a href={l("/blog/")} data-i18n-key="blog_all">
@@ -155,14 +146,6 @@ const showComments = hasGiscus && (post.data.giscus_comments ?? true) && !redire
       <time datetime={post.data.date?.toISOString()}>{formatPostDate(post.data.date)}</time>
       {post.data.external_source ? ` · ${post.data.external_source}` : ""}
     </p>
-
-    {tags.length > 0 && (
-      <div class="tags">
-        {tags.map((tag) => (
-          <span>#{tag}</span>
-        ))}
-      </div>
-    )}
   </article>
 
   <div class="post-detail-layout">
@@ -188,6 +171,14 @@ const showComments = hasGiscus && (post.data.giscus_comments ?? true) && !redire
       <div class="post-body markdown-body">
         <Content />
       </div>
+
+      {tags.length > 0 && (
+        <div class="tags post-tags">
+          {tags.map((tag) => (
+            <span>#{tag}</span>
+          ))}
+        </div>
+      )}
 
       {(previousPost || nextPost) && (
         <nav class="post-pager" aria-label="Post navigation">
@@ -227,17 +218,24 @@ const showComments = hasGiscus && (post.data.giscus_comments ?? true) && !redire
     </div>
 
     {recommendedPosts.length > 0 && (
-      <aside class="post-related card" aria-label="Recommended posts">
-        <h2 data-i18n-key="post_more_to_read">{t(locale, "post_more_to_read")}</h2>
+      <aside class="post-related card post-recommendations" aria-labelledby="post-related-heading">
+        <h2 id="post-related-heading" data-i18n-key="post_more_to_read">
+          {t(locale, "post_more_to_read")}
+        </h2>
         <ul class="post-related-list">
           {recommendedPosts.map((item) => (
             <li class="post-related-item">
               <a href={item.href} target={item.external ? "_blank" : undefined} rel={item.external ? "noreferrer" : undefined}>
-                {item.title}
+                <span class="post-related-copy">
+                  <span class="post-related-title">{item.title}</span>
+                  <span class="post-related-meta">
+                    {formatPostDate(item.date)} · {localeText(locale, `${item.readMinutes} min read`, `${item.readMinutes}분 읽기`)}
+                  </span>
+                </span>
+                {item.gallery[0]?.startsWith("/assets/") && (
+                  <img class="post-related-thumb" src={item.gallery[0]} width="48" height="48" alt="" loading="lazy" />
+                )}
               </a>
-              <p class="post-related-meta">
-                {formatPostDate(item.date)} · {localeText(locale, `${item.readMinutes} min read`, `${item.readMinutes}분 읽기`)}
-              </p>
             </li>
           ))}
         </ul>
