@@ -502,6 +502,10 @@ body {
   padding-bottom: 1.5rem;
 }
 
+.blog-post-content {
+  padding-top: 0;
+}
+
 .post-detail-layout {
   grid-template-columns: minmax(0, 760px) minmax(0, 240px);
   gap: 3rem;
@@ -513,6 +517,10 @@ body {
   border-bottom: 1px solid var(--line);
 }
 
+.blog-post-content > .post-header {
+  max-width: none;
+}
+
 .post-header:has(> .post-header-image) {
   position: relative;
   isolation: isolate;
@@ -520,15 +528,15 @@ body {
 
 .post-header-image {
   position: absolute;
-  inset: 0;
+  inset-block: 0;
+  inset-inline-end: 0;
   z-index: -1;
-  width: 100%;
+  width: auto;
+  max-width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center;
-  border-radius: 4px;
-  opacity: 0.28;
-  mask-image: linear-gradient(100deg, transparent, rgb(0 0 0 / 24%) 48%, black);
+  object-fit: contain;
+  opacity: 0.24;
+  mask-image: linear-gradient(90deg, transparent, black 38%, black 76%, transparent);
   pointer-events: none;
 }
 
