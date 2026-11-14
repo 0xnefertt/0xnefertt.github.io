@@ -112,6 +112,28 @@ test.describe("mobile footer tags", () => {
   });
 });
 
+test("blog search keeps text entered while the index is loading", async ({ page }) => {
+  const pending = page.waitForRequest("**/ko/blog/search-index.json");
+  let releaseIndex;
+  const gate = new Promise((resolve) => {
+    releaseIndex = resolve;
+  });
+  await page.route("**/ko/blog/search-index.json", async (route) => {
+    await gate;
+    await route.continue();
+  });
+  await page.goto("/ko/blog/", { waitUntil: "domcontentloaded" });
+  await pending;
+  try {
+    await page.getByRole("searchbox").fill("파이썬");
+  } finally {
+    releaseIndex();
+  }
+  await expect(page.locator("#blog-inline-search-meta")).toContainText("파이썬");
+  await expect(page.getByRole("searchbox")).toHaveValue("파이썬");
+  expect(new URL(page.url()).searchParams.get("q")).toBe("파이썬");
+});
+
 test("only the selected blog group shows its subcategories, including on paginated lists", async ({ page, request }) => {
   const all = "/ko/blog/";
   const group = `${all}category/study-log/`;
