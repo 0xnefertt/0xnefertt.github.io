@@ -15,9 +15,10 @@ title: 소득의 종류
 translation_key: 2026-08-29-types-of-income
 ---
 
-![](/assets/img/posts/7e8f07f8-ec7f-5f62-ad6d-f19233c37db2/590d450a-9ea9-5367-a6f7-7dce646fb26b.jpg)
-
-[© CoolPubilcDomains, 출처 OGQ](https://www.ogq.me/backgrounds/1515850)
+<figure data-image-caption="true">
+  <img src="/assets/img/posts/7e8f07f8-ec7f-5f62-ad6d-f19233c37db2/590d450a-9ea9-5367-a6f7-7dce646fb26b.jpg" alt="" />
+  <figcaption><a href="https://www.ogq.me/backgrounds/1515850">© CoolPubilcDomains, 출처 OGQ</a></figcaption>
+</figure>
 
 소득의 종류는 **소득세법**을 따른다.
 

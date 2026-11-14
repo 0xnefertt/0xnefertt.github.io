@@ -15,9 +15,10 @@ title: 캐나다 국부 펀드 & Canada Strong Fund
 translation_key: 2026-08-12-canada-strong-fund
 ---
 
-![](/assets/img/posts/43435294-d120-52c6-a6f7-3f4869cc5dbc/177bad47-2e76-552b-a83e-83356a46fff3.jpg)
-
-[© CoolPubilcDomains, 출처 OGQ](https://www.ogq.me/backgrounds/1499856)
+<figure data-image-caption="true">
+  <img src="/assets/img/posts/43435294-d120-52c6-a6f7-3f4869cc5dbc/177bad47-2e76-552b-a83e-83356a46fff3.jpg" alt="" />
+  <figcaption><a href="https://www.ogq.me/backgrounds/1499856">© CoolPubilcDomains, 출처 OGQ</a></figcaption>
+</figure>
 
 캐나다 국부 펀드에 대해서 갑자기 궁금해져서 기록할 겸 알아보기로 하였다.
 

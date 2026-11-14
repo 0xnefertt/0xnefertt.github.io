@@ -13,9 +13,10 @@ title: 요즘 드는 생각
 translation_key: 2026-03-31-thoughts-lately
 ---
 
-![](/assets/img/posts/04ff36a0-186e-549f-a019-9544dfc69c20/2d4e5747-a0cc-5ea8-a4c2-c7cf0584550d.jpg)
-
-[© yassine amsloh, 출처 OGQ](https://www.ogq.me/backgrounds/6752070)
+<figure data-image-caption="true">
+  <img src="/assets/img/posts/04ff36a0-186e-549f-a019-9544dfc69c20/2d4e5747-a0cc-5ea8-a4c2-c7cf0584550d.jpg" alt="" />
+  <figcaption><a href="https://www.ogq.me/backgrounds/6752070">© yassine amsloh, 출처 OGQ</a></figcaption>
+</figure>
 
 불과 1년 전,
 

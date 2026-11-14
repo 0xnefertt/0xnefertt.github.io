@@ -15,9 +15,10 @@ title: 격변의 시대를 앞에 두고서
 translation_key: 2025-12-30-on-the-brink-of-change
 ---
 
-![](/assets/img/posts/b0d984e8-ea95-552a-a1c3-4db18af1589c/2adad989-de41-5d06-a7c4-e1b0e7ee6482.jpg)
-
-[© CoolPubilcDomains, 출처 OGQ](https://www.ogq.me/backgrounds/1511565)
+<figure data-image-caption="true">
+  <img src="/assets/img/posts/b0d984e8-ea95-552a-a1c3-4db18af1589c/2adad989-de41-5d06-a7c4-e1b0e7ee6482.jpg" alt="" />
+  <figcaption><a href="https://www.ogq.me/backgrounds/1511565">© CoolPubilcDomains, 출처 OGQ</a></figcaption>
+</figure>
 
 10년 전에는 보안 전문가가 유망 직종 순위권에 들기도 했다. 5년 전만 하더라도 코로나 시대와 함께 원격근무를 할 수 있는 개발자라는 직업은 많은 인기를 끌었다. 불과 1년 전 까지만 해도 AI, 인공지능은 지금처럼 화두는 아니었다. ChatGPT가 만들어주는 글과 이미지, 소스코드들은 어딘가 부족함이 하나씩 있어서 그랬던 것 같다. 시간이 지날수록 AI의 성능은 놀랍게도 성장하고 있으며 지금은 AI툴을 오히려 믿고 없으면 힘들 지경이 되어버렸다.
 

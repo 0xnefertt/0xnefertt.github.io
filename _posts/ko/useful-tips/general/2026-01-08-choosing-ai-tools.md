@@ -13,9 +13,10 @@ title: AI 도구 어떤거 써야해요?
 translation_key: 2026-01-08-choosing-ai-tools
 ---
 
-![](/assets/img/posts/412bea03-c7ab-51e4-ac38-8663fca74454/1c30056f-26ae-5489-a747-9309af2b2f8b.jpg)
-
-[© CoolPubilcDomains, 출처 OGQ](https://www.ogq.me/backgrounds/1515200)
+<figure data-image-caption="true">
+  <img src="/assets/img/posts/412bea03-c7ab-51e4-ac38-8663fca74454/1c30056f-26ae-5489-a747-9309af2b2f8b.jpg" alt="" />
+  <figcaption><a href="https://www.ogq.me/backgrounds/1515200">© CoolPubilcDomains, 출처 OGQ</a></figcaption>
+</figure>
 
 요즘은 바이브 코딩이 유행이 되어버려서인지 비개발자들도 쉽게 코딩을 할 수 있게 되었다. 가끔은 개발자들보다 더 잘만드는 경우도 있다. 그래서인지 많은 사람들이 부업으로 자신만의 프로젝트/홈페이지를 시작하는 것 같다.
 

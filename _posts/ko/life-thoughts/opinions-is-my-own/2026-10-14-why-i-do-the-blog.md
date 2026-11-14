@@ -15,9 +15,10 @@ title: 블로그를 쓰는 이유
 translation_key: why-i-do-the-blog
 ---
 
-![](/assets/img/posts/c636e3ea-ca08-5e3d-a74b-e670cbcce2ab/e49e8166-353c-5a71-a14a-61368bedfc6e.jpg)
-
-[© CoolPubilcDomains, 출처 OGQ](https://www.ogq.me/backgrounds/1514325)
+<figure data-image-caption="true">
+  <img src="/assets/img/posts/c636e3ea-ca08-5e3d-a74b-e670cbcce2ab/e49e8166-353c-5a71-a14a-61368bedfc6e.jpg" alt="" />
+  <figcaption><a href="https://www.ogq.me/backgrounds/1514325">© CoolPubilcDomains, 출처 OGQ</a></figcaption>
+</figure>
 
 최근에 이전에 이곳저곳에서 썼던 흩어진 글들을 다 모아서 이 블로그에다가 옮기고 있는 중이다. 노션에도 있었고, 워드프레스도 있었고, 티스토리에도 있었다. 페이스북에도 여러 글이 있지만 성격이 좀 다른 것 같아서 그 글은 옮기지 않았다. 블로그를 여러개를 썼었는데 무난하게 괜찮은게 네이버 블로그라는 생각이 들었다. (모르겠다. 궁극적으로는 나만의 블로그를 갖는게 가장 이상적이라고 생각한다...ㅎ)
 

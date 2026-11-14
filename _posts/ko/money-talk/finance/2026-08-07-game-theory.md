@@ -13,9 +13,10 @@ title: 게임이론
 translation_key: 2026-08-07-game-theory
 ---
 
-![](/assets/img/posts/dee07faf-a4de-5bbc-a44d-26f4ed37181c/24f625df-15a6-5996-a443-e61674790bcf.jpg)
-
-[© CoolPubilcDomains, 출처 OGQ](https://www.ogq.me/backgrounds/1514246)
+<figure data-image-caption="true">
+  <img src="/assets/img/posts/dee07faf-a4de-5bbc-a44d-26f4ed37181c/24f625df-15a6-5996-a443-e61674790bcf.jpg" alt="" />
+  <figcaption><a href="https://www.ogq.me/backgrounds/1514246">© CoolPubilcDomains, 출처 OGQ</a></figcaption>
+</figure>
 
 게임이론에 대해서 알아보자.
 

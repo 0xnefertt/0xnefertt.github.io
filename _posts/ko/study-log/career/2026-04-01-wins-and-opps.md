@@ -13,9 +13,10 @@ title: wins & opps
 translation_key: 2026-04-01-wins-and-opps
 ---
 
-![](/assets/img/posts/edab1686-90c0-53ba-a4e8-4f3855ebc489/7d2227ad-70f9-563c-a3df-aa5a26905dcd.jpg)
-
-[© Vera Lúcia, 출처 OGQ](https://www.ogq.me/backgrounds/5171645)
+<figure data-image-caption="true">
+  <img src="/assets/img/posts/edab1686-90c0-53ba-a4e8-4f3855ebc489/7d2227ad-70f9-563c-a3df-aa5a26905dcd.jpg" alt="" />
+  <figcaption><a href="https://www.ogq.me/backgrounds/5171645">© Vera Lúcia, 출처 OGQ</a></figcaption>
+</figure>
 
 우연히 이웃 블로그를 보다가 'wins & opps' 라는 단어를 알게되었다.
 

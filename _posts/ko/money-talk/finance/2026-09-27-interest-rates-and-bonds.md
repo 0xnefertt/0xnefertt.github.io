@@ -19,9 +19,10 @@ title: 금리와 채권에 대한 이해
 translation_key: 2026-09-27-interest-rates-and-bonds
 ---
 
-![](/assets/img/posts/ff55ee9a-db34-54fd-a34c-1b316a4dceac/fb799738-7f8e-5a07-a6d3-939970d2d936.jpg)
-
-[© CoolPubilcDomains, 출처 OGQ](https://www.ogq.me/backgrounds/1490017)
+<figure data-image-caption="true">
+  <img src="/assets/img/posts/ff55ee9a-db34-54fd-a34c-1b316a4dceac/fb799738-7f8e-5a07-a6d3-939970d2d936.jpg" alt="" />
+  <figcaption><a href="https://www.ogq.me/backgrounds/1490017">© CoolPubilcDomains, 출처 OGQ</a></figcaption>
+</figure>
 
 **'금리 = 이자율'**
 

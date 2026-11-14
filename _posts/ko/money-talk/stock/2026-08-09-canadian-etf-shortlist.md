@@ -19,9 +19,10 @@ title: "[캐나다 주식] ETF 종목 추려보기"
 translation_key: 2026-08-09-canadian-etf-shortlist
 ---
 
-![](/assets/img/posts/cce0dff9-635e-50df-aa24-889d664e620d/4ed51e05-4288-5fc4-a4d0-eb0166002ee7.jpg)
-
-[© CoolPubilcDomains, 출처 OGQ](https://www.ogq.me/backgrounds/1481518)
+<figure data-image-caption="true">
+  <img src="/assets/img/posts/cce0dff9-635e-50df-aa24-889d664e620d/4ed51e05-4288-5fc4-a4d0-eb0166002ee7.jpg" alt="" />
+  <figcaption><a href="https://www.ogq.me/backgrounds/1481518">© CoolPubilcDomains, 출처 OGQ</a></figcaption>
+</figure>
 
 주식에서는 "계란을 한 바구니에 담지 말라"는 유명한 격언이 하나 있다.
 

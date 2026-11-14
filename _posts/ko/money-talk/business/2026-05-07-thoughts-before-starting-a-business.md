@@ -13,9 +13,10 @@ title: 창업 생각이 들 때마다 보기
 translation_key: 2026-05-07-thoughts-before-starting-a-business
 ---
 
-![](/assets/img/posts/c9b8c20c-6bc4-5c64-a82f-a147d10a4e97/00e98fa1-53ec-5b2d-ac49-4764d8fd49f3.jpg)
-
-[© OGQ VIDEO, 출처 OGQ](https://www.ogq.me/backgrounds/1287189)
+<figure data-image-caption="true">
+  <img src="/assets/img/posts/c9b8c20c-6bc4-5c64-a82f-a147d10a4e97/00e98fa1-53ec-5b2d-ac49-4764d8fd49f3.jpg" alt="" />
+  <figcaption><a href="https://www.ogq.me/backgrounds/1287189">© OGQ VIDEO, 출처 OGQ</a></figcaption>
+</figure>
 
 나이가 들어가니 점점 내 것을 하고 싶다라는 생각이 든다.
 

@@ -13,9 +13,10 @@ title: 경제공부
 translation_key: 2026-08-07-studying-economics
 ---
 
-![](/assets/img/posts/08f8680e-89d5-59dd-a259-d9e3e9853907/db118690-d86e-5a41-acb2-baefa794f09e.jpg)
-
-[© CoolPubilcDomains, 출처 OGQ](https://www.ogq.me/backgrounds/1511789)
+<figure data-image-caption="true">
+  <img src="/assets/img/posts/08f8680e-89d5-59dd-a259-d9e3e9853907/db118690-d86e-5a41-acb2-baefa794f09e.jpg" alt="" />
+  <figcaption><a href="https://www.ogq.me/backgrounds/1511789">© CoolPubilcDomains, 출처 OGQ</a></figcaption>
+</figure>
 
 오늘은 경제에 대해서 알아보자.
 

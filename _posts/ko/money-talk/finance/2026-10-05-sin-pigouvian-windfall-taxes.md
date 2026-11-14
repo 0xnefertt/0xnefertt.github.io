@@ -18,9 +18,10 @@ title: 죄악세(Sin Tax), 피구세(Pigouvian Tax), 횡재세(Windfall Tax)
 translation_key: 2026-10-05-sin-pigouvian-windfall-taxes
 ---
 
-![](/assets/img/posts/5c3a63ca-dd62-55c2-a732-518fad484345/700b59b4-4397-5201-a9d9-0955f119bb82.jpg)
-
-[© CoolPubilcDomains, 출처 OGQ](https://www.ogq.me/backgrounds/1500454)
+<figure data-image-caption="true">
+  <img src="/assets/img/posts/5c3a63ca-dd62-55c2-a732-518fad484345/700b59b4-4397-5201-a9d9-0955f119bb82.jpg" alt="" />
+  <figcaption><a href="https://www.ogq.me/backgrounds/1500454">© CoolPubilcDomains, 출처 OGQ</a></figcaption>
+</figure>
 
 **세금을 내는 진짜 이유는 뭘까?**
 

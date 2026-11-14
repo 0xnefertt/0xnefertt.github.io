@@ -13,9 +13,10 @@ title: 캐나다가 1등인거
 translation_key: 2026-09-24-where-canada-ranks-first
 ---
 
-![](/assets/img/posts/ca4999af-8521-5fe0-af2a-9279bfda2446/d9790442-3df7-540c-acbd-5520ffb0bcde.jpg)
-
-[© CoolPubilcDomains, 출처 OGQ](https://www.ogq.me/backgrounds/1463859)
+<figure data-image-caption="true">
+  <img src="/assets/img/posts/ca4999af-8521-5fe0-af2a-9279bfda2446/d9790442-3df7-540c-acbd-5520ffb0bcde.jpg" alt="" />
+  <figcaption><a href="https://www.ogq.me/backgrounds/1463859">© CoolPubilcDomains, 출처 OGQ</a></figcaption>
+</figure>
 
 한국은 (앞이던 뒤에서이던)1등인게 참 많다.
 
@@ -41,9 +42,10 @@ translation_key: 2026-09-24-where-canada-ranks-first
 
 ---
 
-![](/assets/img/posts/ca4999af-8521-5fe0-af2a-9279bfda2446/1480bebb-b8cf-5a5c-ac39-63edc40235da.jpg)
-
-[© CoolPubilcDomains, 출처 OGQ](https://www.ogq.me/backgrounds/1459671)
+<figure data-image-caption="true">
+  <img src="/assets/img/posts/ca4999af-8521-5fe0-af2a-9279bfda2446/1480bebb-b8cf-5a5c-ac39-63edc40235da.jpg" alt="" />
+  <figcaption><a href="https://www.ogq.me/backgrounds/1459671">© CoolPubilcDomains, 출처 OGQ</a></figcaption>
+</figure>
 
 이제 캐나다는 어떤게 1등인지 알아보자.
 

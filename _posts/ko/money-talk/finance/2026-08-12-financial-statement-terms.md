@@ -15,9 +15,10 @@ title: 재무제표 분석 용어 알아두기
 translation_key: 2026-08-12-financial-statement-terms
 ---
 
-![](/assets/img/posts/3c24d9c8-688c-5811-af58-0cde5134ce82/6c2a4285-9d8a-5b1a-a9e8-f682975bdf7c.jpg)
-
-[© CoolPubilcDomains, 출처 OGQ](https://www.ogq.me/backgrounds/1513463)
+<figure data-image-caption="true">
+  <img src="/assets/img/posts/3c24d9c8-688c-5811-af58-0cde5134ce82/6c2a4285-9d8a-5b1a-a9e8-f682975bdf7c.jpg" alt="" />
+  <figcaption><a href="https://www.ogq.me/backgrounds/1513463">© CoolPubilcDomains, 출처 OGQ</a></figcaption>
+</figure>
 
 회사를 알아볼 때나 경제⋅시사 뉴스들을 보다보면 어려운 용어들이 종종 나온다.
 

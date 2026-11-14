@@ -15,9 +15,10 @@ title: "[React Native] Metro란 무엇인가?"
 translation_key: 2026-08-14-react-native-metro
 ---
 
-![](/assets/img/posts/4ac411aa-c20a-54e2-ab55-e7b87cf3687b/425448aa-197f-500f-a5cf-f93e457b19df.jpg)
-
-[© CoolPubilcDomains, 출처 OGQ](https://www.ogq.me/backgrounds/1515404)
+<figure data-image-caption="true">
+  <img src="/assets/img/posts/4ac411aa-c20a-54e2-ab55-e7b87cf3687b/425448aa-197f-500f-a5cf-f93e457b19df.jpg" alt="" />
+  <figcaption><a href="https://www.ogq.me/backgrounds/1515404">© CoolPubilcDomains, 출처 OGQ</a></figcaption>
+</figure>
 
 [https://reactnative.dev/docs/metro](https://reactnative.dev/docs/metro)
 

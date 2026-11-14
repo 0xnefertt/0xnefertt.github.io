@@ -13,9 +13,10 @@ title: 대 AI시대에 'HarvardX CS50x' 온라인 강의 듣는 나
 translation_key: 2026-04-11-cs50-in-the-ai-era
 ---
 
-![](/assets/img/posts/8d93fbb6-9f7a-572a-ab53-f8570e7b6359/db054458-a3ec-505d-a7b7-a7a1af0eefcc.jpg)
-
-[© CoolPubilcDomains, 출처 OGQ](https://www.ogq.me/backgrounds/1476739)
+<figure data-image-caption="true">
+  <img src="/assets/img/posts/8d93fbb6-9f7a-572a-ab53-f8570e7b6359/db054458-a3ec-505d-a7b7-a7a1af0eefcc.jpg" alt="" />
+  <figcaption><a href="https://www.ogq.me/backgrounds/1476739">© CoolPubilcDomains, 출처 OGQ</a></figcaption>
+</figure>
 
 ‘대 AI 시대에 개발자는 정말 사라질까?’, ‘그렇다면 앞으로 나는 뭘 하며 살아가야 할까?’
 

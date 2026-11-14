@@ -13,9 +13,10 @@ title: 쿠키
 translation_key: 2026-10-06-web-cookies
 ---
 
-![](/assets/img/posts/86aadf38-0afb-5e44-a1a2-35a1c6c2b5e5/5b3574a1-cf03-567c-af70-750a4f81e5df.jpg)
-
-[© CoolPubilcDomains, 출처 OGQ](https://www.ogq.me/backgrounds/1487600)
+<figure data-image-caption="true">
+  <img src="/assets/img/posts/86aadf38-0afb-5e44-a1a2-35a1c6c2b5e5/5b3574a1-cf03-567c-af70-750a4f81e5df.jpg" alt="" />
+  <figcaption><a href="https://www.ogq.me/backgrounds/1487600">© CoolPubilcDomains, 출처 OGQ</a></figcaption>
+</figure>
 
 웹 사이트를 돌아다니다 한번쯤 봤을 "쿠키 수집에 동의하시겠습니까?" 문구에 우리는 무심코 동의함을 누르지만 정작 쿠키가 뭔지 모른다. 그래서 오늘은 쿠키에 대해서 알아보고자 한다.
 

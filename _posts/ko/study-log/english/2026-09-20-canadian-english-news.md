@@ -15,9 +15,10 @@ title: 캐나다 영어 뉴스 읽기 플랫폼 추천
 translation_key: 2026-09-20-canadian-english-news
 ---
 
-![](/assets/img/posts/54691333-064c-5f1e-ab39-bc3ffbb02559/9583fa32-45e6-5753-a890-9de4178b18ee.jpg)
-
-[© CoolPubilcDomains, 출처 OGQ](https://www.ogq.me/backgrounds/1505752)
+<figure data-image-caption="true">
+  <img src="/assets/img/posts/54691333-064c-5f1e-ab39-bc3ffbb02559/9583fa32-45e6-5753-a890-9de4178b18ee.jpg" alt="" />
+  <figcaption><a href="https://www.ogq.me/backgrounds/1505752">© CoolPubilcDomains, 출처 OGQ</a></figcaption>
+</figure>
 
 인스타그램에서 우연히 어느 영상을 보았다. 요즘 젊은 세대들이 문해력의 심각성에 대해서 이야기하는 그런 영상이었는데 괜히 뜨끔했다. 하루에도 많은 시간을 SNS에 낭비하고 있다. 그래서였을까 점점 문해력이 떨어져 가고 있음을 체감할 때도 있다. "이거", "저거", "그거"와 같이 만능으로 사용할 수 있는 대명사들로 말을 하는 습관이 생겼고, 말의 논리가 사라지고 점점 긴 글은 읽기 힘들다.
 
