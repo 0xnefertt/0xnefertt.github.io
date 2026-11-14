@@ -12,7 +12,7 @@ naver_url: https://blog.naver.com/martin-lee/224422154974
 tags:
   - 진중환
   - 오래된연장통
-title: 진중환, 오래된 연장통
+title: 오래된 연장통
 translation_key: the-old-toolbox
 ---
 
