@@ -117,7 +117,7 @@ const showComments = hasGiscus && (post.data.giscus_comments ?? true) && !redire
   articlePublishedTime={post.data.date}
   articleModifiedTime={post.data.last_updated ?? post.data.date}
   lang={locale}
-  mainClass="post-content"
+  mainClass="post-content blog-post-content"
 >
   {redirectTarget && <meta slot="head" http-equiv="refresh" content={`0; url=${redirectTarget}`} />}
   <script slot="head" type="application/ld+json" set:html={articleJsonLd}></script>
