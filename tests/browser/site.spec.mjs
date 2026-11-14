@@ -22,7 +22,7 @@ async function accessible(page) {
 
 for (const width of [390, 1280]) {
   for (const colorScheme of ["light", "dark"]) {
-    test(`public navigation, search and accessibility at ${width}px in ${colorScheme}`, async ({ page }) => {
+    test(`public navigation, search and accessibility at ${width}px in ${colorScheme}`, async ({ page, request }) => {
       await page.emulateMedia({ colorScheme });
       await page.setViewportSize({ width, height: 844 });
       for (const route of ["/", "/ko/", "/ko/blog/", "/ko/about/", "/ko/books/", "/ko/projects/", "/ko/resources/", "/ko/privacy/", "/admin/"]) {
@@ -37,8 +37,15 @@ for (const width of [390, 1280]) {
         await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible();
         await page.getByRole("button", { name: "Close navigation menu" }).click();
       }
-      await page.getByRole("searchbox").fill("파이썬");
-      await expect(page.locator("#blog-inline-search-results li")).toHaveCount(5);
+      const query = "파이썬";
+      const index = await (await request.get("/ko/blog/search-index.json")).json();
+      const expectedUrls = index
+        .filter((post) => [post.title, post.description, post.content, ...post.tags, ...post.categories].some((field) => field.includes(query)))
+        .map((post) => new URL(post.href, page.url()).href)
+        .sort();
+      await page.getByRole("searchbox").fill(query);
+      const resultLinks = page.locator("#blog-inline-search-results h2 > a");
+      await expect.poll(() => resultLinks.evaluateAll((links) => links.map((link) => link.href).sort())).toEqual(expectedUrls);
       await accessible(page);
       await test.info().attach(`blog-${width}-${colorScheme}`, { body: await page.screenshot(), contentType: "image/png" });
       await page.getByRole("link", { name: "파이썬 가비지 컬렉션", exact: true }).click();
