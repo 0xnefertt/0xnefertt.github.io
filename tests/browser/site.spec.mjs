@@ -61,7 +61,7 @@ test("a photo post shows its artwork, footer tags and six related Korean posts",
   await page.goto(article.href);
   await expect(page.locator(".post-header-image")).toHaveAttribute("src", article.gallery[0]);
   await expect(page.locator(".post-header .tags")).toHaveCount(0);
-  await expect(page.locator(".post-body + .post-tags span")).toHaveText(article.tags.map((tag) => `#${tag}`));
+  await expect(page.locator(".post-body + .post-tags a")).toHaveText(article.tags.map((tag) => (tag.startsWith("#") ? tag : `#${tag}`)));
   const links = page.locator(".post-recommendations li a");
   await expect(links).toHaveCount(6);
   const urls = await links.evaluateAll((nodes) => nodes.map((node) => node.getAttribute("href")));
@@ -76,6 +76,40 @@ test("a photo post shows its artwork, footer tags and six related Korean posts",
   );
   const matches = new Set(related.map((post) => post.href));
   expect(urls.slice(0, Math.min(6, matches.size)).every((url) => matches.has(url))).toBe(true);
+});
+
+test.describe("mobile footer tags", () => {
+  test.use({ hasTouch: true, isMobile: true, viewport: { width: 320, height: 640 } });
+  test("tapping a tag opens only posts carrying that exact tag", async ({ page, request }) => {
+    const index = await (await request.get("/ko/blog/search-index.json")).json();
+    const articles = index.filter((post) => !post.external && post.tags.length);
+    const article = articles.find((post) => post.tags.some((tag) => tag.includes(" "))) ?? articles[0];
+    const tag = article.tags.find((tag) => tag.includes(" ")) ?? article.tags[0];
+    const tagKey = (text) => text.trim().normalize("NFC").toLowerCase();
+    const expected = index.filter((post) => post.tags.some((value) => tagKey(value) === tagKey(tag))).map((post) => post.href);
+    await page.goto(article.href);
+    const label = tag.startsWith("#") ? tag : `#${tag}`;
+    const tags = page.getByRole("navigation", { name: "글 태그" });
+    const link = tags.getByRole("link", { name: label, exact: true }).first();
+    await link.scrollIntoViewIfNeeded();
+    expect(
+      await tags.locator("a").evaluateAll((nodes) =>
+        nodes.every((node) => {
+          const box = node.getBoundingClientRect();
+          return box.height >= 44 && box.width >= 44 && box.left >= 0 && box.right <= innerWidth;
+        })
+      )
+    ).toBe(true);
+    await link.tap();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(label);
+    const matches = page.locator("#blog-search-results h2 a");
+    await expect(page.locator("#blog-search-meta")).toContainText(`${label} 태그가 붙은 글 · ${expected.length}편`);
+    expect(await matches.evaluateAll((nodes) => nodes.map((node) => node.href).sort())).toEqual(
+      expected.map((href) => new URL(href, page.url()).href).sort()
+    );
+    await page.getByRole("searchbox").fill("파이썬");
+    expect(new URL(page.url()).searchParams.has("tag")).toBe(false);
+  });
 });
 
 test("post breadcrumbs navigate independently to all posts, the parent group and the child category", async ({ page, request }) => {

@@ -187,6 +187,7 @@
 
   function updateUrl(query) {
     const nextUrl = new URL(window.location.href);
+    nextUrl.searchParams.delete("tag");
     if (query) {
       nextUrl.searchParams.set("q", query);
     } else {
@@ -229,6 +230,8 @@
 
     const posts = await loadPosts(config);
     const mode = config.mode === "search-page" ? "search-page" : "inline";
+    const heading = mode === "search-page" ? document.getElementById("blog-search-heading") : null;
+    const defaultHeading = heading?.textContent;
     const initialResults = [...resultsContainer.childNodes].map((node) => node.cloneNode(true));
     const latestLimit = Number.isFinite(config.latestLimit) ? config.latestLimit : 12;
 
@@ -271,6 +274,7 @@
 
       if (mutateUrl) {
         updateUrl(trimmedQuery);
+        if (heading) heading.textContent = defaultHeading;
       }
 
       if (!query) {
@@ -290,9 +294,19 @@
     const params = new URLSearchParams(window.location.search);
     const initialQuery = params.get("q") || "";
     input.value = initialQuery;
-    const initialCount = runSearch(initialQuery, false);
-    if (initialQuery.trim()) {
-      trackSearch(initialQuery, initialCount, "page_load");
+    const tag = mode === "search-page" && !initialQuery ? params.get("tag")?.trim() : "";
+    if (tag) {
+      const tagKey = (value) => value.trim().normalize("NFC").toLowerCase();
+      const selectedKey = tagKey(tag);
+      const matches = posts.filter((post) => post.tags?.some((value) => tagKey(value) === selectedKey)).sort((a, b) => b.dateValue - a.dateValue);
+      renderPosts(resultsContainer, matches);
+      const label = tag.startsWith("#") ? tag : `#${tag}`;
+      if (heading) heading.textContent = label;
+      metaNode.textContent = korean ? `${label} 태그가 붙은 글 · ${matches.length}편` : `Posts tagged ${label} · ${matches.length}`;
+      emptyNode.hidden = matches.length > 0;
+    } else {
+      const initialCount = runSearch(initialQuery, false);
+      if (initialQuery.trim()) trackSearch(initialQuery, initialCount, "page_load");
     }
 
     form.addEventListener("submit", (event) => {

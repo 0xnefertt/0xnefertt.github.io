@@ -29,7 +29,7 @@ const searchConfigJson = toSafeJson([
   disableAds
 >
   <section class="blog-header">
-    <h1>{siteConfig.blogName}</h1>
+    <h1 id="blog-search-heading">{siteConfig.blogName}</h1>
     <p data-i18n-key="search_all_posts">{t(locale, "search_all_posts")}</p>
 
     <form class="blog-search-form" id="blog-search-form" action={l("/blog/search/")} method="get">
@@ -55,7 +55,7 @@ const searchConfigJson = toSafeJson([
     </div>
   </section>
 
-  <p class="search-results-meta" id="blog-search-meta"></p>
+  <p class="search-results-meta" id="blog-search-meta" role="status"></p>
 
   <ul class="post-list" id="blog-search-results"></ul>
 
