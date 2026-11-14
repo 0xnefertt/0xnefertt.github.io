@@ -168,7 +168,7 @@ function isActive(href: string, path: string): boolean {
       })();
     </script>
     <link rel="stylesheet" href="/assets/styles/global.css?v=20261113-7" />
-    <link rel="stylesheet" href="/assets/styles/blog.css?v=20261114-4" />
+    <link rel="stylesheet" href="/assets/styles/blog.css?v=20261114-5" />
   </head>
   <body class="site-layout">
     <header class="site-header">
@@ -253,9 +253,9 @@ function isActive(href: string, path: string): boolean {
           © {currentYear} {siteConfig.title}
         </p>
         <div class="footer-links">
-          <nav aria-label="Site links">
+          <nav aria-label={localeText(locale, "Site links", "사이트 링크")}>
             <ul class="footer-site-links">
-              <li class="footer-link-group">
+              <li class="footer-link-group footer-group-site">
                 <a href={l("/privacy/")}>Privacy</a>
                 <a href="/sitemap.xml" type="application/xml">
                   Sitemap
@@ -265,7 +265,7 @@ function isActive(href: string, path: string): boolean {
                 </a>
               </li>
               {socialLinks.length > 0 && (
-                <li class="footer-link-group">
+                <li class="footer-link-group footer-group-social">
                   <span class="footer-divider" aria-hidden="true">
                     |
                   </span>
@@ -274,14 +274,14 @@ function isActive(href: string, path: string): boolean {
                   ))}
                 </li>
               )}
-              <li class="footer-link-group">
+              <li class="footer-link-group footer-group-resources">
                 <span class="footer-divider" aria-hidden="true">
                   |
                 </span>
                 <a href={l("/resources/")}>Resources</a>
                 <a href="/admin/">Login</a>
               </li>
-              <li class="footer-link-group">
+              <li class="footer-link-group footer-group-language">
                 <span class="footer-divider" aria-hidden="true">
                   |
                 </span>
