@@ -778,20 +778,22 @@ body {
 }
 
 .post-share > [data-share-open] {
-  background: var(--surface);
-  color: var(--text);
-  border: 1px solid var(--line);
-  border-radius: 4px;
-  font: inherit;
-  font-size: 0.85rem;
+  display: grid;
+  place-items: center;
   flex-shrink: 0;
-  min-height: 44px;
-  padding: 0.35rem 0.85rem;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text);
   cursor: pointer;
 }
 
-.post-share-trigger-icon {
-  display: none;
+.post-share > [data-share-open]:is(:hover, :active, :focus-visible) {
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .post-share {
@@ -1108,29 +1110,6 @@ html.post-share-is-open {
   .header-inner {
     min-height: 60px;
     padding-block: 0.5rem;
-  }
-
-  .post-share > [data-share-open] {
-    display: grid;
-    place-items: center;
-    width: 44px;
-    padding: 0;
-    border: 0;
-    border-radius: 50%;
-    background: transparent;
-  }
-
-  [data-share-open] > span {
-    display: none;
-  }
-
-  .post-share-trigger-icon {
-    display: block;
-  }
-
-  .post-share > [data-share-open]:is(:active, :focus-visible) {
-    background: var(--accent-soft);
-    color: var(--accent);
   }
 
   .site-footer {
