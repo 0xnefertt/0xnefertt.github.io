@@ -12,7 +12,7 @@ naver_url: https://blog.naver.com/martin-lee/224422156434
 tags:
   - 올리버버크먼
   - 4000주
-title: 올리버 버크먼
+title: 4000주
 translation_key: four-thousand-weeks
 ---
 
