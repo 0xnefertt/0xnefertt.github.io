@@ -118,6 +118,9 @@ for (const width of [390, 1280]) {
     await share.click();
     const dialog = page.getByRole("dialog", { name: "이 글 공유하기" });
     await expect(dialog).toBeVisible();
+    await expect(dialog.locator(".post-share-post-title")).toHaveText(await page.locator("h1").innerText());
+    expect(await dialog.evaluate((node) => node.scrollWidth <= node.clientWidth)).toBe(true);
+    await test.info().attach(`share-dialog-${width}`, { body: await page.screenshot(), contentType: "image/png" });
     await accessible(page);
     const canonical = await page.locator("[data-post-share]").getAttribute("data-share-url");
     await dialog.getByRole("button", { name: "링크 복사" }).click();
