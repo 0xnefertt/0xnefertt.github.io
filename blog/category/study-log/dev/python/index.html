@@ -1,2 +1,899 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex, follow"><meta http-equiv="refresh" content="0; url=/ko/blog/category/study-log/dev/python/"><link rel="canonical" href="https://0xnefertt.github.io/ko/blog/category/study-log/dev/python/"><title>Page moved</title><style>.notice-label[data-astro-cid-sbmovh4h]{vertical-align:middle;border:1px solid;border-radius:.25rem;margin-inline-end:.5rem;padding:.15rem .45rem;font-size:.75rem;display:inline-block}.project-note[data-astro-cid-mm7zk7fd]{margin-block:1rem}.project-note[data-astro-cid-mm7zk7fd] h3[data-astro-cid-mm7zk7fd]{margin:0 0 .25rem;font-size:1rem}.project-note[data-astro-cid-mm7zk7fd] p[data-astro-cid-mm7zk7fd]{white-space:pre-line;overflow-wrap:anywhere;margin:.25rem 0}.project-dialog[data-astro-cid-vokft42d]{border:1px solid var(--line);background:var(--bg);width:min(34rem,100% - 2rem);max-height:calc(100dvh - 2rem);color:var(--text);overflow-wrap:anywhere;overscroll-behavior:contain;border-radius:12px;margin:auto;padding:clamp(1.25rem,3vw,2rem)}.project-dialog[data-astro-cid-vokft42d]::backdrop{background:#00000085}.project-dialog[data-astro-cid-vokft42d] header[data-astro-cid-vokft42d]{justify-content:space-between;align-items:start;gap:1rem;display:flex}.project-dialog[data-astro-cid-vokft42d] h2[data-astro-cid-vokft42d]{margin:0;font-size:1.35rem}.project-dialog[data-astro-cid-vokft42d] button[data-astro-cid-vokft42d]{width:2.75rem;height:2.75rem;color:var(--text-muted);font:inherit;cursor:pointer;background:0 0;border:0;place-content:center;margin:-.5rem;padding:0;font-size:1.5rem;display:grid}.dialog-stack[data-astro-cid-vokft42d]{margin-block:1rem}.dialog-stack[data-astro-cid-vokft42d] h3[data-astro-cid-vokft42d]{margin:0;font-size:1rem}.project-dialog[data-astro-cid-vokft42d] .dialog-actions[data-astro-cid-vokft42d]{border-top:1px solid var(--line);margin-top:1.25rem;padding-top:1rem}.project-dialog[data-astro-cid-vokft42d] .dialog-actions[data-astro-cid-vokft42d] a[data-astro-cid-vokft42d]{color:var(--accent);font-weight:600}
-</style></head><body><p>This page has moved. <a href="/ko/blog/category/study-log/dev/python/">Continue to the page</a>.</p></body></html>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48" href="/favicon.ico"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><title>Python Basics | 0xnefertt&#39;s thoughts</title><meta name="description" content="Notes on Python syntax and basic concepts"><link rel="canonical" href="https://0xnefertt.github.io/blog/category/study-log/dev/python/"><link rel="alternate" hreflang="en" href="https://0xnefertt.github.io/blog/category/study-log/dev/python/"><link rel="alternate" hreflang="ko" href="https://0xnefertt.github.io/ko/blog/category/study-log/dev/python/"><meta property="og:locale" content="en_US"><link rel="alternate" type="application/rss+xml" title="0xnefertt's thoughts RSS Feed" href="/rss.xml"><meta property="og:site_name" content="0xnefertt's thoughts"><meta property="og:type" content="article"><meta property="og:title" content="Python Basics | 0xnefertt's thoughts"><meta property="og:description" content="Notes on Python syntax and basic concepts"><meta property="og:url" content="https://0xnefertt.github.io/blog/category/study-log/dev/python/"><meta property="og:image" content="https://0xnefertt.github.io/assets/img/prof_pic.jpg"><meta property="article:published_time" content="2026-05-22T00:00:00.000Z"><meta property="article:modified_time" content="2026-05-22T00:00:00.000Z"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Python Basics | 0xnefertt's thoughts"><meta name="twitter:description" content="Notes on Python syntax and basic concepts"><meta name="twitter:image" content="https://0xnefertt.github.io/assets/img/prof_pic.jpg"><meta name="twitter:site" content="@0xnefertt"><meta name="twitter:creator" content="@0xnefertt"><script>
+      (() => {
+        window.dataLayer = window.dataLayer || [];
+        window.gtag =
+          window.gtag ||
+          function gtag() {
+            window.dataLayer.push(arguments);
+          };
+
+        window.gtag("consent", "default", {
+          ad_storage: "denied",
+          ad_user_data: "denied",
+          ad_personalization: "denied",
+          analytics_storage: "denied",
+          wait_for_update: 2000,
+        });
+        window.gtag("set", "ads_data_redaction", true);
+      })();
+    </script><script async src="https://www.googletagmanager.com/gtag/js?id=G-XKLJ41F6PS"></script><script>(function(){const gaMeasurementId = "G-XKLJ41F6PS";
+
+      window.gtag("js", new Date());
+      window.gtag("config", gaMeasurementId);
+    })();</script><script>(function(){const gaMeasurementId = "G-XKLJ41F6PS";
+
+      (() => {
+        const analytics = window.siteAnalytics || {};
+        analytics.track =
+          analytics.track ||
+          function track(eventName, params = {}) {
+            if (!gaMeasurementId || typeof window.gtag !== "function") {
+              return;
+            }
+
+            window.gtag("event", eventName, params);
+          };
+        window.siteAnalytics = analytics;
+      })();
+    })();</script><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8138616027618632" crossorigin="anonymous"></script><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Python Basics","inLanguage":"en","description":"Notes on Python syntax and basic concepts","author":{"@type":"Person","name":"0xnefertt","url":"https://0xnefertt.github.io/","sameAs":["https://github.com/0xnefertt","https://x.com/0xnefertt"]},"publisher":{"@type":"Person","name":"0xnefertt","url":"https://0xnefertt.github.io/"},"mainEntityOfPage":"https://0xnefertt.github.io/blog/category/study-log/dev/python/","image":["https://0xnefertt.github.io/assets/img/prof_pic.jpg"],"datePublished":"2026-05-22T00:00:00.000Z","dateModified":"2026-05-22T00:00:00.000Z","keywords":"python, dev, study, dev"}</script><script>
+      (() => {
+        const STORAGE_KEY = "site-theme";
+        const storedTheme = localStorage.getItem(STORAGE_KEY);
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const theme = storedTheme === "light" || storedTheme === "dark" ? storedTheme : prefersDark ? "dark" : "light";
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script><link rel="stylesheet" href="/assets/styles/global.css?v=20261114-2"><link rel="stylesheet" href="/assets/styles/blog.css?v=20261114-9"><style>.notice-label[data-astro-cid-sbmovh4h]{vertical-align:middle;border:1px solid;border-radius:.25rem;margin-inline-end:.5rem;padding:.15rem .45rem;font-size:.75rem;display:inline-block}.project-note[data-astro-cid-mm7zk7fd]{margin-block:1rem}.project-note[data-astro-cid-mm7zk7fd] h3[data-astro-cid-mm7zk7fd]{margin:0 0 .25rem;font-size:1rem}.project-note[data-astro-cid-mm7zk7fd] p[data-astro-cid-mm7zk7fd]{white-space:pre-line;overflow-wrap:anywhere;margin:.25rem 0}.project-dialog[data-astro-cid-vokft42d]{border:1px solid var(--line);background:var(--bg);width:min(34rem,100% - 2rem);max-height:calc(100dvh - 2rem);color:var(--text);overflow-wrap:anywhere;overscroll-behavior:contain;border-radius:12px;margin:auto;padding:clamp(1.25rem,3vw,2rem)}.project-dialog[data-astro-cid-vokft42d]::backdrop{background:#00000085}.project-dialog[data-astro-cid-vokft42d] header[data-astro-cid-vokft42d]{justify-content:space-between;align-items:start;gap:1rem;display:flex}.project-dialog[data-astro-cid-vokft42d] h2[data-astro-cid-vokft42d]{margin:0;font-size:1.35rem}.project-dialog[data-astro-cid-vokft42d] button[data-astro-cid-vokft42d]{width:2.75rem;height:2.75rem;color:var(--text-muted);font:inherit;cursor:pointer;background:0 0;border:0;place-content:center;margin:-.5rem;padding:0;font-size:1.5rem;display:grid}.dialog-stack[data-astro-cid-vokft42d]{margin-block:1rem}.dialog-stack[data-astro-cid-vokft42d] h3[data-astro-cid-vokft42d]{margin:0;font-size:1rem}.project-dialog[data-astro-cid-vokft42d] .dialog-actions[data-astro-cid-vokft42d]{border-top:1px solid var(--line);margin-top:1.25rem;padding-top:1rem}.project-dialog[data-astro-cid-vokft42d] .dialog-actions[data-astro-cid-vokft42d] a[data-astro-cid-vokft42d]{color:var(--accent);font-weight:600}
+</style></head><body class="site-layout"><header class="site-header"><div class="container header-inner"><a class="site-title" href="/">0xnefertt&#39;s thoughts</a><button type="button" class="menu-toggle" data-menu-toggle aria-controls="site-menu-panel" aria-expanded="false" aria-label="Open navigation menu"><span class="menu-toggle-icon" aria-hidden="true"></span><span>Menu</span></button><div class="header-controls" id="site-menu-panel"><nav aria-label="Primary" id="primary-nav"><ul class="nav-list"><li class="nav-item"><a href="/about/">About</a></li><li class="nav-item nav-item--dropdown"><a class="active" href="/blog/">Blog</a><ul class="nav-dropdown"><li class="nav-dropdown-item nav-dropdown-item--nested"><a href="/blog/category/study-log/">study</a><ul class="nav-subdropdown"><li><a href="/blog/category/study-log/dev/">dev</a></li><li><a href="/blog/category/study-log/english/">english</a></li><li><span class="nav-disabled" aria-disabled="true">french (0)</span></li><li><a href="/blog/category/study-log/math/">math</a></li><li><a href="/blog/category/study-log/career/">career</a></li></ul></li><li class="nav-dropdown-item nav-dropdown-item--nested"><a href="/blog/category/money-talk/">money</a><ul class="nav-subdropdown"><li><a href="/blog/category/money-talk/finance/">finance</a></li><li><a href="/blog/category/money-talk/stock/">stock</a></li><li><a href="/blog/category/money-talk/property/">property</a></li><li><a href="/blog/category/money-talk/business/">business</a></li></ul></li><li class="nav-dropdown-item nav-dropdown-item--nested"><a href="/blog/category/life-thoughts/">thoughts</a><ul class="nav-subdropdown"><li><a href="/blog/category/life-thoughts/opinions-is-my-own/">opinions is my own</a></li><li><a href="/blog/category/life-thoughts/retrospect/">retrospect</a></li></ul></li><li class="nav-dropdown-item nav-dropdown-item--nested"><a href="/blog/category/useful-tips/">guides</a><ul class="nav-subdropdown"><li><a href="/blog/category/useful-tips/general/">general</a></li><li><a href="/blog/category/useful-tips/in-canada/">canada</a></li></ul></li></ul></li><li class="nav-item"><a href="/books/">Bookshelf</a></li><li class="nav-item"><a href="/projects/">Projects</a></li></ul></nav><div class="preference-controls"><button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch to dark mode" aria-pressed="false"><span class="theme-toggle-icon" aria-hidden="true"></span></button></div></div></div></header><main class="container post-content blog-post-content"><article class="post-header"><div class="post-header-navigation"><nav class="post-breadcrumbs" aria-label="글 카테고리"><a href="/blog/" data-i18n-key="blog_all">All posts</a> / <a href="/blog/category/study-log/">study</a> / <a href="/blog/category/study-log/dev/">dev</a></nav><div class="post-share" data-post-share data-share-url="https://0xnefertt.github.io/blog/category/study-log/dev/python/"><button type="button" data-share-open aria-label="Share" title="Share" aria-haspopup="dialog" aria-controls="post-share-dialog"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 14V3m-4 4 4-4 4 4M7 10H5v11h14V10h-2"></path></svg></button><dialog class="post-share-dialog" id="post-share-dialog" aria-labelledby="post-share-title"><div class="post-share-header"><h2 id="post-share-title">Share this post</h2><button class="post-share-close" type="button" data-share-close aria-label="Close sharing dialog" autofocus><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m5 5 14 14M19 5 5 19"></path></svg></button></div><div class="post-share-content"><p class="post-share-post-title">Python Basics</p><div class="post-share-options"><a class="post-share-choice" href="mailto:?subject=Python%20Basics&amp;body=Python%20Basics%0A%0Ahttps%3A%2F%2F0xnefertt.github.io%2Fblog%2Fcategory%2Fstudy-log%2Fdev%2Fpython%2F"><span class="post-share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 6 9 7 9-7"></path></svg></span><span>Email</span></a><a class="post-share-choice" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2F0xnefertt.github.io%2Fblog%2Fcategory%2Fstudy-log%2Fdev%2Fpython%2F" target="_blank" rel="noopener noreferrer"><span class="post-share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12a12 12 0 1 0-13.88 11.85v-8.38H7.08V12h3.04V9.36c0-3 1.79-4.66 4.53-4.66 1.31 0 2.68.24 2.68.24v2.95h-1.51c-1.49 0-1.96.92-1.96 1.87V12h3.33l-.53 3.47h-2.8v8.38A12 12 0 0 0 24 12Z"></path></svg></span><span>Facebook</span></a><a class="post-share-choice" href="https://www.reddit.com/submit?url=https%3A%2F%2F0xnefertt.github.io%2Fblog%2Fcategory%2Fstudy-log%2Fdev%2Fpython%2F&amp;title=Python+Basics" target="_blank" rel="noopener noreferrer"><span class="post-share-icon post-share-icon--reddit" aria-hidden="true">r/</span><span>Reddit</span></a><a class="post-share-choice" href="https://wa.me/?text=Python%20Basics%0A%0Ahttps%3A%2F%2F0xnefertt.github.io%2Fblog%2Fcategory%2Fstudy-log%2Fdev%2Fpython%2F" target="_blank" rel="noopener noreferrer"><span class="post-share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.7 11.8a8.6 8.6 0 0 1-12.9 7.4L3 20.5l1.3-4.7a8.6 8.6 0 1 1 16.4-4Z"></path><path fill="currentColor" stroke="none" d="M8.4 6.9c-.3-.1-.7 0-.9.3-.7.8-.7 1.8-.3 2.8.8 2.1 2.9 4.4 5.4 5.3 1.1.4 2.3.2 2.9-.6.2-.3.3-.7.2-1l-2.4-1.2-.8 1c-1.5-.6-2.7-1.8-3.4-3.3l1-.8-1.2-2.5Z"></path></svg></span><span>WhatsApp</span></a></div><label class="post-share-url-label" for="post-share-url">Post link</label><div class="post-share-link-row"><input id="post-share-url" class="post-share-url" type="url" value="https://0xnefertt.github.io/blog/category/study-log/dev/python/" readonly spellcheck="false"><button class="post-share-copy" type="button" data-share-copy><span class="post-share-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="8" y="8" width="13" height="13" rx="2"></rect><path d="M5 16H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1"></path></svg></span><span>Copy link</span></button></div><p class="post-share-feedback" data-share-status role="status" aria-live="polite"></p></div></dialog></div><script type="module">function e(e){let t=e.querySelector(`dialog`),n=e.querySelector(`[data-share-open]`),r=e.querySelector(`.post-share-url`),i=e.dataset.shareUrl;if(!t||!n||!r||!i||e.dataset.shareReady)return;e.dataset.shareReady=`true`;let a=document.documentElement.lang===`ko`,o=n;function s(t){e.querySelectorAll(`[data-share-status]`).forEach(e=>e.textContent=t)}n.addEventListener(`click`,()=>{s(``),o=n,t.showModal(),document.documentElement.classList.add(`post-share-is-open`)}),e.querySelector(`[data-share-close]`)?.addEventListener(`click`,()=>t.close()),t.addEventListener(`keydown`,e=>{if(e.key!==`Tab`)return;let n=[...t.querySelectorAll(`a[href], button:not(:disabled), input:not(:disabled)`)],r=n[0],i=n.at(-1);e.shiftKey&&document.activeElement===r?(e.preventDefault(),i?.focus()):!e.shiftKey&&document.activeElement===i&&(e.preventDefault(),r?.focus())}),t.addEventListener(`click`,e=>{let n=t.getBoundingClientRect();e.target===t&&(e.clientX<n.left||e.clientX>n.right||e.clientY<n.top||e.clientY>n.bottom)&&t.close()}),t.addEventListener(`close`,()=>{document.documentElement.classList.remove(`post-share-is-open`),o.focus({preventScroll:!0})}),e.querySelectorAll(`[data-share-copy]`).forEach(e=>e.addEventListener(`click`,async()=>{try{await navigator.clipboard.writeText(i),s(a?`링크를 복사했습니다.`:`Link copied.`)}catch{o=t.open?n:e,t.open||t.showModal(),document.documentElement.classList.add(`post-share-is-open`),r.focus(),r.select(),s(a?`선택된 주소를 복사해 주세요.`:`Please copy the selected link.`)}}))}document.querySelectorAll(`[data-post-share]`).forEach(e);</script></div><h1>Python Basics</h1><p class="post-byline"><img class="post-author-avatar" src="/assets/img/prof_pic.jpg" alt="" width="28" height="28"><a href="/about/" rel="author">0xnefertt</a><time datetime="2026-05-22T00:00:00.000Z">2026.05.22.</time></p></article><div class="post-detail-layout"><div class="post-main"><details class="post-outline"><summary>Contents · 19 sections</summary><ul><li><a href="#variables">Variables</a></li><li><a href="#conditional-statements">Conditional Statements</a></li><li><a href="#loops-for-while">Loops (for, while)</a></li><li><a href="#functions">Functions</a></li><li><a href="#lists">Lists</a></li><li><a href="#dictionaries">Dictionaries</a></li><li><a href="#working-with-strings">Working with Strings</a></li><li><a href="#reading-and-writing-files">Reading and Writing Files</a></li><li><a href="#exception-handling">Exception Handling</a></li><li><a href="#importing-other-functionality-import--module">Importing Other Functionality (import / module)</a></li><li><a href="#working-with-file-paths-pathlib">Working with File Paths (pathlib)</a></li><li><a href="#json">JSON</a></li><li><a href="#csv">CSV</a></li><li><a href="#package--pip--virtual-environments--uv">package / pip / virtual environments / uv</a></li><li><a href="#pandas">pandas</a></li><li><a href="#requests">requests</a></li><li><a href="#sqlite3">sqlite3</a></li><li><a href="#class">class</a></li><li><a href="#type-hints--dataclass--project-structure">type hints / dataclass / project structure</a></li></ul></details><div class="post-body markdown-body"><h2 id="variables">Variables</h2>
+<p>Unlike JavaScript, there are no keywords such as let, const, or var. You simply write the variable name.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F0F3F6">x </span><span style="color:#FF9492">=</span><span style="color:#91CBFF"> 10</span></span>
+<span class="line"><span style="color:#F0F3F6">y </span><span style="color:#FF9492">=</span><span style="color:#91CBFF"> 20</span></span>
+<span class="line"><span style="color:#F0F3F6">z </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> x </span><span style="color:#FF9492">+</span><span style="color:#F0F3F6"> y</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(z)  </span><span style="color:#BDC4CC"># 30</span></span></code></pre>
+<h2 id="conditional-statements">Conditional Statements</h2>
+<p>Instead of {}, indentation separates code blocks.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F0F3F6">age </span><span style="color:#FF9492">=</span><span style="color:#91CBFF"> 18</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF9492">if</span><span style="color:#F0F3F6"> age </span><span style="color:#FF9492">>=</span><span style="color:#91CBFF"> 18</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#91CBFF">    print</span><span style="color:#F0F3F6">(</span><span style="color:#ADDCFF">"You are an adult."</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"><span style="color:#FF9492">elif</span><span style="color:#F0F3F6"> age </span><span style="color:#FF9492">>=</span><span style="color:#91CBFF"> 13</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#91CBFF">    print</span><span style="color:#F0F3F6">(</span><span style="color:#ADDCFF">"You are a teenager."</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"><span style="color:#FF9492">else</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#91CBFF">    print</span><span style="color:#F0F3F6">(</span><span style="color:#ADDCFF">"You are a minor."</span><span style="color:#F0F3F6">)</span></span></code></pre>
+<h3 id="comparison-operators">Comparison Operators</h3>
+<ul>
+<li><code>==</code>: equal to</li>
+<li><code>!=</code>: not equal to</li>
+<li><code>&#x3C;</code>: less than</li>
+<li><code>></code>: greater than</li>
+<li><code>&#x3C;=</code>: less than or equal to</li>
+<li><code>>=</code>: greater than or equal to</li>
+<li><code>and</code>: logical AND</li>
+<li><code>or</code>: logical OR</li>
+<li><code>not</code>: logical NOT</li>
+</ul>
+<h2 id="loops-for-while">Loops (for, while)</h2>
+<p>For loops are commonly used in Python and can iterate over various data structures, including lists, dictionaries, and sets. You can also use while loops, but for loops are more concise and easier to read. There is no do…while loop.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#BDC4CC"># for loop</span></span>
+<span class="line"><span style="color:#FF9492">for</span><span style="color:#F0F3F6"> i </span><span style="color:#FF9492">in</span><span style="color:#91CBFF"> range</span><span style="color:#F0F3F6">(</span><span style="color:#91CBFF">5</span><span style="color:#F0F3F6">):</span></span>
+<span class="line"><span style="color:#91CBFF">    print</span><span style="color:#F0F3F6">(i)  </span><span style="color:#BDC4CC"># 0, 1, 2, 3, 4</span></span></code></pre>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#BDC4CC"># Iterate over a list</span></span>
+<span class="line"><span style="color:#F0F3F6">fruits </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> [</span><span style="color:#ADDCFF">"apple"</span><span style="color:#F0F3F6">, </span><span style="color:#ADDCFF">"banana"</span><span style="color:#F0F3F6">, </span><span style="color:#ADDCFF">"orange"</span><span style="color:#F0F3F6">]</span></span>
+<span class="line"><span style="color:#FF9492">for</span><span style="color:#F0F3F6"> fruit </span><span style="color:#FF9492">in</span><span style="color:#F0F3F6"> fruits:</span></span>
+<span class="line"><span style="color:#91CBFF">    print</span><span style="color:#F0F3F6">(fruit)</span></span>
+<span class="line"><span style="color:#BDC4CC"># apple</span></span>
+<span class="line"><span style="color:#BDC4CC"># banana</span></span>
+<span class="line"><span style="color:#BDC4CC"># orange</span></span></code></pre>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#BDC4CC"># Iterate over a dictionary</span></span>
+<span class="line"><span style="color:#F0F3F6">person </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> {</span><span style="color:#ADDCFF">"name"</span><span style="color:#F0F3F6">: </span><span style="color:#ADDCFF">"Alice"</span><span style="color:#F0F3F6">, </span><span style="color:#ADDCFF">"age"</span><span style="color:#F0F3F6">: </span><span style="color:#91CBFF">30</span><span style="color:#F0F3F6">, </span><span style="color:#ADDCFF">"city"</span><span style="color:#F0F3F6">: </span><span style="color:#ADDCFF">"Seoul"</span><span style="color:#F0F3F6">}</span></span>
+<span class="line"><span style="color:#FF9492">for</span><span style="color:#F0F3F6"> key, value </span><span style="color:#FF9492">in</span><span style="color:#F0F3F6"> person.items():</span></span>
+<span class="line"><span style="color:#91CBFF">    print</span><span style="color:#F0F3F6">(</span><span style="color:#FF9492">f</span><span style="color:#ADDCFF">"</span><span style="color:#FF9492">{</span><span style="color:#F0F3F6">key</span><span style="color:#FF9492">}</span><span style="color:#ADDCFF">: </span><span style="color:#FF9492">{</span><span style="color:#F0F3F6">value</span><span style="color:#FF9492">}</span><span style="color:#ADDCFF">"</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"><span style="color:#BDC4CC"># name: Alice</span></span>
+<span class="line"><span style="color:#BDC4CC"># age: 30</span></span>
+<span class="line"><span style="color:#BDC4CC"># city: Seoul</span></span></code></pre>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#BDC4CC"># List comprehension</span></span>
+<span class="line"><span style="color:#F0F3F6">squares </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> [x</span><span style="color:#FF9492">**</span><span style="color:#91CBFF">2</span><span style="color:#FF9492"> for</span><span style="color:#F0F3F6"> x </span><span style="color:#FF9492">in</span><span style="color:#91CBFF"> range</span><span style="color:#F0F3F6">(</span><span style="color:#91CBFF">10</span><span style="color:#F0F3F6">)]</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(squares)  </span><span style="color:#BDC4CC"># [0, 1, 4, 9, 16, 25, 36, 49, 64, 81]</span></span></code></pre>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#BDC4CC"># Dictionary comprehension</span></span>
+<span class="line"><span style="color:#F0F3F6">squared_dict </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> {x: x</span><span style="color:#FF9492">**</span><span style="color:#91CBFF">2</span><span style="color:#FF9492"> for</span><span style="color:#F0F3F6"> x </span><span style="color:#FF9492">in</span><span style="color:#91CBFF"> range</span><span style="color:#F0F3F6">(</span><span style="color:#91CBFF">5</span><span style="color:#F0F3F6">)}</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(squared_dict)  </span><span style="color:#BDC4CC"># {0: 0, 1: 1, 2: 4, 3: 9, 4: 16}</span></span></code></pre>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#BDC4CC"># Set comprehension</span></span>
+<span class="line"><span style="color:#F0F3F6">squared_set </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> {x</span><span style="color:#FF9492">**</span><span style="color:#91CBFF">2</span><span style="color:#FF9492"> for</span><span style="color:#F0F3F6"> x </span><span style="color:#FF9492">in</span><span style="color:#91CBFF"> range</span><span style="color:#F0F3F6">(</span><span style="color:#91CBFF">5</span><span style="color:#F0F3F6">)}</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(squared_set)  </span><span style="color:#BDC4CC"># {0, 1, 4, 9, 16}</span></span></code></pre>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#BDC4CC"># Generator expression</span></span>
+<span class="line"><span style="color:#F0F3F6">squared_gen </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> (x</span><span style="color:#FF9492">**</span><span style="color:#91CBFF">2</span><span style="color:#FF9492"> for</span><span style="color:#F0F3F6"> x </span><span style="color:#FF9492">in</span><span style="color:#91CBFF"> range</span><span style="color:#F0F3F6">(</span><span style="color:#91CBFF">5</span><span style="color:#F0F3F6">))</span></span>
+<span class="line"><span style="color:#FF9492">for</span><span style="color:#F0F3F6"> square </span><span style="color:#FF9492">in</span><span style="color:#F0F3F6"> squared_gen:</span></span>
+<span class="line"><span style="color:#91CBFF">    print</span><span style="color:#F0F3F6">(square)  </span><span style="color:#BDC4CC"># 0, 1, 4, 9, 16</span></span></code></pre>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#BDC4CC"># while loop</span></span>
+<span class="line"><span style="color:#F0F3F6">count </span><span style="color:#FF9492">=</span><span style="color:#91CBFF"> 0</span></span>
+<span class="line"><span style="color:#FF9492">while</span><span style="color:#F0F3F6"> count </span><span style="color:#FF9492">&#x3C;</span><span style="color:#91CBFF"> 5</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#91CBFF">    print</span><span style="color:#F0F3F6">(count)  </span><span style="color:#BDC4CC"># 0, 1, 2, 3, 4</span></span>
+<span class="line"><span style="color:#F0F3F6">    count </span><span style="color:#FF9492">+=</span><span style="color:#91CBFF"> 1</span></span></code></pre>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#BDC4CC"># Infinite loop</span></span>
+<span class="line"><span style="color:#FF9492">while</span><span style="color:#91CBFF"> True</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#F0F3F6">    response </span><span style="color:#FF9492">=</span><span style="color:#91CBFF"> input</span><span style="color:#F0F3F6">(</span><span style="color:#ADDCFF">"Enter 'exit' to quit: "</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"><span style="color:#FF9492">    if</span><span style="color:#F0F3F6"> response </span><span style="color:#FF9492">==</span><span style="color:#ADDCFF"> "exit"</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#FF9492">        break</span></span></code></pre>
+<h3 id="break-continue">break, continue</h3>
+<ul>
+<li><code>break</code>: terminates the loop immediately.</li>
+<li><code>continue</code>: skips the current iteration and moves to the next one.</li>
+</ul>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#FF9492">for</span><span style="color:#F0F3F6"> i </span><span style="color:#FF9492">in</span><span style="color:#91CBFF"> range</span><span style="color:#F0F3F6">(</span><span style="color:#91CBFF">10</span><span style="color:#F0F3F6">):</span></span>
+<span class="line"><span style="color:#FF9492">    if</span><span style="color:#F0F3F6"> i </span><span style="color:#FF9492">==</span><span style="color:#91CBFF"> 5</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#FF9492">        break</span><span style="color:#BDC4CC">  # End the loop when i is 5</span></span>
+<span class="line"><span style="color:#91CBFF">    print</span><span style="color:#F0F3F6">(i)  </span><span style="color:#BDC4CC"># 0, 1, 2, 3, 4</span></span></code></pre>
+<h2 id="functions">Functions</h2>
+<p>Functions are defined with the <code>def</code> keyword. A function can accept input values, or arguments, through parameters, perform a particular task, and return a result.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#FF9492">def</span><span style="color:#DBB7FF"> greet</span><span style="color:#F0F3F6">(name):</span></span>
+<span class="line"><span style="color:#FF9492">return</span><span style="color:#FF9492"> f</span><span style="color:#ADDCFF">"Hello, </span><span style="color:#FF9492">{</span><span style="color:#F0F3F6">name</span><span style="color:#FF9492">}</span><span style="color:#ADDCFF">!"</span></span></code></pre>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#FF9492">def</span><span style="color:#DBB7FF"> add</span><span style="color:#F0F3F6">(a, b):</span></span>
+<span class="line"><span style="color:#FF9492">    return</span><span style="color:#F0F3F6"> a </span><span style="color:#FF9492">+</span><span style="color:#F0F3F6"> b</span></span></code></pre>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#FF9492">def</span><span style="color:#DBB7FF"> factorial</span><span style="color:#F0F3F6">(n):</span></span>
+<span class="line"><span style="color:#FF9492">    if</span><span style="color:#F0F3F6"> n </span><span style="color:#FF9492">==</span><span style="color:#91CBFF"> 0</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#FF9492">        return</span><span style="color:#91CBFF"> 1</span></span>
+<span class="line"><span style="color:#FF9492">    else</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#FF9492">        return</span><span style="color:#F0F3F6"> n </span><span style="color:#FF9492">*</span><span style="color:#F0F3F6"> factorial(n </span><span style="color:#FF9492">-</span><span style="color:#91CBFF"> 1</span><span style="color:#F0F3F6">)</span></span></code></pre>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#FF9492">def</span><span style="color:#DBB7FF"> fibonacci</span><span style="color:#F0F3F6">(n):</span></span>
+<span class="line"><span style="color:#FF9492">    if</span><span style="color:#F0F3F6"> n </span><span style="color:#FF9492">&#x3C;=</span><span style="color:#91CBFF"> 0</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#FF9492">        return</span><span style="color:#91CBFF"> 0</span></span>
+<span class="line"><span style="color:#FF9492">    elif</span><span style="color:#F0F3F6"> n </span><span style="color:#FF9492">==</span><span style="color:#91CBFF"> 1</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#FF9492">        return</span><span style="color:#91CBFF"> 1</span></span>
+<span class="line"><span style="color:#FF9492">    else</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#FF9492">        return</span><span style="color:#F0F3F6"> fibonacci(n </span><span style="color:#FF9492">-</span><span style="color:#91CBFF"> 1</span><span style="color:#F0F3F6">) </span><span style="color:#FF9492">+</span><span style="color:#F0F3F6"> fibonacci(n </span><span style="color:#FF9492">-</span><span style="color:#91CBFF"> 2</span><span style="color:#F0F3F6">)</span></span></code></pre>
+<h2 id="lists">Lists</h2>
+<p>Lists are defined with square brackets <code>[]</code> and can contain various data types. Lists are mutable, so you can add, remove, and modify their elements.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F0F3F6">fruits </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> [</span><span style="color:#ADDCFF">"apple"</span><span style="color:#F0F3F6">, </span><span style="color:#ADDCFF">"banana"</span><span style="color:#F0F3F6">, </span><span style="color:#ADDCFF">"orange"</span><span style="color:#F0F3F6">]</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(fruits[</span><span style="color:#91CBFF">0</span><span style="color:#F0F3F6">])  </span><span style="color:#BDC4CC"># apple</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(fruits[</span><span style="color:#91CBFF">1</span><span style="color:#F0F3F6">])  </span><span style="color:#BDC4CC"># banana</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(fruits[</span><span style="color:#91CBFF">2</span><span style="color:#F0F3F6">])  </span><span style="color:#BDC4CC"># orange</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(fruits[</span><span style="color:#FF9492">-</span><span style="color:#91CBFF">1</span><span style="color:#F0F3F6">])  </span><span style="color:#BDC4CC"># orange (the last element)</span></span></code></pre>
+<p>There are various list methods, including append, insert, remove, pop, clear, sort, and reverse.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F0F3F6">fruits.append(</span><span style="color:#ADDCFF">"grape"</span><span style="color:#F0F3F6">)  </span><span style="color:#BDC4CC"># Add an element to the end of the list</span></span>
+<span class="line"><span style="color:#F0F3F6">fruits.insert(</span><span style="color:#91CBFF">1</span><span style="color:#F0F3F6">, </span><span style="color:#ADDCFF">"kiwi"</span><span style="color:#F0F3F6">)  </span><span style="color:#BDC4CC"># Insert an element at index 1</span></span>
+<span class="line"><span style="color:#F0F3F6">fruits.remove(</span><span style="color:#ADDCFF">"banana"</span><span style="color:#F0F3F6">)  </span><span style="color:#BDC4CC"># Remove a particular element</span></span>
+<span class="line"><span style="color:#F0F3F6">last_fruit </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> fruits.pop()  </span><span style="color:#BDC4CC"># Remove and return the last element</span></span>
+<span class="line"><span style="color:#F0F3F6">fruits.clear()  </span><span style="color:#BDC4CC"># Empty the list</span></span>
+<span class="line"><span style="color:#F0F3F6">fruits.sort()  </span><span style="color:#BDC4CC"># Sort the list</span></span>
+<span class="line"><span style="color:#F0F3F6">fruits.reverse()  </span><span style="color:#BDC4CC"># Reverse the list</span></span>
+<span class="line"><span style="color:#F0F3F6">fruits.slice(</span><span style="color:#91CBFF">1</span><span style="color:#F0F3F6">, </span><span style="color:#91CBFF">3</span><span style="color:#F0F3F6">)  </span><span style="color:#BDC4CC"># Return the elements at indices 1 through 2</span></span></code></pre>
+<p>You can create lists concisely using list comprehensions.</p>
+<h2 id="dictionaries">Dictionaries</h2>
+<p>Dictionaries are defined with curly braces <code>{}</code> and store data as key-value pairs. Dictionaries are mutable, so you can add, remove, and modify their elements.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F0F3F6">person </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> {</span><span style="color:#ADDCFF">"name"</span><span style="color:#F0F3F6">: </span><span style="color:#ADDCFF">"Alice"</span><span style="color:#F0F3F6">, </span><span style="color:#ADDCFF">"age"</span><span style="color:#F0F3F6">: </span><span style="color:#91CBFF">30</span><span style="color:#F0F3F6">, </span><span style="color:#ADDCFF">"city"</span><span style="color:#F0F3F6">: </span><span style="color:#ADDCFF">"Seoul"</span><span style="color:#F0F3F6">}</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(person[</span><span style="color:#ADDCFF">"name"</span><span style="color:#F0F3F6">])  </span><span style="color:#BDC4CC"># Alice</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(person[</span><span style="color:#ADDCFF">"age"</span><span style="color:#F0F3F6">])   </span><span style="color:#BDC4CC"># 30</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(person[</span><span style="color:#ADDCFF">"city"</span><span style="color:#F0F3F6">])  </span><span style="color:#BDC4CC"># Seoul</span></span></code></pre>
+<p>Dictionary methods include keys, values, items, get, and pop.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F0F3F6">keys </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> person.keys()  </span><span style="color:#BDC4CC"># Return all keys in the dictionary</span></span>
+<span class="line"><span style="color:#F0F3F6">values </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> person.values()  </span><span style="color:#BDC4CC"># Return all values in the dictionary</span></span>
+<span class="line"><span style="color:#F0F3F6">items </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> person.items()  </span><span style="color:#BDC4CC"># Return all key-value pairs in the dictionary</span></span>
+<span class="line"><span style="color:#F0F3F6">age </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> person.get(</span><span style="color:#ADDCFF">"age"</span><span style="color:#F0F3F6">)  </span><span style="color:#BDC4CC"># Return the value associated with the key</span></span>
+<span class="line"><span style="color:#F0F3F6">removed_value </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> person.pop(</span><span style="color:#ADDCFF">"city"</span><span style="color:#F0F3F6">)  </span><span style="color:#BDC4CC"># Remove and return a particular key-value pair</span></span></code></pre>
+<h2 id="working-with-strings">Working with Strings</h2>
+<p>Strings can be defined with single quotes <code>'</code> or double quotes <code>"</code>. Strings are immutable and can be manipulated through various methods.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F0F3F6">greeting </span><span style="color:#FF9492">=</span><span style="color:#ADDCFF"> "Hello, World!"</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(greeting.upper())  </span><span style="color:#BDC4CC"># "HELLO, WORLD!"</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(greeting.lower())  </span><span style="color:#BDC4CC"># "hello, world!"</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(greeting.replace(</span><span style="color:#ADDCFF">"World"</span><span style="color:#F0F3F6">, </span><span style="color:#ADDCFF">"Python"</span><span style="color:#F0F3F6">))  </span><span style="color:#BDC4CC"># "Hello, Python!"</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(greeting.split(</span><span style="color:#ADDCFF">", "</span><span style="color:#F0F3F6">))  </span><span style="color:#BDC4CC"># ["Hello", "World!"]</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(greeting.strip(</span><span style="color:#ADDCFF">"!"</span><span style="color:#F0F3F6">))  </span><span style="color:#BDC4CC"># "Hello, World"</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(greeting.strip()) </span><span style="color:#BDC4CC"># "Hello, World!" (remove whitespace from both ends)</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(greeting.join([</span><span style="color:#ADDCFF">"Goodbye"</span><span style="color:#F0F3F6">, </span><span style="color:#ADDCFF">"World!"</span><span style="color:#F0F3F6">]))  </span><span style="color:#BDC4CC"># "GoodbyeWorld!"</span></span></code></pre>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#BDC4CC">### in is used as an operator to check whether a particular substring exists in a string.</span></span>
+<span class="line"><span style="color:#F0F3F6">title </span><span style="color:#FF9492">=</span><span style="color:#ADDCFF"> "Coding in Python"</span></span>
+<span class="line"><span style="color:#FF9492">if</span><span style="color:#F0F3F6"> (</span><span style="color:#ADDCFF">"Coding"</span><span style="color:#FF9492"> in</span><span style="color:#F0F3F6"> title):</span></span>
+<span class="line"><span style="color:#91CBFF">    print</span><span style="color:#F0F3F6">(</span><span style="color:#ADDCFF">"The title contains 'Coding'."</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"><span style="color:#FF9492">else</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#91CBFF">    print</span><span style="color:#F0F3F6">(</span><span style="color:#ADDCFF">"The title does not contain 'Coding'."</span><span style="color:#F0F3F6">)</span></span></code></pre>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F0F3F6">file_path </span><span style="color:#FF9492">=</span><span style="color:#ADDCFF"> "/path/to/file.txt"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF9492">for</span><span style="color:#FFB757"> file</span><span style="color:#FF9492"> in</span><span style="color:#F0F3F6"> files:</span></span>
+<span class="line"><span style="color:#FF9492">    if</span><span style="color:#FFB757"> file</span><span style="color:#F0F3F6">.endswitch(</span><span style="color:#ADDCFF">".pdf"</span><span style="color:#F0F3F6">)</span><span style="color:#FFB1AF;font-style:italic">;</span></span>
+<span class="line"><span style="color:#91CBFF">        print</span><span style="color:#F0F3F6">(</span><span style="color:#ADDCFF">"This is a pdf file."</span><span style="color:#F0F3F6"> )</span></span>
+<span class="line"><span style="color:#FF9492">    elif</span><span style="color:#FFB757"> file</span><span style="color:#F0F3F6">.endswitch(</span><span style="color:#ADDCFF">".txt"</span><span style="color:#F0F3F6">)</span><span style="color:#FFB1AF;font-style:italic">;</span></span>
+<span class="line"><span style="color:#91CBFF">        print</span><span style="color:#F0F3F6">(</span><span style="color:#ADDCFF">"This is a text file."</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"><span style="color:#FF9492">    else</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#91CBFF">        print</span><span style="color:#F0F3F6">(</span><span style="color:#ADDCFF">"Unknown file format."</span><span style="color:#F0F3F6">)</span></span></code></pre>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F0F3F6">name </span><span style="color:#FF9492">=</span><span style="color:#ADDCFF"> "Alice"</span></span>
+<span class="line"><span style="color:#F0F3F6">greeting </span><span style="color:#FF9492">=</span><span style="color:#FF9492"> f</span><span style="color:#ADDCFF">"Hello, </span><span style="color:#FF9492">{</span><span style="color:#F0F3F6">name</span><span style="color:#FF9492">}</span><span style="color:#ADDCFF">!"</span><span style="color:#BDC4CC">  # A string using an f-string</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(greeting)  </span><span style="color:#BDC4CC"># "Hello, Alice!"</span></span></code></pre>
+<h2 id="reading-and-writing-files">Reading and Writing Files</h2>
+<p>Use the <code>open()</code> function to read and write files. You must specify a mode when opening a file: typically <code>'r'</code> for reading, <code>'w'</code> for writing, and <code>'a'</code> for appending.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#BDC4CC"># Write a file</span></span>
+<span class="line"><span style="color:#FF9492">with</span><span style="color:#91CBFF"> open</span><span style="color:#F0F3F6">(</span><span style="color:#ADDCFF">"example.txt"</span><span style="color:#F0F3F6">, </span><span style="color:#ADDCFF">"w"</span><span style="color:#F0F3F6">) </span><span style="color:#FF9492">as</span><span style="color:#FFB757"> file</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#FFB757">    file</span><span style="color:#F0F3F6">.write(</span><span style="color:#ADDCFF">"Hello, World!</span><span style="color:#FF9492">\n</span><span style="color:#ADDCFF">"</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"><span style="color:#FFB757">    file</span><span style="color:#F0F3F6">.write(</span><span style="color:#ADDCFF">"This is a sample file.</span><span style="color:#FF9492">\n</span><span style="color:#ADDCFF">"</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"><span style="color:#BDC4CC"># Read a file</span></span>
+<span class="line"><span style="color:#FF9492">with</span><span style="color:#91CBFF"> open</span><span style="color:#F0F3F6">(</span><span style="color:#ADDCFF">"example.txt"</span><span style="color:#F0F3F6">, </span><span style="color:#ADDCFF">"r"</span><span style="color:#F0F3F6">) </span><span style="color:#FF9492">as</span><span style="color:#FFB757"> file</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#F0F3F6">    content </span><span style="color:#FF9492">=</span><span style="color:#FFB757"> file</span><span style="color:#F0F3F6">.read()</span></span>
+<span class="line"><span style="color:#91CBFF">    print</span><span style="color:#F0F3F6">(content)</span></span>
+<span class="line"><span style="color:#BDC4CC"># Append to a file (use "a" mode to add below the existing content while preserving it)</span></span>
+<span class="line"><span style="color:#FF9492">with</span><span style="color:#91CBFF"> open</span><span style="color:#F0F3F6">(</span><span style="color:#ADDCFF">"example.txt"</span><span style="color:#F0F3F6">, </span><span style="color:#ADDCFF">"a"</span><span style="color:#F0F3F6">) </span><span style="color:#FF9492">as</span><span style="color:#FFB757"> file</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#FFB757">    file</span><span style="color:#F0F3F6">.write(</span><span style="color:#ADDCFF">"This line is added to the file.</span><span style="color:#FF9492">\n</span><span style="color:#ADDCFF">"</span><span style="color:#F0F3F6">)</span></span></code></pre>
+<h2 id="exception-handling">Exception Handling</h2>
+<p>Exceptions are handled using <code>try</code> and <code>except</code> blocks. Put code that may raise an exception in the <code>try</code> block, and the code to run when an exception occurs in the <code>except</code> block.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#FF9492">try</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#F0F3F6">    num </span><span style="color:#FF9492">=</span><span style="color:#91CBFF"> int</span><span style="color:#F0F3F6">(</span><span style="color:#ADDCFF">"abc"</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"><span style="color:#91CBFF">    print</span><span style="color:#F0F3F6">(num)</span></span>
+<span class="line"><span style="color:#FF9492">except</span><span style="color:#F0F3F6"> ValuError:</span></span>
+<span class="line"><span style="color:#91CBFF">    print</span><span style="color:#F0F3F6">(</span><span style="color:#ADDCFF">"Cannot convert this to a number."</span><span style="color:#F0F3F6">)</span></span></code></pre>
+<p><strong>Common Exception Types</strong></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Exception</th><th>Meaning</th></tr></thead><tbody><tr><td>ValueError</td><td>Invalid value</td></tr><tr><td>TypeError</td><td>Incorrect type</td></tr><tr><td>IndexError</td><td>List index out of range</td></tr><tr><td>KeyError</td><td>Accessing a missing dictionary key</td></tr><tr><td>ZeroDivisionError</td><td>Division by zero</td></tr><tr><td>FileNotFoundError</td><td>File does not exist</td></tr></tbody></table>
+<p>There is also else.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#FF9492">try</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#F0F3F6">    num </span><span style="color:#FF9492">=</span><span style="color:#91CBFF"> int</span><span style="color:#F0F3F6">(</span><span style="color:#ADDCFF">"123"</span><span style="color:#F0F3F6">) </span><span style="color:#BDC4CC"># Attempt</span></span>
+<span class="line"><span style="color:#FF9492">except</span><span style="color:#91CBFF"> ValueError</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#91CBFF">    print</span><span style="color:#F0F3F6">(</span><span style="color:#ADDCFF">"Conversion failed"</span><span style="color:#F0F3F6">) </span><span style="color:#BDC4CC"># Run on failure</span></span>
+<span class="line"><span style="color:#FF9492">else</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#91CBFF">    print</span><span style="color:#F0F3F6">(</span><span style="color:#ADDCFF">"Conversion succeeded:"</span><span style="color:#F0F3F6">, num) </span><span style="color:#BDC4CC"># Run on success</span></span></code></pre>
+<p>There is also finally. It always runs, whether the operation succeeds or fails.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#FF9492">try</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#F0F3F6">    num </span><span style="color:#FF9492">=</span><span style="color:#91CBFF"> int</span><span style="color:#F0F3F6">(</span><span style="color:#ADDCFF">"123"</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"><span style="color:#FF9492">except</span><span style="color:#91CBFF"> ValueError</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#91CBFF">    print</span><span style="color:#F0F3F6">(</span><span style="color:#ADDCFF">"Conversion failed"</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"><span style="color:#FF9492">finally</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#91CBFF">    print</span><span style="color:#F0F3F6">(</span><span style="color:#ADDCFF">"Always runs"</span><span style="color:#F0F3F6">)</span></span></code></pre>
+<p>raise lets you trigger an error yourself.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F0F3F6">age </span><span style="color:#FF9492">=</span><span style="color:#FF9492"> -</span><span style="color:#91CBFF">1</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF9492">if</span><span style="color:#F0F3F6"> (age </span><span style="color:#FF9492">&#x3C;</span><span style="color:#91CBFF"> 0</span><span style="color:#F0F3F6">):</span></span>
+<span class="line"><span style="color:#FF9492">    raise</span><span style="color:#91CBFF"> ValueError</span><span style="color:#F0F3F6">(</span><span style="color:#ADDCFF">"Age cannot be negative"</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#BDC4CC"># Result</span></span>
+<span class="line"><span style="color:#BDC4CC"># ValueError: Age cannot be negative</span></span></code></pre>
+<h2 id="importing-other-functionality-import--module">Importing Other Functionality (import / module)</h2>
+<p>In Python, each .py file is a module, and import is used to bring its functions, variables, classes, and other contents into another file.</p>
+<p>For example:</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F0F3F6">project</span><span style="color:#FF9492">/</span></span>
+<span class="line"><span style="color:#F0F3F6">├── main.py</span></span>
+<span class="line"><span style="color:#F0F3F6">└── calculator.py</span></span></code></pre>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#BDC4CC"># calculator.py</span></span>
+<span class="line"><span style="color:#FF9492">def</span><span style="color:#DBB7FF"> add</span><span style="color:#F0F3F6"> (a,b):</span></span>
+<span class="line"><span style="color:#FF9492">    return</span><span style="color:#F0F3F6"> a</span><span style="color:#FF9492">+</span><span style="color:#F0F3F6">b</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF9492">def</span><span style="color:#DBB7FF"> sub</span><span style="color:#F0F3F6"> (a,b):</span></span>
+<span class="line"><span style="color:#FF9492">    return</span><span style="color:#F0F3F6"> a</span><span style="color:#FF9492">-</span><span style="color:#F0F3F6">b</span></span></code></pre>
+<p>Here, calculator.py is a module.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#BDC4CC"># main.py</span></span>
+<span class="line"><span style="color:#FF9492">import</span><span style="color:#F0F3F6"> calculator</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(calculator.add(</span><span style="color:#91CBFF">1</span><span style="color:#F0F3F6">,</span><span style="color:#91CBFF">2</span><span style="color:#F0F3F6">))</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(calculator.sub(</span><span style="color:#91CBFF">1</span><span style="color:#F0F3F6">,</span><span style="color:#91CBFF">2</span><span style="color:#F0F3F6">))</span></span></code></pre>
+<p>Here, import calculator imports the module from the calculator.py file.</p>
+<p>Not just functions, but variables are part of modules too. Functions, variables, and classes written in a file basically become attributes of the module.</p>
+<p>Unlike JS/TS, Python has no export keyword.</p>
+<p><strong>Frequently Used Python Standard Library Modules</strong></p>
+<ol>
+<li>math (a module for mathematical calculations)</li>
+</ol>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#FF9492">import</span><span style="color:#F0F3F6"> math</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(math.sqrt(</span><span style="color:#91CBFF">16</span><span style="color:#F0F3F6">))      </span><span style="color:#BDC4CC"># Square root</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(math.ceil(</span><span style="color:#91CBFF">3.2</span><span style="color:#F0F3F6">))     </span><span style="color:#BDC4CC"># Round up</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(math.floor(</span><span style="color:#91CBFF">3.8</span><span style="color:#F0F3F6">))    </span><span style="color:#BDC4CC"># Round down</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(math.factorial(</span><span style="color:#91CBFF">5</span><span style="color:#F0F3F6">))  </span><span style="color:#BDC4CC"># Factorial</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(math.gcd(</span><span style="color:#91CBFF">12</span><span style="color:#F0F3F6">, </span><span style="color:#91CBFF">18</span><span style="color:#F0F3F6">))   </span><span style="color:#BDC4CC"># Greatest common divisor</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(math.lcm(</span><span style="color:#91CBFF">12</span><span style="color:#F0F3F6">, </span><span style="color:#91CBFF">18</span><span style="color:#F0F3F6">))   </span><span style="color:#BDC4CC"># Least common multiple</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(math.pi)            </span><span style="color:#BDC4CC"># Pi</span></span></code></pre>
+<ol start="2">
+<li>random (used to generate random values)</li>
+</ol>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#FF9492">import</span><span style="color:#F0F3F6"> random</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(random.randint(</span><span style="color:#91CBFF">1</span><span style="color:#F0F3F6">,</span><span style="color:#91CBFF">10</span><span style="color:#F0F3F6">))     </span><span style="color:#BDC4CC"># An integer from 1 to 10</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(random.random())          </span><span style="color:#BDC4CC"># A floating-point number from 0 inclusive to 1 exclusive</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(random.choice([</span><span style="color:#ADDCFF">"a"</span><span style="color:#F0F3F6">, </span><span style="color:#ADDCFF">"b"</span><span style="color:#F0F3F6">, </span><span style="color:#ADDCFF">"c"</span><span style="color:#F0F3F6">]))</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">nums </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> [</span><span style="color:#91CBFF">1</span><span style="color:#F0F3F6">,</span><span style="color:#91CBFF">2</span><span style="color:#F0F3F6">,</span><span style="color:#91CBFF">3</span><span style="color:#F0F3F6">,</span><span style="color:#91CBFF">4</span><span style="color:#F0F3F6">,</span><span style="color:#91CBFF">5</span><span style="color:#F0F3F6">]</span></span>
+<span class="line"><span style="color:#F0F3F6">random.shuffle(nums)            </span><span style="color:#BDC4CC"># Shuffle randomly</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(nums)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(random.sample(nums, </span><span style="color:#91CBFF">2</span><span style="color:#F0F3F6">))   </span><span style="color:#BDC4CC"># Select and print two random items</span></span></code></pre>
+<p>Keep in mind that random does not provide randomness for security purposes.</p>
+<p>For security-related values such as passwords, tokens, and verification codes, secrets is more appropriate.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#FF9492">import</span><span style="color:#F0F3F6"> secerets</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">token </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> secrets.token_hex(</span><span style="color:#91CBFF">16</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(token)</span></span></code></pre>
+<ol start="3">
+<li>datetime (used to work with dates and times)</li>
+</ol>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#FF9492">import</span><span style="color:#F0F3F6"> datetime</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">today </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> datetime.date.today()   </span><span style="color:#BDC4CC"># Today's date</span></span>
+<span class="line"><span style="color:#F0F3F6">now </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> datetime.date.now()       </span><span style="color:#BDC4CC"># Current time</span></span>
+<span class="line"><span style="color:#F0F3F6">d </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> datetime.date(</span><span style="color:#91CBFF">2026</span><span style="color:#F0F3F6">,</span><span style="color:#91CBFF">6</span><span style="color:#F0F3F6">, </span><span style="color:#91CBFF">8</span><span style="color:#F0F3F6">)    </span><span style="color:#BDC4CC"># Create a date</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">datetime.datetime.striptime(d, </span><span style="color:#ADDCFF">"%Y-%m-</span><span style="color:#FF9492">%d</span><span style="color:#ADDCFF">"</span><span style="color:#F0F3F6">)  </span><span style="color:#BDC4CC"># Convert a string to a date</span></span>
+<span class="line"><span style="color:#F0F3F6">fiormatted </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> now.strftime(</span><span style="color:#ADDCFF">"%Y-%m-</span><span style="color:#FF9492">%d</span><span style="color:#ADDCFF">"</span><span style="color:#F0F3F6">)       </span><span style="color:#BDC4CC"># Convert a date to a string</span></span></code></pre>
+<ol start="4">
+<li>os</li>
+<li>sys</li>
+<li>pathlib</li>
+<li>json</li>
+<li>collections</li>
+<li>itertools</li>
+<li>heapq</li>
+<li>bisect</li>
+<li>re</li>
+<li>…</li>
+</ol>
+<h2 id="working-with-file-paths-pathlib">Working with File Paths (pathlib)</h2>
+<p>A library that works with file paths as Path objects rather than strings.</p>
+<p>When writing a program that reads or saves files, it is used to specify reliably exactly where the file being handled is located.</p>
+<p>For example: reading CSV files, reading JSON configuration files, saving image files, creating log files, saving scraped data, organizing uploaded files, loading documents for AI/RAG, and creating backups.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#FF9492">from</span><span style="color:#F0F3F6"> pathlib </span><span style="color:#FF9492">import</span><span style="color:#F0F3F6"> Path</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">path </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> Path(</span><span style="color:#ADDCFF">"data/user.txt"</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(path)</span></span>
+<span class="line"><span style="color:#BDC4CC"># Output</span></span>
+<span class="line"><span style="color:#BDC4CC"># data/user.txt</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(Path.cwd())       </span><span style="color:#BDC4CC"># Check the current working directory (where the terminal command runs)</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(Path(</span><span style="color:#91CBFF">__file__</span><span style="color:#F0F3F6">))   </span><span style="color:#BDC4CC"># Check the location of the currently running file</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(Path(</span><span style="color:#91CBFF">__file__</span><span style="color:#F0F3F6">).resoleve())    </span><span style="color:#BDC4CC"># Usually converted to an absolute path for use</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#BDC4CC"># Practical version</span></span>
+<span class="line"><span style="color:#91CBFF">BASE_DIR</span><span style="color:#FF9492"> =</span><span style="color:#F0F3F6"> Path(</span><span style="color:#91CBFF">__file__</span><span style="color:#F0F3F6">).resolve().parent </span><span style="color:#BDC4CC"># Set BASE_DIR to the folder containing the current file.</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(path.is_file())          </span><span style="color:#BDC4CC"># Check whether it is a file</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(path.is_dir())           </span><span style="color:#BDC4CC"># Check whether it is a folder</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">folder </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> Path(</span><span style="color:#ADDCFF">"data"</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"><span style="color:#F0F3F6">folder.mkdir()                  </span><span style="color:#BDC4CC"># Create a folder</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#BDC4CC"># Practical version</span></span>
+<span class="line"><span style="color:#F0F3F6">folder.mkdir(</span><span style="color:#FFB757">exist_ok</span><span style="color:#FF9492">=</span><span style="color:#91CBFF">True</span><span style="color:#F0F3F6">)     </span><span style="color:#BDC4CC"># Create it without raising an error if it already exists</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(path.name)    </span><span style="color:#BDC4CC"># Full filename</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(path.stem)    </span><span style="color:#BDC4CC"># Name without the extension</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(path.suffix)  </span><span style="color:#BDC4CC"># Extension</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(path.parent)  </span><span style="color:#BDC4CC"># Parent folder</span></span></code></pre>
+<p>Relative and absolute paths</p>
+<ul>
+<li>Relative path: a path relative to the current working directory.</li>
+<li>Absolute path: the complete path starting from the computer’s root.</li>
+</ul>
+<h2 id="json">JSON</h2>
+<p>How to save Python dict / list data to a file, or read a JSON file back into Python data.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#FF9492">import</span><span style="color:#F0F3F6"> json</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">json.loads() </span><span style="color:#BDC4CC"># JSON string/file -> Python object</span></span>
+<span class="line"><span style="color:#F0F3F6">json.dumps() </span><span style="color:#BDC4CC"># Python object -> JSON string/file</span></span>
+<span class="line"></span></code></pre>
+<h2 id="csv">CSV</h2>
+<p>Used to work with tabular data.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#FF9492">import</span><span style="color:#F0F3F6"> csv</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">writer </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> csv.DictWriter(</span><span style="color:#FFB757">file</span><span style="color:#F0F3F6">, </span><span style="color:#FFB757">fieldnames</span><span style="color:#FF9492">=</span><span style="color:#F0F3F6">[</span><span style="color:#ADDCFF">"id"</span><span style="color:#F0F3F6">, </span><span style="color:#ADDCFF">"name"</span><span style="color:#F0F3F6">, </span><span style="color:#ADDCFF">"city"</span><span style="color:#F0F3F6">])</span></span>
+<span class="line"><span style="color:#F0F3F6">writer.writeheader()</span></span>
+<span class="line"><span style="color:#F0F3F6">writer.writerows(users)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">reader </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> writer.DictReader(</span><span style="color:#FFB757">file</span><span style="color:#F0F3F6">)</span></span></code></pre>
+<h2 id="package--pip--virtual-environments--uv">package / pip / virtual environments / uv</h2>
+<p>External libraries, excluding built-in libraries such as json, pathlib, and math, are called packages.</p>
+<p>package = a collection of Python functionality created by others, or a library.</p>
+<ul>
+<li>requests = HTTP requests</li>
+<li>fastapi = backend API server</li>
+<li>pandas = data analysis</li>
+<li>numpy = numerical computation</li>
+<li>python-dotenv = reading .env environment variables</li>
+<li>pytest = testing</li>
+</ul>
+<p>pip is a tool for installing Python packages, like npm install in Node.js.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#BDC4CC"># pip install requests</span></span>
+<span class="line"><span style="color:#F0F3F6">python </span><span style="color:#FF9492">-</span><span style="color:#F0F3F6">m pip install requests</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF9492">import</span><span style="color:#F0F3F6"> requests</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">response </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> requests.get(</span><span style="color:#ADDCFF">"https://example.com"</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(response.status_code)</span></span></code></pre>
+<p>Virtual environments were introduced to configure package versions independently for each directory or server.
+venv = a Python environment dedicated to a project.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F0F3F6">mkdir python</span><span style="color:#FF9492">-</span><span style="color:#F0F3F6">practice</span></span>
+<span class="line"><span style="color:#F0F3F6">cd python</span><span style="color:#FF9492">-</span><span style="color:#F0F3F6">practice</span></span>
+<span class="line"><span style="color:#F0F3F6">python3 </span><span style="color:#FF9492">-</span><span style="color:#F0F3F6">m venv .venv</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#BDC4CC"># python-practice/</span></span>
+<span class="line"><span style="color:#BDC4CC"># └── .venv/</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#BDC4CC"># Activate the virtual environment</span></span>
+<span class="line"><span style="color:#F0F3F6">source .venv</span><span style="color:#FF9492">/</span><span style="color:#91CBFF">bin</span><span style="color:#FF9492">/</span><span style="color:#F0F3F6">activate</span></span>
+<span class="line"><span style="color:#BDC4CC"># (.venv) python-practice % python3 -m pip install requests</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#BDC4CC"># Deactivate the virtual environment</span></span>
+<span class="line"><span style="color:#F0F3F6">deactivate</span></span></code></pre>
+<p>When someone else receives your project, they do not know which packages to install.
+That is why the installation list is written in a file called requirements.txt.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F0F3F6">python3 </span><span style="color:#FF9492">-</span><span style="color:#F0F3F6">m pip install </span><span style="color:#FF9492">-</span><span style="color:#F0F3F6">r requirements.txt</span></span></code></pre>
+<p>requirements.txt manages only the package list.</p>
+<p>A project has more to manage than its package list: its name, version, Python version, dependencies, test settings, linter settings, formatter settings, build settings, and so on.</p>
+<p>A common modern approach is to put all of these in one file, pyproject.toml.</p>
+<p>pyproject.toml (=package.json)</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="toml"><code><span class="line"><span style="color:#F0F3F6">[</span><span style="color:#FFB757">project</span><span style="color:#F0F3F6">]</span></span>
+<span class="line"><span style="color:#F0F3F6">name = </span><span style="color:#ADDCFF">"python-practice"</span></span>
+<span class="line"><span style="color:#F0F3F6">version = </span><span style="color:#ADDCFF">"0.1.0"</span></span>
+<span class="line"><span style="color:#F0F3F6">requires-python = </span><span style="color:#ADDCFF">">=3.11"</span></span>
+<span class="line"><span style="color:#F0F3F6">dependencies = [</span></span>
+<span class="line"><span style="color:#ADDCFF">    "requests"</span></span>
+<span class="line"><span style="color:#FFB1AF;font-style:italic">    "python-dotenv"</span></span>
+<span class="line"><span style="color:#F0F3F6">]</span></span></code></pre>
+<p>uv is a tool that is widely used these days.</p>
+<p>uv = a tool that makes managing venv + pip + pyproject.toml + lock files easier.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#FFB757">uv</span><span style="color:#ADDCFF"> init</span><span style="color:#ADDCFF"> python-practice</span></span>
+<span class="line"><span style="color:#91CBFF">cd</span><span style="color:#ADDCFF"> python-practice</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FFB757">uv</span><span style="color:#ADDCFF"> add</span><span style="color:#ADDCFF"> requests</span></span>
+<span class="line"><span style="color:#FFB757">uv</span><span style="color:#ADDCFF"> run</span><span style="color:#ADDCFF"> python</span><span style="color:#ADDCFF"> main.py</span></span></code></pre>
+<h2 id="pandas">pandas</h2>
+<p>pandas can read not only CSV but also various data sources such as Excel, SQL, JSON, and Parquet.</p>
+<p>At the heart of pandas is the DataFrame, an object like an Excel table used inside Python.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#FF9492">import</span><span style="color:#F0F3F6"> pandas </span><span style="color:#FF9492">as</span><span style="color:#F0F3F6"> pd</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">df </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> pd.read_csv(</span><span style="color:#ADDCFF">"data/users.csv"</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(df)</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(df.head()) </span><span style="color:#BDC4CC"># View the first few rows; five by default</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(df[</span><span style="color:#ADDCFF">"name"</span><span style="color:#F0F3F6">, </span><span style="color:#ADDCFF">"city"</span><span style="color:#F0F3F6">, </span><span style="color:#ADDCFF">"salary"</span><span style="color:#F0F3F6">]) </span><span style="color:#BDC4CC"># View columns</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">korean_users </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> df[df[</span><span style="color:#ADDCFF">"country"</span><span style="color:#F0F3F6">] </span><span style="color:#FF9492">==</span><span style="color:#ADDCFF"> "Korea"</span><span style="color:#F0F3F6">] </span><span style="color:#BDC4CC"># Filter by a condition</span></span>
+<span class="line"><span style="color:#F0F3F6">older_users </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> df[df[</span><span style="color:#ADDCFF">"age"</span><span style="color:#F0F3F6">] </span><span style="color:#FF9492">>=</span><span style="color:#91CBFF"> 30</span><span style="color:#F0F3F6">]</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">sorted_df </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> df.sort_values(</span><span style="color:#ADDCFF">"name"</span><span style="color:#F0F3F6">) </span><span style="color:#BDC4CC"># Sort by name; ascending by default</span></span>
+<span class="line"><span style="color:#F0F3F6">sorted_df </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> df.sort_values(</span><span style="color:#ADDCFF">"name"</span><span style="color:#F0F3F6">, </span><span style="color:#FFB757">ascending</span><span style="color:#FF9492">=</span><span style="color:#91CBFF">False</span><span style="color:#F0F3F6">) </span><span style="color:#BDC4CC"># Descending</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">df[</span><span style="color:#ADDCFF">"color"</span><span style="color:#F0F3F6">] </span><span style="color:#FF9492">=</span><span style="color:#ADDCFF"> "Red"</span><span style="color:#BDC4CC"> # Create a new column</span></span>
+<span class="line"><span style="color:#F0F3F6">df[</span><span style="color:#ADDCFF">"age_next_year"</span><span style="color:#F0F3F6">] </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> df[</span><span style="color:#ADDCFF">"age"</span><span style="color:#F0F3F6">] </span><span style="color:#FF9492">+</span><span style="color:#91CBFF"> 1</span><span style="color:#BDC4CC"> # Create a new column using an existing column</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">df.to_csv(</span><span style="color:#ADDCFF">"data/users_output.csv"</span><span style="color:#F0F3F6">, </span><span style="color:#FFB757">index</span><span style="color:#FF9492">=</span><span style="color:#91CBFF">False</span><span style="color:#F0F3F6">) </span><span style="color:#BDC4CC"># Save as CSV</span></span></code></pre>
+<h2 id="requests">requests</h2>
+<p>A Python library for sending requests to web APIs and receiving data.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#FF9492">import</span><span style="color:#F0F3F6"> requests</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">response </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> requests.get(</span><span style="color:#ADDCFF">"https://api.example.com/users"</span><span style="color:#F0F3F6">, </span><span style="color:#FFB757">timeout</span><span style="color:#FF9492">=</span><span style="color:#91CBFF">10</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"><span style="color:#BDC4CC"># It is generally a good idea to include a timeout in API requests.</span></span>
+<span class="line"><span style="color:#BDC4CC"># Commonly used in practice: raise an exception for a 400- or 500-series error.</span></span>
+<span class="line"><span style="color:#BDC4CC"># response.raise_for_status()</span></span>
+<span class="line"><span style="color:#BDC4CC"># Responses usually arrive as JSON.</span></span>
+<span class="line"><span style="color:#F0F3F6">data </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> response.json()</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#BDC4CC"># print(response.status_code)</span></span>
+<span class="line"><span style="color:#BDC4CC"># print(response.text)</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(data[</span><span style="color:#ADDCFF">"name"</span><span style="color:#F0F3F6">])</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(data[</span><span style="color:#ADDCFF">"city"</span><span style="color:#F0F3F6">])</span></span></code></pre>
+<h2 id="sqlite3">sqlite3</h2>
+<p>A local, file-based database included with Python. No external library installation is needed.</p>
+<p>It stores data in a single .db file without needing to run a separate server.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#BDC4CC"># A typical structure</span></span>
+<span class="line"><span style="color:#BDC4CC"># python-data-practice/</span></span>
+<span class="line"><span style="color:#BDC4CC"># ├── main.py</span></span>
+<span class="line"><span style="color:#BDC4CC"># └── data/</span></span>
+<span class="line"><span style="color:#BDC4CC">#    └── app.db</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF9492">import</span><span style="color:#F0F3F6"> sqlite3</span></span>
+<span class="line"><span style="color:#FF9492">from</span><span style="color:#F0F3F6"> pathlib </span><span style="color:#FF9492">import</span><span style="color:#F0F3F6"> Path</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">data_dir </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> Path(</span><span style="color:#ADDCFF">"data"</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"><span style="color:#F0F3F6">data_dir.mkdir(</span><span style="color:#FFB757">exist_ok</span><span style="color:#FF9492">=</span><span style="color:#91CBFF">True</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">db_path </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> data_dir </span><span style="color:#FF9492">/</span><span style="color:#ADDCFF"> "app.db"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">connection </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> sqlite3.connect(db_path)</span></span>
+<span class="line"><span style="color:#BDC4CC"># Use a cursor to send SQL commands to the database.</span></span>
+<span class="line"><span style="color:#F0F3F6">cursor </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> connection.cursor()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#BDC4CC"># Execute SQL</span></span>
+<span class="line"><span style="color:#F0F3F6">connection.commit()</span></span>
+<span class="line"><span style="color:#F0F3F6">connection.close()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#BDC4CC"># Create a table</span></span>
+<span class="line"><span style="color:#F0F3F6">cursor.execute(</span><span style="color:#ADDCFF">"""</span></span>
+<span class="line"><span style="color:#ADDCFF">CREATE TABLE IF NOT EXISTS users (</span></span>
+<span class="line"><span style="color:#ADDCFF">    id INTEGER PRIMARY KEY,</span></span>
+<span class="line"><span style="color:#ADDCFF">    name TEXT NOT NULL,</span></span>
+<span class="line"><span style="color:#ADDCFF">    city TEXT NOT NULL,</span></span>
+<span class="line"><span style="color:#ADDCFF">    age INTEGER</span></span>
+<span class="line"><span style="color:#ADDCFF">)</span></span>
+<span class="line"><span style="color:#ADDCFF">"""</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#BDC4CC"># Insert data</span></span>
+<span class="line"><span style="color:#F0F3F6">cursor.execute(</span></span>
+<span class="line"><span style="color:#ADDCFF">    "INSERT INTO users (name, city, age) VALUES (?, ?, ?)"</span><span style="color:#F0F3F6">,</span></span>
+<span class="line"><span style="color:#F0F3F6">    (</span><span style="color:#ADDCFF">"nefer"</span><span style="color:#F0F3F6">, </span><span style="color:#ADDCFF">"vancouver"</span><span style="color:#F0F3F6">, </span><span style="color:#91CBFF">20</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"><span style="color:#F0F3F6">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#BDC4CC"># Query data</span></span>
+<span class="line"><span style="color:#F0F3F6">cursor.execute(</span><span style="color:#ADDCFF">"SELECT * FROM users WHERE city = ?"</span><span style="color:#F0F3F6">, (</span><span style="color:#ADDCFF">"vancouver"</span><span style="color:#F0F3F6">),)</span></span>
+<span class="line"><span style="color:#F0F3F6">rows </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> cursor.fetchall()</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(rows)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#BDC4CC"># Update and delete data</span></span>
+<span class="line"><span style="color:#F0F3F6">cursor.execute(</span><span style="color:#ADDCFF">"""</span></span>
+<span class="line"><span style="color:#ADDCFF">UPDATE users</span></span>
+<span class="line"><span style="color:#ADDCFF">SET age = ?</span></span>
+<span class="line"><span style="color:#ADDCFF">WHERE name = ?</span></span>
+<span class="line"><span style="color:#ADDCFF">"""</span><span style="color:#F0F3F6">, (</span><span style="color:#91CBFF">30</span><span style="color:#F0F3F6">, </span><span style="color:#ADDCFF">"secret"</span><span style="color:#F0F3F6">))</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">connection.commit()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">cursor.execute(</span><span style="color:#ADDCFF">"""</span></span>
+<span class="line"><span style="color:#ADDCFF">DELETE FROM users</span></span>
+<span class="line"><span style="color:#ADDCFF">WHERE name = ?</span></span>
+<span class="line"><span style="color:#ADDCFF">"""</span><span style="color:#F0F3F6">, (</span><span style="color:#ADDCFF">"secret"</span><span style="color:#F0F3F6">,))</span></span>
+<span class="line"><span style="color:#F0F3F6">connection.commit()</span></span></code></pre>
+<h2 id="class">class</h2>
+<p>A class is a blueprint that groups related data and functions together.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#FF9492">class</span><span style="color:#FFB757"> User</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#FF9492">    def</span><span style="color:#91CBFF"> __init__</span><span style="color:#F0F3F6">(self, name, age):</span></span>
+<span class="line"><span style="color:#91CBFF">        self</span><span style="color:#F0F3F6">.name </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> name</span></span>
+<span class="line"><span style="color:#91CBFF">        self</span><span style="color:#F0F3F6">.age </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> age</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF9492">    def</span><span style="color:#DBB7FF"> introduce</span><span style="color:#F0F3F6">(self):</span></span>
+<span class="line"><span style="color:#FF9492">        return</span><span style="color:#FF9492"> f</span><span style="color:#ADDCFF">"My name is </span><span style="color:#FF9492">{</span><span style="color:#91CBFF">self</span><span style="color:#F0F3F6">.name</span><span style="color:#FF9492">}</span><span style="color:#ADDCFF"> and I am </span><span style="color:#FF9492">{</span><span style="color:#91CBFF">self</span><span style="color:#F0F3F6">.age</span><span style="color:#FF9492">}</span><span style="color:#ADDCFF"> years old."</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">user </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> User(</span><span style="color:#ADDCFF">"Yona"</span><span style="color:#F0F3F6">, </span><span style="color:#91CBFF">30</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(user.name)</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(user.age)</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(user.introduce())</span></span></code></pre>
+<ul>
+<li>class = a blueprint</li>
+<li>instance/object = an actual item made from the blueprint</li>
+<li>attribute = a value held by an object</li>
+</ul>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#BDC4CC"># This creates two objects from the User blueprint; user1 and user2 are different objects.</span></span>
+<span class="line"><span style="color:#F0F3F6">user1 </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> User()</span></span>
+<span class="line"><span style="color:#F0F3F6">user2 </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> User()</span></span></code></pre>
+<p><code>__init__</code> is the initialization function.</p>
+<p>self is the object itself.</p>
+<p>The advantage of classes is that you can create multiple objects with the same structure.</p>
+<p>Special methods you should know when working with classes (double underscore methods, or dunder methods)</p>
+<ul>
+<li><code>__repr__</code>: An object representation for developers. Used to create a readable string for print(obj) or repr(obj). It must return a string.</li>
+<li><code>__str__</code>: A string representation for users. Preferred by str(obj) and print(obj). If absent, <code>__repr__</code> is used instead.</li>
+<li><code>__eq__</code>: Defines the criteria for obj1 == obj2. You can decide whether objects with equal values should be considered equal.</li>
+<li><code>__hash__</code>: Defines the hash value needed to put an object in a set or use it as a dict key. Be careful with hashing if you define <code>__eq__</code> yourself.</li>
+<li><code>__len__</code>: Enables len(obj).</li>
+<li><code>__getitem__</code>: Enables obj[index].</li>
+<li><code>__contains__</code>: Enables value in obj.</li>
+<li><code>__lt__</code>: Defines the criteria for obj1 &#x3C; obj2. Related to sorting.</li>
+</ul>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#FF9492">class</span><span style="color:#FFB757"> Product</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#FF9492">    def</span><span style="color:#91CBFF"> __init__</span><span style="color:#F0F3F6">(self, name, price, quantity):</span></span>
+<span class="line"><span style="color:#91CBFF">        self</span><span style="color:#F0F3F6">.name </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> name</span></span>
+<span class="line"><span style="color:#91CBFF">        self</span><span style="color:#F0F3F6">.price </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> price</span></span>
+<span class="line"><span style="color:#91CBFF">        self</span><span style="color:#F0F3F6">.quantity </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> quantity</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF9492">    def</span><span style="color:#DBB7FF"> total_price</span><span style="color:#F0F3F6">(self):</span></span>
+<span class="line"><span style="color:#FF9492">        return</span><span style="color:#91CBFF"> self</span><span style="color:#F0F3F6">.price </span><span style="color:#FF9492">*</span><span style="color:#91CBFF"> self</span><span style="color:#F0F3F6">.quantity</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF9492">    def</span><span style="color:#91CBFF"> __repr__</span><span style="color:#F0F3F6">(self):</span></span>
+<span class="line"><span style="color:#FF9492">        return</span><span style="color:#F0F3F6"> (</span></span>
+<span class="line"><span style="color:#FF9492">            f</span><span style="color:#ADDCFF">"Product("</span></span>
+<span class="line"><span style="color:#FF9492">            f</span><span style="color:#ADDCFF">"name=</span><span style="color:#FF9492">{</span><span style="color:#91CBFF">self</span><span style="color:#F0F3F6">.name</span><span style="color:#FF9492">!r}</span><span style="color:#ADDCFF">, "</span></span>
+<span class="line"><span style="color:#FF9492">            f</span><span style="color:#ADDCFF">"price=</span><span style="color:#FF9492">{</span><span style="color:#91CBFF">self</span><span style="color:#F0F3F6">.price</span><span style="color:#FF9492">!r}</span><span style="color:#ADDCFF">, "</span></span>
+<span class="line"><span style="color:#FF9492">            f</span><span style="color:#ADDCFF">"quantity=</span><span style="color:#FF9492">{</span><span style="color:#91CBFF">self</span><span style="color:#F0F3F6">.quantity</span><span style="color:#FF9492">!r}</span><span style="color:#ADDCFF">"</span></span>
+<span class="line"><span style="color:#FF9492">            f</span><span style="color:#ADDCFF">")"</span></span>
+<span class="line"><span style="color:#F0F3F6">        )</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF9492">    def</span><span style="color:#91CBFF"> __eq__</span><span style="color:#F0F3F6">(self, other):</span></span>
+<span class="line"><span style="color:#FF9492">        if</span><span style="color:#FF9492"> not</span><span style="color:#91CBFF"> isinstance</span><span style="color:#F0F3F6">(other, Product):</span></span>
+<span class="line"><span style="color:#FF9492">            return</span><span style="color:#91CBFF"> NotImplemented</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF9492">        return</span><span style="color:#F0F3F6"> (</span></span>
+<span class="line"><span style="color:#91CBFF">            self</span><span style="color:#F0F3F6">.name </span><span style="color:#FF9492">==</span><span style="color:#F0F3F6"> other.name</span></span>
+<span class="line"><span style="color:#FF9492">            and</span><span style="color:#91CBFF"> self</span><span style="color:#F0F3F6">.price </span><span style="color:#FF9492">==</span><span style="color:#F0F3F6"> other.price</span></span>
+<span class="line"><span style="color:#FF9492">            and</span><span style="color:#91CBFF"> self</span><span style="color:#F0F3F6">.quantity </span><span style="color:#FF9492">==</span><span style="color:#F0F3F6"> other.quantity</span></span>
+<span class="line"><span style="color:#F0F3F6">        )</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F0F3F6">product1 </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> Product(</span><span style="color:#ADDCFF">"Apple"</span><span style="color:#F0F3F6">, </span><span style="color:#91CBFF">2</span><span style="color:#F0F3F6">, </span><span style="color:#91CBFF">5</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"><span style="color:#F0F3F6">product2 </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> Product(</span><span style="color:#ADDCFF">"Apple"</span><span style="color:#F0F3F6">, </span><span style="color:#91CBFF">2</span><span style="color:#F0F3F6">, </span><span style="color:#91CBFF">5</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"><span style="color:#F0F3F6">product3 </span><span style="color:#FF9492">=</span><span style="color:#F0F3F6"> Product(</span><span style="color:#ADDCFF">"Banana"</span><span style="color:#F0F3F6">, </span><span style="color:#91CBFF">1</span><span style="color:#F0F3F6">, </span><span style="color:#91CBFF">10</span><span style="color:#F0F3F6">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(product1)</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(product1.total_price())</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(product1 </span><span style="color:#FF9492">==</span><span style="color:#F0F3F6"> product2)</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(product1 </span><span style="color:#FF9492">==</span><span style="color:#F0F3F6"> product3)</span></span>
+<span class="line"><span style="color:#91CBFF">print</span><span style="color:#F0F3F6">(product1 </span><span style="color:#FF9492">is</span><span style="color:#F0F3F6"> product2)</span></span></code></pre>
+<h2 id="type-hints--dataclass--project-structure">type hints / dataclass / project structure</h2>
+<p>dataclass is syntax that makes creating classes to hold data easier. It automatically generates <code>__init__</code>, <code>__repr__</code>, <code>__eq__</code>, and other methods.</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#FF9492">from</span><span style="color:#F0F3F6"> dataclasses </span><span style="color:#FF9492">import</span><span style="color:#F0F3F6"> dataclass</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#DBB7FF">@dataclass</span></span>
+<span class="line"><span style="color:#FF9492">class</span><span style="color:#FFB757"> Product</span><span style="color:#F0F3F6">:</span></span>
+<span class="line"><span style="color:#F0F3F6">    name: </span><span style="color:#91CBFF">str</span></span>
+<span class="line"><span style="color:#F0F3F6">    price: </span><span style="color:#91CBFF">int</span></span>
+<span class="line"><span style="color:#F0F3F6">    quantity: </span><span style="color:#91CBFF">int</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#FF9492">    def</span><span style="color:#DBB7FF"> total_price</span><span style="color:#F0F3F6">(self):</span></span>
+<span class="line"><span style="color:#FF9492">        return</span><span style="color:#91CBFF"> self</span><span style="color:#F0F3F6">.price </span><span style="color:#FF9492">*</span><span style="color:#91CBFF"> self</span><span style="color:#F0F3F6">.quantity</span></span></code></pre>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#BDC4CC"># These are type hints.</span></span>
+<span class="line"><span style="color:#F0F3F6">name: </span><span style="color:#91CBFF">str</span></span>
+<span class="line"><span style="color:#F0F3F6">age: </span><span style="color:#91CBFF">int</span></span></code></pre>
+<p>Project structure</p>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#F0F3F6">python</span><span style="color:#FF9492">-</span><span style="color:#F0F3F6">data</span><span style="color:#FF9492">-</span><span style="color:#F0F3F6">practice</span><span style="color:#FF9492">/</span></span>
+<span class="line"><span style="color:#F0F3F6">├── pyproject.toml              </span><span style="color:#BDC4CC"># Project settings, dependencies, and tool settings</span></span>
+<span class="line"><span style="color:#F0F3F6">├── </span><span style="color:#91CBFF">README</span><span style="color:#F0F3F6">.md                   </span><span style="color:#BDC4CC"># Project description</span></span>
+<span class="line"><span style="color:#F0F3F6">├── .gitignore                  </span><span style="color:#BDC4CC"># Files to exclude from Git</span></span>
+<span class="line"><span style="color:#F0F3F6">├── data</span><span style="color:#FF9492">/</span><span style="color:#BDC4CC">                       # Sample/local data such as JSON and CSV</span></span>
+<span class="line"><span style="color:#F0F3F6">│   └── users.json</span></span>
+<span class="line"><span style="color:#F0F3F6">├── src</span><span style="color:#FF9492">/</span><span style="color:#BDC4CC">                        # Actual source code</span></span>
+<span class="line"><span style="color:#F0F3F6">│   └── data_practice</span><span style="color:#FF9492">/</span><span style="color:#BDC4CC">          # My Python package</span></span>
+<span class="line"><span style="color:#F0F3F6">│       ├── </span><span style="color:#91CBFF">__init__</span><span style="color:#F0F3F6">.py</span></span>
+<span class="line"><span style="color:#F0F3F6">│       ├── main.py             </span><span style="color:#BDC4CC"># Execution entry point</span></span>
+<span class="line"><span style="color:#F0F3F6">│       ├── models.py           </span><span style="color:#BDC4CC"># Data structures such as dataclasses</span></span>
+<span class="line"><span style="color:#F0F3F6">│       ├── paths.py            </span><span style="color:#BDC4CC"># File path management</span></span>
+<span class="line"><span style="color:#F0F3F6">│       ├── services</span><span style="color:#FF9492">/</span><span style="color:#BDC4CC">           # Actual business logic</span></span>
+<span class="line"><span style="color:#F0F3F6">│       │   ├── </span><span style="color:#91CBFF">__init__</span><span style="color:#F0F3F6">.py</span></span>
+<span class="line"><span style="color:#F0F3F6">│       │   └── user_service.py</span></span>
+<span class="line"><span style="color:#F0F3F6">│       └── utils</span><span style="color:#FF9492">/</span><span style="color:#BDC4CC">              # Small reusable utility functions</span></span>
+<span class="line"><span style="color:#F0F3F6">│           ├── </span><span style="color:#91CBFF">__init__</span><span style="color:#F0F3F6">.py</span></span>
+<span class="line"><span style="color:#F0F3F6">│           └── json_utils.py</span></span>
+<span class="line"><span style="color:#F0F3F6">└── tests</span><span style="color:#FF9492">/</span><span style="color:#BDC4CC">                      # Test code</span></span>
+<span class="line"><span style="color:#F0F3F6">    └── test_json_utils.py</span></span></code></pre>
+<hr>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Order</th><th>Keyword</th><th>Why It Matters</th></tr></thead><tbody><tr><td>6</td><td>list comprehension</td><td>Process lists concisely and cleanly</td></tr><tr><td>7</td><td>advanced functions</td><td>Defaults, keyword arguments, <code>*args</code>, <code>**kwargs</code></td></tr><tr><td>12</td><td>BeautifulSoup</td><td>HTML parsing and crawling</td></tr><tr><td>13</td><td>argparse / typer</td><td>Build CLI commands</td></tr><tr><td>14</td><td>logging</td><td>Record execution</td></tr><tr><td>15</td><td>datetime</td><td>Work with dates and times</td></tr><tr><td>17</td><td>pytest</td><td>Test code</td></tr></tbody></table>
+<pre class="astro-code github-dark-high-contrast" style="background-color:#0a0c10;color:#f0f3f6; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span></span></span></code></pre></div><nav class="tags post-tags" aria-label="Post tags"><a href="/blog/search/?tag=python">#python</a><a href="/blog/search/?tag=dev">#dev</a></nav><nav class="post-pager" aria-label="Post navigation"><a class="post-pager-link post-pager-link--prev" href="/blog/category/money-talk/business/thoughts-before-starting-a-business/"><span class="post-pager-label" data-i18n-key="post_previous">&lt; Previous</span><span class="post-pager-title">Read This Whenever You Think About Starting a Business</span></a><a class="post-pager-link post-pager-link--next" href="/blog/category/money-talk/finance/portpolio/"><span class="post-pager-label" data-i18n-key="post_next">Next &gt;</span><span class="post-pager-title">Portfolio — May 2026</span></a></nav></div><aside class="post-related card post-recommendations" aria-labelledby="post-related-heading"><h2 id="post-related-heading" data-i18n-key="post_more_to_read">More to read</h2><ul class="post-related-list"><li class="post-related-item"><a href="/blog/category/study-log/dev/python-gc/"><span class="post-related-copy"><span class="post-related-title" title="Garbage Collection in Python">Garbage Collection in Python</span><span class="post-related-meta">2026.07.07. · 3 min read</span></span></a></li><li class="post-related-item"><a href="/blog/category/study-log/dev/python-requests/"><span class="post-related-copy"><span class="post-related-title" title="Python HTTP Client Libraries">Python HTTP Client Libraries</span><span class="post-related-meta">2026.06.16. · 3 min read</span></span></a></li><li class="post-related-item"><a href="/blog/category/study-log/dev/python-duck-typing/"><span class="post-related-copy"><span class="post-related-title" title="Understanding Duck Typing in Python">Understanding Duck Typing in Python</span><span class="post-related-meta">2026.06.15. · 4 min read</span></span></a></li><li class="post-related-item"><a href="/blog/category/study-log/dev/react-router/"><span class="post-related-copy"><span class="post-related-title" title="React Router Basics">React Router Basics</span><span class="post-related-meta">2026.08.06. · 2 min read</span></span></a></li><li class="post-related-item"><a href="/blog/category/study-log/dev/data-structures/"><span class="post-related-copy"><span class="post-related-title" title="Data Structures">Data Structures</span><span class="post-related-meta">2026.07.03. · 7 min read</span></span></a></li><li class="post-related-item"><a href="/blog/category/study-log/dev/react-state-manage/"><span class="post-related-copy"><span class="post-related-title" title="React State Management">React State Management</span><span class="post-related-meta">2026.06.23. · 4 min read</span></span></a></li></ul></aside></div></main><footer class="site-footer"><div class="container footer-inner"><p>© 2026 0xnefertt&#39;s thoughts</p><div class="footer-links"><nav aria-label="Site links"><ul class="footer-site-links"><li class="footer-link-group footer-group-site"><a href="/privacy/">Privacy</a><a href="/sitemap.xml" type="application/xml">Sitemap</a><a href="/rss.xml" type="application/rss+xml">RSS</a></li><li class="footer-link-group footer-group-social"><span class="footer-divider" aria-hidden="true">|</span><a href="mailto:adrwss2@gmail.com">Email</a><a href="https://github.com/0xnefertt">GitHub</a><a href="https://x.com/0xnefertt">X</a></li><li class="footer-link-group footer-group-resources"><span class="footer-divider" aria-hidden="true">|</span><a href="/resources/">Resources</a><a href="/admin/">Login</a></li><li class="footer-link-group footer-group-language"><span class="footer-divider" aria-hidden="true">|</span><div class="language-switch" role="group" aria-label="Language selector"><a class="language-option is-active" href="/blog/category/study-log/dev/python/" aria-current="page" title="English">EN</a><span aria-hidden="true">|</span><a class="language-option" href="/ko/blog/category/study-log/dev/python/" title="한국어">KR</a></div></li></ul></nav></div></div></footer><script>(function(){const gaMeasurementId = "G-XKLJ41F6PS";
+
+      (() => {
+        function track(eventName, params = {}) {
+          if (!gaMeasurementId || typeof window.gtag !== "function") {
+            return;
+          }
+
+          window.gtag("event", eventName, params);
+        }
+
+        window.siteAnalytics = {
+          track,
+        };
+
+        const pagePath = window.location.pathname;
+        if (/^\/blog\/\d{4}\//.test(pagePath)) {
+          track("post_opened", {
+            page_path: pagePath,
+            page_title: document.title,
+          });
+        }
+
+        document.addEventListener("click", (event) => {
+          const clickTarget = event.target;
+          if (!(clickTarget instanceof Element)) {
+            return;
+          }
+
+          const anchor = clickTarget.closest("a[href]");
+          if (!(anchor instanceof HTMLAnchorElement)) {
+            return;
+          }
+
+          if (anchor.dataset.trackIgnore === "true") {
+            return;
+          }
+
+          const href = anchor.getAttribute("href");
+          if (!href) {
+            return;
+          }
+
+          let url;
+          try {
+            url = new URL(href, window.location.href);
+          } catch {
+            return;
+          }
+
+          if (url.origin === window.location.origin) {
+            return;
+          }
+
+          track("outbound_click", {
+            destination_url: url.toString(),
+            link_text: (anchor.textContent || "").trim().slice(0, 120),
+            page_path: pagePath,
+          });
+        });
+
+        let sentAdPlaceholder = false;
+        const sendAdPlaceholderEvent = () => {
+          if (sentAdPlaceholder) {
+            return;
+          }
+
+          sentAdPlaceholder = true;
+          track("adsense_script_present_engagement", {
+            page_path: pagePath,
+          });
+        };
+
+        const hasAdSenseScript = Boolean(document.querySelector('script[src*="googlesyndication.com/pagead/js/adsbygoogle.js"]'));
+        if (!hasAdSenseScript) {
+          return;
+        }
+
+        setTimeout(sendAdPlaceholderEvent, 45000);
+        window.addEventListener(
+          "scroll",
+          () => {
+            const doc = document.documentElement;
+            const scrollableHeight = Math.max(doc.scrollHeight - window.innerHeight, 1);
+            const ratio = window.scrollY / scrollableHeight;
+
+            if (ratio >= 0.55) {
+              sendAdPlaceholderEvent();
+            }
+          },
+          { passive: true }
+        );
+      })();
+    })();</script><script>
+      (() => {
+        const STORAGE_KEY = "site-theme";
+        const themeToggle = document.querySelector("[data-theme-toggle]");
+
+        if (!(themeToggle instanceof HTMLButtonElement)) {
+          return;
+        }
+
+        function getCurrentTheme() {
+          return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+        }
+
+        function applyTheme(nextTheme) {
+          document.documentElement.dataset.theme = nextTheme;
+          localStorage.setItem(STORAGE_KEY, nextTheme);
+          const isDark = nextTheme === "dark";
+          themeToggle.setAttribute("aria-pressed", isDark ? "true" : "false");
+          themeToggle.setAttribute("aria-label", isDark ? "Switch to light mode" : "Switch to dark mode");
+        }
+
+        applyTheme(getCurrentTheme());
+
+        themeToggle.addEventListener("click", () => {
+          applyTheme(getCurrentTheme() === "dark" ? "light" : "dark");
+        });
+      })();
+    </script><script>
+      (() => {
+        const header = document.querySelector(".site-header");
+        const menuToggle = document.querySelector("[data-menu-toggle]");
+        const menuPanel = document.getElementById("site-menu-panel");
+
+        if (!(header instanceof HTMLElement) || !(menuToggle instanceof HTMLButtonElement) || !(menuPanel instanceof HTMLElement)) {
+          return;
+        }
+
+        const mobileMedia = window.matchMedia("(max-width: 840px)");
+
+        function setMenuOpen(nextOpen) {
+          header.classList.toggle("menu-open", nextOpen);
+          menuToggle.setAttribute("aria-expanded", nextOpen ? "true" : "false");
+          menuToggle.setAttribute("aria-label", nextOpen ? "Close navigation menu" : "Open navigation menu");
+        }
+
+        function closeMenu() {
+          setMenuOpen(false);
+        }
+
+        menuToggle.addEventListener("click", () => {
+          const willOpen = !header.classList.contains("menu-open");
+          setMenuOpen(willOpen);
+        });
+
+        menuPanel.addEventListener("click", (event) => {
+          const target = event.target;
+          if (!(target instanceof Element)) {
+            return;
+          }
+
+          if (target.closest("a[href]") && mobileMedia.matches) {
+            closeMenu();
+          }
+        });
+
+        document.addEventListener("click", (event) => {
+          if (!mobileMedia.matches) {
+            return;
+          }
+
+          const target = event.target;
+          if (!(target instanceof Node)) {
+            return;
+          }
+
+          if (header.contains(target)) {
+            return;
+          }
+
+          closeMenu();
+        });
+
+        mobileMedia.addEventListener("change", () => {
+          if (!mobileMedia.matches) {
+            closeMenu();
+          }
+        });
+      })();
+    </script></body></html>
