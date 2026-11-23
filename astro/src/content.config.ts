@@ -8,6 +8,8 @@ const blog = defineCollection({
   loader: glob({
     base: "../_posts",
     pattern: "**/*.md",
+    // Translations can share a public slug; their source paths must remain distinct entries.
+    generateId: ({ entry }) => entry.replace(/\.md$/, ""),
   }),
   schema: z.looseObject({
     lang: z.enum(["ko", "en"]).optional(),

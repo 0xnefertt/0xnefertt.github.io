@@ -1,22 +1,40 @@
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { parseFragment } from "parse5";
+
+const { parse: parseYaml } = createRequire(new URL("../writer/package.json", import.meta.url))("yaml");
 
 function textContent(node) {
   return node.nodeName === "#text" ? node.value : (node.childNodes || []).map(textContent).join("");
 }
 
 const root = path.resolve("astro/dist");
-async function htmlFiles(folder) {
+async function contentFiles(folder, extension) {
   return (
     await Promise.all(
       (await fs.readdir(folder, { withFileTypes: true })).map((entry) => {
         const file = path.join(folder, entry.name);
-        return entry.isDirectory() ? htmlFiles(file) : entry.name.endsWith(".html") ? [file] : [];
+        return entry.isDirectory() ? contentFiles(file, extension) : entry.name.endsWith(extension) ? [file] : [];
       })
     )
   ).flat();
+}
+const sourceTitles = { en: [], ko: [] };
+for (const file of await contentFiles("_posts", ".md")) {
+  const source = await fs.readFile(file, "utf8");
+  const frontmatter = source.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/);
+  assert.ok(frontmatter, `Missing post frontmatter: ${file}`);
+  const metadata = parseYaml(frontmatter[1]);
+  if (metadata.draft === true) continue;
+  // Match shared/content-language.ts, including older posts without explicit language.
+  const folderLocale = file.replaceAll(path.sep, "/").match(/^_posts\/(en|ko)\//)?.[1];
+  const locale =
+    metadata.lang === "en" || metadata.lang === "ko"
+      ? metadata.lang
+      : (folderLocale ?? (/[가-힣]/.test(`${metadata.title ?? ""} ${source.slice(frontmatter[0].length)}`) ? "ko" : "en"));
+  sourceTitles[locale].push(metadata.title);
 }
 for (const locale of ["en", "ko"]) {
   const prefix = locale === "ko" ? "ko/" : "";
@@ -60,6 +78,11 @@ for (const locale of ["en", "ko"]) {
     }
   }
   const posts = JSON.parse(await fs.readFile(path.join(root, prefix, "blog/search-index.json"), "utf8"));
+  assert.deepEqual(
+    posts.map((post) => post.title).sort(),
+    sourceTitles[locale].sort(),
+    `${locale}: search must contain every published source post exactly once; check for content loader ID collisions`
+  );
   for (const post of posts.filter((post) => !post.external)) {
     assert.ok(post.href.startsWith(`/${prefix}blog/`), `Search leaked a different language: ${post.href}`);
     const html = await fs.readFile(path.join(root, decodeURIComponent(post.href), "index.html"), "utf8");
@@ -72,7 +95,7 @@ for (const locale of ["en", "ko"]) {
   }
   console.log(`[verify-locales] ${locale}: ${posts.length} searchable posts; localized pages, navigation and RSS OK`);
 }
-for (const file of await htmlFiles(root)) {
+for (const file of await contentFiles(root, ".html")) {
   const html = await fs.readFile(file, "utf8");
   const relative = path.relative(root, file).replaceAll(path.sep, "/");
   if (relative === "google00ac8e9b5e2f863a.html") {
