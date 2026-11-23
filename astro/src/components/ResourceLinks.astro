@@ -1,0 +1,22 @@
+---
+import type { SiteSettings } from "../../../writer/src/site-settings";
+
+interface Props {
+  items: SiteSettings["favorites"][number]["items"];
+}
+---
+
+<ul class="favorite-child-list">
+  {Astro.props.items.map((item) => (
+    <li class="favorite-item">
+      <a
+        href={item.href}
+        target={/^https?:\/\//.test(item.href) ? "_blank" : undefined}
+        rel={/^https?:\/\//.test(item.href) ? "noreferrer" : undefined}
+      >
+        {item.title}
+      </a>
+      {item.note && <p class="favorite-note">{item.note}</p>}
+    </li>
+  ))}
+</ul>

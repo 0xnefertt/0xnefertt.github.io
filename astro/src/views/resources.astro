@@ -1,11 +1,15 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import UsefulInfo from "../components/UsefulInfo.astro";
+import ResourceLinks from "../components/ResourceLinks.astro";
 import { localeFromPath, localizedPath, localeText } from "../lib/locale";
 import { siteSettings } from "../lib/settings";
 
 const locale = localeFromPath(Astro.url.pathname);
-const favorites = siteSettings.favorites.filter((group) => group.items.length > 0);
+const favorites = siteSettings.favorites
+  .filter((group) => group.items.length > 0)
+  .map((group) => ({ ...group, id: `resource-${encodeURIComponent(group.name.toLowerCase().replace(/\s+/g, "-"))}` }));
+const previewCount = 4;
 const description = localeText(locale, siteSettings.resourcesDescription, siteSettings.resourcesDescriptionKo);
 ---
 
@@ -21,32 +25,51 @@ const description = localeText(locale, siteSettings.resourcesDescription, siteSe
     <p>{description}</p>
   </header>
   <div class="resources-layout">
-    <UsefulInfo config={siteSettings.usefulInfo} />
+    {(favorites.length > 0 || siteSettings.usefulInfo.enabled) && (
+      <aside class="resources-sidebar">
+        {favorites.length > 0 && (
+          <nav class="card resources-category-nav" aria-labelledby="resources-category-title">
+            <h2 id="resources-category-title">{localeText(locale, "Categories", "카테고리 바로가기")}</h2>
+            <ul>
+              {favorites.map((group) => (
+                <li>
+                  <a href={`#${encodeURIComponent(group.id)}`}>
+                    <span>{group.name}</span>
+                    <span class="resources-category-count">{group.items.length}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
+        <UsefulInfo config={siteSettings.usefulInfo} />
+      </aside>
+    )}
     <section class="resources-favorites" aria-labelledby="resources-favorites-title">
       <h2 id="resources-favorites-title">Favorite</h2>
       {favorites.length === 0 && <p>{localeText(locale, "No favorite links yet.", "아직 등록된 즐겨찾기가 없습니다.")}</p>}
       <div class="resources-favorite-groups">
         {favorites.map((group) => (
-          <details class="favorite-group resources-favorite-group" open>
-            <summary class="favorite-group-summary">
-              <span class="favorite-group-title">{group.name}</span>
+          <section id={group.id} class="favorite-group resources-favorite-group" aria-labelledby={`${group.id}-title`}>
+            <div class="resources-group-heading">
+              <h3 id={`${group.id}-title`} class="favorite-group-title">
+                {group.name}
+              </h3>
               <span class="favorite-group-count">({group.items.length})</span>
-            </summary>
-            <ul class="favorite-child-list">
-              {group.items.map((item) => (
-                <li class="favorite-item">
-                  <a
-                    href={item.href}
-                    target={/^https?:\/\//.test(item.href) ? "_blank" : undefined}
-                    rel={/^https?:\/\//.test(item.href) ? "noreferrer" : undefined}
-                  >
-                    {item.title}
-                  </a>
-                  {item.note && <p class="favorite-note">{item.note}</p>}
-                </li>
-              ))}
-            </ul>
-          </details>
+            </div>
+            <ResourceLinks items={group.items.slice(0, previewCount)} />
+            {group.items.length > previewCount && (
+              <details class="resources-more">
+                <summary>
+                  <span class="resources-show-more">
+                    {localeText(locale, `Show ${group.items.length - previewCount} more`, `${group.items.length - previewCount}개 더 보기`)}
+                  </span>
+                  <span class="resources-show-less">{localeText(locale, "Show less", "접기")}</span>
+                </summary>
+                <ResourceLinks items={group.items.slice(previewCount)} />
+              </details>
+            )}
+          </section>
         ))}
       </div>
     </section>
