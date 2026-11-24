@@ -18,7 +18,7 @@ import { getSiteSettings, saveSiteSettings } from "./settings-github";
 import { IMAGE_LIMIT } from "./media-limits";
 import { MEDIA_CHUNK_SIZE, readMedia } from "./media-storage";
 
-const SESSION_SECONDS = 60 * 60 * 24 * 7;
+const SESSION_SECONDS = 60 * 60 * 24 * 30;
 const COOKIE = "writer_session";
 interface Session {
   id: string;
@@ -92,12 +92,13 @@ function redirect(path: string, cookies: string[] = []): Response {
   for (const value of cookies) headers.append("Set-Cookie", value);
   return new Response(null, { status: 302, headers });
 }
+function siteLoginUrl(env: Env, id: string, state: string): string {
+  return `${env.SITE_URL}/admin/#session=${id}&state=${state}`;
+}
 function configured(env: Env): boolean {
   return Boolean(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET && env.SESSION_SECRET?.length >= 32 && /^\d+$/.test(env.OWNER_ID));
 }
-async function session(request: Request, env: Env): Promise<Session> {
-  const bearer = request.headers.get("Authorization")?.match(/^Bearer ([a-f0-9]{64})$/)?.[1];
-  const value = bearer ?? cookieValue(request, COOKIE);
+async function session(value: string, env: Env): Promise<Session> {
   if (!/^[a-f0-9]{64}$/.test(value)) throw new HttpError(401, "로그인이 필요합니다.");
   const row = await env.DB.prepare("SELECT * FROM sessions WHERE id = ? AND expires > ?")
     .bind(await digest(value), Date.now())
@@ -144,6 +145,16 @@ async function route(request: Request, env: Env): Promise<Response> {
     const editor = url.searchParams.get("editor") === "site";
     const clientState = url.searchParams.get("client_state") ?? "";
     if (editor && !/^[a-f0-9-]{36}$/.test(clientState)) throw new HttpError(400, "블로그의 글쓰기 화면에서 로그인해 주세요.");
+    if (editor && url.searchParams.get("resume") === "1") {
+      const id = cookieValue(request, COOKIE);
+      try {
+        await session(id, env);
+        return redirect(siteLoginUrl(env, id, clientState));
+      } catch (error) {
+        if (!(error instanceof HttpError) || error.status !== 401) throw error;
+        return redirect(`${env.SITE_URL}/admin/`);
+      }
+    }
     const flow = await seal(JSON.stringify({ state, verifier, editor, clientState, expires: Date.now() + 600_000 }), env.SESSION_SECRET);
     const githubUrl = new URL("https://github.com/login/oauth/authorize");
     githubUrl.search = new URLSearchParams({
@@ -197,13 +208,14 @@ async function route(request: Request, env: Env): Promise<Response> {
           Date.now() + seconds * 1000
         ),
       ]);
-      const destination = flow.editor ? `${env.SITE_URL}/admin/#session=${id}&state=${flow.clientState}` : "/";
-      return redirect(destination, flow.editor ? [cleared] : [cleared, cookie(request, COOKIE, id, seconds)]);
+      const destination = flow.editor && flow.clientState ? siteLoginUrl(env, id, flow.clientState) : "/";
+      return redirect(destination, [cleared, cookie(request, COOKIE, id, seconds)]);
     } catch (error) {
       return redirect(error instanceof HttpError && error.status === 403 ? "/?login=owner-only" : "/?login=failed", [cleared]);
     }
   }
-  const user = await session(request, env);
+  const bearer = request.headers.get("Authorization")?.match(/^Bearer ([a-f0-9]{64})$/)?.[1];
+  const user = await session(bearer ?? cookieValue(request, COOKIE), env);
   if (!["GET", "HEAD"].includes(request.method)) {
     if (!allowedOrigin(request, env) || !equals(request.headers.get("X-CSRF-Token") ?? "", user.csrf))
       throw new HttpError(403, "요청을 확인하지 못했습니다. 화면을 새로고침해 주세요.");

@@ -66,7 +66,9 @@ Never put the GitHub Client Secret or the session secret in a `PUBLIC_` variable
 - The server stores opaque session identifiers as hashes. The GitHub access token is encrypted at rest; it is never returned to browser JavaScript. Cookies are HttpOnly, Secure on HTTPS, and SameSite=Lax. Mutations require a same-origin request and a session CSRF token. API and HTML responses are not cached.
 - For the blog's editor, OAuth returns to a fixed `/admin/` URL with an opaque session ID in the fragment and a client nonce. The browser validates
   the nonce, removes the fragment, and stores the opaque session in sessionStorage. API requests send it as a bearer token and omit cross-site
-  cookies. This supports browsers that block third-party cookies. A strict Content Security Policy is used on the editor, with no analytics or ads.
+  cookies. A first-party navigation to the Worker restores the tab session using its HttpOnly cookie. Browser local storage holds only a flag that
+  prompts this navigation. New sessions last up to 30 days, bounded by the GitHub token lifetime. A strict Content Security Policy is used on the
+  editor, with no analytics or ads.
 - Draft versions use optimistic concurrency. A stale edit is rejected instead of overwriting another device's work. If there is a conflict, download the local text before reopening the latest draft.
 - Markdown previews are sanitized. Raw HTML scripts and event handlers cannot execute. The preview shares the site's CSS, but it is not a full Astro build: legacy template syntax and custom Markdown processing may render differently.
 - Images accept PNG, JPEG, GIF, or WebP up to 5 MiB each, with up to 20 private attachments per working copy. Images share D1 storage; large image libraries should move to object storage. Downloading a draft exports text only; images remain in its private working copy.

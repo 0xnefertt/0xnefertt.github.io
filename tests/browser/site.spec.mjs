@@ -273,6 +273,35 @@ test("search rejects executable URLs while preserving ordinary links and text", 
   await expect(results.locator("h2 a").first()).not.toHaveText(title);
 });
 
+test("admin centers the login and restores it in a new tab until logout", async ({ page, context }) => {
+  await page.goto("/admin/");
+  const login = page.getByRole("link", { name: "GitHub로 로그인" });
+  for (const viewport of [
+    { width: 1280, height: 800 },
+    { width: 390, height: 844 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await expect(login).toBeVisible();
+    await expect(page.locator(".writer-header")).toBeHidden();
+    const heading = await page.getByRole("heading", { name: "관리자 로그인" }).boundingBox();
+    const button = await login.boundingBox();
+    expect(Math.abs(button.x + button.width / 2 - viewport.width / 2)).toBeLessThan(1);
+    expect(Math.abs((heading.y + button.y + button.height) / 2 - viewport.height / 2)).toBeLessThan(1);
+  }
+  await accessible(page);
+  await login.click();
+  await expect(page.locator("#workspace")).toBeVisible();
+  await page.close();
+
+  const reopened = await context.newPage();
+  await reopened.goto("/admin/");
+  await expect(reopened.locator("#workspace")).toBeVisible();
+  await reopened.locator("#logout").click();
+  await expect(reopened.getByRole("link", { name: "GitHub로 로그인" })).toBeVisible();
+  await reopened.reload();
+  await expect(reopened.getByRole("link", { name: "GitHub로 로그인" })).toBeVisible();
+});
+
 test("admin offers separate English and Korean SEO descriptions without changing the visible introduction", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/admin/");

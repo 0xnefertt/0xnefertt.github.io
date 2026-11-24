@@ -77,19 +77,37 @@ select {
   font-size: 0.8rem;
   color: var(--text-muted);
 }
-.welcome {
-  margin-block: 12vh;
-  padding: 3rem var(--admin-gutter);
+body:has(#login-screen:not([hidden])) {
+  background: var(--surface);
 }
-.welcome h1 {
-  font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 600;
-  letter-spacing: -0.06em;
-  margin: 1rem 0;
+.writer-main:has(#login-screen:not([hidden])) {
+  padding: 0;
 }
-.welcome p {
-  color: var(--text-muted);
-  margin-bottom: 2rem;
+#login-screen {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.75rem;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 1rem;
+  text-align: center;
+}
+#login-screen h1 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+#login-link {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--line);
+  color: inherit;
+}
+#login-message {
+  max-width: 24rem;
+  margin: 0;
+}
+#login-message:empty {
+  display: none;
 }
 .eyebrow {
   font-size: 0.7rem;

@@ -1,5 +1,6 @@
 import { after, afterEach, before, test } from "node:test";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { readFile, mkdir } from "node:fs/promises";
 import { build } from "esbuild";
 import { Miniflare, convertV4MiniflareOptions } from "miniflare";
@@ -459,12 +460,22 @@ test("site login returns to the fixed admin address with its client nonce", asyn
     headers: { Cookie: start.headers.get("Set-Cookie").split(";")[0] },
   });
   const target = new URL(callback.headers.get("Location"));
-  assert.ok(!callback.headers.getSetCookie().some((value) => value.startsWith("writer_session=")));
+  const cookie = callback.headers.getSetCookie().find((value) => value.startsWith("writer_session="));
+  assert.match(cookie, /HttpOnly; SameSite=Lax; Max-Age=2592000; Secure/);
   assert.equal(target.origin, "https://0xnefertt.github.io");
   assert.equal(target.pathname, "/admin/");
   const fragment = new URLSearchParams(target.hash.slice(1));
   assert.equal(fragment.get("state"), nonce);
   assert.match(fragment.get("session"), /^[a-f0-9]{64}$/);
+  const db = await mf.getD1Database("DB");
+  const id = createHash("sha256").update(fragment.get("session")).digest("base64url");
+  const { expires } = await db.prepare("SELECT expires FROM sessions WHERE id = ?").bind(id).first();
+  assert.ok(expires - Date.now() > 29 * 24 * 60 * 60 * 1000);
+  const resume = `${origin}/auth/login?editor=site&client_state=${nonce}&resume=1`;
+  const headers = { Cookie: cookie.split(";")[0] };
+  assert.equal((await mf.dispatchFetch(resume, { redirect: "manual", headers })).headers.get("Location"), target.href);
+  await db.prepare("UPDATE sessions SET expires = 0 WHERE id = ?").bind(id).run();
+  assert.equal((await mf.dispatchFetch(resume, { redirect: "manual", headers })).headers.get("Location"), "https://0xnefertt.github.io/admin/");
 });
 test("category edits retain the original file and record old category routes", async () => {
   const opened = await (await request("/api/posts/open", { method: "POST", data: { path: sourcePath } })).json();

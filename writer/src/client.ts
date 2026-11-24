@@ -27,11 +27,12 @@ if (!document.getElementById("workspace")) document.body.insertAdjacentHTML("aft
 const apiBase = document.querySelector<HTMLMetaElement>('meta[name="writer-api"]')?.content ?? "";
 const loginNonceKey = "writer.login-nonce";
 const sessionKey = "writer.session";
+const resumeKey = "writer.resume";
 const returned = new URLSearchParams(location.hash.slice(1));
 if (apiBase && returned.has("session")) {
   const candidate = returned.get("session") ?? "";
-  if (/^[a-f0-9]{64}$/.test(candidate) && returned.get("state") === sessionStorage.getItem(loginNonceKey))
-    sessionStorage.setItem(sessionKey, candidate);
+  const nonce = sessionStorage.getItem(loginNonceKey);
+  if (nonce && returned.get("state") === nonce && /^[a-f0-9]{64}$/.test(candidate)) sessionStorage.setItem(sessionKey, candidate);
   sessionStorage.removeItem(loginNonceKey);
   history.replaceState(null, "", location.pathname);
 }
@@ -1027,6 +1028,7 @@ element("logout").addEventListener(
       if (!manager.canLogout() || !(await leave())) return;
       await api("/api/logout", { method: "POST" });
       sessionStorage.removeItem(sessionKey);
+      if (apiBase) window.localStorage.removeItem(resumeKey);
       sessionToken = "";
       current = null;
       dirty = false;
@@ -1034,20 +1036,35 @@ element("logout").addEventListener(
     })().catch(report)
 );
 
+function openSiteLogin(resume = false) {
+  const nonce = crypto.randomUUID();
+  sessionStorage.setItem(loginNonceKey, nonce);
+  const params = new URLSearchParams({ editor: "site", client_state: nonce });
+  if (resume) {
+    params.set("resume", "1");
+    location.replace(`${apiBase}/auth/login?${params}`);
+  } else {
+    location.href = `${apiBase}/auth/login?${params}`;
+  }
+}
+
 async function start() {
-  element<HTMLAnchorElement>("login-link").href = apiBase ? `${apiBase}/auth/login?editor=site` : "/auth/login";
+  const link = element<HTMLAnchorElement>("login-link");
+  link.href = `${apiBase}/auth/login`;
   try {
     const session = await api<{ csrf: string }>("/api/session");
     csrf = session.csrf;
-    element("workspace").hidden = false;
-    element("admin-nav").hidden = false;
-    element("logout").hidden = false;
-    status("연결됨");
-    await refreshDrafts();
-    void manager.load();
   } catch (error) {
+    if (apiBase && error instanceof ApiError && error.status === 401) {
+      sessionStorage.removeItem(sessionKey);
+      if (window.localStorage.getItem(resumeKey)) {
+        window.localStorage.removeItem(resumeKey);
+        openSiteLogin(true);
+        return;
+      }
+    }
+    document.querySelector<HTMLElement>(".writer-header")!.hidden = true;
     element("login-screen").hidden = false;
-    status("관리자 로그인");
     const login = new URLSearchParams(location.search).get("login");
     const message = element("login-message");
     if (login) {
@@ -1056,15 +1073,21 @@ async function start() {
     }
     if (!(error instanceof ApiError) || error.status !== 401) {
       message.textContent = error instanceof Error ? error.message : "서버에 연결할 수 없습니다.";
-      if (error instanceof ApiError && error.status === 503) element("login-link").hidden = true;
+      if (error instanceof ApiError && error.status === 503) link.hidden = true;
     }
+    return;
   }
+  if (apiBase) window.localStorage.setItem(resumeKey, "1");
+  element("workspace").hidden = false;
+  element("admin-nav").hidden = false;
+  element("logout").hidden = false;
+  status("연결됨");
+  await refreshDrafts().catch(report);
+  void manager.load();
 }
 element("login-link").addEventListener("click", (event) => {
   if (!apiBase) return;
   event.preventDefault();
-  const nonce = crypto.randomUUID();
-  sessionStorage.setItem(loginNonceKey, nonce);
-  location.href = `${apiBase}/auth/login?editor=site&client_state=${encodeURIComponent(nonce)}`;
+  openSiteLogin();
 });
 void start();

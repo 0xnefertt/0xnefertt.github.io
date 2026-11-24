@@ -151,7 +151,7 @@ const api = createServer(async (req, res) => {
     });
     const headers = Object.fromEntries(response.headers);
     if (response.headers.getSetCookie().length) headers["set-cookie"] = response.headers.getSetCookie();
-    if (url.pathname === "/auth/login" && response.status === 302) {
+    if (url.pathname === "/auth/login" && response.status === 302 && new URL(headers.location).hostname === "github.com") {
       const provider = new URL(headers.location);
       headers.location = `/test/oauth?state=${encodeURIComponent(provider.searchParams.get("state"))}`;
     }
